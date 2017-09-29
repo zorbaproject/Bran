@@ -31,8 +31,8 @@ Una nota sugli script: se non sai quali argomenti fornire ad uno script, eseguir
 - Ci sono due sole versioni del VdB: potrebbe essere più interessante avere versioni intermedie per capire come sia cambiato il linguaggio nel corso del tempo
 
 ## Crediti
-Tullio De Mauro ha scritto le varie edizioni originali del Vocabolario di Base
-Floriana Sciumbata ha suggerito le applicazioni pratiche di un dataset basato sul VdB nella linguistica italiana
-Luca Tringali ha scritto gli script che producono i dataset csv e txt
+- Tullio De Mauro ha scritto le varie edizioni originali del Vocabolario di Base
+- Floriana Sciumbata ha suggerito le applicazioni pratiche di un dataset basato sul VdB nella linguistica italiana
+- Luca Tringali ha scritto gli script che producono i dataset csv e txt
 
 Il codice è pubblicato sotto licenza GNU GPL3, chiunque è invogliato a modificarlo e utilizzarlo, anche per scopi commerciali, a condizione di citare tutti gli autori e ripubblicare il codice. I PDF originali sono qui riportati solo per comodità, non sono da considerarsi inclusi nella licenza GPL3.
