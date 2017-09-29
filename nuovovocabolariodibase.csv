@@ -218,8 +218,7 @@ b,1albero,s.m.
 i,albicocca,s.f.;s.m.inv.;agg.inv.
 b,album,s.m.inv.
 n,alcol,s.m.
-b,alcuno,agg.indef.
-n,pron.indef.m.
+b,alcuno,agg.indef.;pron.indef.m.
 i,alfabeto,s.m.
 i,alga,s.f.
 i,algerino,agg.;s.m.
@@ -260,8 +259,7 @@ i,al,uminio,s.m.
 b,allungare,v.tr.;v.intr.
 i,alluvione,s.f.
 b,almeno,avv.
-n,alquanto,agg.indef.
-n,pron.indef.;avv.
+n,alquanto,agg.indef.;pron.indef.;avv.
 i,altalena,s.f.
 n,altamente,avv.
 n,altare,s.m.
@@ -274,14 +272,11 @@ b,altezza,s.f.
 b,1alto,agg.;s.m.;avv.
 i,altoatesino,agg.;s.m.
 i,altopiano,s.m.
-b,altrettanto,agg.indef.
-n,pron.indef.;avv.
+b,altrettanto,agg.indef.;pron.indef.;avv.
 b,altrimenti,avv.
-b,altro,agg.indef.
-n,pron.indef.m.;avv.
+b,altro,agg.indef.;pron.indef.m.;avv.
 n,altrove,avv.
-n,altrui,agg.poss.inv.
-n,pron.indef.inv.
+n,altrui,agg.poss.inv.;pron.indef.inv.
 n,alunno,s.m.
 i,alveare,s.m.
 b,alzare,v.tr.
@@ -649,8 +644,7 @@ i,autotreno,s.m.
 n,autunno,s.m.
 i,avambraccio,s.m.
 n,avanguardia,s.f.
-b,avanti,avv.;agg.inv.
-n,loc.,di,comando;prep.;s.m.inv.;s.m.;f.inv.
+b,avanti,avv.;agg.inv.;loc.,di,comando;prep.;s.m.inv.;s.m.;f.inv.
 b,1avanzare,v.intr.;tr.
 n,1avanzato,p.pass.;agg.
 i,avanzo,s.m.
@@ -1086,7 +1080,7 @@ i,caposquadra,s.m.;f.
 i,capotavola,s.m.;f.
 i,capoufficio,s.m.;f.
 i,1cappa,s.f.;m.
-n1cappella,s.f.
+n,1cappella,s.f.
 i,cappelliera,s.f.
 n,cappello,s.m.
 i,cappero,s.m.
@@ -1114,8 +1108,7 @@ n,cardiaco,agg.;s.m.
 i,cardigan,s.m.inv.
 n,1cardinale,agg.;s.m.;agg.inv.
 n,carenza,s.f.
-b,1carica,s.f.
-n,loc.,di,comando
+b,1carica,s.f.;loc.,di,comando
 b,caricare,v.tr.
 b,1carico,s.m.
 n,2carico,agg.
@@ -1195,7 +1188,7 @@ n,2cavo,s.m.
 n,cavolo,s.m.
 n,cazzata,s.f.
 b,cazzo,s.m.
-b,1ce,pron.pers.,di,prima,pers.pl.;avv.
+b,1ce,pron.pers. di prima pers.pl.;avv.
 i,cece,s.m.
 i,1ceco,agg.;s.m.
 i,cecoslovacco,agg.;s.m.
@@ -1234,8 +1227,7 @@ b,certamente,avv.
 b,certezza,s.f.
 n,certificare,v.tr.
 n,certificato,p.pass.;agg.;s.m.
-b,certo,agg.;agg.indef.
-n,pron.indef.m.;s.m.;avv.
+b,certo,agg.;agg.indef.;pron.indef.m.;s.m.;avv.
 b,cervello,s.m.
 i,cervo,s.m.
 n,cespuglio,s.m.
@@ -1245,15 +1237,9 @@ i,cestino,s.m.
 i,1cesto,s.m.
 i,cetriolo,s.m.
 n,2chat,s.f.inv.
-b,1che,pron.rel.
-n,pron.interr.
-n,pron.escl.
-n,pron.indef.inv.;agg.interr.;agg.escl.;s.m.inv.
+b,1che,pron.rel.;pron.interr.;pron.escl.;pron.indef.inv.;agg.interr.;agg.escl.;s.m.inv.
 i,chewingum,s.m.inv.
-b,1chi,pron.rel.
-n,pron.rel.indef.
-n,pron.indef.
-n,pron.interr.
+b,1chi,pron.rel.;pron.rel.indef.;pron.indef.;pron.interr.
 n,chiacchiera,s.f.
 n,chiacchierare,v.intr.
 b,chiamare,v.tr.
@@ -1282,18 +1268,15 @@ n,chirurgo,s.m.
 b,chissà,avv.
 n,chitarra,s.f.
 b,chiudere,v.tr.;intr.
-b,chiunque,pron.indef.
-n,pron.rel.indef.
+b,chiunque,pron.indef.;pron.rel.indef.
 b,chiuso,p.pass.;agg.;s.m.;avv.
 n,chiusura,s.f.
 i,2ci,s.f.;m.inv.
-b,1ci,pron.pers.,di,prima,pers.pl.
-n,pron.dimostr.;avv.
+b,1ci,pron.pers. di prima pers.pl.;pron.dimostr.;avv.
 i,ciabatta,s.f.
 i,ciambella,s.f.
 b,ciao,inter.
-b,ciascuno,agg.indef.
-n,pron.indef.m.
+b,ciascuno,agg.indef.;pron.indef.m.
 i,cibare,v.tr.
 b,cibo,s.m.
 n,cicatrice,s.f.
@@ -1859,8 +1842,7 @@ b,curare,v.tr.
 n,curiosare,v.intr.
 n,curiosità,s.f.inv.
 b,curioso,agg.;s.m.
-n,curriculum,s.m.inv.
-n,lat.
+n,curriculum,s.m.inv.;lat.
 n,1curva,s.f.
 n,curvo,agg.;s.m.
 n,cuscino,s.m.
@@ -2128,8 +2110,7 @@ b,divenire,v.intr.;s.m.
 b,diventare,v.intr.
 n,diversamente,avv.
 n,diversità,s.f.inv.
-b,diverso,agg.;agg.indef.
-n,pron.indef.;s.m.
+b,diverso,agg.;agg.indef.;pron.indef.;s.m.
 b,divertente,p.pres.;agg.
 n,divertimento,s.m.
 b,divertire,v.tr.
@@ -2258,7 +2239,7 @@ n,efficacia,s.f.
 n,efficiente,agg.
 n,efficienza,s.f.
 i,egiziano,agg.;s.m.
-b,1egli,pron.pers.,di,terza,pers.m.sing.
+b,1egli,pron.pers. di terza pers.m.sing.
 n,elaborare,v.tr.
 n,elaborazione,s.f.
 n,elastico,agg.;s.m.
@@ -2397,16 +2378,16 @@ n,esposizione,s.f.
 b,espressione,s.f.
 i,espresso,p.pass.;agg.;s.m.
 b,esprimere,v.tr.
-b,essa,pron.pers.,di,terza,pers.f.
+b,essa,pron.pers. di terza pers.f.
 i,1esse,s.f.;m.inv.
-n,2esse,pron.pers.,di,terza,pers.f.pl.
+n,2esse,pron.pers. di terza pers.f.pl.
 n,essenza,s.f.
 n,essenziale,agg.;s.m.
 n,essenzialmente,avv.
 b,1essere,v.intr.
 b,2essere,s.m.
-b,essi,pron.pers.,di,terza,pers.m.pl.
-b,esso,pron.pers.,di,terza,pers.m.sing.
+b,essi,pron.pers. di terza pers.m.pl.
+b,esso,pron.pers. di terza pers.m.sing.
 n,1est,s.m.inv.;agg.inv.
 b,estate,s.f.
 n,estendere,v.tr.
@@ -2663,8 +2644,7 @@ b,fondare,v.tr.
 n,fondatore,s.m.
 n,fondazione,s.f.
 n,fondere,v.tr.;intr.
-b,fondo,agg.;s.m.;avv.
-n,loc.,di,comando
+b,fondo,agg.;s.m.;avv.;loc.,di,comando
 n,fontana,s.f.
 i,fontanella,s.f.
 b,1fonte,s.f.;s.m.
@@ -2753,8 +2733,7 @@ n,fucile,s.m.
 b,fuga,s.f.
 b,fuggire,v.intr.;tr.
 n,fulmine,s.m.
-b,fumare,v.intr.;tr.
-n,s.m
+b,fumare,v.intr.;tr.;s.m
 n,fumetto,s.m.
 b,fumo,s.m.;agg.inv.
 i,fune,s.f.
@@ -2765,8 +2744,7 @@ n,funzionamento,s.m.
 b,funzionare,v.intr.
 n,funzionario,s.m.
 b,funzione,s.f.
-b,fuoco,s.m.
-n,loc.,di,comando
+b,fuoco,s.m.;loc.,di,comando
 b,fuori,avv.;prep.;s.m.inv.;agg.inv.
 n,furbo,agg.;s.m.
 i,furfante,s.m.;f.
@@ -2913,7 +2891,7 @@ n,giustamente,avv.
 n,giustificare,v.tr.
 b,giustizia,s.f.
 b,1giusto,agg.;s.m.;avv.
-b,2gli,pron.pers.,di,terza,pers.m.sing.
+b,2gli,pron.pers. di terza pers.m.sing.
 i,glicine,s.m.
 n,global,agg.inv.;s.m.;f.inv.
 n,globale,agg.
@@ -3030,9 +3008,7 @@ n,ignorante,p.pres.;agg.;s.m.;f.
 n,ignoranza,s.f.
 b,ignorare,v.tr.
 n,ignoto,agg.;s.m.
-b,il,art.det.m.sing.
-n,pron.pers.,di,terza,pers.m.sing.
-n,pron.dimostr.
+b,il,art.det.m.sing.;pron.pers. di terza pers.m.sing.;pron.dimostr.
 n,illecito,agg.;s.m.
 n,illegale,agg.;s.m.;f.
 i,illegittimo,agg.;s.m.
@@ -3170,8 +3146,7 @@ b,indicare,v.tr.
 b,indicazione,s.f.
 b,indice,s.m.;agg.
 i,indietreggiare,v.intr.
-b,indietro,avv.;agg.inv.
-n,loc.,di,comando
+b,indietro,avv.;agg.inv.;loc.,di,comando
 i,indifeso,agg.
 n,indifferente,agg.;s.m.;f.
 n,indifferenza,s.f.
@@ -3371,7 +3346,7 @@ n,1invitato,p.pass.;agg.;s.m.
 n,1invito,s.m.
 n,invocare,v.tr.
 i,inzuppare,v.tr.
-b,1io,pron.pers.,di,prima,pers.sing.;s.m.inv.
+b,1io,pron.pers. di prima pers.sing.;s.m.inv.
 i,1ionico,agg.
 b,ipotesi,s.f.inv.
 n,ipotizzare,v.tr.
@@ -3414,8 +3389,7 @@ n,killer,s.m.;f.inv.;agg.inv.
 i,kit,s.m.inv.
 i,kiwi,s.m.inv.
 b,là,avv.
-b,1la,art.det.f.sing.
-n,pron.pers.,di,terza,pers.f.sing.
+b,1la,art.det.f.sing.;pron.pers. di terza pers.f.sing.
 b,labbro,s.m.
 i,labirinto,s.m.
 b,laboratorio,s.m.
@@ -3478,9 +3452,8 @@ b,lavoratore,agg.;s.m.
 n,lavorazione,s.f.
 b,lavoro,s.m.
 i,laziale,agg.;s.m.;f.
-b,1le,art.det.f.pl.
-n,pron.pers.,di,terza,pers.f.pl.
-b,2le,pron.pers.,di,terza,pers.f.sing.
+b,1le,art.det.f.pl.;pron.pers. di terza pers.f.pl.
+b,2le,pron.pers. di terza pers.f.sing.
 n,leader,s.m.;f.inv.
 i,lealtà,s.f.inv.
 i,lebbra,s.f.
@@ -3502,7 +3475,7 @@ n,legittimo,agg.
 i,legna,s.f.inv.
 b,legno,s.m.
 i,legume,s.m.
-b,lei,pron.pers.,di,terza,pers.f.sing.;s.m.inv.;s.f.inv.
+b,lei,pron.pers. di terza pers.f.sing.;s.m.inv.;s.f.inv.
 b,lentamente,avv.
 i,1lente,s.f.
 i,lenticchia,s.f.
@@ -3530,7 +3503,7 @@ n,1leva,s.f.
 b,levare,v.tr.;s.m.
 b,lezione,s.f.
 b,lì,avv.
-b,1li,pron.pers.,di,terza,pers.m.pl.
+b,1li,pron.pers. di terza pers.m.pl.
 n,libanese,agg.;s.m.;f.
 n,liberale,agg.;s.m.;f.
 n,liberamente,avv.
@@ -3582,8 +3555,7 @@ n,1litro,s.m.
 i,lituano,agg.;s.m.
 n,live,agg.inv.
 b,1livello,s.m.
-b,lo,art.det.m.sing.
-n,pron.pers.,di,terza,pers.m.sing.
+b,lo,art.det.m.sing.;pron.pers. di terza pers.m.sing.
 b,1locale,agg.;s.m.;f.
 b,2locale,s.m.
 n,1località,s.f.inv.
@@ -3599,8 +3571,7 @@ n,lontananza,s.f.
 b,lontano,agg.;avv.;s.m.
 i,2lonza,s.f.
 n,look,s.m.inv.
-b,loro,pron.pers.,di,terza,pers.m.;f.pl.;agg.poss.,di,terza,pers.pl.
-n,pron.poss.,di,terza,pers.pl.
+b,loro,pron.pers. di terza pers.m.;f.pl.;agg.poss. di terza pers.pl.;pron.poss. di terza pers.pl.
 b,lotta,s.f.
 n,lottare,v.intr.
 i,lozione,s.f.
@@ -3613,7 +3584,7 @@ i,lucertola,s.f.
 i,lucidare,v.tr.
 n,lucido,agg.;s.m.
 b,luglio,s.m.
-b,1lui,pron.pers.,di,terza,pers.m.sing.;s.m.inv.
+b,1lui,pron.pers. di terza pers.m.sing.;s.m.inv.
 i,lumaca,s.f.
 n,luminoso,agg.
 b,luna,s.f.
@@ -3785,12 +3756,11 @@ n,maturare,v.intr.;tr.
 n,maturità,s.f.inv.
 n,maturo,agg.
 n,1mazzo,s.m.
-b,me,pron.pers.,di,prima,pers.sing.;s.m.inv.
+b,me,pron.pers. di prima pers.sing.;s.m.inv.
 b,meccanico,agg.;s.m.
 b,meccanismo,s.m.
 n,medaglia,s.f.
-n,medesimo,agg.dimostr.
-n,pron.dimostr.m.
+n,medesimo,agg.dimostr.;pron.dimostr.m.
 b,1media,s.f.
 n,2media,s.m.inv.
 n,2mediante,prep.
@@ -3871,7 +3841,7 @@ b,mettere,v.tr.;intr.
 n,mezzanotte,s.f.
 b,1mezzo,agg.;s.m.;avv.
 n,mezzogiorno,s.m.
-b,3mi,pron.pers.,di,prima,pers.sing.
+b,3mi,pron.pers. di prima pers.sing.
 i,miagolare,v.intr.
 b,1mica,s.f.;avv.
 i,1micio,s.m.
@@ -3908,8 +3878,7 @@ n,minoranza,s.f.
 b,minore,agg.;s.m.;f.
 n,minuscolo,agg.
 b,1minuto,s.m.
-b,mio,agg.poss.,di,prima,pers.sing.
-n,pron.poss.,di,prima,pers.sing.
+b,mio,agg.poss. di prima pers.sing.;pron.poss. di prima pers.sing.
 b,miracolo,s.m.
 n,mirare,v.tr.;intr.
 n,mischiare,v.tr.
@@ -3955,8 +3924,7 @@ n,mollare,v.tr.;intr.
 i,mollusco,s.m.
 i,molo,s.m.
 n,moltiplicare,v.tr.
-b,molto,agg.indef.
-n,pron.indef.;avv.;s.m.
+b,molto,agg.indef.;pron.indef.;avv.;s.m.
 b,momento,s.m.
 i,monaca,s.f.
 i,1monaco,s.m.
@@ -4100,8 +4068,7 @@ b,nero,agg.;s.m.
 n,nervo,s.m.
 i,nervosismo,s.m.
 b,nervoso,agg.;s.m.
-b,nessuno,agg.indef.
-n,pron.indef.m.;s.m.
+b,nessuno,agg.indef.;pron.indef.m.;s.m.
 i,1nettare,s.m.
 n,netto,agg.;s.m.;avv.
 n,network,s.m.inv.
@@ -4119,7 +4086,7 @@ i,nocciola,s.f.;s.m.inv.;agg.inv.
 i,nocciolina,s.f.
 i,nocivo,agg.
 n,nodo,s.m.
-b,noi,pron.pers.,di,prima,pers.pl.
+b,noi,pron.pers. di prima pers.pl.
 n,noia,s.f.
 n,noioso,agg.
 i,noleggiare,v.tr.
@@ -4141,8 +4108,7 @@ n,normalmente,avv.
 n,normativa,s.f.
 i,norvegese,agg.;s.m.;f.
 n,nostalgia,s.f.
-b,nostro,agg.poss.,di,prima,pers.pl.
-n,pron.poss.,di,prima,pers.pl.
+b,nostro,agg.poss. di prima pers.pl.;pron.poss. di prima pers.pl.
 b,nota,s.f.
 n,notaio,s.m.
 b,1notare,v.tr.
@@ -4458,8 +4424,7 @@ i,paravento,s.m.
 n,parcheggiare,v.tr.
 n,parcheggio,s.m.
 b,1parco,s.m.
-b,parecchio,agg.indef.
-n,pron.indef.;avv.;agg.
+b,parecchio,agg.indef.;pron.indef.;avv.;agg.
 i,pareggiare,v.tr.;intr.
 i,1pareggio,s.m.
 b,parente,s.m.;f.
@@ -4767,8 +4732,7 @@ i,platino,s.m.;s.m.inv.;agg.inv.
 i,plurale,s.m.;agg.
 i,1pneumatico,s.m.
 n,pochino,s.m.
-b,poco,agg.indef.
-n,pron.indef.;s.m.;avv.
+b,poco,agg.indef.;pron.indef.;s.m.;avv.
 i,1podere,s.m.
 n,poema,s.m.
 b,poesia,s.f.
@@ -4981,8 +4945,7 @@ n,1privare,v.tr.
 b,1privato,agg.;s.m.
 n,privilegio,s.m.
 n,privo,agg.
-n,2pro,prep.;s.m.inv.
-n,lat.
+n,2pro,prep.;s.m.inv.;lat.
 n,probabile,agg.
 n,probabilità,s.f.inv.
 b,probabilmente,avv.
@@ -5142,23 +5105,16 @@ i,quaglia,s.f.
 b,qualche,agg.indef.;avv.
 b,qualcosa,pron.indef.;s.m.
 b,qualcuno,pron.indef.m.;agg.indef.;s.m.
-b,quale,agg.interr.;agg.escl.;agg.rel.;agg.indef.
-n,pron.interr.
-n,pron.rel.
-n,pron.indef.;avv.;s.m.
+b,quale,agg.interr.;agg.escl.;agg.rel.;agg.indef.;pron.interr.;pron.rel.;pron.indef.;avv.;s.m.
 n,qualificare,v.tr.
 b,qualità,s.f.inv.
 n,qualora,cong.
 b,qualsiasi,agg.indef.;agg.rel.
-b,qualunque,agg.indef.;agg.rel.
-n,pron.rel.indef.
+b,qualunque,agg.indef.;agg.rel.;pron.rel.indef.
 b,quando,cong.;avv.;s.m.
 b,quantità,s.f.inv.
 n,quantitativo,agg.;s.m.
-b,1quanto,agg.interr.;agg.escl.;agg.rel.
-n,pron.interr.
-n,pron.escl.
-n,pron.rel.;avv.;s.m.
+b,1quanto,agg.interr.;agg.escl.;agg.rel.;pron.interr.;pron.escl.;pron.rel.;avv.;s.m.
 b,quaranta,agg.num.card.inv.;s.m.inv.;s.m.pl.
 n,quarta,s.f.
 b,quartiere,s.m.
@@ -5166,12 +5122,10 @@ b,quarto,agg.num.ord.;s.m.
 b,quasi,avv.;cong.
 n,quattordici,agg.num.card.inv.;s.m.inv.;s.f.,pl.
 b,quattro,agg.num.card.inv.;s.m.inv.;s.f.pl.
-b,quello,agg.dimostr.
-n,pron.dimostr.m.
+b,quello,agg.dimostr.;pron.dimostr.m.
 i,quercia,s.f.
 b,questione,s.f.
-b,questo,agg.dimostr.
-n,pron.dimostr.m.
+b,questo,agg.dimostr.;pron.dimostr.m.
 n,questura,s.f.
 b,qui,avv.
 b,quindi,avv.;cong.
@@ -5493,8 +5447,7 @@ i,ripiego,s.m.
 i,ripieno,agg.;s.m.
 b,riportare,v.tr.
 n,1riposare,v.intr.;tr.
-n,riposo,s.m.
-n,loc.,di,comando;s.m.inv.
+n,riposo,s.m.;loc.,di,comando;s.m.inv.
 b,riprendere,v.tr.;intr.
 n,ripresa,s.f.
 n,riprodurre,v.tr.
@@ -5920,7 +5873,7 @@ i,sdebitarsi,v.pronom.intr.
 i,sdegnare,v.tr.
 n,sdraiare,v.tr.
 i,sdraiato,p.pass.;agg.
-b,1se,pron.pers.,di,terza,pers.m.;f.sing.;pl.
+b,1se,pron.pers. di terza pers.m.;f.sing.;pl.
 b,2se,cong.;s.m.inv.
 n,sebbene,cong.
 n,seccare,v.tr.;intr.
@@ -6082,7 +6035,7 @@ n,shopping,s.m.inv.
 i,shorts,s.m.pl.
 n,show,s.m.inv.
 b,1sì,avv.;s.m.inv.;agg.inv.
-b,2si,pron.pers.,di,terza,pers.m.;f.sing.;pl.
+b,2si,pron.pers. di terza pers.m.;f.sing.;pl.
 b,sia,cong.
 i,siamese,agg.;s.m.;f.
 n,sicché,cong.
@@ -6104,7 +6057,8 @@ b,signore,s.m.
 b,signorina,s.f.
 b,silenzio,s.m.
 n,silenzioso,agg.
-i,sillaba,s.f.;simb.lico,agg.
+i,sillaba,s.f.
+n,simbolico,agg.
 b,simbolo,s.m.
 b,simile,agg.;agg.dimostr.;s.m.;f.;s.m.;avv.
 n,simpatia,s.f.
@@ -6463,8 +6417,7 @@ b,1stato,s.m.
 b,2stato,s.m.
 n,statua,s.f.
 n,statunitense,agg.;s.m.;f.
-n,1status,s.m.inv.
-n,lat.
+n,1status,s.m.inv.;lat.
 n,stavolta,avv.
 b,stazione,s.f.
 b,1stella,s.f.
@@ -6475,8 +6428,7 @@ i,1stereo,agg.inv.;s.m.inv.
 n,sterlina,s.f.
 i,1sterzare,v.intr.
 i,1sterzo,s.m.
-b,stesso,agg.dimostr.
-n,pron.dimostr.m.
+b,stesso,agg.dimostr.;pron.dimostr.m.
 b,stile,s.m.
 n,stima,s.f.
 n,stimare,v.tr.
@@ -6575,8 +6527,7 @@ i,sughero,s.m.
 n,sugo,s.m.
 n,suicidio,s.m.
 i,suino,s.m.;agg.
-b,suo,agg.poss.,di,terza,pers.sing.
-n,pron.poss.,di,terza,pers.sing.
+b,suo,agg.poss. di terza pers.sing.;pron.poss. di terza pers.sing.
 i,suocera,s.f.
 i,suocero,s.m.
 i,suola,s.f.
@@ -6635,9 +6586,7 @@ i,tagliere,s.m.
 b,taglio,s.m.
 i,1tagliola,s.f.
 i,talco,s.m.
-b,tale,agg.dimostr.;agg.indef.
-n,pron.dimostr.
-n,pron.indef.;avv.
+b,tale,agg.dimostr.;agg.indef.;pron.dimostr.;pron.indef.;avv.
 i,taleggio,s.m.
 n,talento,s.m.
 b,talmente,avv.
@@ -6646,9 +6595,7 @@ n,talvolta,avv.
 i,tamburo,s.m.
 i,tamponare,v.tr.
 n,tangente,p.pres.;agg.;s.f.
-b,tanto,agg.indef.
-n,pron.indef.
-n,pron.dimostr.;s.m.inv.;avv.;cong.
+b,tanto,agg.indef.;pron.indef.;pron.dimostr.;s.m.inv.;avv.;cong.
 n,tappa,s.f.
 n,tappare,v.tr.
 i,tappetino,s.m.
@@ -6681,7 +6628,7 @@ b,tavolo,s.m.
 n,taxi,s.m.inv.
 n,tazza,s.f.
 n,tè,s.m.inv.
-b,1te,pron.pers. di prima pers.sing.
+b,1te,pron.pers. di seconda pers.sing.
 n,team,s.m.inv.
 n,teatrale,agg.
 b,teatro,s.m.
@@ -6782,7 +6729,7 @@ i,tettoia,s.f.
 n,TG,sigla
 i,thermos,s.m.inv.
 i,2ti,s.f.;m.inv.
-b,1ti,pron.pers. di prima pers.sing.
+b,1ti,pron.pers. di seconda pers.sing.
 i,2tic,s.m.inv.
 i,ticchettio,s.m.
 n,tifare,v.intr.
@@ -6952,8 +6899,7 @@ i,tritare,v.tr.
 i,trofeo,s.m.
 n,1tronco,s.m.
 n,1trono,s.m.
-b,troppo,agg.indef.
-n,pron.indef.;avv.;s.m.
+b,troppo,agg.indef.;pron.indef.;avv.;s.m.
 i,trota,s.f.
 i,trottare,v.intr.
 i,trottola,s.f.
@@ -6965,7 +6911,7 @@ n,truffa,s.f.
 i,truffare,v.tr.
 n,truppa,s.f.
 i,t-shirt,s.f.inv.
-b,tu,pron.pers. di prima pers.sing.;s.m.inv.
+b,tu,pron.pers. di seconda pers.sing.;s.m.inv.
 n,tubo,s.m.
 n,tuffare,v.tr.
 i,1tuffo,s.m.
@@ -6974,8 +6920,7 @@ n,tumore,s.m.
 i,tunica,s.f.
 i,tunisino,agg.;s.m.
 i,tunnel,s.m.inv.
-b,tuo,agg.poss. di prima pers.sing.
-n,pron.poss. di prima pers.sing.
+b,tuo,agg.poss. di seconda pers.sing.;pron.poss. di seconda pers.sing.
 i,1tuono,s.m.
 n,turbare,v.tr.
 n,turco,agg.;s.m.
@@ -6988,8 +6933,7 @@ n,tutela,s.f.
 n,2tutelare,v.tr.
 i,tutore,s.m.
 b,tuttavia,cong.;avv.
-b,tutto,agg.indef.
-n,pron.indef.;s.m.
+b,tutto,agg.indef.;pron.indef.;s.m.
 n,tuttora,avv.
 i,,1u,s.f.;m.inv.
 n,ubriaco,agg.;s.m.
@@ -7019,8 +6963,7 @@ n,umile,agg.;s.m.;f.
 n,umiliare,v.tr.
 n,umore,s.m.
 i,umorismo,s.m.
-b,una,art.indet.f.sing.
-n,pron.indef.;s.f.inv.
+b,una,art.indet.f.sing.;pron.indef.;s.f.inv.
 n,undici,agg.num.card.inv.;s.m.inv.;s.f.pl.;s.m.pl.
 i,ungherese,agg.;s.m.;f.
 n,unghia,s.f.
@@ -7035,9 +6978,7 @@ n,universale,agg.;s.m.
 b,università,s.f.inv.
 n,universitario,agg.;s.m.
 b,1universo,s.m.
-b,uno,agg.num.card.;s.m.inv.
-n,art.indet.m.sing.
-n,pron.indef.m.
+b,uno,agg.num.card.;s.m.inv.;art.indet.m.sing.;pron.indef.m.
 b,uomo,s.m.
 b,uovo,s.m.
 i,uragano,s.m.
@@ -7099,13 +7040,12 @@ n,variante,p.pres.;agg.;s.f.;s.m.
 n,variare,v.tr.;intr.
 n,variazione,s.f.
 n,1varietà,s.f.inv.
-b,vario,agg.;agg.indef.
-n,pron.indef.;s.m.
+b,vario,agg.;agg.indef.;pron.indef.;s.m.
 i,variopinto,agg.
 n,vasca,s.f.
 n,vaso,s.m.
 n,vasto,agg.;s.m.
-b,1ve,pron.pers. di prima pers.pl.;avv.
+b,1ve,pron.pers. di seconda pers.pl.;avv.
 b,1vecchio,agg.;s.m.
 b,vedere,v.tr.;intr.;s.m.
 n,vedova,s.f.
@@ -7175,8 +7115,7 @@ i,veterinario,agg.;s.m.
 n,1vetrina,s.f.
 b,vetro,s.m.
 n,vettura,s.f.
-b,1vi,pron.pers. di prima pers.pl.
-n,pron.dimostr.;avv.
+b,1vi,pron.pers. di seconda pers.pl.;pron.dimostr.;avv.
 b,via,s.f.;avv.;inter.;s.m.inv.
 b,viaggiare,v.intr.;tr.
 n,viaggiatore,s.m.
@@ -7249,7 +7188,7 @@ n,vocazione,s.f.
 b,voce,s.f.
 i,vodka,s.f.inv.
 b,voglia,s.f.
-b,voi,pron.pers. di prima pers.pl.;s.m.inv.
+b,voi,pron.pers. di seconda pers.pl.;s.m.inv.
 i,1volantino,s.m.
 b,1volare,v.intr.;tr.
 i,volata,s.f.
@@ -7269,8 +7208,7 @@ b,volume,s.m.
 n,vomitare,v.tr.
 i,vomito,s.m.
 i,vongola,s.f.
-b,vostro,agg.poss. di prima pers.pl.
-n,pron.poss. di prima pers.pl.
+b,vostro,agg.poss. di seconda pers.pl.;pron.poss. di seconda pers.pl.
 b,1votare,v.tr.;intr.
 i,votazione,s.f.
 b,1voto,s.m.

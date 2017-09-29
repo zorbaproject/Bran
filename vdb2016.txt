@@ -6,26 +6,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 a
 a
 abbagliante
@@ -521,7 +501,6 @@ artigianale
 artigiano
 artiglieria
 artiglio
-art.indet.m.sing.
 artista
 artistico
 ascella
@@ -1108,6 +1087,7 @@ caposquadra
 capotavola
 capoufficio
 cappa
+cappella
 cappelliera
 cappello
 cappero
@@ -3447,9 +3427,6 @@ lasagna
 lasciare
 lassù
 lastra
-lat.
-lat.
-lat.
 laterale
 latino
 lato
@@ -3583,12 +3560,6 @@ lituano
 live
 livello
 lo
-loc.
-loc.
-loc.
-loc.
-loc.
-loc.
 locale
 locale
 località
@@ -5029,38 +5000,6 @@ promessa
 promettere
 promozione
 promuovere
-pron.dimostr.
-pron.dimostr.
-pron.dimostr.m.
-pron.dimostr.m.
-pron.dimostr.m.
-pron.dimostr.m.
-pron.escl.
-pron.escl.
-pron.indef.
-pron.indef.
-pron.indef.inv.
-pron.indef.m.
-pron.indef.m.
-pron.indef.m.
-pron.interr.
-pron.interr.
-pron.interr.
-pron.interr.
-pron.pers.
-pron.pers.
-pron.pers.
-pron.pers.
-pron.poss.
-pron.poss.
-pron.poss.
-pron.poss.
-pron.poss. di prima pers.pl.
-pron.poss. di prima pers.sing.
-pron.rel.
-pron.rel.indef.
-pron.rel.indef.
-pron.rel.indef.
 pronto
 pronuncia
 pronunciare
@@ -6055,7 +5994,6 @@ settore
 severo
 sexy
 sezione
-s.f.
 sfera
 sfida
 sfidare
@@ -6121,6 +6059,7 @@ signorina
 silenzio
 silenzioso
 sillaba
+simbolico
 simbolo
 simile
 simpatia
@@ -6163,7 +6102,6 @@ slogare
 slogatura
 slovacco
 sloveno
-s.m
 smacchiare
 smacchiatore
 smaltimento

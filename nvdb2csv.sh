@@ -44,13 +44,7 @@ cp "$myfile"s.html "$myfile"TMP.html
 
 #creo la divisione in righe
 sed -i "s/<br\/>//g" "$myfile"s.html
-
-declare -a arr=("agg\." "p\.pres\." "p\.pass\." "s\.m\." "s\.m\.inv\." "s\.f\." "s\.f\.inv\." "prep\." "avv\." "cong\." "inter\." "v\.intr\." "v\.tr\." "simb.")
-for i in "${arr[@]}"
-do
-   sed -i "s/, ${i}/; ${i}/g" "$myfile"s.html
-done
-
+sed -i "s/, \([qwertyuiopasdfghjklzxcvbnm\.1234567890]*\)\./; \1\./g" "$myfile"s.html
 sed -i "s/,/\n/g" "$myfile"s.html 
 
 #pulisco intestazione e pie di pagina
@@ -62,13 +56,14 @@ sed -i "s/  / /g" "$myfile"s.html
 sed -i "s/ /,/g" "$myfile"s.html
 sed -i "s/,e,/;/g" "$myfile"s.html
 sed -i "s/;,/;/g" "$myfile"s.html
-sed -i "s/,di,seconda,pers/ di prima pers/g" "$myfile"s.html
+sed -i "s/,di,prima,pers/ di prima pers/g" "$myfile"s.html
 sed -i "s/,di,seconda,pers/ di seconda pers/g" "$myfile"s.html
-sed -i "s/,di,seconda,pers/ di terza pers/g" "$myfile"s.html
+sed -i "s/,di,terza,pers/ di terza pers/g" "$myfile"s.html
 
 #aggiungo la colonna per bold-italic
 sed -i "s/<\/i>//g" "$myfile"s.html
 sed -i "s/<\/b>//g" "$myfile"s.html
+sed -i "s/^\([^,]\)/,\1/g" "$myfile"s.html
 sed -i "s/^/n/g" "$myfile"s.html
 sed -i "s/n,<i>/i,/g" "$myfile"s.html
 sed -i "s/n,<b>/b,/g" "$myfile"s.html
