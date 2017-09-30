@@ -1,11 +1,4 @@
 
-
-
-
-
-
-
-
 a
 a
 abbagliante
@@ -217,7 +210,6 @@ aguzzo
 aiuola
 aiutare
 aiuto
-al
 ala
 alba
 albanese
@@ -263,6 +255,7 @@ allontanare
 allora
 alluce
 alludere
+alluminio
 allungare
 alluvione
 almeno
@@ -826,7 +819,7 @@ biologico
 bionda
 biondo
 birichino
-biril
+birillo
 birra
 bisbigliare
 biscia
@@ -1856,6 +1849,7 @@ cuscino
 custode
 custodia
 custodire
+da
 dado
 danese
 dannato
@@ -2208,6 +2202,7 @@ durare
 durata
 duro
 e
+e
 ebbene
 ebraico
 ebreo
@@ -2532,7 +2527,7 @@ fermaglio
 fermare
 fermo
 feroce
-Ferragosto
+ferragosto
 ferramenta
 ferro
 ferrovia
@@ -2898,7 +2893,6 @@ giustizia
 giusto
 gli
 glicine
-global
 globale
 gloria
 gnocco
@@ -2940,7 +2934,6 @@ grano
 granturco
 grappa
 grasso
-gratis
 grattare
 grattugiato
 gratuito
@@ -2990,6 +2983,7 @@ hobby
 home
 hotel
 hyperlink
+i
 i
 icona
 ics
@@ -3600,6 +3594,7 @@ lupo
 lussemburghese
 lusso
 lutto
+ma
 maccherone
 macchia
 macchina
@@ -4145,6 +4140,7 @@ nutrire
 nuvola
 nuvoloso
 nylon
+o
 o
 obbedire
 obbiettivo
@@ -4778,7 +4774,6 @@ pompelmo
 pompiere
 ponte
 pony
-pop
 popolare
 popolare
 popolarità
@@ -4801,7 +4796,7 @@ portafoglio
 portafortuna
 portale
 portamonete
-portaombrel
+portaombrelli
 portare
 portata
 portatore
@@ -5098,6 +5093,7 @@ puttana
 puzza
 puzzare
 puzzle
+qua
 quaderno
 quadrato
 quadrifoglio
@@ -6536,7 +6532,6 @@ suolo
 suonare
 suono
 suora
-super
 superare
 superbia
 superficiale
@@ -6727,7 +6722,7 @@ testo
 tetta
 tetto
 tettoia
-TG
+tg
 thermos
 ti
 ti
@@ -6936,6 +6931,7 @@ tutore
 tuttavia
 tutto
 tuttora
+u
 ubriaco
 uccello
 uccidere

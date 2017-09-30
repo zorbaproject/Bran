@@ -255,7 +255,7 @@ b,allontanare,v.tr.
 b,allora,avv.;cong.
 i,alluce,s.m.
 n,alludere,v.intr.
-i,al,uminio,s.m.
+i,alluminio,s.m.
 b,allungare,v.tr.;v.intr.
 i,alluvione,s.f.
 b,almeno,avv.
@@ -644,7 +644,7 @@ i,autotreno,s.m.
 n,autunno,s.m.
 i,avambraccio,s.m.
 n,avanguardia,s.f.
-b,avanti,avv.;agg.inv.;loc.,di,comando;prep.;s.m.inv.;s.m.;f.inv.
+b,avanti,avv.;agg.inv.;loc. di comando;prep.;s.m.inv.;s.m.;f.inv.
 b,1avanzare,v.intr.;tr.
 n,1avanzato,p.pass.;agg.
 i,avanzo,s.m.
@@ -819,7 +819,7 @@ n,biologico,agg.;s.m.
 n,1bionda,s.f.
 n,biondo,agg.;s.m.
 i,birichino,s.m.;agg.
-i,biril,o,s.m.
+i,birillo,s.m.
 n,birra,s.f.
 i,bisbigliare,v.intr.;tr.
 i,biscia,s.f.
@@ -1108,7 +1108,7 @@ n,cardiaco,agg.;s.m.
 i,cardigan,s.m.inv.
 n,1cardinale,agg.;s.m.;agg.inv.
 n,carenza,s.f.
-b,1carica,s.f.;loc.,di,comando
+b,1carica,s.f.;loc. di comando
 b,caricare,v.tr.
 b,1carico,s.m.
 n,2carico,agg.
@@ -1849,7 +1849,7 @@ n,cuscino,s.m.
 n,custode,s.m.;f.;agg.
 n,custodia,s.f.
 n,custodire,v.tr.
-b,,1da,prep.
+b,1da,prep.
 i,dado,s.m.
 i,danese,agg.;s.m.;f.
 n,dannato,p.pass.;agg.;s.m.
@@ -1963,7 +1963,7 @@ n,devastare,v.tr.
 i,deviare,v.intr.;tr.
 i,deviazione,s.f.
 b,1di,prep.
-i,2di,s.f.;m.,inv.
+i,2di,s.f.;m. inv.
 n,diagnosi,s.f.inv.
 b,dialetto,s.m.
 n,dialogare,v.intr.;tr.
@@ -2201,7 +2201,7 @@ b,durante,p.pres.;prep.;s.m.inv.
 b,durare,v.intr.;v.tr.
 b,durata,s.f.
 b,1duro,agg.;s.m.;avv.
-i,,1e,s.f.;m.inv.
+i,1e,s.f.;m.inv.
 b,2e,cong.
 n,ebbene,cong.
 n,ebraico,agg.;s.m.
@@ -2527,7 +2527,7 @@ i,fermaglio,s.m.
 b,fermare,v.tr.;v.intr.
 b,1fermo,agg.
 n,feroce,agg.
-i,Ferragosto,s.m.
+i,ferragosto,s.m.
 i,ferramenta,s.m.;f.inv.
 b,ferro,s.m.
 n,ferrovia,s.f.
@@ -2644,7 +2644,7 @@ b,fondare,v.tr.
 n,fondatore,s.m.
 n,fondazione,s.f.
 n,fondere,v.tr.;intr.
-b,fondo,agg.;s.m.;avv.;loc.,di,comando
+b,fondo,agg.;s.m.;avv.;loc. di comando
 n,fontana,s.f.
 i,fontanella,s.f.
 b,1fonte,s.f.;s.m.
@@ -2744,7 +2744,7 @@ n,funzionamento,s.m.
 b,funzionare,v.intr.
 n,funzionario,s.m.
 b,funzione,s.f.
-b,fuoco,s.m.;loc.,di,comando
+b,fuoco,s.m.;loc. di comando
 b,fuori,avv.;prep.;s.m.inv.;agg.inv.
 n,furbo,agg.;s.m.
 i,furfante,s.m.;f.
@@ -2892,8 +2892,7 @@ n,giustificare,v.tr.
 b,giustizia,s.f.
 b,1giusto,agg.;s.m.;avv.
 b,2gli,pron.pers. di terza pers.m.sing.
-i,glicine,s.m.
-n,global,agg.inv.;s.m.;f.inv.
+i,glicine,s.m.;globallagg.inv.;s.m.;f.inv.
 n,globale,agg.
 n,1gloria,s.f.
 i,gnocco,s.m.
@@ -2934,8 +2933,7 @@ n,grandioso,agg.
 n,grano,s.m.
 i,granturco,s.m.
 i,1grappa,s.f.
-b,grasso,agg.;s.m.
-n,gratis,avv.;agg.inv.
+b,grasso,agg.;s.m.;gratissavv.;agg.inv.
 n,grattare,v.tr.;intr.
 i,grattugiato,p.pass.;agg.
 n,gratuito,agg.
@@ -2985,7 +2983,7 @@ n,hobby,s.m.inv.
 n,home,s.f.inv.
 n,hotel,s.m.inv.
 n,hyperlink,s.m.inv.
-i,,1i,s.f.;m.inv.
+i,1i,s.f.;m.inv.
 n,2i,art.det.m.pl.
 n,icona,s.f.
 i,ics,s.f.;m.inv.
@@ -3146,7 +3144,7 @@ b,indicare,v.tr.
 b,indicazione,s.f.
 b,indice,s.m.;agg.
 i,indietreggiare,v.intr.
-b,indietro,avv.;agg.inv.;loc.,di,comando
+b,indietro,avv.;agg.inv.;loc. di comando
 i,indifeso,agg.
 n,indifferente,agg.;s.m.;f.
 n,indifferenza,s.f.
@@ -3596,7 +3594,7 @@ b,lupo,s.m.
 i,lussemburghese,agg.;s.m.;f.
 n,lusso,s.m.
 n,lutto,s.m.
-b,,1ma,cong.;s.m.inv.
+b,1ma,cong.;s.m.inv.
 i,maccherone,s.m.
 b,1macchia,s.f.
 b,macchina,s.f.
@@ -4142,7 +4140,7 @@ n,nutrire,v.tr.
 n,nuvola,s.f.
 i,nuvoloso,agg.
 i,nylon,s.m.inv.
-i,,1o,s.f.;m.inv.
+i,1o,s.f.;m.inv.
 b,2o,cong.
 n,obbedire,v.intr.
 i,obbiettivo,agg.;s.m.
@@ -4775,8 +4773,7 @@ n,1pompa,s.f.
 i,pompelmo,s.m.
 i,1pompiere,s.m.
 b,ponte,s.m.
-i,1pony,s.m.inv.
-n,pop,agg.inv.;s.m.inv.
+i,1pony,s.m.inv.;poppagg.inv.;s.m.inv.
 b,1popolare,agg.;s.m.
 n,2popolare,v.tr.
 i,popolarità,s.f.inv.
@@ -4799,7 +4796,7 @@ n,portafoglio,s.m.
 i,portafortuna,s.m.inv.
 n,1portale,s.m.
 i,portamonete,s.m.inv.
-i,portaombrel,i,s.m.inv.
+i,portaombrelli,s.m.inv.
 b,portare,v.tr.;intr.
 n,portata,s.f.
 n,portatore,agg.;s.m.
@@ -5096,7 +5093,7 @@ n,puttana,s.f.
 n,puzza,s.f.
 n,puzzare,v.intr.
 i,puzzle,s.m.inv.
-b,,1qua,avv.
+b,1qua,avv.
 n,quaderno,s.m.
 n,2quadrato,p.pass.;agg.
 i,quadrifoglio,s.m.
@@ -5120,7 +5117,7 @@ n,quarta,s.f.
 b,quartiere,s.m.
 b,quarto,agg.num.ord.;s.m.
 b,quasi,avv.;cong.
-n,quattordici,agg.num.card.inv.;s.m.inv.;s.f.,pl.
+n,quattordici,agg.num.card.inv.;s.m.inv.;s.f. pl.
 b,quattro,agg.num.card.inv.;s.m.inv.;s.f.pl.
 b,quello,agg.dimostr.;pron.dimostr.m.
 i,quercia,s.f.
@@ -5447,7 +5444,7 @@ i,ripiego,s.m.
 i,ripieno,agg.;s.m.
 b,riportare,v.tr.
 n,1riposare,v.intr.;tr.
-n,riposo,s.m.;loc.,di,comando;s.m.inv.
+n,riposo,s.m.;loc. di comando;s.m.inv.
 b,riprendere,v.tr.;intr.
 n,ripresa,s.f.
 n,riprodurre,v.tr.
@@ -6442,7 +6439,7 @@ i,stivaletto,s.m.
 n,stoffa,s.f.
 n,stomaco,s.m.
 i,1stonare,v.tr.;intr.
-i,1stop,loc.,di,comando;s.m.inv.
+i,1stop,loc. di comando;s.m.inv.
 i,stoppa,s.f.
 i,storcere,v.tr.
 b,storia,s.f.
@@ -6534,8 +6531,7 @@ i,suola,s.f.
 n,suolo,s.m.
 b,suonare,v.tr.;intr.
 b,suono,s.m.
-b,suora,s.f.
-n,1super,agg.inv.;s.m.;f.inv.
+b,suora,s.f.;1superragg.inv.;s.m.;f.inv.
 b,superare,v.tr.
 i,superbia,s.f.
 n,superficiale,agg.
@@ -6726,7 +6722,7 @@ b,1testo,s.m.
 n,tetta,s.f.
 b,tetto,s.m.
 i,tettoia,s.f.
-n,TG,sigla
+n,tg,sigla
 i,thermos,s.m.inv.
 i,2ti,s.f.;m.inv.
 b,1ti,pron.pers. di seconda pers.sing.
@@ -6935,7 +6931,7 @@ i,tutore,s.m.
 b,tuttavia,cong.;avv.
 b,tutto,agg.indef.;pron.indef.;s.m.
 n,tuttora,avv.
-i,,1u,s.f.;m.inv.
+i,1u,s.f.;m.inv.
 n,ubriaco,agg.;s.m.
 b,uccello,s.m.
 b,uccidere,v.tr.

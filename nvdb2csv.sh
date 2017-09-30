@@ -35,10 +35,14 @@ sed -i "s/<b>[QWERTYUIOPASDFGHJKLZXCVBNM]<\/b><br\/>/, /g" "$myfile"s.html
 newpage='dizionario.internazionale.it\/nuovovocabolariodibase<br\/>[0123456789]*<br\/><hr\/><a name=[0123456789]*><\/a>23 dicembre 2016<br\/>Il Nuovo vocabolario di base della lingua italiana - Tullio De Mauro - Internazionale<br\/>'
 sed -i "s/${newpage}//g" "$myfile"s.html
 
+#tutto in minuscole
+sed -i 's/.*/\L&/g' "$myfile"s.html
+
 #unisco le parole spezzate
 sed -i "s/-<br\/>//g" "$myfile"s.html
 sed -i "s/-<\/b><br\/><b>//g" "$myfile"s.html
 sed -i "s/-<\/i><br\/><i>//g" "$myfile"s.html
+sed -i "s/\([rtpsfglzcvbnm]\) \([aeiouèéòàùì]\)/\1\1\2/g" "$myfile"s.html
 
 cp "$myfile"s.html "$myfile"TMP.html
 
@@ -59,6 +63,10 @@ sed -i "s/;,/;/g" "$myfile"s.html
 sed -i "s/,di,prima,pers/ di prima pers/g" "$myfile"s.html
 sed -i "s/,di,seconda,pers/ di seconda pers/g" "$myfile"s.html
 sed -i "s/,di,terza,pers/ di terza pers/g" "$myfile"s.html
+sed -i "s/,di,comando/ di comando/g" "$myfile"s.html
+sed -i "s/s\.f\.,pl\./s\.f\. pl\./g" "$myfile"s.html
+sed -i "s/m\.,inv/m\. inv/g" "$myfile"s.html
+
 
 #aggiungo la colonna per bold-italic
 sed -i "s/<\/i>//g" "$myfile"s.html
@@ -67,6 +75,9 @@ sed -i "s/^\([^,]\)/,\1/g" "$myfile"s.html
 sed -i "s/^/n/g" "$myfile"s.html
 sed -i "s/n,<i>/i,/g" "$myfile"s.html
 sed -i "s/n,<b>/b,/g" "$myfile"s.html
+sed -i "s/\([nib]\),,/\1,/g" "$myfile"s.html
+
+#TODO: si può eliminare la prima riga n
 
 mv "$myfile"s.html "$myfile".csv
 mv "$myfile"TMP.html "$myfile".html
