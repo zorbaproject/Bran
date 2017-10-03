@@ -11,7 +11,14 @@ oldfile = localdir + "/../vdb1980.txt"
 newfile = localdir + "/../vdb2016.txt"
 
 try:
-    wordscount = len(sys.argv[1].split(","))
+    if os.path.isfile(sys.argv[1]):
+        text_file = open(sys.argv[1], "r")
+        wlist = text_file.read().split("\n")
+        wordscount = len(wlist)
+        text_file.close()
+    else:
+        wlist = sys.argv[1].split(",")
+        wordscount = len(wlist)
 except:
     print("Esempio: python3 diagramma-di-venn.py banana,zappare,abbagliante,computer diagrammavenn.R")
     sys.exit()
@@ -23,7 +30,8 @@ except:
 
 wordslist = [[ "", False, False ] for r in range(wordscount)]
 for i in range(wordscount):
-    wordslist[i][0] = sys.argv[1].split(",")[i]
+    wordslist[i][0] = wlist[i]
+
 
 
 #leggo i due file dei vocabolari di base
@@ -70,6 +78,11 @@ for i in range(wordscount):
 
 print("Ecco la tabella CSV che puoi usare come riepilogo:\n")
 print(mycsv)
+
+if wordscount > 100:
+    text_file = open(Rfile+".csv", "w")
+    text_file.write(mycsv)
+    text_file.close()
 
 
 myRcode = ""
