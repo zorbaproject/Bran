@@ -41,26 +41,36 @@ def geturl(thisurl):
 
 
 def cleanRepubblica(thishtml):
+    #get only the article
     start = re.escape('<div class="body-text">')
     end = re.escape('<div id="fb-facepile">')
     
     indexes = [(m.start(0), m.end(0)) for m in re.finditer(start, thishtml)]
+    if len(indexes)<1:
+        return ""
     ns = indexes[0][1]
     indexes = [(m.start(0), m.end(0)) for m in re.finditer(end, thishtml)]
+    if len(indexes)<1:
+        return ""
     ne = indexes[0][0]
+    if ns < 0 or ne < 0:
+        return ""
     thishtml = thishtml[ns:ne]
     
-    #remove until the first mark, beacause usually the first phrase is useless
+    #remove until the first mark, because usually the first phrase is useless
     thishtml = re.sub("<strong>.*?<\/strong>.*?[\.]", "", thishtml)
     
+    #remove photogalleries
     start = re.escape('<div class="snappedPlaceholder"')
     end = re.escape('</div>')
     thishtml = re.sub(start+".*?"+end, "", thishtml, flags=re.DOTALL)
     
+    #remove share buttons
     start = re.escape('<span class="gs-share-count-text">')
     end = re.escape('</span>')
     thishtml = re.sub(start+".*?"+end, "", thishtml, flags=re.DOTALL)
     
+    #remove twitter feed
     start = re.escape('<blockquote class="twitter-tweet"')
     end = re.escape('</blockquote>')
     thishtml = re.sub(start+".*?"+end, "", thishtml, flags=re.DOTALL)
@@ -87,18 +97,21 @@ def cleanGeneric(thishtml):
     thishtml = re.sub("<.*?>", "", thishtml, flags=re.DOTALL)
     
     #remove all empty lines
-    #thishtml = re.sub("^[^a-z]*?$", "EE", thishtml)
     stripped = [line for line in thishtml.split('\n') if line.strip() != '']
     thishtml = "".join(stripped)
+    
+    #TODO: it might be a good idea to check if at least a few words in every lines belong to the vdb, otherwise we should delete those lines
     
     #remove double spaces
     while (bool(re.search('\s\s', thishtml))):
         thishtml = re.sub("\s\s", " ", thishtml)
     
+    #remove initial spaces
+    thishtml = re.sub("^\s", "", thishtml)
+    
     return thishtml
 
 def url2name(thisurl):
-    #http://www.repubblica.it/esteri/2018/05/18/news/aereo_incidente_schianto_cuba_decollo-196760241/?ref=RHPPLF-BH-I0-C8-P7-S1.8-T1
     myname = re.sub(re.escape('http://'), "", thisurl)
     myname = re.sub(re.escape('https://'), "", myname)
     myname = re.sub("\?.*$", "", myname)
@@ -115,9 +128,10 @@ def runOnPage(thisurl, output = ""):
         print(thishtml)
     else:
         fname = output + "/" + url2name(thisurl)
-        text_file = open(fname, "w")
-        text_file.write(thishtml)
-        text_file.close()
+        if thishtml != "":
+            text_file = open(fname, "w")
+            text_file.write(thishtml)
+            text_file.close()
     
 def runRecursive(thisurl, output = ""):
     #before going on, check if we previously worked on this page
@@ -134,12 +148,12 @@ else:
     print('USAGE: ./url2corpus.py http://www.repubblica.it/esteri/2018/05/18/news/aereo_incidente_schianto_cuba_decollo-196760241/ ./corpus/ -r')
     sys.exit()
 output = ""
-if len(sys.argv)>2 and os.path.isdir(sys.argv[1]):
-    output = sys.argv[1]
-if len(sys.argv)<3:
-    runOnPage(thisurl, output)
-else:
+if len(sys.argv)>2 and os.path.isdir(sys.argv[2]):
+    output = sys.argv[2]
+if len(sys.argv)>3:
     if sys.argv[3] == "-r" and output != "":
-        #here we cycle for all the urls
+        #here we cycle for all the urls we can find
         print("I'm scanning the URL recursively looking for other pages to download. This is going to be endless (I mean it). When you are tired, just hit Ctrl+C.")
         runRecursive(thisurl, output)
+else:
+    runOnPage(thisurl, output)
