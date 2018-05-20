@@ -2,7 +2,7 @@
 Proviamo a tradurre il Vocabolario di Base di De Mauro in un formato utilizzabile in programmi e analisi statistiche per i linguisti italiani.
 
 ## Come aprire i file su Windows
-Probabilmente l'idea migliore è utilizzare il programma Notepad++. Per farla breve, c'è un problema riguardo i caratteri "nuova riga", perché Windows non supporta lo standard "\n". Quindi Blocco Note non riesce a distinguere le righe, e diventa tutto illeggibile. Notepad++ funziona molto meglio (e ha un sacoc di altre funzioni utili).
+Probabilmente l'idea migliore è utilizzare il programma Notepad++. Per farla breve, c'è un problema riguardo i caratteri "nuova riga", perché Windows non supporta lo standard "\n". Quindi Blocco Note non riesce a distinguere le righe, e diventa tutto illeggibile. Notepad++ funziona molto meglio (e ha un sacco di altre funzioni utili).
 Notepad++ si trova qui:
 https://notepad-plus-plus.org/repository/7.x/7.5.1/npp.7.5.1.Installer.exe
 Ne esistono anche versioni "portable", per computer su cui non puoi installare programmi.
@@ -19,6 +19,7 @@ Per quanto riguarda la produzione di grafici, è necessario l'interprete R: http
 - **comparazione.txt** è il risultato dello script compara.sh, si tratta di un semplice report che mostra quante e quali parole siano presenti in uno solo dei due dizionari oppure in entrambi. Nei tre elenchi, le parole sono separate da uno spazio, se vuoi trasformarli in una tabella basta selezionarle e usare lo spazio come delimitatore di riga (o colonna).
 - **vdb1980.txt e vdb2016.txt** sono le semplici liste dei vocaboli, senza altre informazioni, delle due versioni del vocabolario di base. Questi due file vengono prodotti automaticamente dallo script compara.sh e sono probabilmente il migliore punto di partenza per chi deve fare semplici analisi statistiche perché sono "puliti" e pronti all'uso
 - **esempi** è la cartella che contiene dei programmi di esempio basati sui dataset prodotti
+- **url2corpus.py** è lo script che estrae articoli da siti come Repubblica e Ansa, per creare una cartella contenente un corpus di testi. Lo si può eseguire con questa forma `python ./url2corpus.py http://www.repubblica.it/cronaca/2018/05/20/news/francavilla_al_mare_uomo_lancia_la_figlia_dal_viadotto_della_a14-196893055/ ./corpus/ -r` Il primo argomento è la pagina da cui si vuole partire, il secondo è la cartella in cui salvare i testi, e -r è l'opzione che indica l'esecuzione ricorsiva, cercando all'interno dei link delle varie pagine
 
 Una nota sugli script: se non sai quali argomenti fornire ad uno script, eseguirlo senza argomenti ti fornisce un suggerimento.
 
@@ -29,6 +30,7 @@ Una nota sugli script: se non sai quali argomenti fornire ad uno script, eseguir
 - A causa dell'origine dei testi come PDF, è possibile che alcune cose non abbiano funzionato. Sarebbe opportuno controllare meglio che ogni parola sia riportata correttamente.
 - Le due versioni del vocabolario usano due standard diversi per le indicazioni grammaticali. Per esempio, "aggettivo" diventa "agg.". Nel caso si voglia fare una comparazione, basta realizzare un semplice array di traduzione. Il fatto è che nell'edizione 1980 molte parole non hanno nemmeno una di queste indicazioni, quindi pare poco utile fare un confronto.
 - Ci sono due sole versioni del VdB: potrebbe essere più interessante avere versioni intermedie per capire come sia cambiato il linguaggio nel corso del tempo
+- Lo script url2corpus.py dovrebbe utilizzare il nvdb per capire se una riga contenga parole di senso compiuto.
 
 ## Crediti
 - Tullio De Mauro ha scritto le varie edizioni originali del Vocabolario di Base
