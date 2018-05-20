@@ -9,14 +9,16 @@ import os
 
 
 #there are a few urls we should ignore
-ignore = ['quotidiano.repubblica.it', 'rep.repubblica.it', 'trovacinema.repubblica.it', 'miojob.repubblica.it', 'racconta.repubblica.it', 'video.repubblica.it', 'www.repubblica.it/economia/miojob/', 'facebook.com', 'google.com', 'yahoo.com', 'twitter.com', 'ansa.it/games/', 'ansa.it/meteo/', 'ansa.it/nuova_europa/', 'corporate.ansa.it', 'filmalcinema.shtml', 'trovacinema', 'splash.repubblica.it', 'd.repubblica.it']
+ignore = ['quotidiano.repubblica.it', 'rep.repubblica.it', 'trovacinema.repubblica.it', 'miojob.repubblica.it', 'racconta.repubblica.it', 'video.repubblica.it', 'www.repubblica.it/economia/miojob/', 'facebook.com', 'google.com', 'yahoo.com', 'twitter.com', 'ansa.it/games/', 'ansa.it/meteo/', 'ansa.it/nuova_europa/', 'corporate.ansa.it', 'filmalcinema.shtml', 'trovacinema', 'splash.repubblica.it', 'd.repubblica.it', '/static/servizi/']
 
 useragent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
 
 thisurl = ""
 visited = []
-firstrun = True
 visitedfile = ""
+firstrun = True
+vdb = []
+vdbfile = ""
 
 def find_between(s, first, last ):
     try:
@@ -51,8 +53,8 @@ def geturl(thisurl):
 
 def cleanRepubblica(thishtml):
     #look for known article delimiters
-    start = ['<div class="body-text".*?>', '<div class="entrytext".*?>', '<div class="post-entry".*?>', '<div class="entry-content".*?>', '<div class="article-maincolblog".*?>']
-    end = ['<div id="fb-facepile">','<p class="dettagliotag">', '<footer', '<p class="postmetadata">']
+    start = ['<div class="body-text".*?>', '<div class="entrytext".*?>', '<div class="post-entry".*?>', '<div class="entry-content".*?>', '<div class="article-maincolblog".*?>', '<div class="detail-articles".*?>', '<div class="entry".*?>']
+    end = ['<div id="fb-facepile">','<p class="dettagliotag">', '<footer', '<p class="postmetadata">', '<!-- fine TESTO -->', '<div class=\'sociable\'>']
     cs = 0
     ce = 0
     for i in range(len(start)):
@@ -142,11 +144,19 @@ def cleanGeneric(thishtml):
     #clean all tags (NOTE: DOTALL means that . matches every characters including \n)
     thishtml = re.sub("<.*?>", "", thishtml, flags=re.DOTALL)
     
-    #TODO: it might be a good idea to check if at least a few words in every lines belong to the vdb, otherwise we should delete those lines
-    
     #remove all empty lines
-    stripped = [line for line in thishtml.split('\n') if line.strip() != '']
-    thishtml = "".join(stripped)
+    #stripped = [line for line in thishtml.split('\n') if line.strip() != '']
+    #thishtml = "".join(stripped)
+    nl = '\n' #switch to ' ' if you don't want paragraph separation
+    stripped = ""
+    for line in thishtml.split('\n'):
+        if line.strip() != '':
+            for word in line:
+                #it's a good idea to check if at least a few words in every lines belong to the vdb
+                if word in vdb or len(vdb)<1:
+                    stripped = stripped + line + nl
+                    break
+    thishtml = stripped
     
     #remove double spaces
     while (bool(re.search('\s\s', thishtml))):
@@ -242,6 +252,20 @@ def runRecursive(thisurl, output = ""):
 
 if len(sys.argv)>1:
     thisurl = sys.argv[1]
+    vdbfile = os.path.abspath(os.path.dirname(sys.argv[0]))+"/vdb2016.txt"
+    if os.path.isfile(vdbfile):
+        vdb = [line.rstrip('\n') for line in open(vdbfile)]
+    if 'RICERCAREPUBBLICA:' in thisurl:
+        query = '+'
+        fromdate = '2000-01-01'
+        todate = datetime.datetime.now().strftime('%Y-%m-%d')
+        thisurl = 'http://ricerca.repubblica.it/ricerca/repubblica-it?author=&sortby=adate&query=' +query +'&fromdate='+fromdate+'&todate='+todate+'&mode=all&page=1'
+        if len(sys.argv)>2 and os.path.isdir(sys.argv[2]):
+            output = sys.argv[2]
+            #TODO: http://ricerca.repubblica.it/ricerca/repubblica-it?author=&sortby=adate&query=+&fromdate=2000-01-01&todate=2018-05-20&mode=all&page=1
+            sys.exit()
+        else:
+            sys.exit()
 else:
     print('USAGE: ./url2corpus.py URL ./corpus/ -r')
     print('Example URLS:\n http://www.repubblica.it/esteri/2018/05/18/news/aereo_incidente_schianto_cuba_decollo-196760241/\n https://www.ansa.it/sito/notizie/politica/2018/05/14/governo-di-maio-e-salvini-al-colle-nel-pomeriggio.-resta-nodo-premier_308ebf3c-4e34-4251-876c-9c9d83606e91.html\n http://www.repubblica.it/rss/homepage/rss2.0.xml\n http://www.ansa.it/sito/notizie/cronaca/cronaca_rss.xml')
@@ -251,7 +275,6 @@ if len(sys.argv)>2 and os.path.isdir(sys.argv[2]):
     output = sys.argv[2]
 if len(sys.argv)>3:
     if sys.argv[3] == "-r" and output != "":
-        
         visitedfile = output + "/visited.tmp"
         if os.path.isfile(visitedfile):
             visited = [line.rstrip('\n') for line in open(visitedfile)]
