@@ -151,7 +151,7 @@ def cleanGeneric(thishtml):
     stripped = ""
     for line in thishtml.split('\n'):
         if line.strip() != '':
-            for word in line:
+            for word in line.split():
                 #it's a good idea to check if at least a few words in every lines belong to the vdb
                 if word in vdb or len(vdb)<1:
                     stripped = stripped + line + nl
