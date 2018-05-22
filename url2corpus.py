@@ -9,7 +9,7 @@ import os
 
 
 #there are a few urls we should ignore
-ignore = ['quotidiano.repubblica.it', 'rep.repubblica.it', 'trovacinema.repubblica.it', 'miojob.repubblica.it', 'racconta.repubblica.it', 'video.repubblica.it', 'www.repubblica.it/economia/miojob/', 'facebook.com', 'google.com', 'yahoo.com', 'twitter.com', 'ansa.it/games/', 'ansa.it/meteo/', 'ansa.it/nuova_europa/', 'corporate.ansa.it', 'filmalcinema.shtml', 'trovacinema', 'splash.repubblica.it', 'd.repubblica.it', '/static/servizi/']
+ignore = ['quotidiano.repubblica.it', 'rep.repubblica.it', 'trovacinema.repubblica.it', 'miojob.repubblica.it', 'racconta.repubblica.it', 'video.repubblica.it', 'www.repubblica.it/economia/miojob/', 'facebook.com', 'google.com', 'yahoo.com', 'twitter.com', 'ansa.it/games/', 'ansa.it/meteo/', 'ansa.it/nuova_europa/', 'corporate.ansa.it', 'filmalcinema.shtml', 'trovacinema', 'splash.repubblica.it', 'd.repubblica.it/ricerca', 'video.d.repubblica.it', 'finanza.repubblica.it', '/static/servizi/']
 
 useragent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
 
@@ -34,6 +34,8 @@ def find_between(s, first, last ):
 
 def geturl(thisurl):
     global useragent
+    if thisurl == '':
+        return ''
     req = urllib.request.Request(
         thisurl, 
         data=None, 
@@ -196,9 +198,12 @@ def runOnPage(thisurl, output = ""):
     for i in range(len(links)):
         if links[i][0] == '/':
             links[i] = baseurl+ links[i]
-        for ii in range(len(ignore)):
-            if ignore[ii] in links[i]:
-                links[i] = ''
+        if links[i] == thisurl:
+            links[i] = ''
+        else:
+            for ii in range(len(ignore)):
+                if ignore[ii] in links[i]:
+                    links[i] = ''
     for ii in range(len(ignore)):
         if ignore[ii] in thisurl:
             return []
