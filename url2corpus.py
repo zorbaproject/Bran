@@ -6,6 +6,7 @@ import re
 import html
 import sys
 import os
+import datetime
 
 
 #there are a few urls we should ignore
@@ -96,6 +97,34 @@ def cleanRepubblica(thishtml):
     
     return thishtml
 
+def cleanRepubblicaSearch(thishtml):
+    #look for known article delimiters
+    start = ['<section id="lista-risultati">']
+    end = ['<!-- /risultati -->']
+    cs = 0
+    ce = 0
+    for i in range(len(start)):
+        if (bool(re.search(start[i], thishtml))):
+            cs = i
+    for i in range(len(end)):
+        if (bool(re.search(end[i], thishtml))):
+            ce = i
+    #if we didn't find delimitier, this is an unknown article type so we stop here
+    indexes = [(m.start(0), m.end(0)) for m in re.finditer(start[cs], thishtml)]
+    if len(indexes)<1:
+        return ""
+    ns = indexes[0][1]
+    indexes = [(m.start(0), m.end(0)) for m in re.finditer(end[ce], thishtml)]
+    if len(indexes)<1:
+        return ""
+    ne = indexes[0][0]
+    #get only the search results
+    if ns < 0 or ne < 0:
+        return ""
+    thishtml = thishtml[ns:ne]
+    
+    return thishtml
+
 def cleanAnsa(thishtml):
     #look for known article delimiters
     start = ['<div itemprop="articleBody".*?>']
@@ -173,6 +202,10 @@ def cleanGeneric(thishtml):
 
 def getLinks(thishtml):
     links = [m.group(1) for m in re.finditer("<a .*?href=\"(http.*?|\/.*?)\".*?<\/a>", thishtml)]
+    return links
+
+def getSearchLinks(thishtml):
+    links = [m.group(1) for m in re.finditer("<a .*?href=\"(http.*?|\/.*?)\".*?title=.*?<\/a>", thishtml, flags=re.DOTALL)]
     return links
 
 def getRSSLinks(thishtml):
@@ -254,6 +287,35 @@ def runRecursive(thisurl, output = ""):
                     myfile.write(links[i]+"\n")
                 runRecursive(links[i],output)
 
+def runSearchRepubblica(thisquery, output, fromdate, todate):
+    query = thisquery.replace('RICERCAREPUBBLICA:','')
+    if query == '':
+        query = '+'
+    query = query.replace(' ','+')
+    #we are not allowed to get more than 250 pages
+    for npage in range(250):
+        thisurl = 'http://ricerca.repubblica.it/ricerca/repubblica-it?author=&sortby=adate&query=' +query +'&fromdate='+fromdate+'&todate='+todate+'&mode=all&page='+str(npage)
+        thishtml = geturl(thisurl)
+        thishtml = cleanRepubblicaSearch(thishtml)
+        links = getSearchLinks(thishtml)
+        alllinks = []
+        articlesfile = output + "/articles.tmp"
+        if os.path.isfile(articlesfile):
+            alllinks = [line.rstrip('\n') for line in open(articlesfile)]
+        for i in range(len(links)):
+            if links[i] not in alllinks and 'www.repubblica.it/?ref=search' not in links[i] and 'ricerca.repubblica.it' not in links[i]:
+                fname = output + "/" + url2name(links[i])
+                if os.path.isfile(fname) == False:
+                    print(links[i])
+                    pagehtml = geturl(links[i])
+                    pagehtml = cleanGeneric(pagehtml)
+                    if pagehtml != "":
+                        text_file = open(fname, "w")
+                        text_file.write(pagehtml)
+                        text_file.close()
+                    alllinks.append(links[i])
+                    with open(articlesfile, "a") as myfile:
+                        myfile.write(links[i]+"\n")
 
 if len(sys.argv)>1:
     thisurl = sys.argv[1]
@@ -261,19 +323,26 @@ if len(sys.argv)>1:
     if os.path.isfile(vdbfile):
         vdb = [line.rstrip('\n') for line in open(vdbfile)]
     if 'RICERCAREPUBBLICA:' in thisurl:
-        query = '+'
         fromdate = '2000-01-01'
         todate = datetime.datetime.now().strftime('%Y-%m-%d')
-        thisurl = 'http://ricerca.repubblica.it/ricerca/repubblica-it?author=&sortby=adate&query=' +query +'&fromdate='+fromdate+'&todate='+todate+'&mode=all&page=1'
+        if len(sys.argv)>3 and len(sys.argv[3].split('-'))==3:
+            fromdate = sys.argv[3]
         if len(sys.argv)>2 and os.path.isdir(sys.argv[2]):
             output = sys.argv[2]
-            #TODO: http://ricerca.repubblica.it/ricerca/repubblica-it?author=&sortby=adate&query=+&fromdate=2000-01-01&todate=2018-05-20&mode=all&page=1
+            fromyear = int(fromdate.split('-')[0])
+            frommonth= int(fromdate.split('-')[1])
+            toyear = int(todate.split('-')[0])
+            for iy in range(toyear-fromyear):
+                for im in range(12-frommonth):
+                    nfromdate = str(fromyear+iy)+'-'+str(frommonth+im).zfill(2) +'-01'
+                    print(nfromdate)
+                    runSearchRepubblica(thisurl, output, nfromdate, todate)
             sys.exit()
         else:
             sys.exit()
 else:
     print('USAGE: ./url2corpus.py URL ./corpus/ -r')
-    print('Example URLS:\n http://www.repubblica.it/esteri/2018/05/18/news/aereo_incidente_schianto_cuba_decollo-196760241/\n https://www.ansa.it/sito/notizie/politica/2018/05/14/governo-di-maio-e-salvini-al-colle-nel-pomeriggio.-resta-nodo-premier_308ebf3c-4e34-4251-876c-9c9d83606e91.html\n http://www.repubblica.it/rss/homepage/rss2.0.xml\n http://www.ansa.it/sito/notizie/cronaca/cronaca_rss.xml')
+    print('Example URLS:\n http://www.repubblica.it/esteri/2018/05/18/news/aereo_incidente_schianto_cuba_decollo-196760241/\n https://www.ansa.it/sito/notizie/politica/2018/05/14/governo-di-maio-e-salvini-al-colle-nel-pomeriggio.-resta-nodo-premier_308ebf3c-4e34-4251-876c-9c9d83606e91.html\n http://www.repubblica.it/rss/homepage/rss2.0.xml\n http://www.ansa.it/sito/notizie/cronaca/cronaca_rss.xml\nYou can also download from Repubblica.it search engine:\n ./url2corpus.py "RICERCAREPUBBLICA:" ./corpus-ricerche/ 2000-01-01\nin this case the last argument should be the date from which you want to start downloading (YYYY-MM-DD). In the first argument you can specify a search query after the double mark.')
     sys.exit()
 output = ""
 if len(sys.argv)>2 and os.path.isdir(sys.argv[2]):

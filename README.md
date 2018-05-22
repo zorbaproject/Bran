@@ -30,7 +30,19 @@ Una nota sugli script: se non sai quali argomenti fornire ad uno script, eseguir
 - A causa dell'origine dei testi come PDF, è possibile che alcune cose non abbiano funzionato. Sarebbe opportuno controllare meglio che ogni parola sia riportata correttamente.
 - Le due versioni del vocabolario usano due standard diversi per le indicazioni grammaticali. Per esempio, "aggettivo" diventa "agg.". Nel caso si voglia fare una comparazione, basta realizzare un semplice array di traduzione. Il fatto è che nell'edizione 1980 molte parole non hanno nemmeno una di queste indicazioni, quindi pare poco utile fare un confronto.
 - Ci sono due sole versioni del VdB: potrebbe essere più interessante avere versioni intermedie per capire come sia cambiato il linguaggio nel corso del tempo
-- Lo script url2corpus.py dovrebbe utilizzare il nvdb per capire se una riga contenga parole di senso compiuto.
+
+## Indicazioni per URL2Corpus
+Per il sito di Repubblica e per l'Ansa, lo script cerca di riconoscere le porzioni di articolo in ogni pagina sulla base dei tag HTML. In altri casi, considera un paragrafo accettabile soltanto se al suo interno è presente almeno una parola del VdB 2016.
+La funzione di ricerca
+```
+./url2corpus.py "RICERCAREPUBBLICA:" ./corpus-ricerche/ 2000-01-01
+```
+permette di scaricare tutti gli articoli del sito dalla data specificata fino a oggi.
+La funzione di scaricamento degli RSS in modo ricorsivo può essere eseguita dal terminale bash in modo continuo
+```
+while true; do ./url2corpus.py http://www.repubblica.it/rss/cronaca/rss2.0.xml ./corpus/ -r; sleep 20; done
+```
+così ci si mantiene sempre aggiornati con i nuovi articoli reperibili.
 
 ## Crediti
 - Tullio De Mauro ha scritto le varie edizioni originali del Vocabolario di Base
