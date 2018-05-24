@@ -37,7 +37,10 @@ La funzione di ricerca
 ```
 ./url2corpus.py "RICERCAREPUBBLICA:" ./corpus-ricerche/ 2000-01-01
 ```
-permette di scaricare tutti gli articoli del sito dalla data specificata fino a oggi.
+permette di scaricare tutti gli articoli del sito dalla data specificata fino a oggi. Se lo script si ferma, si può scoprire l'ultima data controllata leggendo il file corpus-ricerche/fromdate.tmp, e riavviare lo script da quella data. Su Bash si può automatizzare così:
+```
+./url2corpus.py "RICERCAREPUBBLICA:" ./corpus-ricerche/ $(less corpus-ricerche/fromdate.tmp | tail -n 1)
+```
 La funzione di scaricamento degli RSS in modo ricorsivo può essere eseguita dal terminale bash in modo continuo
 ```
 while true; do ./url2corpus.py http://www.repubblica.it/rss/cronaca/rss2.0.xml ./corpus/ -r; sleep 20; done

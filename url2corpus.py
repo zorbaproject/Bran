@@ -294,15 +294,20 @@ def runSearchRepubblica(thisquery, output, fromdate, todate):
     query = query.replace(' ','+')
     #we are not allowed to get more than 250 pages
     for npage in range(250):
+        #http://ricerca.repubblica.it/ricerca/repubblica-it?author=&sortby=adate&query=+&fromdate=2000-10-01&todate=2018-05-22&mode=all&page=1
         thisurl = 'http://ricerca.repubblica.it/ricerca/repubblica-it?author=&sortby=adate&query=' +query +'&fromdate='+fromdate+'&todate='+todate+'&mode=all&page='+str(npage)
         thishtml = geturl(thisurl)
         thishtml = cleanRepubblicaSearch(thishtml)
         links = getSearchLinks(thishtml)
+        #m = re.match(r"(http.*?\..*?)(\/|$)", 'http://www.repubblica.it')
+        baseurl = 'http://www.repubblica.it' #m.group(1)
         alllinks = []
         articlesfile = output + "/articles.tmp"
         if os.path.isfile(articlesfile):
             alllinks = [line.rstrip('\n') for line in open(articlesfile)]
         for i in range(len(links)):
+            if links[i][0] == '/':
+                links[i] = baseurl+ links[i]
             if links[i] not in alllinks and 'www.repubblica.it/?ref=search' not in links[i] and 'ricerca.repubblica.it' not in links[i]:
                 fname = output + "/" + url2name(links[i])
                 if os.path.isfile(fname) == False:
@@ -313,9 +318,9 @@ def runSearchRepubblica(thisquery, output, fromdate, todate):
                         text_file = open(fname, "w")
                         text_file.write(pagehtml)
                         text_file.close()
-                    alllinks.append(links[i])
-                    with open(articlesfile, "a") as myfile:
-                        myfile.write(links[i]+"\n")
+                        alllinks.append(links[i])
+                        with open(articlesfile, "a") as myfile:
+                            myfile.write(links[i]+"\n")
 
 if len(sys.argv)>1:
     thisurl = sys.argv[1]
@@ -330,13 +335,17 @@ if len(sys.argv)>1:
         if len(sys.argv)>2 and os.path.isdir(sys.argv[2]):
             output = sys.argv[2]
             fromyear = int(fromdate.split('-')[0])
-            frommonth= int(fromdate.split('-')[1])
+            frommonth = int(fromdate.split('-')[1])
             toyear = int(todate.split('-')[0])
-            for iy in range(toyear-fromyear):
-                for im in range(12-frommonth):
+            for iy in range(1+toyear-fromyear):
+                for im in range(13-frommonth):
                     nfromdate = str(fromyear+iy)+'-'+str(frommonth+im).zfill(2) +'-01'
                     print(nfromdate)
+                    fdatefile = output + "/fromdate.tmp"
+                    with open(fdatefile, "a") as myfile:
+                        myfile.write(str(nfromdate)+"\n")
                     runSearchRepubblica(thisurl, output, nfromdate, todate)
+                frommonth = 1
             sys.exit()
         else:
             sys.exit()
