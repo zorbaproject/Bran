@@ -217,6 +217,8 @@ def url2name(thisurl):
     myname = re.sub(re.escape('https://'), "", myname)
     myname = re.sub("\?.*$", "", myname)
     myname = re.sub("[\\\/\.]", "-", myname)
+    if len(myname)>200:
+        myname = myname[0:200]
     myname = myname + ".txt"
     return myname
 
