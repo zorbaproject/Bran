@@ -56,6 +56,7 @@ La funzione di scaricamento degli RSS in modo ricorsivo può essere eseguita dal
 while true; do ./url2corpus.py http://www.repubblica.it/rss/cronaca/rss2.0.xml ./corpus/ -r; sleep 20; done
 ```
 così ci si mantiene sempre aggiornati con i nuovi articoli reperibili.
+Esistono degli esempi del risultato di questo script all'indirizzo https://mega.nz/#F!aMozlbZb!RbQO7OrAFESvd6zmckgEGA
 
 ## Crediti
 - Tullio De Mauro ha scritto le varie edizioni originali del Vocabolario di Base

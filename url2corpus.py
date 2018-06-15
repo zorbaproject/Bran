@@ -45,9 +45,24 @@ def geturl(thisurl):
         }
     )
     
+    thishtml = ""
     try:
         f = urllib.request.urlopen(req)
-        thishtml = f.read().decode('utf-8')
+        ft = f.read()
+    except:
+        ft = ""
+    try:
+        encoding = f.info().get_content_charset() #f.headers.get_content_charset()
+        if encoding == None:
+            encoding = 'windows-1252'
+        thishtml = ft.decode(encoding)
+        print(encoding)
+    except:
+        try:
+           thishtml = ft.decode('utf-8', 'backslashreplace')
+        except:
+           thishtml = str(ft)
+    try:
         thishtml = html.unescape(thishtml)
     except:
         thishtml = ""
@@ -159,11 +174,11 @@ def cleanGeneric(thishtml):
     thishtml = re.sub("<h[0-9].*?<\/h[0-9]>", "", thishtml, flags=re.DOTALL)
     
     #clean links
-    thishtml = re.sub("<a .*?<\/a>", "", thishtml, flags=re.DOTALL)
+    thishtml = re.sub("<[aA] .*?<\/[aA]>", "", thishtml, flags=re.DOTALL)
     
     #clean js and css
-    thishtml = re.sub("<script.*?<\/script>", "", thishtml, flags=re.DOTALL)
-    thishtml = re.sub("<style.*?<\/style>", "", thishtml, flags=re.DOTALL)
+    thishtml = re.sub("<script.*?<\/script>", "", thishtml, flags=re.IGNORECASE|re.DOTALL)
+    thishtml = re.sub("<style.*?<\/style>", "", thishtml, flags=re.IGNORECASE|re.DOTALL)
     
     #remove strong tag if in caps lock
     thishtml = re.sub("<strong>[^a-z]+?<\/strong>", "", thishtml)
@@ -198,10 +213,21 @@ def cleanGeneric(thishtml):
     thishtml = re.sub("^\s*?-", "", thishtml)
     thishtml = re.sub("^(di)\s", "", thishtml)
     
+    #delete spaces at the end of the lines, then delete line if it does not end with a dot
+    stripped = ""
+    for line in thishtml.split('\n'):
+        line = re.sub("\s*?$", "", line)
+        if len(line)<200 and bool(re.match('.*?[\.,;\?!]$', line))==False:
+            line = ''
+        stripped = stripped + line + nl
+    thishtml = stripped
+    
     return thishtml
 
 def getLinks(thishtml):
-    links = [m.group(1) for m in re.finditer("<a .*?href=\"(http.*?|\/.*?)\".*?<\/a>", thishtml)]
+    #regex = "<[aA] .*?href=\"(http.*?|\/.*?)\".*?<\/[aA]>"
+    regex = ".*?href=[\"'](.*?)[\"']"
+    links = [m.group(1) for m in re.finditer(regex, thishtml, flags=re.DOTALL)]
     return links
 
 def getSearchLinks(thishtml):
@@ -215,8 +241,8 @@ def getRSSLinks(thishtml):
 def url2name(thisurl):
     myname = re.sub(re.escape('http://'), "", thisurl)
     myname = re.sub(re.escape('https://'), "", myname)
-    myname = re.sub("\?.*$", "", myname)
-    myname = re.sub("[\\\/\.]", "-", myname)
+    #myname = re.sub("\?.*$", "", myname)
+    myname = re.sub("[\\\/\.\?&]", "-", myname)
     if len(myname)>200:
         myname = myname[0:200]
     myname = myname + ".txt"
@@ -232,7 +258,10 @@ def runOnPage(thisurl, output = ""):
     baseurl = m.group(1)
     for i in range(len(links)):
         if links[i][0] == '/':
-            links[i] = baseurl+ links[i]
+            links[i] = baseurl + links[i]
+        if links[i][:5] != 'http:' and links[i][:6] != 'https:':
+            links[i] = baseurl + "/" + links[i]
+        print(links[i])
         if links[i] == thisurl:
             links[i] = ''
         else:
@@ -270,9 +299,10 @@ def runRecursive(thisurl, output = ""):
     #before going on, check if we previously worked on this page
     m = re.match(r"http.*?\.(.*?)(\/|$)", thisurl)
     baseurl = m.group(1)
-    fname = fname = output + "/" + url2name(thisurl)
+    fname = output + "/" + url2name(thisurl)
     if os.path.isfile(fname) == False or firstrun:
-        if re.sub("\?.*$", "", thisurl) not in visited:
+        #if re.sub("\?.*$", "", thisurl) not in visited:
+        if thisurl not in visited:
             links = runOnPage(thisurl, output)
             visited.append(thisurl)
         else:
@@ -329,6 +359,9 @@ if len(sys.argv)>1:
     vdbfile = os.path.abspath(os.path.dirname(sys.argv[0]))+"/vdb2016.txt"
     if os.path.isfile(vdbfile):
         vdb = [line.rstrip('\n') for line in open(vdbfile)]
+    if len(sys.argv)>4:
+        if sys.argv[4] == "-novdb":
+            vdb = []
     if 'RICERCAREPUBBLICA:' in thisurl:
         fromdate = '2000-01-01'
         todate = datetime.datetime.now().strftime('%Y-%m-%d')
@@ -353,7 +386,7 @@ if len(sys.argv)>1:
             sys.exit()
 else:
     print('USAGE: ./url2corpus.py URL ./corpus/ -r')
-    print('Example URLS:\n http://www.repubblica.it/esteri/2018/05/18/news/aereo_incidente_schianto_cuba_decollo-196760241/\n https://www.ansa.it/sito/notizie/politica/2018/05/14/governo-di-maio-e-salvini-al-colle-nel-pomeriggio.-resta-nodo-premier_308ebf3c-4e34-4251-876c-9c9d83606e91.html\n http://www.repubblica.it/rss/homepage/rss2.0.xml\n http://www.ansa.it/sito/notizie/cronaca/cronaca_rss.xml\nYou can also download from Repubblica.it search engine:\n ./url2corpus.py "RICERCAREPUBBLICA:" ./corpus-ricerche/ 2000-01-01\nin this case the last argument should be the date from which you want to start downloading (YYYY-MM-DD). In the first argument you can specify a search query after the double mark.')
+    print('Example URLS:\n http://www.repubblica.it/esteri/2018/05/18/news/aereo_incidente_schianto_cuba_decollo-196760241/\n https://www.ansa.it/sito/notizie/politica/2018/05/14/governo-di-maio-e-salvini-al-colle-nel-pomeriggio.-resta-nodo-premier_308ebf3c-4e34-4251-876c-9c9d83606e91.html\n http://www.repubblica.it/rss/homepage/rss2.0.xml\n http://www.ansa.it/sito/notizie/cronaca/cronaca_rss.xml\nYou can also download from Repubblica.it search engine:\n ./url2corpus.py "RICERCAREPUBBLICA:" ./corpus-ricerche/ 2000-01-01\nin this case the last argument should be the date from which you want to start downloading (YYYY-MM-DD). In the first argument you can specify a search query after the double mark.\nIf you append -novdb option after -r, then the VdB will not be used.')
     sys.exit()
 output = ""
 if len(sys.argv)>2 and os.path.isdir(sys.argv[2]):
