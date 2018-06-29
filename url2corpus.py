@@ -174,7 +174,10 @@ def cleanGeneric(thishtml):
     thishtml = re.sub("<h[0-9].*?<\/h[0-9]>", "", thishtml, flags=re.DOTALL)
     
     #clean links
-    thishtml = re.sub("<[aA] .*?<\/[aA]>", "", thishtml, flags=re.DOTALL)
+    repl = ""
+    if 1==1:
+        repl = "\g<1>"#NOTE \g<\> is equal to \1, meaning group 1, but it's less ambiguous
+    thishtml = re.sub("<[aA]\s.*?>(.*?)<\/[aA]>", repl, thishtml, flags=re.DOTALL) 
     
     #clean js and css
     thishtml = re.sub("<script.*?<\/script>", "", thishtml, flags=re.IGNORECASE|re.DOTALL)
