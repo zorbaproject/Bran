@@ -7,36 +7,29 @@ import html
 import sys
 import os
 import datetime
+from socket import timeout
 
 from PySide2.QtWidgets import QApplication, QDialog, QLineEdit, QPushButton, QVBoxLayout
 from PySide2.QtUiTools import QUiLoader
 from PySide2.QtWidgets import QLabel
 from PySide2.QtWidgets import QMessageBox
 from PySide2.QtCore import QFile
+from PySide2.QtCore import QThread
 from PySide2.QtWidgets import QFileDialog
 from PySide2.QtWidgets import QMainWindow
 from PySide2.QtWidgets import QListWidget
 
-class Form(QDialog):
-    def __init__(self, parent=None):
-        super(Form, self).__init__(parent)
-        #QMessageBox.warning(self, self.tr("My Application"), self.tr("The document has been modified.\nDo you want to save your changes?"))
-        file = QFile("forms/url2corpus.ui")
-        file.open(QFile.ReadOnly)
-        loader = QUiLoader()
-        self.w = loader.load(file)
-        layout = QVBoxLayout()
-        layout.addWidget(self.w)
-        self.setLayout(layout)
-        self.w.accepted.connect(self.isaccepted)
-        self.w.rejected.connect(self.isrejected)
-        self.setWindowTitle("Estrai corpus da sito web")
-        self.w.resultsgrp.setTitle("In attesa")
-        self.w.download.clicked.connect(self.downloadtxt)
-        self.w.searchrep.clicked.connect(self.searchrep)
-        self.w.choosefolder.clicked.connect(self.choosefolder)
-        self.w.ignoreext.setText(".*(\.zip|\.xml|\.pdf|\.avi|\.gif|\.jpeg|\.jpg|\.ico|\.png|\.wav|\.mp3|\.mp4|\.mpg|\.mpeg|\.tif|\.tiff)$")
+class TXTdownloader(QThread):
 
+    def __init__(self, widget, whattodo):
+        QThread.__init__(self)
+        self.w = widget
+        self.whattodo = whattodo
+        self.loadvariables()
+        self.setTerminationEnabled(True)
+        self.stopme = False
+
+    def loadvariables(self):
         #there are a few urls we should ignore
         self.ignore = ['quotidiano.repubblica.it', 'rep.repubblica.it', 'trovacinema.repubblica.it', 'miojob.repubblica.it', 'racconta.repubblica.it', 'video.repubblica.it', 'www.repubblica.it/economia/miojob/', 'facebook.com', 'google.com', 'yahoo.com', 'twitter.com', 'ansa.it/games/', 'ansa.it/meteo/', 'ansa.it/nuova_europa/', 'corporate.ansa.it', 'filmalcinema.shtml', 'trovacinema', 'splash.repubblica.it', 'd.repubblica.it/ricerca', 'video.d.repubblica.it', 'finanza.repubblica.it', '/static/servizi/']
 
@@ -57,6 +50,20 @@ class Form(QDialog):
         self.w.aanno.setValue(int(todate.split('-')[0]))
         self.w.amese.setValue(int(todate.split('-')[1]))
         self.w.agiorno.setValue(int(todate.split('-')[2]))
+
+    def __del__(self):
+        #self.wait()
+        QThread.wait()
+
+    def stop():
+        self.stopme = True
+
+    def run(self):
+        if self.whattodo == "generica":
+            self.downloadtxt()
+        if self.whattodo == "searchrep":
+            self.searchrep()
+        return
 
     def find_between(self, s, first, last ):
         try:
@@ -84,7 +91,7 @@ class Form(QDialog):
 
         thishtml = ""
         try:
-            f = urllib.request.urlopen(req)
+            f = urllib.request.urlopen(req,timeout=self.w.timeout.value())
             ft = f.read() #we should stop if this is taking too long
         except:
             ft = ""
@@ -290,7 +297,7 @@ class Form(QDialog):
 
     def runOnPage(self, thisurl, output = ""):
         self.firstrun = False
-        if bool(re.match(self.w.ignoreext.text(), thisurl))==True:
+        if bool(re.match(self.w.ignoreext.text(), thisurl))==True or self.stopme:
             return []
         thishtml = self.geturl(thisurl)
         links = self.getLinks(thishtml)
@@ -341,6 +348,9 @@ class Form(QDialog):
 
     def runRecursive(self, thisurl, output = ""):
         #global visited
+        if self.stopme:
+            QThread.quit()
+            return
         #before going on, check if we previously worked on this page
         m = re.match(r"http.*?\.(.*?)(\/|$)", thisurl)
         baseurl = m.group(1)
@@ -383,6 +393,9 @@ class Form(QDialog):
             if os.path.isfile(articlesfile):
                 alllinks = [line.rstrip('\n') for line in open(articlesfile)]
             for i in range(len(links)):
+                if self.stopme:
+                    QThread.quit()
+                    return
                 if links[i][0] == '/':
                     links[i] = baseurl+ links[i]
                 if links[i] not in alllinks and 'www.repubblica.it/?ref=search' not in links[i] and 'ricerca.repubblica.it' not in links[i]:
@@ -419,33 +432,78 @@ class Form(QDialog):
         self.w.resultsgrp.setTitle("In attesa")
 
     def searchrep(self):
+        thisurl = self.w.repquery.text()
+        self.w.results.clear()
+        todate = str(self.w.aanno.value()) + "-" + str(self.w.amese.value()) + "-" + str(self.w.agiorno.value())
+        fromdate = str(self.w.daanno.value()) + "-" + str(self.w.damese.value()) + "-" + str(self.w.dagiorno.value())
+        if os.path.isdir(self.w.folder.text()):
+            output = self.w.folder.text()
+            fromyear = int(fromdate.split('-')[0])
+            frommonth = int(fromdate.split('-')[1])
+            toyear = int(todate.split('-')[0])
+            for iy in range(1+toyear-fromyear):
+                for im in range(13-frommonth):
+                    nfromdate = str(fromyear+iy)+'-'+str(frommonth+im).zfill(2) +'-01'
+                    self.w.results.addItem(nfromdate)
+                    self.w.results.setCurrentRow(self.w.results.count()-1)
+                    if self.stopme:
+                        QThread.quit()
+                        return
+                    fdatefile = output + "/fromdate.tmp"
+                    with open(fdatefile, "a") as myfile:
+                        myfile.write(str(nfromdate)+"\n")
+                    self.runSearchRepubblica(thisurl, output, nfromdate, todate)
+                frommonth = 1
+            return
+        else:
+            return
         #if 'RICERCAREPUBBLICA:' in thisurl:
                 #fromdate = '2000-01-01'
                 #todate = datetime.datetime.now().strftime('%Y-%m-%d')
-                thisurl = self.w.repquery.text()
-                self.w.results.clear()
-                todate = str(self.w.aanno) + "-" + str(self.w.amese) + "-" + str(self.w.agiorno)
-                fromdate = str(self.w.daanno) + "-" + str(self.w.damese) + "-" + str(self.w.dagiorno)
-                if len(sys.argv)>2 and os.path.isdir(sys.argv[2]):
-                    output = sys.argv[2]
-                    fromyear = int(fromdate.split('-')[0])
-                    frommonth = int(fromdate.split('-')[1])
-                    toyear = int(todate.split('-')[0])
-                    for iy in range(1+toyear-fromyear):
-                        for im in range(13-frommonth):
-                            nfromdate = str(fromyear+iy)+'-'+str(frommonth+im).zfill(2) +'-01'
-                            self.w.results.addItem(nfromdate)
-                            self.w.results.setCurrentRow(self.w.results.count()-1)
-                            fdatefile = output + "/fromdate.tmp"
-                            with open(fdatefile, "a") as myfile:
-                                myfile.write(str(nfromdate)+"\n")
-                            self.runSearchRepubblica(thisurl, output, nfromdate, todate)
-                        frommonth = 1
-                    sys.exit()
-                else:
-                    sys.exit()
+
+
         #    print('USAGE: ./url2corpus.py URL ./corpus/ -r')
         #    print('Example URLS:\n http://www.repubblica.it/esteri/2018/05/18/news/aereo_incidente_schianto_cuba_decollo-196760241/\n https://www.ansa.it/sito/notizie/politica/2018/05/14/governo-di-maio-e-salvini-al-colle-nel-pomeriggio.-resta-nodo-premier_308ebf3c-4e34-4251-876c-9c9d83606e91.html\n http://www.repubblica.it/rss/homepage/rss2.0.xml\n http://www.ansa.it/sito/notizie/cronaca/cronaca_rss.xml\nYou can also download from Repubblica.it search engine:\n ./url2corpus.py "RICERCAREPUBBLICA:" ./corpus-ricerche/ 2000-01-01\nin this case the last argument should be the date from which you want to start downloading (YYYY-MM-DD). In the first argument you can specify a search query after the double mark.\nIf you append -novdb option after -r, then the VdB will not be used.')
+
+
+
+class Form(QDialog):
+    def __init__(self, parent=None):
+        super(Form, self).__init__(parent)
+        #QMessageBox.warning(self, self.tr("My Application"), self.tr("The document has been modified.\nDo you want to save your changes?"))
+        file = QFile("forms/url2corpus.ui")
+        file.open(QFile.ReadOnly)
+        loader = QUiLoader()
+        self.w = loader.load(file)
+        layout = QVBoxLayout()
+        layout.addWidget(self.w)
+        self.setLayout(layout)
+        self.w.accepted.connect(self.isaccepted)
+        self.w.rejected.connect(self.isrejected)
+        self.setWindowTitle("Estrai corpus da sito web")
+        self.w.resultsgrp.setTitle("In attesa")
+        self.w.download.clicked.connect(self.downloadtxt)
+        self.w.searchrep.clicked.connect(self.searchrep)
+        self.w.stopall.clicked.connect(self.stopall)
+        self.w.choosefolder.clicked.connect(self.choosefolder)
+        self.w.ignoreext.setText(".*(\.zip|\.xml|\.pdf|\.avi|\.gif|\.jpeg|\.jpg|\.ico|\.png|\.wav|\.mp3|\.mp4|\.mpg|\.mpeg|\.tif|\.tiff|\.css|\.json|\.rar)$")
+
+
+    def downloadtxt(self):
+        self.myThread = TXTdownloader(self.w, "generica")
+        self.myThread.start()
+
+    def searchrep(self):
+        self.myThread = TXTdownloader(self.w, "searchrep")
+        self.myThread.start()
+
+    def stopall(self):
+        try:
+            #self.myThread.wait()
+            #self.myThread.terminate()
+            self.myThread.stop()
+        except:
+            print("No thread to stop")
 
     def choosefolder(self):
         fileName = QFileDialog.getExistingDirectory(self, "Seleziona la cartella in cui salvare il corpus")
