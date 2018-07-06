@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QPlainTextEdit" name="plainTextEdit"/>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>Fi&amp;le</string>
+    </property>
+    <addaction name="actionNuovo"/>
+    <addaction name="actionApri"/>
+    <addaction name="actionSalva"/>
+    <addaction name="actionSalva_come"/>
+    <addaction name="separator"/>
+    <addaction name="actionChiudi"/>
+   </widget>
+   <widget class="QMenu" name="menuModifica">
+    <property name="title">
+     <string>&amp;Modifica</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menuStrumenti">
+    <property name="title">
+     <string>Str&amp;umenti</string>
+    </property>
+    <addaction name="actionConta_occorrenze"/>
+    <addaction name="actionRimuovi_frasi_ripetute"/>
+   </widget>
+   <widget class="QMenu" name="menuAbout">
+    <property name="title">
+     <string>&amp;About</string>
+    </property>
+    <addaction name="actionAbout_this_text_editor"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuModifica"/>
+   <addaction name="menuStrumenti"/>
+   <addaction name="menuAbout"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionAbout_this_text_editor">
+   <property name="text">
+    <string>About this text editor</string>
+   </property>
+  </action>
+  <action name="actionNuovo">
+   <property name="text">
+    <string>Nuovo</string>
+   </property>
+  </action>
+  <action name="actionApri">
+   <property name="text">
+    <string>Apri</string>
+   </property>
+  </action>
+  <action name="actionSalva">
+   <property name="text">
+    <string>Salva</string>
+   </property>
+  </action>
+  <action name="actionSalva_come">
+   <property name="text">
+    <string>Salva come</string>
+   </property>
+  </action>
+  <action name="actionChiudi">
+   <property name="text">
+    <string>Chiudi</string>
+   </property>
+  </action>
+  <action name="actionConta_occorrenze">
+   <property name="text">
+    <string>Conta occorrenze</string>
+   </property>
+  </action>
+  <action name="actionRimuovi_frasi_ripetute">
+   <property name="text">
+    <string>Rimuovi frasi ripetute</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

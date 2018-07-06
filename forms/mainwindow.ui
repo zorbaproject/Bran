@@ -10,6 +10,12 @@
     <height>600</height>
    </rect>
   </property>
+  <property name="minimumSize">
+   <size>
+    <width>800</width>
+    <height>600</height>
+   </size>
+  </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
@@ -67,8 +73,8 @@
      <property name="title">
       <string>Importa corpus</string>
      </property>
-     <addaction name="actionDa_file"/>
-     <addaction name="actionDa_sito_web"/>
+     <addaction name="actionDa_file_txt"/>
+     <addaction name="actionDa_file_zip"/>
     </widget>
     <addaction name="actionApri"/>
     <addaction name="actionSalva"/>
@@ -84,14 +90,23 @@
      <string>Str&amp;umenti</string>
     </property>
     <addaction name="actionScarica_corpus_da_sito_web"/>
+    <addaction name="actionEditor_di_testo"/>
    </widget>
    <widget class="QMenu" name="menuAbout">
     <property name="title">
      <string>&amp;About</string>
     </property>
+    <addaction name="actionAbout_Bran"/>
+   </widget>
+   <widget class="QMenu" name="menuAnalisi">
+    <property name="title">
+     <string>Analisi</string>
+    </property>
+    <addaction name="actionConta_occorrenze"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuModifica"/>
+   <addaction name="menuAnalisi"/>
    <addaction name="menuStrumenti"/>
    <addaction name="menuAbout"/>
   </widget>
@@ -106,19 +121,34 @@
     <string>Salva</string>
    </property>
   </action>
-  <action name="actionDa_file">
+  <action name="actionDa_file_txt">
    <property name="text">
-    <string>Da file</string>
+    <string>Da file txt</string>
    </property>
   </action>
-  <action name="actionDa_sito_web">
+  <action name="actionDa_file_zip">
    <property name="text">
-    <string>Da sito web</string>
+    <string>Da file zip</string>
    </property>
   </action>
   <action name="actionScarica_corpus_da_sito_web">
    <property name="text">
     <string>Scarica corpus da sito web</string>
+   </property>
+  </action>
+  <action name="actionEditor_di_testo">
+   <property name="text">
+    <string>Editor di testo</string>
+   </property>
+  </action>
+  <action name="actionAbout_Bran">
+   <property name="text">
+    <string>About Bran</string>
+   </property>
+  </action>
+  <action name="actionConta_occorrenze">
+   <property name="text">
+    <string>Conta occorrenze</string>
    </property>
   </action>
  </widget>

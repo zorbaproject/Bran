@@ -7,13 +7,55 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>300</height>
+    <height>360</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QCheckBox" name="aiutocb">
+     <property name="text">
+      <string>Aiuto</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QWidget" name="aiutowid" native="true">
+     <layout class="QVBoxLayout" name="aiuto">
+      <item>
+       <widget class="QPushButton" name="cheat">
+        <property name="text">
+         <string>Cheatsheet</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QTextEdit" name="test">
+          <property name="html">
+           <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Noto Sans'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;L'espressione verrà cercata dentro questo testo e sostituita.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="dotest">
+          <property name="text">
+           <string>Test</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
    <item>
     <widget class="QLabel" name="label_2">
      <property name="text">
@@ -23,6 +65,13 @@
    </item>
    <item>
     <widget class="QLineEdit" name="orig"/>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="ignorecase">
+     <property name="text">
+      <string>Case Insensitive</string>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="QLabel" name="label">

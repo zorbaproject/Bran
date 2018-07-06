@@ -13,6 +13,9 @@ from PySide2.QtUiTools import QUiLoader
 from PySide2.QtWidgets import QLabel
 from PySide2.QtWidgets import QMessageBox
 from PySide2.QtCore import QFile
+from PySide2.QtWidgets import QFileDialog
+from PySide2.QtWidgets import QMainWindow
+from PySide2.QtWidgets import QListWidget
 
 class Form(QDialog):
     def __init__(self, parent=None):
@@ -28,6 +31,11 @@ class Form(QDialog):
         self.w.accepted.connect(self.isaccepted)
         self.w.rejected.connect(self.isrejected)
         self.setWindowTitle("Estrai corpus da sito web")
+        self.w.resultsgrp.setTitle("In attesa")
+        self.w.download.clicked.connect(self.downloadtxt)
+        self.w.searchrep.clicked.connect(self.searchrep)
+        self.w.choosefolder.clicked.connect(self.choosefolder)
+        self.w.ignoreext.setText(".*(\.zip|\.xml|\.pdf|\.avi|\.gif|\.jpeg|\.jpg|\.ico|\.png|\.wav|\.mp3|\.mp4|\.mpg|\.mpeg|\.tif|\.tiff)$")
 
         #there are a few urls we should ignore
         self.ignore = ['quotidiano.repubblica.it', 'rep.repubblica.it', 'trovacinema.repubblica.it', 'miojob.repubblica.it', 'racconta.repubblica.it', 'video.repubblica.it', 'www.repubblica.it/economia/miojob/', 'facebook.com', 'google.com', 'yahoo.com', 'twitter.com', 'ansa.it/games/', 'ansa.it/meteo/', 'ansa.it/nuova_europa/', 'corporate.ansa.it', 'filmalcinema.shtml', 'trovacinema', 'splash.repubblica.it', 'd.repubblica.it/ricerca', 'video.d.repubblica.it', 'finanza.repubblica.it', '/static/servizi/']
@@ -39,9 +47,18 @@ class Form(QDialog):
         self.visitedfile = ""
         self.firstrun = True
         self.vdb = []
-        self.vdbfile = ""
+        self.vdbfile = os.path.abspath(os.path.dirname(sys.argv[0]))+"/vdb2016.txt"
+        if os.path.isfile(self.vdbfile):
+            self.vdb = [line.rstrip('\n') for line in open(self.vdbfile)]
+        if len(self.vdb) < 1:
+            QMessageBox.warning(self, "Errore", "Non ho trovato il VdB 2016 in "+self.vdbfile)
 
-    def find_between(s, first, last ):
+        todate = datetime.datetime.now().strftime('%Y-%m-%d')
+        self.w.aanno.setValue(int(todate.split('-')[0]))
+        self.w.amese.setValue(int(todate.split('-')[1]))
+        self.w.agiorno.setValue(int(todate.split('-')[2]))
+
+    def find_between(self, s, first, last ):
         try:
             start = 0
             if first != "":
@@ -53,7 +70,7 @@ class Form(QDialog):
         except ValueError:
             return ""
 
-    def geturl(thisurl):
+    def geturl(self, thisurl):
         #global useragent
         if thisurl == '':
             return ''
@@ -68,7 +85,7 @@ class Form(QDialog):
         thishtml = ""
         try:
             f = urllib.request.urlopen(req)
-            ft = f.read()
+            ft = f.read() #we should stop if this is taking too long
         except:
             ft = ""
         try:
@@ -76,7 +93,7 @@ class Form(QDialog):
             if encoding == None:
                 encoding = 'windows-1252'
             thishtml = ft.decode(encoding)
-            print(encoding)
+            #print(encoding)
         except:
             try:
                thishtml = ft.decode('utf-8', 'backslashreplace')
@@ -89,7 +106,7 @@ class Form(QDialog):
         return thishtml
 
 
-    def cleanRepubblica(thishtml):
+    def cleanRepubblica(self, thishtml):
         #look for known article delimiters
         start = ['<div class="body-text".*?>', '<div class="entrytext".*?>', '<div class="post-entry".*?>', '<div class="entry-content".*?>', '<div class="article-maincolblog".*?>', '<div class="detail-articles".*?>', '<div class="entry".*?>']
         end = ['<div id="fb-facepile">','<p class="dettagliotag">', '<footer', '<p class="postmetadata">', '<!-- fine TESTO -->', '<div class=\'sociable\'>']
@@ -132,7 +149,7 @@ class Form(QDialog):
 
         return thishtml
 
-    def cleanRepubblicaSearch(thishtml):
+    def cleanRepubblicaSearch(self, thishtml):
         #look for known article delimiters
         start = ['<section id="lista-risultati">']
         end = ['<!-- /risultati -->']
@@ -160,7 +177,7 @@ class Form(QDialog):
 
         return thishtml
 
-    def cleanAnsa(thishtml):
+    def cleanAnsa(self, thishtml):
         #look for known article delimiters
         start = ['<div itemprop="articleBody".*?>']
         end = ['<div id="relatedMobile"']
@@ -188,14 +205,14 @@ class Form(QDialog):
 
         return thishtml
 
-    def cleanGeneric(thishtml):
+    def cleanGeneric(self, thishtml):
 
         #clean headers
         thishtml = re.sub("<h[0-9].*?<\/h[0-9]>", "", thishtml, flags=re.DOTALL)
 
         #clean links
         repl = ""
-        if 1==1:
+        if self.w.keeplinkscontent.isChecked():
             repl = "\g<1>"#NOTE \g<\> is equal to \1, meaning group 1, but it's less ambiguous
         thishtml = re.sub("<[aA]\s.*?>(.*?)<\/[aA]>", repl, thishtml, flags=re.DOTALL)
 
@@ -222,7 +239,7 @@ class Form(QDialog):
             if line.strip() != '':
                 for word in line.split():
                     #it's a good idea to check if at least a few words in every lines belong to the vdb
-                    if word in vdb or len(vdb)<1:
+                    if word in self.vdb or self.w.usevdb.isChecked(): #len(vdb)<1:
                         stripped = stripped + line + nl
                         break
         thishtml = stripped
@@ -247,21 +264,21 @@ class Form(QDialog):
 
         return thishtml
 
-    def getLinks(thishtml):
+    def getLinks(self, thishtml):
         #regex = "<[aA] .*?href=\"(http.*?|\/.*?)\".*?<\/[aA]>"
         regex = ".*?href=[\"'](.*?)[\"']"
         links = [m.group(1) for m in re.finditer(regex, thishtml, flags=re.DOTALL)]
         return links
 
-    def getSearchLinks(thishtml):
+    def getSearchLinks(self, thishtml):
         links = [m.group(1) for m in re.finditer("<a .*?href=\"(http.*?|\/.*?)\".*?title=.*?<\/a>", thishtml, flags=re.DOTALL)]
         return links
 
-    def getRSSLinks(thishtml):
+    def getRSSLinks(self, thishtml):
         links = [m.group(1) for m in re.finditer("<link>.*?(http.*?)(\]\]>)*?<\/link>", thishtml, flags=re.DOTALL)]
         return links
 
-    def url2name(thisurl):
+    def url2name(self, thisurl):
         myname = re.sub(re.escape('http://'), "", thisurl)
         myname = re.sub(re.escape('https://'), "", myname)
         #myname = re.sub("\?.*$", "", myname)
@@ -271,62 +288,67 @@ class Form(QDialog):
         myname = myname + ".txt"
         return myname
 
-    def runOnPage(thisurl, output = ""):
-        global ignore
-
-        firstrun = False
-        thishtml = geturl(thisurl)
-        links = getLinks(thishtml)
+    def runOnPage(self, thisurl, output = ""):
+        self.firstrun = False
+        if bool(re.match(self.w.ignoreext.text(), thisurl))==True:
+            return []
+        thishtml = self.geturl(thisurl)
+        links = self.getLinks(thishtml)
         m = re.match(r"(http.*?\..*?)(\/|$)", thisurl)
         baseurl = m.group(1)
         for i in range(len(links)):
-            if links[i][0] == '/':
+            if len(links[i]) < 6:
+                links[i] = ""
+            elif links[i][0] == '/':
                 links[i] = baseurl + links[i]
-            if links[i][:5] != 'http:' and links[i][:6] != 'https:':
+            elif links[i][:5] != 'http:' and links[i][:6] != 'https:':
                 links[i] = baseurl + "/" + links[i]
-            print(links[i])
+            #print(links[i])
             if links[i] == thisurl:
                 links[i] = ''
             else:
-                for ii in range(len(ignore)):
-                    if ignore[ii] in links[i]:
+                for ii in range(len(self.ignore)):
+                    if self.ignore[ii] in links[i]:
                         links[i] = ''
-        for ii in range(len(ignore)):
-            if ignore[ii] in thisurl:
+        for ii in range(len(self.ignore)):
+            if self.ignore[ii] in thisurl:
                 return []
         #cleaning for Repubblica.it
         if 'repubblica.it' in thisurl:
             if 'rss2.0.xml' in thisurl:
-                links = getRSSLinks(thishtml)
+                links = self.getRSSLinks(thishtml)
                 return links
-            thishtml = cleanRepubblica(thishtml)
+            thishtml = self.cleanRepubblica(thishtml)
         #cleaning for ANSA.it
         if 'ansa.it' in thisurl:
             if 'rss.xml' in thisurl:
-                links = getRSSLinks(thishtml)
+                links = self.getRSSLinks(thishtml)
                 return links
-            thishtml = cleanAnsa(thishtml)
-        thishtml = cleanGeneric(thishtml)
+            thishtml = self.cleanAnsa(thishtml)
+        thishtml = self.cleanGeneric(thishtml)
         if output == "":
             print(thishtml)
         else:
-            fname = output + "/" + url2name(thisurl)
+            fname = output + "/" + self.url2name(thisurl)
             if thishtml != "":
                 text_file = open(fname, "w")
                 text_file.write(thishtml)
                 text_file.close()
+                self.w.results.addItem(thisurl)
+                self.w.results.setCurrentRow(self.w.results.count()-1)
+                QApplication.processEvents()
         return links
 
-    def runRecursive(thisurl, output = ""):
+    def runRecursive(self, thisurl, output = ""):
         #global visited
         #before going on, check if we previously worked on this page
         m = re.match(r"http.*?\.(.*?)(\/|$)", thisurl)
         baseurl = m.group(1)
-        fname = output + "/" + url2name(thisurl)
-        if os.path.isfile(fname) == False or firstrun:
+        fname = output + "/" + self.url2name(thisurl)
+        if os.path.isfile(fname) == False or self.firstrun:
             #if re.sub("\?.*$", "", thisurl) not in visited:
-            if thisurl not in visited:
-                links = runOnPage(thisurl, output)
+            if thisurl not in self.visited: #and bool(re.match(self.w.ignoreext.text(), thisurl))==False:
+                links = self.runOnPage(thisurl, output)
                 self.visited.append(thisurl)
             else:
                 links = []
@@ -336,13 +358,13 @@ class Form(QDialog):
                 lbaseurl = ''
                 if m:
                     lbaseurl = m.group(1)
-                if re.sub("\?.*$", "", links[i]) not in visited and baseurl in lbaseurl:
-                    print(links[i])
+                if re.sub("\?.*$", "", links[i]) not in self.visited and baseurl in lbaseurl:
+                    #print(links[i])
                     with open(self.visitedfile, "a") as myfile:
                         myfile.write(links[i]+"\n")
-                    runRecursive(links[i],output)
+                    self.runRecursive(links[i],output)
 
-    def runSearchRepubblica(thisquery, output, fromdate, todate):
+    def runSearchRepubblica(self, thisquery, output, fromdate, todate):
         query = thisquery.replace('RICERCAREPUBBLICA:','')
         if query == '':
             query = '+'
@@ -351,9 +373,9 @@ class Form(QDialog):
         for npage in range(250):
             #http://ricerca.repubblica.it/ricerca/repubblica-it?author=&sortby=adate&query=+&fromdate=2000-10-01&todate=2018-05-22&mode=all&page=1
             thisurl = 'http://ricerca.repubblica.it/ricerca/repubblica-it?author=&sortby=adate&query=' +query +'&fromdate='+fromdate+'&todate='+todate+'&mode=all&page='+str(npage)
-            thishtml = geturl(thisurl)
-            thishtml = cleanRepubblicaSearch(thishtml)
-            links = getSearchLinks(thishtml)
+            thishtml = self.geturl(thisurl)
+            thishtml = self.cleanRepubblicaSearch(thishtml)
+            links = self.getSearchLinks(thishtml)
             #m = re.match(r"(http.*?\..*?)(\/|$)", 'http://www.repubblica.it')
             baseurl = 'http://www.repubblica.it' #m.group(1)
             alllinks = []
@@ -364,33 +386,46 @@ class Form(QDialog):
                 if links[i][0] == '/':
                     links[i] = baseurl+ links[i]
                 if links[i] not in alllinks and 'www.repubblica.it/?ref=search' not in links[i] and 'ricerca.repubblica.it' not in links[i]:
-                    fname = output + "/" + url2name(links[i])
+                    fname = output + "/" + self.url2name(links[i])
                     if os.path.isfile(fname) == False:
-                        print(links[i])
-                        pagehtml = geturl(links[i])
-                        pagehtml = cleanGeneric(pagehtml)
+                        pagehtml = self.geturl(links[i])
+                        pagehtml = self.cleanGeneric(pagehtml)
                         if pagehtml != "":
                             text_file = open(fname, "w")
                             text_file.write(pagehtml)
                             text_file.close()
                             alllinks.append(links[i])
+                            self.w.results.addItem(links[i])
+                            self.w.results.setCurrentRow(self.w.results.count()-1)
                             with open(articlesfile, "a") as myfile:
                                 myfile.write(links[i]+"\n")
 
-    def do_search(self,):
-        if len(sys.argv)>1:
-            thisurl = sys.argv[1]
-            vdbfile = os.path.abspath(os.path.dirname(sys.argv[0]))+"/vdb2016.txt"
-            if os.path.isfile(vdbfile):
-                vdb = [line.rstrip('\n') for line in open(vdbfile)]
-            if len(sys.argv)>4:
-                if sys.argv[4] == "-novdb":
-                    vdb = []
-            if 'RICERCAREPUBBLICA:' in thisurl:
-                fromdate = '2000-01-01'
-                todate = datetime.datetime.now().strftime('%Y-%m-%d')
-                if len(sys.argv)>3 and len(sys.argv[3].split('-'))==3:
-                    fromdate = sys.argv[3]
+    def downloadtxt(self):
+        thisurl = self.w.url.text()
+        output = ""
+        if os.path.isdir(self.w.folder.text()):
+            output = self.w.folder.text()
+        else:
+            return
+        self.w.results.clear()
+        self.w.resultsgrp.setTitle("STO LAVORANDO:")
+        if self.w.recursive.isChecked():
+            self.visitedfile = output + "/visited.tmp"
+            if os.path.isfile(self.visitedfile):
+                self.visited = [line.rstrip('\n') for line in open(self.visitedfile)]
+            self.runRecursive(thisurl, output)
+        else:
+            self.runOnPage(thisurl, output)
+        self.w.resultsgrp.setTitle("In attesa")
+
+    def searchrep(self):
+        #if 'RICERCAREPUBBLICA:' in thisurl:
+                #fromdate = '2000-01-01'
+                #todate = datetime.datetime.now().strftime('%Y-%m-%d')
+                thisurl = self.w.repquery.text()
+                self.w.results.clear()
+                todate = str(self.w.aanno) + "-" + str(self.w.amese) + "-" + str(self.w.agiorno)
+                fromdate = str(self.w.daanno) + "-" + str(self.w.damese) + "-" + str(self.w.dagiorno)
                 if len(sys.argv)>2 and os.path.isdir(sys.argv[2]):
                     output = sys.argv[2]
                     fromyear = int(fromdate.split('-')[0])
@@ -399,33 +434,24 @@ class Form(QDialog):
                     for iy in range(1+toyear-fromyear):
                         for im in range(13-frommonth):
                             nfromdate = str(fromyear+iy)+'-'+str(frommonth+im).zfill(2) +'-01'
-                            print(nfromdate)
+                            self.w.results.addItem(nfromdate)
+                            self.w.results.setCurrentRow(self.w.results.count()-1)
                             fdatefile = output + "/fromdate.tmp"
                             with open(fdatefile, "a") as myfile:
                                 myfile.write(str(nfromdate)+"\n")
-                            runSearchRepubblica(thisurl, output, nfromdate, todate)
+                            self.runSearchRepubblica(thisurl, output, nfromdate, todate)
                         frommonth = 1
                     sys.exit()
                 else:
                     sys.exit()
-        else:
-            print('USAGE: ./url2corpus.py URL ./corpus/ -r')
-            print('Example URLS:\n http://www.repubblica.it/esteri/2018/05/18/news/aereo_incidente_schianto_cuba_decollo-196760241/\n https://www.ansa.it/sito/notizie/politica/2018/05/14/governo-di-maio-e-salvini-al-colle-nel-pomeriggio.-resta-nodo-premier_308ebf3c-4e34-4251-876c-9c9d83606e91.html\n http://www.repubblica.it/rss/homepage/rss2.0.xml\n http://www.ansa.it/sito/notizie/cronaca/cronaca_rss.xml\nYou can also download from Repubblica.it search engine:\n ./url2corpus.py "RICERCAREPUBBLICA:" ./corpus-ricerche/ 2000-01-01\nin this case the last argument should be the date from which you want to start downloading (YYYY-MM-DD). In the first argument you can specify a search query after the double mark.\nIf you append -novdb option after -r, then the VdB will not be used.')
-            sys.exit()
-        output = ""
-        if len(sys.argv)>2 and os.path.isdir(sys.argv[2]):
-            output = sys.argv[2]
-        if len(sys.argv)>3:
-            if sys.argv[3] == "-r" and output != "":
-                visitedfile = output + "/visited.tmp"
-                if os.path.isfile(visitedfile):
-                    visited = [line.rstrip('\n') for line in open(visitedfile)]
-                #here we cycle for all the urls we can find
-                print("I'm scanning the URL recursively looking for other pages to download. This is going to be endless (I mean it). When you are tired, just hit Ctrl+C.")
-                runRecursive(thisurl, output)
-        else:
-            runOnPage(thisurl, output)
+        #    print('USAGE: ./url2corpus.py URL ./corpus/ -r')
+        #    print('Example URLS:\n http://www.repubblica.it/esteri/2018/05/18/news/aereo_incidente_schianto_cuba_decollo-196760241/\n https://www.ansa.it/sito/notizie/politica/2018/05/14/governo-di-maio-e-salvini-al-colle-nel-pomeriggio.-resta-nodo-premier_308ebf3c-4e34-4251-876c-9c9d83606e91.html\n http://www.repubblica.it/rss/homepage/rss2.0.xml\n http://www.ansa.it/sito/notizie/cronaca/cronaca_rss.xml\nYou can also download from Repubblica.it search engine:\n ./url2corpus.py "RICERCAREPUBBLICA:" ./corpus-ricerche/ 2000-01-01\nin this case the last argument should be the date from which you want to start downloading (YYYY-MM-DD). In the first argument you can specify a search query after the double mark.\nIf you append -novdb option after -r, then the VdB will not be used.')
 
+    def choosefolder(self):
+        fileName = QFileDialog.getExistingDirectory(self, "Seleziona la cartella in cui salvare il corpus")
+        if not fileName == "":
+            if os.path.isdir(fileName):
+                self.w.folder.setText(fileName)
 
     def isaccepted(self):
             self.accept()
