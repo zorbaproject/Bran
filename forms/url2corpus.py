@@ -45,15 +45,10 @@ class TXTdownloader(QThread):
             self.vdb = [line.rstrip('\n') for line in open(self.vdbfile)]
         if len(self.vdb) < 1:
             QMessageBox.warning(self, "Errore", "Non ho trovato il VdB 2016 in "+self.vdbfile)
-
-        todate = datetime.datetime.now().strftime('%Y-%m-%d')
-        self.w.aanno.setValue(int(todate.split('-')[0]))
-        self.w.amese.setValue(int(todate.split('-')[1]))
-        self.w.agiorno.setValue(int(todate.split('-')[2]))
+        self.todate = datetime.datetime.now().strftime('%Y-%m-%d')
 
     def __del__(self):
-        #self.wait()
-        QThread.wait()
+        print("Shutting down thread")
 
     def stop():
         self.stopme = True
@@ -297,7 +292,7 @@ class TXTdownloader(QThread):
 
     def runOnPage(self, thisurl, output = ""):
         self.firstrun = False
-        if bool(re.match(self.w.ignoreext.text(), thisurl))==True or self.stopme:
+        if bool(re.match(self.w.ignoreext.text(), thisurl))==True or self.w.stopall.isChecked():
             return []
         thishtml = self.geturl(thisurl)
         links = self.getLinks(thishtml)
@@ -348,8 +343,8 @@ class TXTdownloader(QThread):
 
     def runRecursive(self, thisurl, output = ""):
         #global visited
-        if self.stopme:
-            QThread.quit()
+        if self.w.stopall.isChecked():
+            self.quit()
             return
         #before going on, check if we previously worked on this page
         m = re.match(r"http.*?\.(.*?)(\/|$)", thisurl)
@@ -393,8 +388,8 @@ class TXTdownloader(QThread):
             if os.path.isfile(articlesfile):
                 alllinks = [line.rstrip('\n') for line in open(articlesfile)]
             for i in range(len(links)):
-                if self.stopme:
-                    QThread.quit()
+                if self.w.stopall.isChecked():
+                    self.quit()
                     return
                 if links[i][0] == '/':
                     links[i] = baseurl+ links[i]
@@ -446,8 +441,8 @@ class TXTdownloader(QThread):
                     nfromdate = str(fromyear+iy)+'-'+str(frommonth+im).zfill(2) +'-01'
                     self.w.results.addItem(nfromdate)
                     self.w.results.setCurrentRow(self.w.results.count()-1)
-                    if self.stopme:
-                        QThread.quit()
+                    if self.w.stopall.isChecked():
+                        self.quit()
                         return
                     fdatefile = output + "/fromdate.tmp"
                     with open(fdatefile, "a") as myfile:
@@ -457,9 +452,6 @@ class TXTdownloader(QThread):
             return
         else:
             return
-        #if 'RICERCAREPUBBLICA:' in thisurl:
-                #fromdate = '2000-01-01'
-                #todate = datetime.datetime.now().strftime('%Y-%m-%d')
 
 
         #    print('USAGE: ./url2corpus.py URL ./corpus/ -r')
@@ -484,26 +476,27 @@ class Form(QDialog):
         self.w.resultsgrp.setTitle("In attesa")
         self.w.download.clicked.connect(self.downloadtxt)
         self.w.searchrep.clicked.connect(self.searchrep)
-        self.w.stopall.clicked.connect(self.stopall)
+        #self.w.stopall.clicked.connect(self.stopall)
         self.w.choosefolder.clicked.connect(self.choosefolder)
         self.w.ignoreext.setText(".*(\.zip|\.xml|\.pdf|\.avi|\.gif|\.jpeg|\.jpg|\.ico|\.png|\.wav|\.mp3|\.mp4|\.mpg|\.mpeg|\.tif|\.tiff|\.css|\.json|\.rar)$")
+        todate = datetime.datetime.now().strftime('%Y-%m-%d')
+        self.w.aanno.setValue(int(todate.split('-')[0]))
+        self.w.amese.setValue(int(todate.split('-')[1]))
+        self.w.agiorno.setValue(int(todate.split('-')[2]))
 
 
     def downloadtxt(self):
         self.myThread = TXTdownloader(self.w, "generica")
+        self.myThread.finished.connect(self.threadstopped)
         self.myThread.start()
 
     def searchrep(self):
         self.myThread = TXTdownloader(self.w, "searchrep")
+        self.myThread.finished.connect(self.threadstopped)
         self.myThread.start()
 
-    def stopall(self):
-        try:
-            #self.myThread.wait()
-            #self.myThread.terminate()
-            self.myThread.stop()
-        except:
-            print("No thread to stop")
+    def threadstopped(self):
+        self.w.stopall.setChecked(False)
 
     def choosefolder(self):
         fileName = QFileDialog.getExistingDirectory(self, "Seleziona la cartella in cui salvare il corpus")

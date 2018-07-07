@@ -63,7 +63,7 @@
             <number>300</number>
            </property>
            <property name="value">
-            <number>60</number>
+            <number>30</number>
            </property>
           </widget>
          </item>
@@ -288,6 +288,12 @@
        <widget class="QPushButton" name="stopall">
         <property name="text">
          <string>Interrompi tutte le operazioni</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
         </property>
        </widget>
       </item>
