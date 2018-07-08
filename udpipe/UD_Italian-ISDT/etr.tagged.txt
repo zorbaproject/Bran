@@ -1,0 +1,237 @@
+# newdoc
+# newpar
+# sent_id = 1
+# text = sottovoce pubblicazione di lettura facilitata la nuova legge sulla cittadinanza nelle ultime settimane i politici italiani stanno discutendo molto della nuova legge sulla cittadinanza.
+1	sottovoce	sottovoce	ADV	B	_	20	advmod	_	_
+2	pubblicazione	pubblicazione	NOUN	S	Gender=Fem|Number=Sing	20	nsubj	_	_
+3	di	di	ADP	E	_	4	case	_	_
+4	lettura	lettura	NOUN	S	Gender=Fem|Number=Sing	2	nmod	_	_
+5	facilitata	facilitare	VERB	V	Gender=Fem|Number=Sing|Tense=Past|VerbForm=Part	20	acl	_	_
+6	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	8	det	_	_
+7	nuova	nuovo	ADJ	A	Gender=Fem|Number=Sing	8	amod	_	_
+8	legge	legge	NOUN	S	Gender=Fem|Number=Sing	5	obj	_	_
+9-10	sulla	_	_	_	_	_	_	_	_
+9	su	su	ADP	E	_	11	case	_	_
+10	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	11	det	_	_
+11	cittadinanza	cittadinanza	NOUN	S	Gender=Fem|Number=Sing	8	nmod	_	_
+12-13	nelle	_	_	_	_	_	_	_	_
+12	in	in	ADP	E	_	15	case	_	_
+13	le	il	DET	RD	Definite=Def|Gender=Fem|Number=Plur|PronType=Art	15	det	_	_
+14	ultime	ultimo	ADJ	NO	Gender=Fem|Number=Plur|NumType=Ord	15	amod	_	_
+15	settimane	settimana	NOUN	S	Gender=Fem|Number=Plur	20	obl	_	_
+16	i	il	DET	RD	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	17	det	_	_
+17	politici	politico	NOUN	S	Gender=Masc|Number=Plur	20	nsubj	_	_
+18	italiani	italiano	ADJ	A	Gender=Masc|Number=Plur	17	amod	_	_
+19	stanno	stare	AUX	VA	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	20	aux	_	_
+20	discutendo	discutire	VERB	V	VerbForm=Ger	0	root	_	_
+21	molto	molto	ADV	B	_	20	advmod	_	_
+22-23	della	_	_	_	_	_	_	_	_
+22	di	di	ADP	E	_	25	case	_	_
+23	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	25	det	_	_
+24	nuova	nuovo	ADJ	A	Gender=Fem|Number=Sing	25	amod	_	_
+25	legge	legge	NOUN	S	Gender=Fem|Number=Sing	20	obl	_	_
+26-27	sulla	_	_	_	_	_	_	_	_
+26	su	su	ADP	E	_	28	case	_	_
+27	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	28	det	_	_
+28	cittadinanza	cittadinanza	NOUN	S	Gender=Fem|Number=Sing	25	nmod	_	SpaceAfter=No
+29	.	.	PUNCT	FS	_	20	punct	_	_
+
+# sent_id = 2
+# text = una legge è come una regola che decidono i politici in Parlamento.
+1	una	uno	DET	RI	Definite=Ind|Gender=Fem|Number=Sing|PronType=Art	2	det	_	_
+2	legge	legge	NOUN	S	Gender=Fem|Number=Sing	6	nsubj	_	_
+3	è	essere	AUX	V	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	6	cop	_	_
+4	come	come	ADP	E	_	6	case	_	_
+5	una	uno	DET	RI	Definite=Ind|Gender=Fem|Number=Sing|PronType=Art	6	det	_	_
+6	regola	regola	NOUN	S	Gender=Fem|Number=Sing	0	root	_	_
+7	che	che	PRON	PR	PronType=Rel	8	nsubj	_	_
+8	decidono	decidire	VERB	V	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	6	acl:relcl	_	_
+9	i	il	DET	RD	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	10	det	_	_
+10	politici	politico	NOUN	S	Gender=Masc|Number=Plur	8	obj	_	_
+11	in	in	ADP	E	_	12	case	_	_
+12	Parlamento	parlamento	PROPN	SP	_	10	nmod	_	SpaceAfter=No
+13	.	.	PUNCT	FS	_	6	punct	_	_
+
+# sent_id = 3
+# text = la Cittadinanza invece è un insieme di diritti e doveri molto importanti che hanno tutti i cittadini di un Paese.
+1	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	2	det	_	_
+2	Cittadinanza	Cittadinanza	NOUN	S	Gender=Fem|Number=Sing	6	nsubj	_	_
+3	invece	invece	ADV	B	_	6	advmod	_	_
+4	è	essere	AUX	V	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	6	cop	_	_
+5	un	uno	DET	RI	Definite=Ind|Gender=Masc|Number=Sing|PronType=Art	6	det	_	_
+6	insieme	insieme	NOUN	S	Gender=Masc|Number=Sing	0	root	_	_
+7	di	di	ADP	E	_	8	case	_	_
+8	diritti	diritto	NOUN	S	Gender=Masc|Number=Plur	6	nmod	_	_
+9	e	e	CCONJ	CC	_	10	cc	_	_
+10	doveri	dovere	NOUN	S	Gender=Masc|Number=Plur	8	conj	_	_
+11	molto	molto	ADV	B	_	12	advmod	_	_
+12	importanti	importante	ADJ	A	Number=Plur	6	amod	_	_
+13	che	che	PRON	PR	PronType=Rel	14	nsubj	_	_
+14	hanno	avere	VERB	V	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	6	acl:relcl	_	_
+15	tutti	tutto	DET	T	Gender=Masc|Number=Plur|PronType=Tot	17	det:predet	_	_
+16	i	il	DET	RD	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	17	det	_	_
+17	cittadini	cittadino	NOUN	S	Gender=Masc|Number=Plur	14	obj	_	_
+18	di	di	ADP	E	_	20	case	_	_
+19	un	uno	DET	RI	Definite=Ind|Gender=Masc|Number=Sing|PronType=Art	20	det	_	_
+20	Paese	paese	NOUN	S	Gender=Masc|Number=Sing	17	nmod	_	SpaceAfter=No
+21	.	.	PUNCT	FS	_	6	punct	_	_
+
+# sent_id = 4
+# text = per esempio il diritto di andare a votare.
+1	per	per	ADP	E	_	2	case	_	_
+2	esempio	esempio	NOUN	S	Gender=Masc|Number=Sing	4	nmod	_	_
+3	il	il	DET	RD	Definite=Def|Gender=Masc|Number=Sing|PronType=Art	4	det	_	_
+4	diritto	diritto	NOUN	S	Gender=Masc|Number=Sing	9	nsubj	_	_
+5	di	di	ADP	E	_	6	mark	_	_
+6	andare	andare	VERB	V	VerbForm=Inf	4	acl	_	_
+7	a	a	ADP	E	_	8	mark	_	_
+8	votare	votare	VERB	V	VerbForm=Inf	6	xcomp	_	SpaceAfter=No
+9	.	.	PUNCT	FS	_	0	root	_	_
+
+# sent_id = 5
+# text = una persona è italiana se ha la cittadinanza italiana.
+1	una	uno	DET	RI	Definite=Ind|Gender=Fem|Number=Sing|PronType=Art	2	det	_	_
+2	persona	persona	NOUN	S	Gender=Fem|Number=Sing	4	nsubj	_	_
+3	è	essere	AUX	V	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	4	cop	_	_
+4	italiana	italiana	ADJ	A	Gender=Fem|Number=Sing	0	root	_	_
+5	se	se	SCONJ	CS	_	6	mark	_	_
+6	ha	avere	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	4	advcl	_	_
+7	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	8	det	_	_
+8	cittadinanza	cittadinanza	NOUN	S	Gender=Fem|Number=Sing	6	obj	_	_
+9	italiana	italiano	ADJ	A	Gender=Fem|Number=Sing	8	amod	_	SpaceAfter=No
+10	.	.	PUNCT	FS	_	4	punct	_	_
+
+# sent_id = 6
+# text = oggi un bimbo ha la cittadinanza italiana se ha almeno un genitore italiano.
+1	oggi	oggi	ADV	B	_	4	advmod	_	_
+2	un	uno	DET	RI	Definite=Ind|Gender=Masc|Number=Sing|PronType=Art	3	det	_	_
+3	bimbo	bimbo	NOUN	S	Gender=Masc|Number=Sing	4	nsubj	_	_
+4	ha	avere	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	0	root	_	_
+5	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	6	det	_	_
+6	cittadinanza	cittadinanza	NOUN	S	Gender=Fem|Number=Sing	4	obj	_	_
+7	italiana	italiano	ADJ	A	Gender=Fem|Number=Sing	6	amod	_	_
+8	se	se	SCONJ	CS	_	9	mark	_	_
+9	ha	avere	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	4	advcl	_	_
+10	almeno	almeno	ADV	B	_	9	advmod	_	_
+11	un	uno	DET	RI	Definite=Ind|Gender=Masc|Number=Sing|PronType=Art	12	det	_	_
+12	genitore	genitore	NOUN	S	Gender=Masc|Number=Sing	9	obj	_	_
+13	italiano	italiano	ADJ	A	Gender=Masc|Number=Sing	12	amod	_	SpaceAfter=No
+14	.	.	PUNCT	FS	_	4	punct	_	_
+
+# sent_id = 7
+# text = un bambino nato da genitori stranieri oggi può avere la cittadinanza italiana solo quando compie 18 anni di età e solo se ha vissuto sempre in Italia.
+1	un	uno	DET	RI	Definite=Ind|Gender=Masc|Number=Sing|PronType=Art	2	det	_	_
+2	bambino	bambino	NOUN	S	Gender=Masc|Number=Sing	9	nsubj	_	_
+3	nato	nascere	VERB	V	Gender=Masc|Number=Sing|Tense=Past|VerbForm=Part	2	acl	_	_
+4	da	da	ADP	E	_	5	case	_	_
+5	genitori	genitore	NOUN	S	Gender=Masc|Number=Plur	3	obl	_	_
+6	stranieri	straniero	ADJ	A	Gender=Masc|Number=Plur	5	amod	_	_
+7	oggi	oggi	ADV	B	_	9	advmod	_	_
+8	può	potere	AUX	VM	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	9	aux	_	_
+9	avere	avere	VERB	V	VerbForm=Inf	0	root	_	_
+10	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	11	det	_	_
+11	cittadinanza	cittadinanza	NOUN	S	Gender=Fem|Number=Sing	9	obj	_	_
+12	italiana	italiano	ADJ	A	Gender=Fem|Number=Sing	11	amod	_	_
+13	solo	solo	ADV	B	_	15	advmod	_	_
+14	quando	quando	SCONJ	CS	_	15	mark	_	_
+15	compie	compiere	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	9	advcl	_	_
+16	18	18	NUM	N	NumType=Card	17	nummod	_	_
+17	anni	anno	NOUN	S	Gender=Masc|Number=Plur	15	obj	_	_
+18	di	di	ADP	E	_	19	case	_	_
+19	età	età	NOUN	S	Gender=Fem	17	nmod	_	_
+20	e	e	CCONJ	CC	_	24	cc	_	_
+21	solo	solo	ADV	B	_	24	advmod	_	_
+22	se	se	SCONJ	CS	_	24	mark	_	_
+23	ha	avere	AUX	VA	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	24	aux	_	_
+24	vissuto	vivere	VERB	V	Gender=Masc|Number=Sing|Tense=Past|VerbForm=Part	9	conj	_	_
+25	sempre	sempre	ADV	B	_	24	advmod	_	_
+26	in	in	ADP	E	_	27	case	_	_
+27	Italia	Italia	PROPN	SP	_	24	obl	_	SpaceAfter=No
+28	.	.	PUNCT	FS	_	9	punct	_	_
+
+# sent_id = 8
+# text = se i politici saranno d' accordo, la nuova legge sulla cittadinanza cambierà un po' le regole per i figli delle persone straniere.
+1	se	se	SCONJ	CS	_	4	mark	_	_
+2	i	il	DET	RD	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	3	det	_	_
+3	politici	politico	NOUN	S	Gender=Masc|Number=Plur	4	nsubj	_	_
+4	saranno	essere	VERB	V	Mood=Ind|Number=Plur|Person=3|Tense=Fut|VerbForm=Fin	14	advcl	_	_
+5	d'	di	ADP	E	_	6	case	_	_
+6	accordo	accordo	NOUN	S	Gender=Masc|Number=Sing	4	obl	_	SpaceAfter=No
+7	,	,	PUNCT	FF	_	4	punct	_	_
+8	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	10	det	_	_
+9	nuova	nuovo	ADJ	A	Gender=Fem|Number=Sing	10	amod	_	_
+10	legge	legge	NOUN	S	Gender=Fem|Number=Sing	14	nsubj	_	_
+11-12	sulla	_	_	_	_	_	_	_	_
+11	su	su	ADP	E	_	13	case	_	_
+12	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	13	det	_	_
+13	cittadinanza	cittadinanza	NOUN	S	Gender=Fem|Number=Sing	10	nmod	_	_
+14	cambierà	cambiare	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Fut|VerbForm=Fin	0	root	_	_
+15	un	uno	DET	RI	Definite=Ind|Gender=Masc|Number=Sing|PronType=Art	16	det	_	_
+16	po'	poco	ADV	B	_	18	advmod	_	_
+17	le	il	DET	RD	Definite=Def|Gender=Fem|Number=Plur|PronType=Art	18	det	_	_
+18	regole	regola	NOUN	S	Gender=Fem|Number=Plur	14	obj	_	_
+19	per	per	ADP	E	_	21	case	_	_
+20	i	il	DET	RD	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	21	det	_	_
+21	figli	figlio	NOUN	S	Gender=Masc|Number=Plur	18	nmod	_	_
+22-23	delle	_	_	_	_	_	_	_	_
+22	di	di	ADP	E	_	24	case	_	_
+23	le	il	DET	RD	Definite=Def|Gender=Fem|Number=Plur|PronType=Art	24	det	_	_
+24	persone	persona	NOUN	S	Gender=Fem|Number=Plur	21	nmod	_	_
+25	straniere	straniero	ADJ	A	Gender=Fem|Number=Plur	24	amod	_	SpaceAfter=No
+26	.	.	PUNCT	FS	_	14	punct	_	_
+
+# sent_id = 9
+# text = in futuro, con la nuova legge i bambini con genitori stranieri potranno avere la cittadinanza italiana anche prima dei 18 anni.
+1	in	in	ADP	E	_	2	case	_	_
+2	futuro	futuro	NOUN	S	Gender=Masc|Number=Sing	14	obl	_	SpaceAfter=No
+3	,	,	PUNCT	FF	_	2	punct	_	_
+4	con	con	ADP	E	_	7	case	_	_
+5	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	7	det	_	_
+6	nuova	nuovo	ADJ	A	Gender=Fem|Number=Sing	7	amod	_	_
+7	legge	legge	NOUN	S	Gender=Fem|Number=Sing	9	nmod	_	_
+8	i	il	DET	RD	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	9	det	_	_
+9	bambini	bambino	NOUN	S	Gender=Masc|Number=Plur	14	nsubj	_	_
+10	con	con	ADP	E	_	11	case	_	_
+11	genitori	genitore	NOUN	S	Gender=Masc|Number=Plur	9	nmod	_	_
+12	stranieri	straniero	ADJ	A	Gender=Masc|Number=Plur	11	amod	_	_
+13	potranno	potere	AUX	VM	Mood=Ind|Number=Plur|Person=3|Tense=Fut|VerbForm=Fin	14	aux	_	_
+14	avere	avere	VERB	V	VerbForm=Inf	0	root	_	_
+15	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	16	det	_	_
+16	cittadinanza	cittadinanza	NOUN	S	Gender=Fem|Number=Sing	14	obj	_	_
+17	italiana	italiano	ADJ	A	Gender=Fem|Number=Sing	16	amod	_	_
+18	anche	anche	ADV	B	_	19	advmod	_	_
+19	prima	prima	ADV	B	_	23	case	_	_
+20-21	dei	_	_	_	_	_	_	_	_
+20	di	di	ADP	E	_	19	fixed	_	_
+21	i	il	DET	RD	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	23	det	_	_
+22	18	18	NUM	N	NumType=Card	23	nummod	_	_
+23	anni	anno	NOUN	S	Gender=Masc|Number=Plur	14	obl	_	SpaceAfter=No
+24	.	.	PUNCT	FS	_	14	punct	_	_
+
+# sent_id = 10
+# text = con la nuova legge, i bambini stranieri potranno diventare italiani in 2 modi.
+1	con	con	ADP	E	_	4	case	_	_
+2	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	4	det	_	_
+3	nuova	nuovo	ADJ	A	Gender=Fem|Number=Sing	4	amod	_	_
+4	legge	legge	NOUN	S	Gender=Fem|Number=Sing	10	obl	_	SpaceAfter=No
+5	,	,	PUNCT	FF	_	4	punct	_	_
+6	i	il	DET	RD	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	7	det	_	_
+7	bambini	bambino	NOUN	S	Gender=Masc|Number=Plur	10	nsubj	_	_
+8	stranieri	straniero	ADJ	A	Gender=Masc|Number=Plur	7	amod	_	_
+9	potranno	potere	AUX	VM	Mood=Ind|Number=Plur|Person=3|Tense=Fut|VerbForm=Fin	10	aux	_	_
+10	diventare	diventare	VERB	V	VerbForm=Inf	0	root	_	_
+11	italiani	italiano	NOUN	S	Gender=Masc|Number=Plur	10	obj	_	_
+12	in	in	ADP	E	_	14	case	_	_
+13	2	2	NUM	N	NumType=Card	14	nummod	_	_
+14	modi	mode	NOUN	S	Gender=Masc|Number=Plur	10	obl	_	SpaceAfter=No
+15	.	.	PUNCT	FS	_	10	punct	_	_
+
+# sent_id = 11
+# text = il primo modo si chiama ius
+1	il	il	DET	RD	Definite=Def|Gender=Masc|Number=Sing|PronType=Art	3	det	_	_
+2	primo	primo	ADJ	NO	Gender=Masc|Number=Sing|NumType=Ord	3	amod	_	_
+3	modo	modo	NOUN	S	Gender=Masc|Number=Sing	5	nsubj	_	_
+4	si	si	PRON	PC	Clitic=Yes|Person=3|PronType=Prs	5	expl	_	_
+5	chiama	chiamare	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	0	root	_	_
+6	ius	ius	X	SW	Foreign=Yes	5	xcomp	_	SpacesAfter=\n
+
