@@ -22,18 +22,52 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
+     <widget class="QGroupBox" name="groupBox">
+      <property name="title">
+       <string>Filtra con RegEx</string>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <widget class="QLineEdit" name="cfilter"/>
+       </item>
+       <item>
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>Colonna:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="ccolumn"/>
+       </item>
+       <item>
+        <widget class="QPushButton" name="dofiltra">
+         <property name="text">
+          <string>Filtra</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
      <widget class="QTableWidget" name="corpus">
       <attribute name="horizontalHeaderDefaultSectionSize">
        <number>150</number>
       </attribute>
       <column>
        <property name="text">
-        <string>Corpus originale</string>
+        <string>ID corpus</string>
        </property>
       </column>
       <column>
        <property name="text">
-        <string>Corpus lemmato</string>
+        <string>Originale</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Lemmato</string>
        </property>
       </column>
       <column>
@@ -76,14 +110,27 @@
      <addaction name="actionDa_file_txt"/>
      <addaction name="actionDa_file_zip"/>
     </widget>
+    <widget class="QMenu" name="menuEsporta">
+     <property name="title">
+      <string>Esporta</string>
+     </property>
+     <addaction name="actionEsporta_corpus_in_CSV_unico"/>
+     <addaction name="actionEsporta_corpus_in_un_CSV_per_ogni_ID"/>
+    </widget>
     <addaction name="actionApri"/>
     <addaction name="actionSalva"/>
     <addaction name="menuImporta_corpus"/>
+    <addaction name="menuEsporta"/>
+    <addaction name="separator"/>
+    <addaction name="actionChiudi"/>
+    <addaction name="actionEsci"/>
    </widget>
    <widget class="QMenu" name="menuModifica">
     <property name="title">
      <string>&amp;Modifica</string>
     </property>
+    <addaction name="actionEsporta_vista_attuale_in_CSV"/>
+    <addaction name="actionRimuovi_vista_attuale_dal_corpus"/>
    </widget>
    <widget class="QMenu" name="menuStrumenti">
     <property name="title">
@@ -113,12 +160,12 @@
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionApri">
    <property name="text">
-    <string>Apri</string>
+    <string>Apri progetto</string>
    </property>
   </action>
   <action name="actionSalva">
    <property name="text">
-    <string>Salva</string>
+    <string>Salva progetto</string>
    </property>
   </action>
   <action name="actionDa_file_txt">
@@ -149,6 +196,36 @@
   <action name="actionConta_occorrenze">
    <property name="text">
     <string>Conta occorrenze</string>
+   </property>
+  </action>
+  <action name="actionEsporta_corpus_in_CSV_unico">
+   <property name="text">
+    <string>Esporta corpus in CSV unico</string>
+   </property>
+  </action>
+  <action name="actionEsporta_corpus_in_un_CSV_per_ogni_ID">
+   <property name="text">
+    <string>Esporta corpus in un CSV per ogni ID</string>
+   </property>
+  </action>
+  <action name="actionChiudi">
+   <property name="text">
+    <string>Chiudi</string>
+   </property>
+  </action>
+  <action name="actionEsci">
+   <property name="text">
+    <string>Esci</string>
+   </property>
+  </action>
+  <action name="actionEsporta_vista_attuale_in_CSV">
+   <property name="text">
+    <string>Esporta vista attuale in CSV</string>
+   </property>
+  </action>
+  <action name="actionRimuovi_vista_attuale_dal_corpus">
+   <property name="text">
+    <string>Rimuovi vista attuale dal corpus</string>
    </property>
   </action>
  </widget>
