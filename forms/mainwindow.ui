@@ -47,6 +47,13 @@
          </property>
         </widget>
        </item>
+       <item>
+        <widget class="QPushButton" name="cancelfiltro">
+         <property name="text">
+          <string>Annulla filtro</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
     </item>
@@ -72,7 +79,42 @@
       </column>
       <column>
        <property name="text">
-        <string>PoS tag</string>
+        <string>U PoS</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>X PoS</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>FEATS</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Head</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>DepRel</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Deps</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Varie</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>ID parola</string>
        </property>
       </column>
      </widget>
@@ -83,6 +125,13 @@
        <widget class="QPushButton" name="replace_in_corpus">
         <property name="text">
          <string>Sostituisci nel corpus con RegEx</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="delselected">
+        <property name="text">
+         <string>Elimina righe selezionate</string>
         </property>
        </widget>
       </item>
@@ -150,6 +199,7 @@
      <string>Analisi</string>
     </property>
     <addaction name="actionConta_occorrenze"/>
+    <addaction name="actionStatistiche_con_VdB"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuModifica"/>
@@ -226,6 +276,11 @@
   <action name="actionRimuovi_vista_attuale_dal_corpus">
    <property name="text">
     <string>Rimuovi vista attuale dal corpus</string>
+   </property>
+  </action>
+  <action name="actionStatistiche_con_VdB">
+   <property name="text">
+    <string>Statistiche con VdB</string>
    </property>
   </action>
  </widget>

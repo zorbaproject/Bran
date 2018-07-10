@@ -1,6 +1,8 @@
 forms/mainwindow.ui
 forms/regex_replace.py
 forms/regex_replace.ui
+forms/tableeditor.py
+forms/tableeditor.ui
 forms/texteditor.py
 forms/texteditor.ui
 forms/url2corpus.py

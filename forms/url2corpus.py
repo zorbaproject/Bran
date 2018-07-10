@@ -40,11 +40,11 @@ class TXTdownloader(QThread):
         self.visitedfile = ""
         self.firstrun = True
         self.vdb = []
-        self.vdbfile = os.path.abspath(os.path.dirname(sys.argv[0]))+"../dizionario/vdb2016.txt"
+        self.vdbfile = os.path.abspath(os.path.dirname(sys.argv[0]))+"/dizionario/vdb2016.txt"
         if os.path.isfile(self.vdbfile):
             self.vdb = [line.rstrip('\n') for line in open(self.vdbfile)]
         else:
-            QMessageBox.warning(self, "Errore", "Non ho trovato il VdB 2016 in "+self.vdbfile)
+            QMessageBox.warning(self.w, "Errore", "Non ho trovato il VdB 2016 in "+self.vdbfile)
         self.todate = datetime.datetime.now().strftime('%Y-%m-%d')
 
     def __del__(self):

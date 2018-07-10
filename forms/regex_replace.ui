@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>360</height>
+    <height>370</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -82,6 +82,27 @@ p, li { white-space: pre-wrap; }
    </item>
    <item>
     <widget class="QLineEdit" name="dest"/>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>Cerca in</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="colcombo"/>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="colcheck">
+       <property name="text">
+        <string>Tutte le colonne</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
