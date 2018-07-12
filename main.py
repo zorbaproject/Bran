@@ -7,6 +7,12 @@ import pip
 import sys
 import os
 import re
+import urllib.request
+import urllib.parse
+import html
+import datetime
+import json
+from socket import timeout
 
 try:
     from PySide2.QtWidgets import QApplication
@@ -21,21 +27,22 @@ except:
     except:
         sys.exit(1)
 
-try:
-    from ufal.udpipe import Model, Pipeline, ProcessingError
-except:
-    try:
-        from tkinter import messagebox
-        thispkg = "UDPipe"
-        messagebox.showinfo("Installazione, attendi prego", "Sto per installare "+ thispkg +" e ci vorrà del tempo. Premi Ok e vai a prenderti un caffè.")
-        pip.main(["install", "ufal.udpipe"])
-        from ufal.udpipe import Model, Pipeline, ProcessingError
-    except:
-        sys.exit(1)
+#try:
+#    from ufal.udpipe import Model, Pipeline, ProcessingError
+#except:
+#    try:
+#        from tkinter import messagebox
+#        thispkg = "UDPipe"
+#        messagebox.showinfo("Installazione, attendi prego", "Sto per installare "+ thispkg +" e ci vorrà del tempo. Premi Ok e vai a prenderti un caffè.")
+#        pip.main(["install", "ufal.udpipe"])
+#        from ufal.udpipe import Model, Pipeline, ProcessingError
+#    except:
+#        sys.exit(1)
 
 
 from PySide2.QtUiTools import QUiLoader
 from PySide2.QtCore import QFile
+from PySide2.QtCore import Qt
 from PySide2.QtWidgets import QLabel
 from PySide2.QtWidgets import QFileDialog
 from PySide2.QtWidgets import QInputDialog
@@ -43,11 +50,19 @@ from PySide2.QtWidgets import QMessageBox
 from PySide2.QtWidgets import QMainWindow
 from PySide2.QtWidgets import QTableWidget
 from PySide2.QtWidgets import QTableWidgetItem #QtGui?
+from PySide2.QtCore import QThread
+
+
 
 from forms import regex_replace
 from forms import url2corpus
 from forms import texteditor
 from forms import tableeditor
+from forms import tint
+
+
+
+
 
 class MainWindow(QMainWindow):
 
@@ -58,6 +73,7 @@ class MainWindow(QMainWindow):
         loader = QUiLoader(self)
         self.w = loader.load(file)
         self.setCentralWidget(self.w)
+        self.setWindowTitle("Bran")
         self.w.replace_in_corpus.clicked.connect(self.replaceCorpus)
         self.w.dofiltra.clicked.connect(self.dofiltra)
         self.w.cancelfiltro.clicked.connect(self.cancelfiltro)
@@ -68,24 +84,15 @@ class MainWindow(QMainWindow):
         self.w.actionEditor_di_testo.triggered.connect(self.texteditor)
         self.w.actionStatistiche_con_VdB.triggered.connect(self.statisticheconvdb)
         # TODO: importa da file zip: naviga un archivio come fosse una cartella
-        self.istdmodel = os.path.abspath(os.path.dirname(sys.argv[0]))+"/udpipe/UD_Italian-ISDT/nob.udpipe"
-        self.model = Model.load(self.istdmodel)
-        if not self.model:
-            QMessageBox.warning(self, "Errore", "Non ho trovato il modello italiano in "+self.istdmodel)
-        self.pipeline = Pipeline(self.model, "tokenize", Pipeline.DEFAULT, Pipeline.DEFAULT, "conllu")
-        #sys.stderr.write('Usage: %s input_format(tokenize|conllu|horizontal|vertical) output_format(conllu) model_file\n' % sys.argv[0])
-        self.UDerror = ProcessingError()
-        self.IDcorpuscol = 0
-        self.origcorpuscol = 1
-        self.lemmcorpuscol = 2
-        self.uposcorpuscol = 3
-        self.xposcorpuscol = 4
-        self.featcorpuscol = 5
-        self.headcorpuscol = 6
-        self.deprelcorpuscol = 7
-        self.depscorpuscol = 8
-        self.misccorpuscol = 9
-        self.idwordcorpuscol = 10
+        self.corpuscols = {
+            'IDcorpus': 0,
+            'Orig': 1,
+            'Lemma': 2,
+            'pos': 3,
+            'ner': 4,
+            'feat': 5,
+            'IDword': 6
+        }
         self.enumeratecolumns(self.w.ccolumn)
 
     def replaceCorpus(self):
@@ -106,14 +113,26 @@ class MainWindow(QMainWindow):
                         self.setcelltocorpus(newstr, row, col)
 
     def contaoccorrenze(self):
-        #conta occorrenze: https://pastebin.com/0tPNVACe
         thisname = []
         for col in range(self.w.corpus.columnCount()):
             thisname.append(self.w.corpus.horizontalHeaderItem(col).text())
         column = QInputDialog.getItem(self, "Scegli la colonna", "Su quale colonna devo contare le occorrenze?",thisname,current=0,editable=False)
         col = thisname.index(column[0])
+        TBdialog = tableeditor.Form(self)
+        TBdialog.addcolumn(column[0], 0)
+        TBdialog.addcolumn("Occorrenze", 1)
         for row in range(self.w.corpus.rowCount()):
-            self.w.corpus.item(row,col).text()
+            thistext = self.w.corpus.item(row,col).text()
+            tbitem = TBdialog.w.tableWidget.findItems(thistext,Qt.MatchExactly)
+            if len(tbitem)>0:
+                tbrow = tbitem[0].row()
+                tbval = int(TBdialog.w.tableWidget.item(tbrow,1).text())+1
+                TBdialog.setcelltotable(str(tbval), tbrow, 1)
+            else:
+                TBdialog.addlinetotable(thistext, 0)
+                tbrow = TBdialog.w.tableWidget.rowCount()-1
+                TBdialog.setcelltotable("1", tbrow, 1)
+        TBdialog.exec()
 
     def web2corpus(self):
         w2Cdialog = url2corpus.Form(self)
@@ -145,81 +164,14 @@ class MainWindow(QMainWindow):
 
     def loadtxt(self):
         fileNames = QFileDialog.getOpenFileNames(self, "Apri file TXT", ".", "Text files (*.txt *.md)")[0]
-        fileID = 0
-        if self.w.corpus.rowCount() >0:
-            fileID = int(self.w.corpus.item(self.w.corpus.rowCount()-1,0).text().split("_")[0])
-        for fileName in fileNames:
-            if not fileName == "":
-                if os.path.isfile(fileName):
-                    QApplication.processEvents()
-                    fileID = fileID+1
-                    text_file = open(fileName, "r")
-                    lines = text_file.read() #.split('\n')
-                    text_file.close()
-                    self.w.statusbar.showMessage("ATTENDI: sto lavorando su "+fileName)
-                    self.text2corpus(lines, str(fileID)+"_"+os.path.basename(fileName))
+        self.w.statusbar.showMessage("ATTENDI: Sto importando i file txt nel corpus...")
+        self.TCThread = tint.TintCorpus(self.w, fileNames, self.corpuscols)
+        self.TCThread.finished.connect(self.txtloadingstopped)
+        self.TCThread.start()
+
+    def txtloadingstopped(self):
+        #self.w.statusbar.showMessage("Importazione TXT Terminata", 10)
         self.w.statusbar.clearMessage()
-
-
-    def text2corpus(self, text, IDcorpus):
-        itext = ''.join(text)
-        processed = self.pipeline.process(itext, self.UDerror)
-        if self.UDerror.occurred():
-            print(self.UDerror.message)
-        #print(processed)
-        processed = processed.split('\n')
-        oldorig = ""
-        origempty = 0
-        for rowtext in processed:
-            if len(rowtext)>0 and rowtext[0]!="#" and rowtext[0]!="_":
-                QApplication.processEvents()
-                rowN = -1
-                rowlst = rowtext.split("\t")
-                if len(rowlst)>0:
-                    wID = rowlst[0]
-                    if "-" in wID:
-                        if len(rowlst)>1:
-                            oldorig = rowlst[1]
-                        rowlst = ""
-                        origempty = int(wID.split("-")[1]) - int(wID.split("-")[0])
-                    else:
-                        rowN = self.addlinetocorpus(IDcorpus, self.IDcorpuscol)
-                if len(rowlst)>0:
-                    idwordcorpus = rowlst[0]
-                    self.setcelltocorpus(idwordcorpus, rowN, self.idwordcorpuscol)
-                if len(rowlst)>1:
-                    origcorpus = rowlst[1]
-                    if oldorig != "":
-                        origcorpus = oldorig
-                        oldorig = ""
-                    elif origempty > 0:
-                        origcorpus = ""
-                        origempty = origempty-1
-                    self.setcelltocorpus(origcorpus, rowN, self.origcorpuscol)
-                if len(rowlst)>2:
-                    lemmcorpus = rowlst[2]
-                    self.setcelltocorpus(lemmcorpus, rowN, self.lemmcorpuscol)
-                if len(rowlst)>3:
-                    uposcorpus = rowlst[3]
-                    self.setcelltocorpus(uposcorpus, rowN, self.uposcorpuscol)
-                if len(rowlst)>4:
-                    xposcorpus = rowlst[4]
-                    self.setcelltocorpus(xposcorpus, rowN, self.xposcorpuscol)
-                if  len(rowlst)>5:
-                    featcorpus = rowlst[5]
-                    self.setcelltocorpus(featcorpus, rowN, self.featcorpuscol)
-                if len(rowlst)>6:
-                    headcorpus = rowlst[6]
-                    self.setcelltocorpus(headcorpus, rowN, self.headcorpuscol)
-                if len(rowlst)>7:
-                    deprelcorpus = rowlst[7]
-                    self.setcelltocorpus(deprelcorpus, rowN, self.deprelcorpuscol)
-                if len(rowlst)>8:
-                    depscorpus = rowlst[8]
-                    self.setcelltocorpus(depscorpus, rowN, self.depscorpuscol)
-                if len(rowlst)>9:
-                    misccorpus = rowlst[9]
-                    self.setcelltocorpus(misccorpus, rowN, self.misccorpuscol)
 
     def addlinetocorpus(self, text, column):
         row = self.w.corpus.rowCount()
@@ -234,7 +186,6 @@ class MainWindow(QMainWindow):
         titem = QTableWidgetItem()
         titem.setText(text)
         self.w.corpus.setItem(row, column, titem)
-        #self.w.corpus.setCurrentCell(row, column)
 
     def texteditor(self):
         te = texteditor.TextEditor()

@@ -79,37 +79,17 @@
       </column>
       <column>
        <property name="text">
-        <string>U PoS</string>
+        <string>Tag PoS</string>
        </property>
       </column>
       <column>
        <property name="text">
-        <string>X PoS</string>
+        <string>Tag NER</string>
        </property>
       </column>
       <column>
        <property name="text">
-        <string>FEATS</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Head</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>DepRel</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Deps</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Varie</string>
+        <string>Morfologia</string>
        </property>
       </column>
       <column>
