@@ -82,6 +82,7 @@ class TintCorpus(QThread):
         self.fileNames = fnames
         self.corpuscols = corpcol
         self.Tintaddr = myTintAddr
+        self.outputcsv = ""
         self.loadvariables()
         self.setTerminationEnabled(True)
 
@@ -150,13 +151,19 @@ class TintCorpus(QThread):
                 myarray = {'sentences': []}
             for sentence in myarray["sentences"]:
                 for token in sentence["tokens"]:
-                    rowN = self.addlinetocorpus(IDcorpus, self.corpuscols["IDcorpus"])
-                    self.setcelltocorpus(str(token["index"]), rowN, self.corpuscols["IDword"])
-                    self.setcelltocorpus(str(token["originalText"]), rowN, self.corpuscols["Orig"])
-                    self.setcelltocorpus(str(token["lemma"]), rowN, self.corpuscols["Lemma"])
-                    self.setcelltocorpus(str(token["pos"]), rowN, self.corpuscols["pos"])
-                    self.setcelltocorpus(str(token["ner"]), rowN, self.corpuscols["ner"])
-                    self.setcelltocorpus(str(token["full_morpho"]), rowN, self.corpuscols["feat"])
+                    if self.outputcsv == "":
+                        rowN = self.addlinetocorpus(IDcorpus, self.corpuscols["IDcorpus"])
+                        self.setcelltocorpus(str(token["index"]), rowN, self.corpuscols["IDword"])
+                        self.setcelltocorpus(str(token["originalText"]), rowN, self.corpuscols["Orig"])
+                        self.setcelltocorpus(str(token["lemma"]), rowN, self.corpuscols["Lemma"])
+                        self.setcelltocorpus(str(token["pos"]), rowN, self.corpuscols["pos"])
+                        self.setcelltocorpus(str(token["ner"]), rowN, self.corpuscols["ner"])
+                        self.setcelltocorpus(str(token["full_morpho"]), rowN, self.corpuscols["feat"])
+                    else:
+                        fullline = IDcorpus + "\t" + str(token["originalText"]) + "\t" + str(token["lemma"]) + "\t" + str(token["pos"]) + "\t" + str(token["ner"]) + "\t" + str(token["full_morpho"]) + "\t" + str(token["index"])
+                        fdatefile = self.outputcsv
+                        with open(fdatefile, "a") as myfile:
+                            myfile.write(fullline+"\n")
 
     #def runServer(self):
     #    self.TThread = TintRunner(self.w, "")
@@ -189,84 +196,6 @@ class TintCorpus(QThread):
             thishtml = str(ft)
         return thishtml
 
-
-    def text2corpusUDPIPE(self, text, IDcorpus):
-        self.istdmodel = os.path.abspath(os.path.dirname(sys.argv[0]))+"/udpipe/UD_Italian-ISDT/nob.udpipe"
-        self.model = Model.load(self.istdmodel)
-        if not self.model:
-            QMessageBox.warning(self, "Errore", "Non ho trovato il modello italiano in "+self.istdmodel)
-        self.pipeline = Pipeline(self.model, "tokenize", Pipeline.DEFAULT, Pipeline.DEFAULT, "conllu")
-        #sys.stderr.write('Usage: %s input_format(tokenize|conllu|horizontal|vertical) output_format(conllu) model_file\n' % sys.argv[0])
-        self.UDerror = ProcessingError()
-        self.IDcorpuscol = 0
-        self.origcorpuscol = 1
-        self.lemmcorpuscol = 2
-        self.uposcorpuscol = 3
-        self.xposcorpuscol = 4
-        self.featcorpuscol = 5
-        self.headcorpuscol = 6
-        self.deprelcorpuscol = 7
-        self.depscorpuscol = 8
-        self.misccorpuscol = 9
-        self.idwordcorpuscol = 10
-        itext = ''.join(text)
-        processed = self.pipeline.process(itext, self.UDerror)
-        if self.UDerror.occurred():
-            print(self.UDerror.message)
-        #print(processed)
-        processed = processed.split('\n')
-        oldorig = ""
-        origempty = 0
-        for rowtext in processed:
-            if len(rowtext)>0 and rowtext[0]!="#" and rowtext[0]!="_":
-                QApplication.processEvents()
-                rowN = -1
-                rowlst = rowtext.split("\t")
-                if len(rowlst)>0:
-                    wID = rowlst[0]
-                    if "-" in wID:
-                        if len(rowlst)>1:
-                            oldorig = rowlst[1]
-                        rowlst = ""
-                        origempty = int(wID.split("-")[1]) - int(wID.split("-")[0])
-                    else:
-                        rowN = self.addlinetocorpus(IDcorpus, self.IDcorpuscol)
-                if len(rowlst)>0:
-                    idwordcorpus = rowlst[0]
-                    self.setcelltocorpus(idwordcorpus, rowN, self.idwordcorpuscol)
-                if len(rowlst)>1:
-                    origcorpus = rowlst[1]
-                    if oldorig != "":
-                        origcorpus = oldorig
-                        oldorig = ""
-                    elif origempty > 0:
-                        origcorpus = ""
-                        origempty = origempty-1
-                    self.setcelltocorpus(origcorpus, rowN, self.origcorpuscol)
-                if len(rowlst)>2:
-                    lemmcorpus = rowlst[2]
-                    self.setcelltocorpus(lemmcorpus, rowN, self.lemmcorpuscol)
-                if len(rowlst)>3:
-                    uposcorpus = rowlst[3]
-                    self.setcelltocorpus(uposcorpus, rowN, self.uposcorpuscol)
-                if len(rowlst)>4:
-                    xposcorpus = rowlst[4]
-                    self.setcelltocorpus(xposcorpus, rowN, self.xposcorpuscol)
-                if  len(rowlst)>5:
-                    featcorpus = rowlst[5]
-                    self.setcelltocorpus(featcorpus, rowN, self.featcorpuscol)
-                if len(rowlst)>6:
-                    headcorpus = rowlst[6]
-                    self.setcelltocorpus(headcorpus, rowN, self.headcorpuscol)
-                if len(rowlst)>7:
-                    deprelcorpus = rowlst[7]
-                    self.setcelltocorpus(deprelcorpus, rowN, self.deprelcorpuscol)
-                if len(rowlst)>8:
-                    depscorpus = rowlst[8]
-                    self.setcelltocorpus(depscorpus, rowN, self.depscorpuscol)
-                if len(rowlst)>9:
-                    misccorpus = rowlst[9]
-                    self.setcelltocorpus(misccorpus, rowN, self.misccorpuscol)
 
 
 class Form(QDialog):
@@ -304,7 +233,7 @@ class Form(QDialog):
         self.w.address.setText("localhost") #http://localhost:8012/tint
 
     def loadjava(self):
-        QMessageBox.information(self, "Attenzione", "Per qualche motivo, Tint non funziona con Java di Oracle, ma solo con OpenJDK. Puoi scaricarlo da qui per Windows: <a href=\"https://download.java.net/java/GA/jdk10/10.0.1/fb4372174a714e6b8c52526dc134031e/10//openjdk-10.0.1_windows-x64_bin.tar.gz\">https://download.java.net/java/GA/jdk10/10.0.1/fb4372174a714e6b8c52526dc134031e/10//openjdk-10.0.1_windows-x64_bin.tar.gz</a>. Devi solo estrarre il file con 7Zip, non servono privilegi di amministrazione.")
+        QMessageBox.information(self, "Hai già Java?", "Se non hai Java puoi scaricarlo da qui per Windows: <a href=\"https://download.java.net/java/GA/jdk10/10.0.1/fb4372174a714e6b8c52526dc134031e/10//openjdk-10.0.1_windows-x64_bin.tar.gz\">https://download.java.net/java/GA/jdk10/10.0.1/fb4372174a714e6b8c52526dc134031e/10//openjdk-10.0.1_windows-x64_bin.tar.gz</a>. Devi solo estrarre il file con 7Zip, non servono privilegi di amministrazione. Poi, indica la posizione del fil java.exe (di solito nella cartella bin).")
         fileName = QFileDialog.getOpenFileName(self, "Trova Java", ".", "Java (*.exe)")[0]
         if fileName != "":
             self.w.java.setText(fileName)

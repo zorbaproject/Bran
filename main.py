@@ -84,7 +84,10 @@ class MainWindow(QMainWindow):
         self.w.delselected.clicked.connect(self.delselected)
         self.w.actionScarica_corpus_da_sito_web.triggered.connect(self.web2corpus)
         self.w.actionConta_occorrenze.triggered.connect(self.contaoccorrenze)
+        self.w.actionEsporta_corpus_in_CSV_unico.triggered.connect(self.salvaCSV)
         self.w.actionDa_file_txt.triggered.connect(self.loadtxt)
+        self.w.actionDa_file_JSON.triggered.connect(self.loadjson)
+        self.w.actionDa_file_CSV.triggered.connect(self.loadCSV)
         self.w.actionEditor_di_testo.triggered.connect(self.texteditor)
         self.w.actionStatistiche_con_VdB.triggered.connect(self.statisticheconvdb)
         # TODO: importa da file zip: naviga un archivio come fosse una cartella
@@ -97,6 +100,7 @@ class MainWindow(QMainWindow):
             'feat': 5,
             'IDword': 6
         }
+        self.separator = "\t"
         self.enumeratecolumns(self.w.ccolumn)
         QApplication.processEvents()
         self.alreadyChecked = False
@@ -140,7 +144,10 @@ class MainWindow(QMainWindow):
         TBdialog.addcolumn(column[0], 0)
         TBdialog.addcolumn("Occorrenze", 1)
         for row in range(self.w.corpus.rowCount()):
-            thistext = self.w.corpus.item(row,col).text()
+            try:
+                thistext = self.w.corpus.item(row,col).text()
+            except:
+                thistext = ""
             tbitem = TBdialog.w.tableWidget.findItems(thistext,Qt.MatchExactly)
             if len(tbitem)>0:
                 tbrow = tbitem[0].row()
@@ -151,6 +158,24 @@ class MainWindow(QMainWindow):
                 tbrow = TBdialog.w.tableWidget.rowCount()-1
                 TBdialog.setcelltotable("1", tbrow, 1)
         TBdialog.exec()
+
+    def salvaCSV(self):
+        fileName = QFileDialog.getSaveFileName(self, "Salva file CSV", ".", "Text files (*.csv *.txt)")[0]
+        if fileName != "":
+            csv = ""
+            for col in range(self.w.corpus.columnCount()):
+                if col > 0:
+                    csv = csv + self.separator
+                csv = csv + self.w.corpus.horizontalHeaderItem(col).text()
+            for row in range(self.w.corpus.rowCount()):
+                csv = csv + "\n"
+                for col in range(self.w.corpus.columnCount()):
+                    if col > 0:
+                        csv = csv + self.separator
+                    csv = csv + self.w.corpus.item(row,col).text()
+            text_file = open(fileName, "w")
+            text_file.write(csv)
+            text_file.close()
 
     def web2corpus(self):
         w2Cdialog = url2corpus.Form(self)
@@ -186,8 +211,66 @@ class MainWindow(QMainWindow):
             return
         self.w.statusbar.showMessage("ATTENDI: Sto importando i file txt nel corpus...")
         self.TCThread = tint.TintCorpus(self.w, fileNames, self.corpuscols, self.TintAddr)
+        QMessageBox.information(self, "Attenzione", "Per evitare di finire la memoria RAM a disposizione, è una buona idea salvare il corpus in un file CSV e importarlo successivamente. Ti verrà proposto di scegliere il nome del file su cui salvare il corpus, se vuoi comunque provare a importarlo direttamente in Bran non selezionare alcun file.")
+        self.TCThread.outputcsv = QFileDialog.getSaveFileName(self, "Salva come CSV", ".", "CSV files (*.txt *.csv)")[0]
+        if self.TCThread.outputcsv != "":
+            csvheader = ""
+            text_file = open(self.TCThread.outputcsv, "w")
+            text_file.write(csvheader)
+            text_file.close()
         self.TCThread.finished.connect(self.txtloadingstopped)
         self.TCThread.start()
+
+    def loadjson(self):
+        fileNames = QFileDialog.getOpenFileNames(self, "Apri file JSON", ".", "Json files (*.txt *.json)")[0]
+        fileID = 0
+        for fileName in fileNames:
+            if not fileName == "":
+                if os.path.isfile(fileName):
+                    if self.w.corpus.rowCount() >0:
+                        fileID = int(self.w.corpus.item(self.w.corpus.rowCount()-1,0).text().split("_")[0])
+                    #QApplication.processEvents()
+                    fileID = fileID+1
+                    text_file = open(fileName, "r")
+                    lines = text_file.read()
+                    text_file.close()
+                    IDcorpus = str(fileID)+"_"+os.path.basename(fileName)
+                    try:
+                        myarray = json.loads(lines)
+                    except:
+                        myarray = {'sentences': []}
+                    for sentence in myarray["sentences"]:
+                        for token in sentence["tokens"]:
+                            rowN = self.addlinetocorpus(IDcorpus, self.corpuscols["IDcorpus"])
+                            self.setcelltocorpus(str(token["index"]), rowN, self.corpuscols["IDword"])
+                            self.setcelltocorpus(str(token["originalText"]), rowN, self.corpuscols["Orig"])
+                            self.setcelltocorpus(str(token["lemma"]), rowN, self.corpuscols["Lemma"])
+                            self.setcelltocorpus(str(token["pos"]), rowN, self.corpuscols["pos"])
+                            self.setcelltocorpus(str(token["ner"]), rowN, self.corpuscols["ner"])
+                            self.setcelltocorpus(str(token["full_morpho"]), rowN, self.corpuscols["feat"])
+
+    def loadCSV(self):
+        fileNames = QFileDialog.getOpenFileNames(self, "Apri file CSV", ".", "Json files (*.txt *.csv)")[0]
+        fileID = 0
+        rowN = 0
+        for fileName in fileNames:
+            if not fileName == "":
+                if os.path.isfile(fileName):
+                    text_file = open(fileName, "r")
+                    lines = text_file.read()
+                    text_file.close()
+                    for line in lines.split('\n'):
+                        self.w.statusbar.showMessage("ATTENDI: Sto importando la riga numero "+str(rowN))
+                        QApplication.processEvents()
+                        #print(rowN)
+                        colN = 0
+                        for col in line.split('\t'):
+                            if colN == 0:
+                                if col == "":
+                                    break
+                                rowN = self.addlinetocorpus(col, self.corpuscols["IDcorpus"])
+                            self.setcelltocorpus(str(col), rowN, colN)
+                            colN = colN + 1
 
     def txtloadingstopped(self):
         self.w.statusbar.clearMessage()
@@ -209,6 +292,8 @@ class MainWindow(QMainWindow):
             self.alreadyChecked = True
             self.TintThread.start()
         else:
+            if platform.system() == "Windows":
+                QMessageBox.information(self, "Come usare il server su Windows", "Sembra che tu stia usando Windows. Su questo sistema, per utilizzare il server Tint, devi chiudere l'interfaccia di Bran, lasciando aperto solo il terminale. Poi puoi aprire di nuovo Bran (caricherà un altro terminale e una nuova interfaccia grafica).")
             self.w.statusbar.showMessage("OK, il server è attivo")
 
     def checkServer(self, ok = False):

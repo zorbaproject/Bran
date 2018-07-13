@@ -137,7 +137,8 @@
       <string>Importa corpus</string>
      </property>
      <addaction name="actionDa_file_txt"/>
-     <addaction name="actionDa_file_zip"/>
+     <addaction name="actionDa_file_JSON"/>
+     <addaction name="actionDa_file_CSV"/>
     </widget>
     <widget class="QMenu" name="menuEsporta">
      <property name="title">
@@ -261,6 +262,16 @@
   <action name="actionStatistiche_con_VdB">
    <property name="text">
     <string>Statistiche con VdB</string>
+   </property>
+  </action>
+  <action name="actionDa_file_JSON">
+   <property name="text">
+    <string>Da file JSON</string>
+   </property>
+  </action>
+  <action name="actionDa_file_CSV">
+   <property name="text">
+    <string>Da file CSV</string>
    </property>
   </action>
  </widget>
