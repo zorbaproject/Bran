@@ -54,18 +54,22 @@ class TintRunner(QThread):
         readystring = "TintServer - Pipeline loaded"  #"[HttpServer] Started"
         CLASSPATH = self.TintDir+"/*"
         args = [self.Java,"-classpath", CLASSPATH, "eu.fbk.dh.tint.runner.TintServer", "-p ",self.TintPort]
-        p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        while True:
-            lineb = p.stdout.readline()
-            line = str(lineb)
-            #print("++"+line+"++")
-            self.w.loglist.addItem(line)
-            self.w.loglist.setCurrentRow(self.w.loglist.count()-1)
-            QApplication.processEvents()
-            if readystring in line:
-                break
-        self.dataReceived.emit(True)
-        self.w.quit.clicked.emit()
+        print(self.Java)
+        try:
+            p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            while True:
+                lineb = p.stdout.readline()
+                line = str(lineb)
+                #print("++"+line+"++")
+                self.w.loglist.addItem(line)
+                self.w.loglist.setCurrentRow(self.w.loglist.count()-1)
+                QApplication.processEvents()
+                if readystring in line:
+                    break
+            self.dataReceived.emit(True)
+            self.w.quit.clicked.emit()
+        except:
+            self.dataReceived.emit(False)
 
 
 
@@ -277,6 +281,8 @@ class Form(QDialog):
         self.setLayout(layout)
         self.loadsettings()
         self.w.quit.clicked.connect(self.accept)
+        self.w.loadjava.clicked.connect(self.loadjava)
+        self.w.loadtint.clicked.connect(self.loadtint)
         self.setWindowTitle("Impostazioni di Tint")
 
     def loadsettings(self):
@@ -291,8 +297,19 @@ class Form(QDialog):
         else:
             self.w.java.setText("/usr/bin/java")
         if platform.system() == "Windows":
-            self.w.tintlib.setText(os.path.abspath(os.path.dirname(sys.argv[0]))+"\tint\lib")
+            self.w.tintlib.setText(os.path.abspath(os.path.dirname(sys.argv[0]))+"\\tint\\lib")
         else:
             self.w.tintlib.setText(os.path.abspath(os.path.dirname(sys.argv[0]))+"/tint/lib")
         self.w.port.setText("8012")
-        self.w.address.setText("http://localhost:8012/tint")
+        self.w.address.setText("localhost") #http://localhost:8012/tint
+
+    def loadjava(self):
+        QMessageBox.information(self, "Attenzione", "Per qualche motivo, Tint non funziona con Java di Oracle, ma solo con OpenJDK. Puoi scaricarlo da qui per Windows: <a href=\"https://download.java.net/java/GA/jdk10/10.0.1/fb4372174a714e6b8c52526dc134031e/10//openjdk-10.0.1_windows-x64_bin.tar.gz\">https://download.java.net/java/GA/jdk10/10.0.1/fb4372174a714e6b8c52526dc134031e/10//openjdk-10.0.1_windows-x64_bin.tar.gz</a>. Devi solo estrarre il file con 7Zip, non servono privilegi di amministrazione.")
+        fileName = QFileDialog.getOpenFileName(self, "Trova Java", ".", "Java (*.exe)")[0]
+        if fileName != "":
+            self.w.java.setText(fileName)
+
+    def loadtint(self):
+        fileName = QFileDialog.getExistingDirectory(self, "Seleziona la cartella di Tint")
+        if fileName != "":
+            self.w.tintlib.setText(fileName)

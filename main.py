@@ -3,6 +3,7 @@
 
 #would be nice: https://github.com/yarolig/pyqtc
 
+
 import pip
 import sys
 import os
@@ -26,7 +27,9 @@ except:
         #pip install --index-url=http://download.qt.io/snapshots/ci/pyside/5.9/latest/ pyside2 --trusted-host download.qt.io
         from PySide2.QtWidgets import QApplication
     except:
-        sys.exit(1)
+        from pip._internal import main
+        main(["install", "--index-url=http://download.qt.io/snapshots/ci/pyside/5.9/latest/", "pyside2", "--trusted-host", "download.qt.io"])
+        from PySide2.QtWidgets import QApplication
 
 #try:
 #    from ufal.udpipe import Model, Pipeline, ProcessingError
@@ -96,17 +99,18 @@ class MainWindow(QMainWindow):
         }
         self.enumeratecolumns(self.w.ccolumn)
         QApplication.processEvents()
+        self.alreadyChecked = False
         self.loadConfig()
 
     def loadConfig(self):
         self.TintSetdialog = tint.Form(self)
-        self.Java = self.TintSetdialog.w.java.text()
-        self.TintDir = self.TintSetdialog.w.tintlib.text()
-        self.TintPort = self.TintSetdialog.w.port.text()
-        self.TintAddr = self.TintSetdialog.w.address.text()
         self.TintSetdialog.w.start.clicked.connect(self.runServer)
         self.TintSetdialog.w.check.clicked.connect(self.checkServer)
         self.TintSetdialog.exec()
+        self.Java = self.TintSetdialog.w.java.text()
+        self.TintDir = self.TintSetdialog.w.tintlib.text()
+        self.TintPort = self.TintSetdialog.w.port.text()
+        self.TintAddr = "http://" + self.TintSetdialog.w.address.text() + ":" +self.TintPort +"/tint"
         #self.Java -classpath $_CLASSPATH eu.fbk.dh.tint.runner.TintServer -p self.TintPort
 
     def replaceCorpus(self):
@@ -190,21 +194,39 @@ class MainWindow(QMainWindow):
 
     def runServer(self, ok = False):
         if not ok:
+            if self.alreadyChecked:
+                QMessageBox.warning(self, "Errore", "Non ho trovato il server Tint.")
+                self.alreadyChecked = False
+                return
+            self.Java = self.TintSetdialog.w.java.text()
+            self.TintDir = self.TintSetdialog.w.tintlib.text()
+            self.TintPort = self.TintSetdialog.w.port.text()
+            self.TintAddr = "http://" + self.TintSetdialog.w.address.text() + ":" +self.TintPort +"/tint"
             self.w.statusbar.showMessage("ATTENDI: Devo avviare il server")
             self.TintThread = tint.TintRunner(self.TintSetdialog.w)
             self.TintThread.loadvariables(self.Java, self.TintDir, self.TintPort)
             self.TintThread.dataReceived.connect(lambda data: self.runServer(bool(data)))
+            self.alreadyChecked = True
             self.TintThread.start()
         else:
             self.w.statusbar.showMessage("OK, il server è attivo")
 
     def checkServer(self, ok = False):
         if not ok:
+            if self.alreadyChecked:
+                QMessageBox.warning(self, "Errore", "Non ho trovato il server Tint.")
+                self.alreadyChecked = False
+                return
+            self.Java = self.TintSetdialog.w.java.text()
+            self.TintDir = self.TintSetdialog.w.tintlib.text()
+            self.TintPort = self.TintSetdialog.w.port.text()
+            self.TintAddr = "http://" + self.TintSetdialog.w.address.text() + ":" +self.TintPort +"/tint"
             self.w.statusbar.showMessage("ATTENDI: sto controllando se il server sia attivo")
             QApplication.processEvents()
             self.TestThread = tint.TintCorpus(self.w, [], self.corpuscols, self.TintAddr)
             self.TestThread.finished.connect(self.txtloadingstopped)
             self.TestThread.dataReceived.connect(lambda data: self.checkServer(bool(data)))
+            self.alreadyChecked = True
             self.TestThread.start()
             while self.TestThread.isRunning():
                 time.sleep(10)
