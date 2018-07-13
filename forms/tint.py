@@ -4,15 +4,22 @@
 import sys
 import os
 import re
+from os import listdir
+from os.path import isfile, join
 import urllib.request
 import urllib.parse
 import html
 import datetime
 import json
+import subprocess
 from socket import timeout
+import platform
 
+from PySide2.QtWidgets import QApplication, QDialog, QLineEdit, QPushButton, QVBoxLayout
+from PySide2.QtUiTools import QUiLoader
 from PySide2.QtCore import QFile
 from PySide2.QtCore import Qt
+from PySide2.QtCore import Signal
 from PySide2.QtWidgets import QLabel
 from PySide2.QtWidgets import QFileDialog
 from PySide2.QtWidgets import QInputDialog
@@ -23,45 +30,59 @@ from PySide2.QtCore import QThread
 
 
 class TintRunner(QThread):
+    dataReceived = Signal(bool)
 
     def __init__(self, widget,addr = ""):
         QThread.__init__(self)
         self.w = widget
-        self.addr = addr
-        self.loadvariables()
         self.setTerminationEnabled(True)
 
-    def loadvariables(self):
-        #http://localhost:8012/tint?text=Barack%20Obama%20era%20il%20presidente%20degli%20Stati%20Uniti%20d%27America.
-        if self.addr == "":
-            self.addr = "http://localhost:8012/tint"
-        self.timeout = 300
+    def loadvariables(self, javavar, tintdirvar, tintportvar):
+        self.Java = javavar
+        self.TintDir = tintdirvar
+        self.TintPort = tintportvar
 
     def __del__(self):
         print("Shutting down thread")
 
-    def run(self, text):
-        #self.getJson(text)
+    def run(self):
         self.runServer()
         return
 
     def runServer(self):
         print("Eseguo il server Tint")
+        readystring = "TintServer - Pipeline loaded"  #"[HttpServer] Started"
+        CLASSPATH = self.TintDir+"/*"
+        args = [self.Java,"-classpath", CLASSPATH, "eu.fbk.dh.tint.runner.TintServer", "-p ",self.TintPort]
+        p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        while True:
+            lineb = p.stdout.readline()
+            line = str(lineb)
+            #print("++"+line+"++")
+            self.w.loglist.addItem(line)
+            self.w.loglist.setCurrentRow(self.w.loglist.count()-1)
+            QApplication.processEvents()
+            if readystring in line:
+                break
+        self.dataReceived.emit(True)
+        self.w.quit.clicked.emit()
+
 
 
 class TintCorpus(QThread):
+    dataReceived = Signal(bool)
 
-    def __init__(self, widget, fnames, corpcol):
+    def __init__(self, widget, fnames, corpcol, myTintAddr):
         QThread.__init__(self)
         self.w = widget
         self.fileNames = fnames
         self.corpuscols = corpcol
+        self.Tintaddr = myTintAddr
         self.loadvariables()
         self.setTerminationEnabled(True)
 
     def loadvariables(self):
         #http://localhost:8012/tint?text=Barack%20Obama%20era%20il%20presidente%20degli%20Stati%20Uniti%20d%27America.
-        self.Tintaddr = "http://localhost:8012/tint"
         self.TintTimeout = 300
         self.useragent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
 
@@ -69,7 +90,6 @@ class TintCorpus(QThread):
         print("Shutting down thread")
 
     def run(self):
-        #self.getJson(text)
         self.loadtxt()
         return
 
@@ -88,6 +108,14 @@ class TintCorpus(QThread):
                     #self.w.statusbar.showMessage("ATTENDI: sto lavorando su "+fileName)
                     self.text2corpusTINT(lines, str(fileID)+"_"+os.path.basename(fileName))
         #self.w.statusbar.clearMessage()
+        if self.fileNames == []:
+            testline = "Il gatto è sopra al tetto."
+            myres = self.getJson(testline)
+            try:
+                myarray = json.loads(myres)
+                self.dataReceived.emit(True)
+            except:
+                self.dataReceived.emit(False)
 
 
     def addlinetocorpus(self, text, column):
@@ -126,10 +154,10 @@ class TintCorpus(QThread):
                     self.setcelltocorpus(str(token["ner"]), rowN, self.corpuscols["ner"])
                     self.setcelltocorpus(str(token["full_morpho"]), rowN, self.corpuscols["feat"])
 
-    def runServer(self):
-        self.TThread = TintRunner(self.w, "")
-        #self.TThread.finished.connect(self.threadstopped)
-        self.TThread.start()
+    #def runServer(self):
+    #    self.TThread = TintRunner(self.w, "")
+    #    #self.TThread.finished.connect(self.threadstopped)
+    #    self.TThread.start()
 
     def getJson(self, text):
         #http://localhost:8012/tint?text=Barack%20Obama%20era%20il%20presidente%20degli%20Stati%20Uniti%20d%27America.
@@ -235,3 +263,36 @@ class TintCorpus(QThread):
                 if len(rowlst)>9:
                     misccorpus = rowlst[9]
                     self.setcelltocorpus(misccorpus, rowN, self.misccorpuscol)
+
+
+class Form(QDialog):
+    def __init__(self, parent=None):
+        super(Form, self).__init__(parent)
+        file = QFile("forms/tint.ui")
+        file.open(QFile.ReadOnly)
+        loader = QUiLoader()
+        self.w = loader.load(file)
+        layout = QVBoxLayout()
+        layout.addWidget(self.w)
+        self.setLayout(layout)
+        self.loadsettings()
+        self.w.quit.clicked.connect(self.accept)
+        self.setWindowTitle("Impostazioni di Tint")
+
+    def loadsettings(self):
+        if platform.system() == "Windows":
+            jdir = "C:/Program Files/Java/"
+            jfiles = os.listdir(jdir)
+            jre = "jre"
+            for fil in jfiles:
+                if "jre" in fil:
+                    jre = fil
+            self.w.java.setText(jdir+jre+"/bin/java.exe")
+        else:
+            self.w.java.setText("/usr/bin/java")
+        if platform.system() == "Windows":
+            self.w.tintlib.setText(os.path.abspath(os.path.dirname(sys.argv[0]))+"\tint\lib")
+        else:
+            self.w.tintlib.setText(os.path.abspath(os.path.dirname(sys.argv[0]))+"/tint/lib")
+        self.w.port.setText("8012")
+        self.w.address.setText("http://localhost:8012/tint")

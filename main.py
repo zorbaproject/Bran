@@ -11,6 +11,7 @@ import urllib.request
 import urllib.parse
 import html
 import datetime
+import time
 import json
 from socket import timeout
 
@@ -94,6 +95,19 @@ class MainWindow(QMainWindow):
             'IDword': 6
         }
         self.enumeratecolumns(self.w.ccolumn)
+        QApplication.processEvents()
+        self.loadConfig()
+
+    def loadConfig(self):
+        self.TintSetdialog = tint.Form(self)
+        self.Java = self.TintSetdialog.w.java.text()
+        self.TintDir = self.TintSetdialog.w.tintlib.text()
+        self.TintPort = self.TintSetdialog.w.port.text()
+        self.TintAddr = self.TintSetdialog.w.address.text()
+        self.TintSetdialog.w.start.clicked.connect(self.runServer)
+        self.TintSetdialog.w.check.clicked.connect(self.checkServer)
+        self.TintSetdialog.exec()
+        #self.Java -classpath $_CLASSPATH eu.fbk.dh.tint.runner.TintServer -p self.TintPort
 
     def replaceCorpus(self):
         repCdialog = regex_replace.Form(self)
@@ -164,14 +178,38 @@ class MainWindow(QMainWindow):
 
     def loadtxt(self):
         fileNames = QFileDialog.getOpenFileNames(self, "Apri file TXT", ".", "Text files (*.txt *.md)")[0]
+        if len(fileNames)<1:
+            return
         self.w.statusbar.showMessage("ATTENDI: Sto importando i file txt nel corpus...")
-        self.TCThread = tint.TintCorpus(self.w, fileNames, self.corpuscols)
+        self.TCThread = tint.TintCorpus(self.w, fileNames, self.corpuscols, self.TintAddr)
         self.TCThread.finished.connect(self.txtloadingstopped)
         self.TCThread.start()
 
     def txtloadingstopped(self):
-        #self.w.statusbar.showMessage("Importazione TXT Terminata", 10)
         self.w.statusbar.clearMessage()
+
+    def runServer(self, ok = False):
+        if not ok:
+            self.w.statusbar.showMessage("ATTENDI: Devo avviare il server")
+            self.TintThread = tint.TintRunner(self.TintSetdialog.w)
+            self.TintThread.loadvariables(self.Java, self.TintDir, self.TintPort)
+            self.TintThread.dataReceived.connect(lambda data: self.runServer(bool(data)))
+            self.TintThread.start()
+        else:
+            self.w.statusbar.showMessage("OK, il server è attivo")
+
+    def checkServer(self, ok = False):
+        if not ok:
+            self.w.statusbar.showMessage("ATTENDI: sto controllando se il server sia attivo")
+            QApplication.processEvents()
+            self.TestThread = tint.TintCorpus(self.w, [], self.corpuscols, self.TintAddr)
+            self.TestThread.finished.connect(self.txtloadingstopped)
+            self.TestThread.dataReceived.connect(lambda data: self.checkServer(bool(data)))
+            self.TestThread.start()
+            while self.TestThread.isRunning():
+                time.sleep(10)
+        else:
+            self.TintSetdialog.accept()
 
     def addlinetocorpus(self, text, column):
         row = self.w.corpus.rowCount()

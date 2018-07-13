@@ -5,6 +5,8 @@
 from PySide2.QtWidgets import QApplication, QDialog, QLineEdit, QPushButton, QVBoxLayout
 from PySide2.QtUiTools import QUiLoader
 from PySide2.QtWidgets import QLabel
+from PySide2.QtWidgets import QFileDialog
+from PySide2.QtWidgets import QInputDialog
 from PySide2.QtWidgets import QMessageBox
 from PySide2.QtCore import QFile
 from PySide2.QtWidgets import QTableWidget
@@ -24,9 +26,10 @@ class Form(QDialog):
         self.setLayout(layout)
         self.w.accepted.connect(self.isaccepted)
         self.w.rejected.connect(self.isrejected)
-        #self.w.apri.clicked.connect(self.doaiuto)
-        #self.w.salva.clicked.connect(self.dotest)
+        self.w.apricsv.clicked.connect(self.apriCSV)
+        self.w.salvacsv.clicked.connect(self.salvaCSV)
         self.setWindowTitle("Visualizzazione tabella")
+        self.separator = "\t"
 
     def isaccepted(self):
         self.accept()
@@ -36,7 +39,9 @@ class Form(QDialog):
     def addcolumn(self, text, column):
         cols = self.w.tableWidget.columnCount()
         self.w.tableWidget.setColumnCount(cols+1)
-        #self.w.tableWidget.horizontalHeaderItem(cols).setText(text)
+        titem = QTableWidgetItem()
+        titem.setText(text)
+        self.w.tableWidget.setHorizontalHeaderItem(cols, titem)
 
     def addlinetotable(self, text, column):
         row = self.w.tableWidget.rowCount()
@@ -51,3 +56,24 @@ class Form(QDialog):
         titem = QTableWidgetItem()
         titem.setText(text)
         self.w.tableWidget.setItem(row, column, titem)
+
+    def salvaCSV(self):
+        fileName = QFileDialog.getSaveFileName(self, "Salva file CSV", ".", "Text files (*.csv *.txt)")[0]
+        if fileName != "":
+            csv = ""
+            for col in range(self.w.tableWidget.columnCount()):
+                if col > 0:
+                    csv = csv + self.separator
+                csv = csv + self.w.tableWidget.horizontalHeaderItem(col).text()
+            for row in range(self.w.tableWidget.rowCount()):
+                csv = csv + "\n"
+                for col in range(self.w.tableWidget.columnCount()):
+                    if col > 0:
+                        csv = csv + self.separator
+                    csv = csv + self.w.tableWidget.item(row,col).text()
+            text_file = open(fileName, "w")
+            text_file.write(csv)
+            text_file.close()
+
+    def apriCSV(self):
+        print("Niente")

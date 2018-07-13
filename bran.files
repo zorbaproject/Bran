@@ -6,6 +6,7 @@ forms/tableeditor.ui
 forms/texteditor.py
 forms/texteditor.ui
 forms/tint.py
+forms/tint.ui
 forms/url2corpus.py
 forms/url2corpus.ui
 main.py
