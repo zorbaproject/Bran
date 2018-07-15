@@ -135,7 +135,7 @@ Cosa vuoi fare?
       <string notr="true">background-color: rgb(255, 0, 0);</string>
      </property>
      <property name="text">
-      <string>Chiudi</string>
+      <string>Non mi interessa Tint</string>
      </property>
     </widget>
    </item>

@@ -19,6 +19,7 @@ import json
 import subprocess
 from socket import timeout
 import platform
+import mmap
 
 try:
     from PySide2.QtWidgets import QApplication
@@ -62,63 +63,6 @@ from forms import tint
 from forms import progress
 #from forms import sessione
 
-
-class CSVloader(QThread):
-    dataReceived = Signal(bool)
-
-    def __init__(self, widget, myProgrdialog, fils):
-        QThread.__init__(self)
-        self.w = widget
-        self.Progrdialog = myProgrdialog
-        self.fileNames = fils
-        self.setTerminationEnabled(True)
-
-    def __del__(self):
-        print("Shutting down thread")
-
-    def run(self):
-        self.loadCSV()
-        return
-
-    def addlinetocorpus(self, text, column):
-        row = self.w.corpus.rowCount()
-        self.w.corpus.insertRow(row)
-        titem = QTableWidgetItem()
-        titem.setText(text)
-        self.w.corpus.setItem(row, column, titem)
-        self.w.corpus.setCurrentCell(row, column)
-        return row
-
-    def setcelltocorpus(self, text, row, column):
-        titem = QTableWidgetItem()
-        titem.setText(text)
-        self.w.corpus.setItem(row, column, titem)
-
-    def loadCSV(self):
-        fileID = 0
-        rowN = 0
-        for fileName in self.fileNames:
-            if not fileName == "":
-                if os.path.isfile(fileName):
-                    text_file = open(fileName, "r")
-                    lines = text_file.read()
-                    text_file.close()
-                    for line in lines.split('\n'):
-                        #self.w.statusbar.showMessage("ATTENDI: Sto importando la riga numero "+str(rowN))
-                        #self.Progrdialog.w.testo.setText("ATTENDI: Sto importando la riga numero "+str(rowN))
-                        QApplication.processEvents()
-                        #print(rowN)
-                        colN = 0
-                        for col in line.split('\t'):
-                            if self.Progrdialog.result == 0:
-                                return
-                            if colN == 0:
-                                if col == "":
-                                    break
-                                rowN = self.addlinetocorpus(str(col), 0) #self.corpuscols["IDcorpus"]
-                            self.setcelltocorpus(str(col), rowN, colN)
-                            colN = colN + 1
-        #self.Progrdialog.isaccepted()
 
 
 
@@ -303,38 +247,46 @@ class MainWindow(QMainWindow):
                             self.setcelltocorpus(str(token["ner"]), rowN, self.corpuscols["ner"])
                             self.setcelltocorpus(str(token["full_morpho"]), rowN, self.corpuscols["feat"])
 
-    def loadCSV2(self):
-        #apri finestra di progresso
-        self.Progrdialog = progress.Form(self)
-        self.Progrdialog.setModal(False)
-        fileNames = QFileDialog.getOpenFileNames(self, "Apri file CSV", ".", "Json files (*.txt *.csv)")[0]
-        self.CSVload = CSVloader(self.w, self.Progrdialog, fileNames)
-        self.CSVload.start()
-        self.Progrdialog.exec()
-
     def loadCSV(self):
+        fileNames = QFileDialog.getOpenFileNames(self, "Apri file CSV", ".", "File CSV (*.txt *.csv)")[0]
+        self.myprogress = progress.ProgressDialog(self.w)
+        self.myprogress.start()
+        self.CSVloader(fileNames, self.myprogress.Progrdialog)
+
+    def CSVloader(self, fileNames, Progrdialog):
         fileID = 0
-        rowN = 0
-        fileNames = QFileDialog.getOpenFileNames(self, "Apri file CSV", ".", "Json files (*.txt *.csv)")[0]
         for fileName in fileNames:
             if not fileName == "":
                 if os.path.isfile(fileName):
+                    totallines = self.linescount(fileName)
                     text_file = open(fileName, "r")
                     lines = text_file.read()
                     text_file.close()
+                    rowN = 0
                     for line in lines.split('\n'):
-                        self.w.statusbar.showMessage("ATTENDI: Sto importando la riga numero "+str(rowN))
-                        #self.Progrdialog.w.testo.setText("ATTENDI: Sto importando la riga numero "+str(rowN))
+                        Progrdialog.w.testo.setText("Sto importando la riga numero "+str(rowN))
+                        Progrdialog.w.progressBar.setValue(int((rowN/totallines)*100))
                         QApplication.processEvents()
-                        #print(rowN)
                         colN = 0
-                        for col in line.split('\t'):
+                        for col in line.split(self.separator):
+                            if Progrdialog.w.annulla.isChecked():
+                                return
                             if colN == 0:
                                 if col == "":
                                     break
                                 rowN = self.addlinetocorpus(str(col), 0) #self.corpuscols["IDcorpus"]
                             self.setcelltocorpus(str(col), rowN, colN)
                             colN = colN + 1
+            Progrdialog.accept()
+
+    def linescount(self, filename):
+        f = open(filename, "r+")
+        buf = mmap.mmap(f.fileno(), 0)
+        lines = 0
+        readline = buf.readline
+        while readline():
+            lines += 1
+        return lines
 
     def txtloadingstopped(self):
         self.w.statusbar.clearMessage()

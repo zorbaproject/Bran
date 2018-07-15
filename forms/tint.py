@@ -20,13 +20,13 @@ from PySide2.QtUiTools import QUiLoader
 from PySide2.QtCore import QFile
 from PySide2.QtCore import Qt
 from PySide2.QtCore import Signal
+from PySide2.QtCore import QThread
 from PySide2.QtWidgets import QLabel
 from PySide2.QtWidgets import QFileDialog
 from PySide2.QtWidgets import QInputDialog
 from PySide2.QtWidgets import QMessageBox
 from PySide2.QtWidgets import QTableWidget
 from PySide2.QtWidgets import QTableWidgetItem #QtGui?
-from PySide2.QtCore import QThread
 
 
 class TintRunner(QThread):

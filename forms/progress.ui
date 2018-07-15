@@ -36,6 +36,9 @@
      <property name="text">
       <string>Annulla</string>
      </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
     </widget>
    </item>
   </layout>
