@@ -21,6 +21,12 @@ from socket import timeout
 import platform
 import mmap
 
+arch = platform.architecture()[0]
+if arch != '64bit':
+    from tkinter import messagebox
+    messagebox.showinfo("Pericolo", "Sembra che tu stia utilizzando Python a 32bit. La maggioranza delle librerie moderne (come PySide2) utilizza codice a 64bit, per poter sfruttare appieno la RAM. Per favore, installa Python a 64bit.")
+    sys.exit(1)
+
 try:
     from PySide2.QtWidgets import QApplication
 except:
@@ -50,7 +56,7 @@ from PySide2.QtWidgets import QInputDialog
 from PySide2.QtWidgets import QMessageBox
 from PySide2.QtWidgets import QMainWindow
 from PySide2.QtWidgets import QTableWidget
-from PySide2.QtWidgets import QTableWidgetItem #QtGui?
+from PySide2.QtWidgets import QTableWidgetItem
 from PySide2.QtCore import QThread
 
 
@@ -61,7 +67,7 @@ from forms import texteditor
 from forms import tableeditor
 from forms import tint
 from forms import progress
-#from forms import sessione
+from forms import sessione
 
 
 
@@ -86,9 +92,11 @@ class MainWindow(QMainWindow):
         self.w.actionDa_file_txt.triggered.connect(self.loadtxt)
         self.w.actionDa_file_JSON.triggered.connect(self.loadjson)
         self.w.actionDa_file_CSV.triggered.connect(self.loadCSV)
+        self.w.actionConfigurazione_Tint.triggered.connect(self.loadConfig)
+        self.w.actionSalva.triggered.connect(self.salvaProgetto)
+        self.w.actionApri.triggered.connect(self.apriProgetto)
         self.w.actionEditor_di_testo.triggered.connect(self.texteditor)
         self.w.actionStatistiche_con_VdB.triggered.connect(self.statisticheconvdb)
-        # TODO: importa da file zip: naviga un archivio come fosse una cartella
         self.corpuscols = {
             'IDcorpus': 0,
             'Orig': 1,
@@ -102,7 +110,12 @@ class MainWindow(QMainWindow):
         self.enumeratecolumns(self.w.ccolumn)
         QApplication.processEvents()
         self.alreadyChecked = False
+        self.ImportingFile = False
+        self.sessionFile = ""
+        self.sessionDir = "."
+        self.loadSession()
         self.loadConfig()
+        self.txtloadingstopped()
 
     def loadConfig(self):
         self.TintSetdialog = tint.Form(self)
@@ -114,6 +127,19 @@ class MainWindow(QMainWindow):
         self.TintPort = self.TintSetdialog.w.port.text()
         self.TintAddr = "http://" + self.TintSetdialog.w.address.text() + ":" +self.TintPort +"/tint"
         #self.Java -classpath $_CLASSPATH eu.fbk.dh.tint.runner.TintServer -p self.TintPort
+
+    def loadSession(self):
+        seSdialog = sessione.Form(self)
+        seSdialog.exec()
+        self.sessionFile = ""
+        if seSdialog.result():
+            self.sessionFile = seSdialog.filesessione
+            if os.path.isfile(self.sessionFile):
+                self.sessionDir = os.path.abspath(os.path.dirname(self.sessionFile))
+
+    def apriProgetto(self):
+        self.loadSession()
+        self.txtloadingstopped()
 
     def replaceCorpus(self):
         repCdialog = regex_replace.Form(self)
@@ -139,6 +165,7 @@ class MainWindow(QMainWindow):
         column = QInputDialog.getItem(self, "Scegli la colonna", "Su quale colonna devo contare le occorrenze?",thisname,current=0,editable=False)
         col = thisname.index(column[0])
         TBdialog = tableeditor.Form(self)
+        TBdialog.sessionDir = self.sessionDir
         TBdialog.addcolumn(column[0], 0)
         TBdialog.addcolumn("Occorrenze", 1)
         for row in range(self.w.corpus.rowCount()):
@@ -157,23 +184,48 @@ class MainWindow(QMainWindow):
                 TBdialog.setcelltotable("1", tbrow, 1)
         TBdialog.exec()
 
+    def salvaProgetto(self):
+        if self.sessionFile == "":
+            fileName = QFileDialog.getSaveFileName(self, "Salva file CSV", self.sessionDir, "Text files (*.csv *.txt)")[0]
+            if fileName != "":
+                self.sessionFile = fileName
+        if self.sessionFile != "":
+            self.myprogress = progress.ProgressDialog(self.w)
+            self.myprogress.start()
+            self.CSVsaver(self.sessionFile, self.myprogress.Progrdialog, False)
+
     def salvaCSV(self):
-        fileName = QFileDialog.getSaveFileName(self, "Salva file CSV", ".", "Text files (*.csv *.txt)")[0]
+        fileName = QFileDialog.getSaveFileName(self, "Salva file CSV", self.sessionDir, "Text files (*.csv *.txt)")[0]
+        self.myprogress = progress.ProgressDialog(self.w)
+        self.myprogress.start()
+        self.CSVsaver(fileName, self.myprogress.Progrdialog, True)
+
+    def CSVsaver(self, fileName, Progrdialog, addheader = False):
         if fileName != "":
             csv = ""
-            for col in range(self.w.corpus.columnCount()):
-                if col > 0:
-                    csv = csv + self.separator
-                csv = csv + self.w.corpus.horizontalHeaderItem(col).text()
-            for row in range(self.w.corpus.rowCount()):
-                csv = csv + "\n"
+            if addheader:
                 for col in range(self.w.corpus.columnCount()):
                     if col > 0:
                         csv = csv + self.separator
-                    csv = csv + self.w.corpus.item(row,col).text()
+                    csv = csv + self.w.corpus.horizontalHeaderItem(col).text()
+            totallines = self.w.corpus.rowCount()
             text_file = open(fileName, "w")
             text_file.write(csv)
             text_file.close()
+            for row in range(self.w.corpus.rowCount()):
+                csv = csv + "\n"
+                Progrdialog.w.testo.setText("Sto salvando la riga numero "+str(row))
+                Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+                QApplication.processEvents()
+                for col in range(self.w.corpus.columnCount()):
+                    if Progrdialog.w.annulla.isChecked():
+                        return
+                    if col > 0:
+                        csv = csv + self.separator
+                    csv = csv + self.w.corpus.item(row,col).text()
+                with open(fileName, "a") as myfile:
+                    myfile.write(csv+"\n")
+            Progrdialog.accept()
 
     def web2corpus(self):
         w2Cdialog = url2corpus.Form(self)
@@ -204,13 +256,12 @@ class MainWindow(QMainWindow):
             self.w.corpus.setRowHidden(row, False)
 
     def loadtxt(self):
-        fileNames = QFileDialog.getOpenFileNames(self, "Apri file TXT", ".", "Text files (*.txt *.md)")[0]
+        fileNames = QFileDialog.getOpenFileNames(self, "Apri file TXT", self.sessionDir, "Text files (*.txt *.md)")[0]
         if len(fileNames)<1:
             return
         self.w.statusbar.showMessage("ATTENDI: Sto importando i file txt nel corpus...")
         self.TCThread = tint.TintCorpus(self.w, fileNames, self.corpuscols, self.TintAddr)
-        QMessageBox.information(self, "Attenzione", "Per evitare di finire la memoria RAM a disposizione, è una buona idea salvare il corpus in un file CSV e importarlo successivamente. Ti verrà proposto di scegliere il nome del file su cui salvare il corpus, se vuoi comunque provare a importarlo direttamente in Bran non selezionare alcun file.")
-        self.TCThread.outputcsv = QFileDialog.getSaveFileName(self, "Salva come CSV", ".", "CSV files (*.txt *.csv)")[0]
+        self.TCThread.outputcsv = self.sessionFile
         if self.TCThread.outputcsv != "":
             csvheader = ""
             text_file = open(self.TCThread.outputcsv, "w")
@@ -220,7 +271,8 @@ class MainWindow(QMainWindow):
         self.TCThread.start()
 
     def loadjson(self):
-        fileNames = QFileDialog.getOpenFileNames(self, "Apri file JSON", ".", "Json files (*.txt *.json)")[0]
+        QMessageBox.information(self, "Attenzione", "Caricare un file JSON prodotto manualmente può essere pericoloso: se i singoli paragrafi sono troppo grandi, il programma può andare in crash. Utilizza questa funzione solo se sai esattamente cosa stai facendo.")
+        fileNames = QFileDialog.getOpenFileNames(self, "Apri file JSON", self.sessionDir, "Json files (*.txt *.json)")[0]
         fileID = 0
         for fileName in fileNames:
             if not fileName == "":
@@ -248,17 +300,29 @@ class MainWindow(QMainWindow):
                             self.setcelltocorpus(str(token["full_morpho"]), rowN, self.corpuscols["feat"])
 
     def loadCSV(self):
-        fileNames = QFileDialog.getOpenFileNames(self, "Apri file CSV", ".", "File CSV (*.txt *.csv)")[0]
-        self.myprogress = progress.ProgressDialog(self.w)
-        self.myprogress.start()
-        self.CSVloader(fileNames, self.myprogress.Progrdialog)
+        if self.ImportingFile == False:
+            fileNames = QFileDialog.getOpenFileNames(self, "Apri file CSV", self.sessionDir, "File CSV (*.txt *.csv)")[0]
+            self.myprogress = progress.ProgressDialog(self.w)
+            self.myprogress.start()
+            self.ImportingFile = True
+            self.CSVloader(fileNames, self.myprogress.Progrdialog)
 
     def CSVloader(self, fileNames, Progrdialog):
         fileID = 0
         for fileName in fileNames:
             if not fileName == "":
                 if os.path.isfile(fileName):
-                    totallines = self.linescount(fileName)
+                    if not os.path.getsize(fileName) > 0:
+                        #break
+                        Progrdialog.reject()
+                        self.ImportingFile = False
+                        return
+                    try:
+                        totallines = self.linescount(fileName)
+                    except:
+                        Progrdialog.reject()
+                        self.ImportingFile = False
+                        return
                     text_file = open(fileName, "r")
                     lines = text_file.read()
                     text_file.close()
@@ -270,6 +334,8 @@ class MainWindow(QMainWindow):
                         colN = 0
                         for col in line.split(self.separator):
                             if Progrdialog.w.annulla.isChecked():
+                                Progrdialog.reject()
+                                self.ImportingFile = False
                                 return
                             if colN == 0:
                                 if col == "":
@@ -277,7 +343,8 @@ class MainWindow(QMainWindow):
                                 rowN = self.addlinetocorpus(str(col), 0) #self.corpuscols["IDcorpus"]
                             self.setcelltocorpus(str(col), rowN, colN)
                             colN = colN + 1
-            Progrdialog.accept()
+        Progrdialog.accept()
+        self.ImportingFile = False
 
     def linescount(self, filename):
         f = open(filename, "r+")
@@ -290,6 +357,23 @@ class MainWindow(QMainWindow):
 
     def txtloadingstopped(self):
         self.w.statusbar.clearMessage()
+        if self.sessionFile != "" and self.ImportingFile == False:
+            if os.path.isfile(self.sessionFile):
+                if not os.path.getsize(self.sessionFile) > 1:
+                    return
+            try:
+                self.myprogress = progress.ProgressDialog(self.w)
+                self.myprogress.start()
+                self.ImportingFile = True
+                fileNames = ['']
+                fileNames[0] = self.sessionFile
+                self.CSVloader(fileNames, self.myprogress.Progrdialog)
+            except:
+                try:
+                    self.myprogress.reject()
+                    self.ImportingFile = False
+                except:
+                    return
 
     def runServer(self, ok = False):
         if not ok:
@@ -322,10 +406,8 @@ class MainWindow(QMainWindow):
             self.TintDir = self.TintSetdialog.w.tintlib.text()
             self.TintPort = self.TintSetdialog.w.port.text()
             self.TintAddr = "http://" + self.TintSetdialog.w.address.text() + ":" +self.TintPort +"/tint"
-            self.w.statusbar.showMessage("ATTENDI: sto controllando se il server sia attivo")
             QApplication.processEvents()
             self.TestThread = tint.TintCorpus(self.w, [], self.corpuscols, self.TintAddr)
-            self.TestThread.finished.connect(self.txtloadingstopped)
             self.TestThread.dataReceived.connect(lambda data: self.checkServer(bool(data)))
             self.alreadyChecked = True
             self.TestThread.start()

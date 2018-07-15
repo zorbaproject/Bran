@@ -22,6 +22,7 @@ from PySide2.QtCore import Qt
 from PySide2.QtCore import Signal
 from PySide2.QtCore import QThread
 from PySide2.QtWidgets import QLabel
+from PySide2.QtWidgets import QLineEdit
 from PySide2.QtWidgets import QFileDialog
 from PySide2.QtWidgets import QInputDialog
 from PySide2.QtWidgets import QMessageBox
@@ -107,12 +108,22 @@ class TintCorpus(QThread):
                         fileID = int(self.w.corpus.item(self.w.corpus.rowCount()-1,0).text().split("_")[0])
                     #QApplication.processEvents()
                     fileID = fileID+1
-                    text_file = open(fileName, "r")
-                    lines = text_file.read()
-                    text_file.close()
-                    #self.w.statusbar.showMessage("ATTENDI: sto lavorando su "+fileName)
+                    lines = ""
+                    try:
+                        text_file = open(fileName, "r")
+                        lines = text_file.read()
+                        text_file.close()
+                    except:
+                        predefEncode = "ISO-8859-15"
+                        #https://pypi.org/project/chardet/
+                        myencoding = QInputDialog.getText(self.w, "Scegli la codifica", "Sembra che questo file non sia codificato in UTF-8. Vuoi provare a specificare una codifica diversa?", QLineEdit.Normal, predefEncode)
+                        try:
+                            text_file = open(fileName, "r", encoding=myencoding[0])
+                            lines = text_file.read()
+                            text_file.close()
+                        except:
+                           return
                     self.text2corpusTINT(lines, str(fileID)+"_"+os.path.basename(fileName))
-        #self.w.statusbar.clearMessage()
         if self.fileNames == []:
             testline = "Il gatto è sopra al tetto."
             myres = self.getJson(testline)

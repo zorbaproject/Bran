@@ -27,23 +27,50 @@ class Form(QDialog):
         layout = QVBoxLayout()
         layout.addWidget(self.w)
         self.setLayout(layout)
-        self.w.accepted.connect(self.isaccepted)
+        self.w.ok.clicked.connect(self.isaccepted)
+        self.w.annulla.clicked.connect(self.isrejected)
         self.w.rejected.connect(self.isrejected)
+        self.w.selectapri.clicked.connect(self.selectapri)
+        self.w.selectcrea.clicked.connect(self.selectcrea)
         self.setWindowTitle("Scegli una sessione di lavoro")
+        self.filesessione = ""
 
     def isaccepted(self):
         self.filesessione = ""
         if self.w.aprisessione.text() != "":
-            self.filesessione = self.w.aprisessione.text()
-            fileName = "-bran.csv" #nome della cartella
+            #self.filesessione = self.w.aprisessione.text()
+            lastchar = self.w.aprisessione.text()[len(self.w.aprisessione.text())-1]
+            if lastchar == "/" or lastchar == "\\":
+                self.w.aprisessione.setText(self.w.aprisessione.text()[0:-1])
+            folder = os.path.basename(self.w.aprisessione.text())
+            fileName = self.w.aprisessione.text() + "/" + folder + "-bran.csv"
+            #print(fileName)
             self.filesessione = self.filesessione + fileName
             if os.path.isfile(self.filesessione):
                 self.accept()
             else:
-                QMessageBox.errore(self, "Errore", "Questa cartella non contiene un valido file di sessione. Il file deve essere chiamato "+fileName+".")
+                self.filesessione = ""
+                QMessageBox.critical(self, "Errore", "Questa cartella non contiene un valido file di sessione. Il file deve essere chiamato "+fileName+".")
         if self.w.creafolder.text() != "":
-            self.filesessione = self.w.aprisessione.text()
-            self.accept()
+            lastchar = self.w.creasessione.text()[len(self.w.creasessione.text())-1]
+            if lastchar == "/" or lastchar == "\\":
+                self.w.creasessione.setText(self.w.creasessione.text()[0:-1])
+            sname = self.w.creasessione.text()
+            sname = sname.replace("/", "")
+            sname = sname.replace("\\", "")
+            folder = self.w.creafolder.text() + "/" + sname
+            tempfile = folder + "/" + sname +"-bran.csv"
+            try:
+                os.makedirs(folder)
+                text_file = open(tempfile, "w")
+                text_file.write("")
+                text_file.close()
+                self.filesessione = tempfile
+                self.accept()
+            except:
+                QMessageBox.critical(self, "Errore", "Impossibile creare la cartella "+folder+" e il file " + tempfile + ": forse non hai il permesso di scrivere in questa posizione, oppure la cartella esiste già.")
+            #self.filesessione = tempfile
+            #self.accept()
 
     def isrejected(self):
         self.filesessione = ""

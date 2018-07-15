@@ -168,6 +168,8 @@
     </property>
     <addaction name="actionScarica_corpus_da_sito_web"/>
     <addaction name="actionEditor_di_testo"/>
+    <addaction name="separator"/>
+    <addaction name="actionConfigurazione_Tint"/>
    </widget>
    <widget class="QMenu" name="menuAbout">
     <property name="title">
@@ -272,6 +274,11 @@
   <action name="actionDa_file_CSV">
    <property name="text">
     <string>Da file CSV</string>
+   </property>
+  </action>
+  <action name="actionConfigurazione_Tint">
+   <property name="text">
+    <string>Configurazione Tint</string>
    </property>
   </action>
  </widget>

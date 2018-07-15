@@ -32,6 +32,7 @@ class Form(QDialog):
         self.w.apricsv.clicked.connect(self.apriCSV)
         self.w.salvacsv.clicked.connect(self.salvaCSV)
         self.setWindowTitle("Visualizzazione tabella")
+        self.sessionDir = "."
         self.separator = "\t"
 
     def isaccepted(self):
@@ -61,7 +62,7 @@ class Form(QDialog):
         self.w.tableWidget.setItem(row, column, titem)
 
     def salvaCSV(self):
-        fileName = QFileDialog.getSaveFileName(self, "Salva file CSV", ".", "Text files (*.csv *.txt)")[0]
+        fileName = QFileDialog.getSaveFileName(self, "Salva file CSV", self.sessionDir, "Text files (*.csv *.txt)")[0]
         if fileName != "":
             csv = ""
             for col in range(self.w.tableWidget.columnCount()):
