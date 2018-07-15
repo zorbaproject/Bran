@@ -15,6 +15,10 @@ import datetime
 import time
 import json
 from socket import timeout
+import json
+import subprocess
+from socket import timeout
+import platform
 
 try:
     from PySide2.QtWidgets import QApplication
@@ -27,26 +31,18 @@ except:
         #pip install --index-url=http://download.qt.io/snapshots/ci/pyside/5.9/latest/ pyside2 --trusted-host download.qt.io
         from PySide2.QtWidgets import QApplication
     except:
-        from pip._internal import main
-        main(["install", "--index-url=http://download.qt.io/snapshots/ci/pyside/5.9/latest/", "pyside2", "--trusted-host", "download.qt.io"])
-        from PySide2.QtWidgets import QApplication
-
-#try:
-#    from ufal.udpipe import Model, Pipeline, ProcessingError
-#except:
-#    try:
-#        from tkinter import messagebox
-#        thispkg = "UDPipe"
-#        messagebox.showinfo("Installazione, attendi prego", "Sto per installare "+ thispkg +" e ci vorrà del tempo. Premi Ok e vai a prenderti un caffè.")
-#        pip.main(["install", "ufal.udpipe"])
-#        from ufal.udpipe import Model, Pipeline, ProcessingError
-#    except:
-#        sys.exit(1)
+        try:
+            from pip._internal import main
+            main(["install", "--index-url=http://download.qt.io/snapshots/ci/pyside/5.9/latest/", "pyside2", "--trusted-host", "download.qt.io"])
+            from PySide2.QtWidgets import QApplication
+        except:
+            sys.exit(1)
 
 
 from PySide2.QtUiTools import QUiLoader
 from PySide2.QtCore import QFile
 from PySide2.QtCore import Qt
+from PySide2.QtCore import Signal
 from PySide2.QtWidgets import QLabel
 from PySide2.QtWidgets import QFileDialog
 from PySide2.QtWidgets import QInputDialog
@@ -63,8 +59,66 @@ from forms import url2corpus
 from forms import texteditor
 from forms import tableeditor
 from forms import tint
+from forms import progress
+#from forms import sessione
 
 
+class CSVloader(QThread):
+    dataReceived = Signal(bool)
+
+    def __init__(self, widget, myProgrdialog, fils):
+        QThread.__init__(self)
+        self.w = widget
+        self.Progrdialog = myProgrdialog
+        self.fileNames = fils
+        self.setTerminationEnabled(True)
+
+    def __del__(self):
+        print("Shutting down thread")
+
+    def run(self):
+        self.loadCSV()
+        return
+
+    def addlinetocorpus(self, text, column):
+        row = self.w.corpus.rowCount()
+        self.w.corpus.insertRow(row)
+        titem = QTableWidgetItem()
+        titem.setText(text)
+        self.w.corpus.setItem(row, column, titem)
+        self.w.corpus.setCurrentCell(row, column)
+        return row
+
+    def setcelltocorpus(self, text, row, column):
+        titem = QTableWidgetItem()
+        titem.setText(text)
+        self.w.corpus.setItem(row, column, titem)
+
+    def loadCSV(self):
+        fileID = 0
+        rowN = 0
+        for fileName in self.fileNames:
+            if not fileName == "":
+                if os.path.isfile(fileName):
+                    text_file = open(fileName, "r")
+                    lines = text_file.read()
+                    text_file.close()
+                    for line in lines.split('\n'):
+                        #self.w.statusbar.showMessage("ATTENDI: Sto importando la riga numero "+str(rowN))
+                        #self.Progrdialog.w.testo.setText("ATTENDI: Sto importando la riga numero "+str(rowN))
+                        QApplication.processEvents()
+                        #print(rowN)
+                        colN = 0
+                        for col in line.split('\t'):
+                            if self.Progrdialog.result == 0:
+                                return
+                            if colN == 0:
+                                if col == "":
+                                    break
+                                rowN = self.addlinetocorpus(str(col), 0) #self.corpuscols["IDcorpus"]
+                            self.setcelltocorpus(str(col), rowN, colN)
+                            colN = colN + 1
+        #self.Progrdialog.isaccepted()
 
 
 
@@ -72,7 +126,7 @@ class MainWindow(QMainWindow):
 
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
-        file = QFile("forms/mainwindow.ui")
+        file = QFile(os.path.abspath(os.path.dirname(sys.argv[0]))+"/forms/mainwindow.ui")
         file.open(QFile.ReadOnly)
         loader = QUiLoader(self)
         self.w = loader.load(file)
@@ -249,10 +303,19 @@ class MainWindow(QMainWindow):
                             self.setcelltocorpus(str(token["ner"]), rowN, self.corpuscols["ner"])
                             self.setcelltocorpus(str(token["full_morpho"]), rowN, self.corpuscols["feat"])
 
-    def loadCSV(self):
+    def loadCSV2(self):
+        #apri finestra di progresso
+        self.Progrdialog = progress.Form(self)
+        self.Progrdialog.setModal(False)
         fileNames = QFileDialog.getOpenFileNames(self, "Apri file CSV", ".", "Json files (*.txt *.csv)")[0]
+        self.CSVload = CSVloader(self.w, self.Progrdialog, fileNames)
+        self.CSVload.start()
+        self.Progrdialog.exec()
+
+    def loadCSV(self):
         fileID = 0
         rowN = 0
+        fileNames = QFileDialog.getOpenFileNames(self, "Apri file CSV", ".", "Json files (*.txt *.csv)")[0]
         for fileName in fileNames:
             if not fileName == "":
                 if os.path.isfile(fileName):
@@ -261,6 +324,7 @@ class MainWindow(QMainWindow):
                     text_file.close()
                     for line in lines.split('\n'):
                         self.w.statusbar.showMessage("ATTENDI: Sto importando la riga numero "+str(rowN))
+                        #self.Progrdialog.w.testo.setText("ATTENDI: Sto importando la riga numero "+str(rowN))
                         QApplication.processEvents()
                         #print(rowN)
                         colN = 0
@@ -268,7 +332,7 @@ class MainWindow(QMainWindow):
                             if colN == 0:
                                 if col == "":
                                     break
-                                rowN = self.addlinetocorpus(col, self.corpuscols["IDcorpus"])
+                                rowN = self.addlinetocorpus(str(col), 0) #self.corpuscols["IDcorpus"]
                             self.setcelltocorpus(str(col), rowN, colN)
                             colN = colN + 1
 
@@ -313,8 +377,9 @@ class MainWindow(QMainWindow):
             self.TestThread.dataReceived.connect(lambda data: self.checkServer(bool(data)))
             self.alreadyChecked = True
             self.TestThread.start()
-            while self.TestThread.isRunning():
-                time.sleep(10)
+            #while self.TestThread.isRunning():
+            #    time.sleep(10)
+            self.TintSetdialog.w.loglist.addItem("Sto cercando il server")
         else:
             self.TintSetdialog.accept()
 

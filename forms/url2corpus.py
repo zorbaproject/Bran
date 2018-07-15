@@ -259,7 +259,7 @@ class TXTdownloader(QThread):
         stripped = ""
         for line in thishtml.split('\n'):
             line = re.sub("\s*?$", "", line)
-            if len(line)<200 and bool(re.match('.*?[\.,;\?!]$', line))==False:
+            if len(line)<200 and bool(re.match('.*?[\.,;\?!]$.*?', line))==False:
                 line = ''
             stripped = stripped + line + nl
         thishtml = stripped
@@ -463,7 +463,7 @@ class Form(QDialog):
     def __init__(self, parent=None):
         super(Form, self).__init__(parent)
         #QMessageBox.warning(self, self.tr("My Application"), self.tr("The document has been modified.\nDo you want to save your changes?"))
-        file = QFile("forms/url2corpus.ui")
+        file = QFile(os.path.abspath(os.path.dirname(sys.argv[0]))+"/forms/url2corpus.ui")
         file.open(QFile.ReadOnly)
         loader = QUiLoader()
         self.w = loader.load(file)

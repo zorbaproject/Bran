@@ -1,6 +1,10 @@
 forms/mainwindow.ui
+forms/progress.py
+forms/progress.ui
 forms/regex_replace.py
 forms/regex_replace.ui
+forms/sessione.py
+forms/sessione.ui
 forms/tableeditor.py
 forms/tableeditor.ui
 forms/texteditor.py

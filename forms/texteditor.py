@@ -16,7 +16,7 @@ class TextEditor(QMainWindow):
 
     def __init__(self, parent=None):
         super(TextEditor, self).__init__(parent)
-        file = QFile("forms/texteditor.ui")
+        file = QFile(os.path.abspath(os.path.dirname(sys.argv[0]))+"/forms/texteditor.ui")
         file.open(QFile.ReadOnly)
         loader = QUiLoader(self)
         self.w = loader.load(file)

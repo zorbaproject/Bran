@@ -13,11 +13,14 @@ from PySide2.QtWidgets import QTableWidget
 from PySide2.QtWidgets import QTableWidgetItem
 
 import re
+import sys
+import os
+
 
 class Form(QDialog):
     def __init__(self, parent=None):
         super(Form, self).__init__(parent)
-        file = QFile("forms/tableeditor.ui")
+        file = QFile(os.path.abspath(os.path.dirname(sys.argv[0]))+"/forms/tableeditor.ui")
         file.open(QFile.ReadOnly)
         loader = QUiLoader()
         self.w = loader.load(file)

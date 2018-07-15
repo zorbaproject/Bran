@@ -149,8 +149,45 @@ class TintCorpus(QThread):
                 myarray = json.loads(myres)
             except:
                 myarray = {'sentences': []}
+            legenda = {'A': ['adj'], 'AP': ['adj'], 'B': ['adv','prep'], 'BN': ['adv'], 'S': ['n'], 'T': ['pron'], 'RI': ['art'], 'RD': ['art','pron'], 'V': ['v'], 'E': ['prep'], 'VA': ['v'], 'CC': ['conj'], 'PC': ['art','pron'], 'PR': ['conj'], 'VM': ['v'], 'CS': ['conj'], 'PE': ['pron'], 'DD': ['adj'], 'DI': ['pron'], 'PI': ['pron'], 'SW': ['n']}
             for sentence in myarray["sentences"]:
                 for token in sentence["tokens"]:
+                    morfL = str(token["full_morpho"]).split(' ')
+                    posL = str(token["pos"]).split('+')
+                    morf = ""
+                    try:
+                        posN = 0
+                        for pos in posL:
+                            posML = legenda[pos]
+                            ind = 0
+                            for morfT in morfL:
+                                c = False
+                                for posM in posML:
+                                    if bool(re.match('.*?\+'+posM+'([\+/].*?|$)', morfT)):
+                                        c = True
+                                        break
+                                if c:
+                                    break
+                                ind = ind + 1
+                            txt = morfL[ind]
+                            if posN > 0:
+                                stind = txt.index('/')+1
+                                stind = txt.index('~',stind)+1
+                                stind = txt.index('+',stind)+1
+                                txt = txt[stind:]
+                            else:
+                                stind = txt.index('+')+1
+                                if '/' in txt:
+                                    enind = txt.index('/')+1
+                                else:
+                                    enind = len(txt)
+                                txt = txt[stind:enind]
+                            morf = morf + txt
+                            posN = posN +1
+                    except:
+                        morf = str(token["full_morpho"]) #.split(" ")[0]
+                        #print(posL)
+                        #print(str(token["full_morpho"]))
                     if self.outputcsv == "":
                         rowN = self.addlinetocorpus(IDcorpus, self.corpuscols["IDcorpus"])
                         self.setcelltocorpus(str(token["index"]), rowN, self.corpuscols["IDword"])
@@ -158,17 +195,13 @@ class TintCorpus(QThread):
                         self.setcelltocorpus(str(token["lemma"]), rowN, self.corpuscols["Lemma"])
                         self.setcelltocorpus(str(token["pos"]), rowN, self.corpuscols["pos"])
                         self.setcelltocorpus(str(token["ner"]), rowN, self.corpuscols["ner"])
-                        self.setcelltocorpus(str(token["full_morpho"]), rowN, self.corpuscols["feat"])
+                        self.setcelltocorpus(morf, rowN, self.corpuscols["feat"])
                     else:
-                        fullline = IDcorpus + "\t" + str(token["originalText"]) + "\t" + str(token["lemma"]) + "\t" + str(token["pos"]) + "\t" + str(token["ner"]) + "\t" + str(token["full_morpho"]) + "\t" + str(token["index"])
+                        fullline = IDcorpus + "\t" + str(token["originalText"]) + "\t" + str(token["lemma"]) + "\t" + str(token["pos"]) + "\t" + str(token["ner"]) + "\t" + morf + "\t" + str(token["index"])
                         fdatefile = self.outputcsv
                         with open(fdatefile, "a") as myfile:
                             myfile.write(fullline+"\n")
 
-    #def runServer(self):
-    #    self.TThread = TintRunner(self.w, "")
-    #    #self.TThread.finished.connect(self.threadstopped)
-    #    self.TThread.start()
 
     def getJson(self, text):
         #http://localhost:8012/tint?text=Barack%20Obama%20era%20il%20presidente%20degli%20Stati%20Uniti%20d%27America.
@@ -201,7 +234,7 @@ class TintCorpus(QThread):
 class Form(QDialog):
     def __init__(self, parent=None):
         super(Form, self).__init__(parent)
-        file = QFile("forms/tint.ui")
+        file = QFile(os.path.abspath(os.path.dirname(sys.argv[0]))+"/forms/tint.ui")
         file.open(QFile.ReadOnly)
         loader = QUiLoader()
         self.w = loader.load(file)
@@ -217,12 +250,18 @@ class Form(QDialog):
     def loadsettings(self):
         if platform.system() == "Windows":
             jdir = "C:/Program Files/Java/"
-            jfiles = os.listdir(jdir)
-            jre = "jre"
+            try:
+                jfiles = os.listdir(jdir)
+            except:
+                jfiles = []
+            jre = ""
             for fil in jfiles:
                 if "jre" in fil:
                     jre = fil
-            self.w.java.setText(jdir+jre+"/bin/java.exe")
+            if jre == "":
+                self.w.java.setText("")
+            else:
+                self.w.java.setText(jdir+jre+"/bin/java.exe")
         else:
             self.w.java.setText("/usr/bin/java")
         if platform.system() == "Windows":
@@ -233,7 +272,7 @@ class Form(QDialog):
         self.w.address.setText("localhost") #http://localhost:8012/tint
 
     def loadjava(self):
-        QMessageBox.information(self, "Hai già Java?", "Se non hai Java puoi scaricarlo da qui per Windows: <a href=\"https://download.java.net/java/GA/jdk10/10.0.1/fb4372174a714e6b8c52526dc134031e/10//openjdk-10.0.1_windows-x64_bin.tar.gz\">https://download.java.net/java/GA/jdk10/10.0.1/fb4372174a714e6b8c52526dc134031e/10//openjdk-10.0.1_windows-x64_bin.tar.gz</a>. Devi solo estrarre il file con 7Zip, non servono privilegi di amministrazione. Poi, indica la posizione del fil java.exe (di solito nella cartella bin).")
+        QMessageBox.information(self, "Hai già Java?", "Se non hai Java puoi scaricarlo da qui per Windows: <a href=\"https://download.java.net/java/GA/jdk10/10.0.1/fb4372174a714e6b8c52526dc134031e/10//openjdk-10.0.1_windows-x64_bin.tar.gz\">https://download.java.net/java/GA/jdk10/10.0.1/fb4372174a714e6b8c52526dc134031e/10//openjdk-10.0.1_windows-x64_bin.tar.gz</a>. Devi solo estrarre il file con 7Zip, non servono privilegi di amministrazione. Poi, indica la posizione del file java.exe (di solito nella cartella bin).")
         fileName = QFileDialog.getOpenFileName(self, "Trova Java", ".", "Java (*.exe)")[0]
         if fileName != "":
             self.w.java.setText(fileName)

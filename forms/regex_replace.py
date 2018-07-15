@@ -7,12 +7,15 @@ from PySide2.QtWidgets import QMessageBox
 from PySide2.QtCore import QFile
 
 import re
+import sys
+import os
+
 
 class Form(QDialog):
     def __init__(self, parent=None):
         super(Form, self).__init__(parent)
         #QMessageBox.warning(self, self.tr("My Application"), self.tr("The document has been modified.\nDo you want to save your changes?"))
-        file = QFile("forms/regex_replace.ui")
+        file = QFile(os.path.abspath(os.path.dirname(sys.argv[0]))+"/forms/regex_replace.ui")
         file.open(QFile.ReadOnly)
         loader = QUiLoader()
         self.w = loader.load(file)
