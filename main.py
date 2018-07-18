@@ -311,7 +311,7 @@ class MainWindow(QMainWindow):
                         csv = csv + self.separator
                     csv = csv + self.w.corpus.horizontalHeaderItem(col).text()
             totallines = self.w.corpus.rowCount()
-            text_file = open(fileName, "w")
+            text_file = open(fileName, "w", encoding='utf-8')
             text_file.write(csv)
             text_file.close()
             for row in range(self.w.corpus.rowCount()):
@@ -325,7 +325,7 @@ class MainWindow(QMainWindow):
                     if col > 0:
                         csv = csv + self.separator
                     csv = csv + self.w.corpus.item(row,col).text()
-                with open(fileName, "a") as myfile:
+                with open(fileName, "a", encoding='utf-8') as myfile:
                     myfile.write(csv+"\n")
             Progrdialog.accept()
 
@@ -364,11 +364,11 @@ class MainWindow(QMainWindow):
         self.w.statusbar.showMessage("ATTENDI: Sto importando i file txt nel corpus...")
         self.TCThread = tint.TintCorpus(self.w, fileNames, self.corpuscols, self.TintAddr)
         self.TCThread.outputcsv = self.sessionFile
-        if self.TCThread.outputcsv != "":
-            csvheader = ""
-            text_file = open(self.TCThread.outputcsv, "w")
-            text_file.write(csvheader)
-            text_file.close()
+        #if self.TCThread.outputcsv != "":
+        #    csvheader = ""
+        #    text_file = open(self.TCThread.outputcsv, "w")
+        #    text_file.write(csvheader)
+        #    text_file.close()
         self.TCThread.finished.connect(self.txtloadingstopped)
         self.TCThread.start()
 
@@ -383,7 +383,7 @@ class MainWindow(QMainWindow):
                         fileID = int(self.w.corpus.item(self.w.corpus.rowCount()-1,0).text().split("_")[0])
                     #QApplication.processEvents()
                     fileID = fileID+1
-                    text_file = open(fileName, "r")
+                    text_file = open(fileName, "r", encoding='utf-8')
                     lines = text_file.read()
                     text_file.close()
                     IDcorpus = str(fileID)+"_"+os.path.basename(fileName)
@@ -425,7 +425,7 @@ class MainWindow(QMainWindow):
                         Progrdialog.reject()
                         self.ImportingFile = False
                         return
-                    text_file = open(fileName, "r")
+                    text_file = open(fileName, "r", encoding='utf-8')
                     lines = text_file.read()
                     text_file.close()
                     rowN = 0
@@ -449,7 +449,7 @@ class MainWindow(QMainWindow):
         self.ImportingFile = False
 
     def linescount(self, filename):
-        f = open(filename, "r+")
+        f = open(filename, "r+", encoding='utf-8')
         buf = mmap.mmap(f.fileno(), 0)
         lines = 0
         readline = buf.readline
