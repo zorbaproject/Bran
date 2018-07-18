@@ -89,7 +89,9 @@ class MainWindow(QMainWindow):
         self.w.actionScarica_corpus_da_sito_web.triggered.connect(self.web2corpus)
         self.w.actionConta_occorrenze.triggered.connect(self.contaoccorrenze)
         self.w.actionEsporta_corpus_in_CSV_unico.triggered.connect(self.salvaCSV)
+        self.w.actionCalcola_densit_lessicale.triggered.connect(self.densitalessico)
         self.w.actionDa_file_txt.triggered.connect(self.loadtxt)
+        self.w.actionTraduci_i_tag_PoS_in_forma_leggibile.triggered.connect(self.translatePos)
         self.w.actionDa_file_JSON.triggered.connect(self.loadjson)
         self.w.actionDa_file_CSV.triggered.connect(self.loadCSV)
         self.w.actionConfigurazione_Tint.triggered.connect(self.loadConfig)
@@ -106,6 +108,7 @@ class MainWindow(QMainWindow):
             'feat': 5,
             'IDword': 6
         }
+        self.legendaPos = {"A":["Aggettivo", "none"],"AP":["agg. Poss", "none"],"B":["Avverbio", "none"],"B+PC":["Avverbio+pron. clit. ", "none"],"BN":["avv, negazione", "none"],"CC":["Cong. coord", "none"],"CS":["Cong. Sub.", "none"],"DD":["Det. Dim.", "none"],"DE":["Det. escl. ", "none"],"DI":["Det. Indefinito", "none"],"DQ":["det. Int.", "none"],"DR":["Det. Rel", "none"],"E":["Preposizioni", "none"],"E+RD":["Prep. art. ", "none"],"FB":["Punteggiatura - \"\" () «» - - ", "none"],"FC":["Punteggiatura - : ;", "none"],"FF":["Punteggiatura - ,", "none"],"FS":["Punteggiatura - .?!", "none"],"I":["interiezione", "none"],"N":["Numero", "none"],"NO":["Numerale", "none"],"PC":["pron. Clitico", "none"],"PC+PC":["pron. clitico+clitico", "none"],"PD":["Pron. Dimostrativo", "none"],"PE":["pron. Pers. ", "none"],"PI":["Pron. Ind.", "none"],"PP":["pron. Poss.", "none"],"PQ":["Pron. Int.", "none"],"PR":["Pron. rel.", "none"],"RD":["Art. det.", "none"],"RI":["Art. ind.", "none"],"S":["Sost.", "none"],"SP":["Nome proprio", "none"],"SW":["forestierismo", "none"],"T":["Determinante (tutt*)", "none"],"V":["Verbi", "none"],"V+PC":["V+pron. Clitico", "none"],"V+PC+PC":["V+pron. Clitico + pron clitico", "none"],"VA":["V. ausiliare", "none"],"VA+PC":["V. aus+pron.clitico", "none"],"VM":["V. modale", "none"],"VM+PC":["Verbo mod + pron. Clitico", "none"],"X":["altro", "none"]}
         self.separator = "\t"
         self.enumeratecolumns(self.w.ccolumn)
         QApplication.processEvents()
@@ -168,7 +171,15 @@ class MainWindow(QMainWindow):
         TBdialog.sessionDir = self.sessionDir
         TBdialog.addcolumn(column[0], 0)
         TBdialog.addcolumn("Occorrenze", 1)
+        self.myprogress = progress.ProgressDialog(self.w)
+        self.myprogress.start()
+        totallines = self.w.corpus.rowCount()
         for row in range(self.w.corpus.rowCount()):
+            self.myprogress.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
+            self.myprogress.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            QApplication.processEvents()
+            if self.myprogress.Progrdialog.w.annulla.isChecked():
+                return
             try:
                 thistext = self.w.corpus.item(row,col).text()
             except:
@@ -182,6 +193,97 @@ class MainWindow(QMainWindow):
                 TBdialog.addlinetotable(thistext, 0)
                 tbrow = TBdialog.w.tableWidget.rowCount()-1
                 TBdialog.setcelltotable("1", tbrow, 1)
+        self.myprogress.Progrdialog.accept()
+        TBdialog.exec()
+
+    def translatePos(self):
+        col = self.corpuscols['pos']
+        self.myprogress = progress.ProgressDialog(self.w)
+        self.myprogress.start()
+        totallines = self.w.corpus.rowCount()
+        for row in range(self.w.corpus.rowCount()):
+            self.myprogress.Progrdialog.w.testo.setText("Sto lavorando sulla riga numero "+str(row))
+            self.myprogress.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            QApplication.processEvents()
+            if self.myprogress.Progrdialog.w.annulla.isChecked():
+                return
+            try:
+                thistext = self.w.corpus.item(row,col).text()
+            except:
+                thistext = ""
+            try:
+                newtext = self.legendaPos[thistext][0]
+            except:
+                newtext = thistext
+            self.setcelltocorpus(newtext, row, col)
+        self.myprogress.Progrdialog.accept()
+
+    def densitalessico(self):
+        col = self.corpuscols['pos']
+        TBdialog = tableeditor.Form(self)
+        TBdialog.sessionDir = self.sessionDir
+        TBdialog.addcolumn("Part of Speech", 0)
+        TBdialog.addcolumn("Occorrenze", 1)
+        self.myprogress = progress.ProgressDialog(self.w)
+        self.myprogress.start()
+        totallines = self.w.corpus.rowCount()
+        for row in range(self.w.corpus.rowCount()):
+            self.myprogress.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
+            self.myprogress.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            QApplication.processEvents()
+            if self.myprogress.Progrdialog.w.annulla.isChecked():
+                return
+            try:
+                thistextO = self.w.corpus.item(row,col).text()
+                thistext = self.legendaPos[thistextO][0]
+            except:
+                thistext = ""
+            tbitem = TBdialog.w.tableWidget.findItems(thistext,Qt.MatchExactly)
+            if len(tbitem)>0:
+                tbrow = tbitem[0].row()
+                tbval = int(TBdialog.w.tableWidget.item(tbrow,1).text())+1
+                TBdialog.setcelltotable(str(tbval), tbrow, 1)
+            else:
+                TBdialog.addlinetotable(thistext, 0)
+                tbrow = TBdialog.w.tableWidget.rowCount()-1
+                TBdialog.setcelltotable("1", tbrow, 1)
+        totallines = TBdialog.w.tableWidget.rowCount()
+        paroletotali = 0
+        parolepiene = 0
+        parolevuote = 0
+        parolenone = 0
+        for row in range(TBdialog.w.tableWidget.rowCount()):
+            self.myprogress.Progrdialog.w.testo.setText("Sto sommando la riga numero "+str(row))
+            self.myprogress.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            QApplication.processEvents()
+            thistext = TBdialog.w.tableWidget.item(row,0).text()
+            for key in self.legendaPos:
+                if thistext == self.legendaPos[key][0]:
+                    if "piene" == self.legendaPos[key][1]:
+                        paroletotali = paroletotali + int(TBdialog.w.tableWidget.item(row,1).text())
+                        parolepiene = parolepiene + int(TBdialog.w.tableWidget.item(row,1).text())
+                        break
+                    if "vuote" == self.legendaPos[key][1]:
+                        paroletotali = paroletotali + int(TBdialog.w.tableWidget.item(row,1).text())
+                        parolevuote = parolevuote + int(TBdialog.w.tableWidget.item(row,1).text())
+                        break
+                    if "none" == self.legendaPos[key][1]:
+                        paroletotali = paroletotali + int(TBdialog.w.tableWidget.item(row,1).text())
+                        parolenone = parolenone + int(TBdialog.w.tableWidget.item(row,1).text())
+                        break
+        TBdialog.addlinetotable("Parole totali", 0)
+        tbrow = TBdialog.w.tableWidget.rowCount()-1
+        TBdialog.setcelltotable(str(paroletotali), tbrow, 1)
+        TBdialog.addlinetotable("Parole piene", 0)
+        tbrow = TBdialog.w.tableWidget.rowCount()-1
+        TBdialog.setcelltotable(str(parolepiene), tbrow, 1)
+        TBdialog.addlinetotable("Parole vuote", 0)
+        tbrow = TBdialog.w.tableWidget.rowCount()-1
+        TBdialog.setcelltotable(str(parolevuote), tbrow, 1)
+        TBdialog.addlinetotable("Altri tokens", 0)
+        tbrow = TBdialog.w.tableWidget.rowCount()-1
+        TBdialog.setcelltotable(str(parolenone), tbrow, 1)
+        self.myprogress.Progrdialog.accept()
         TBdialog.exec()
 
     def salvaProgetto(self):

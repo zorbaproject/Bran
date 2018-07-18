@@ -29,6 +29,8 @@ from PySide2.QtWidgets import QMessageBox
 from PySide2.QtWidgets import QTableWidget
 from PySide2.QtWidgets import QTableWidgetItem #QtGui?
 
+from forms import progress
+
 
 class TintRunner(QThread):
     dataReceived = Signal(bool)
@@ -151,14 +153,29 @@ class TintCorpus(QThread):
 
     def text2corpusTINT(self, text, IDcorpus):
         #process
-        itext = text.split('\n')
+        itext = text.replace('.','.\n')
+        itext = itext.replace('?','?\n')
+        itext = itext.split('\n')
+        #itext = re.split('[\n\.\?]', text)
+        self.myprogress = progress.ProgressDialog(self.w)
+        self.myprogress.start()
+        totallines = len(itext)
+        row = 0
         for line in itext:
+            row = row + 1
+            self.myprogress.Progrdialog.w.testo.setText("Sto lavorando sulla frase numero "+str(row))
+            self.myprogress.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            QApplication.processEvents()
+            if self.myprogress.Progrdialog.w.annulla.isChecked():
+                return
             myres = ""
             if line != "":
                 myres = self.getJson(line)
             try:
                 myarray = json.loads(myres)
             except:
+                #print("Errore nella lettura:")
+                #print(line)
                 myarray = {'sentences': []}
             legenda = {'A': ['adj'], 'AP': ['adj'], 'B': ['adv','prep'], 'BN': ['adv'], 'S': ['n'], 'T': ['pron'], 'RI': ['art'], 'RD': ['art','pron'], 'V': ['v'], 'E': ['prep'], 'VA': ['v'], 'CC': ['conj'], 'PC': ['art','pron'], 'PR': ['conj'], 'VM': ['v'], 'CS': ['conj'], 'PE': ['pron'], 'DD': ['adj'], 'DI': ['pron'], 'PI': ['pron'], 'SW': ['n']}
             for sentence in myarray["sentences"]:
@@ -212,11 +229,12 @@ class TintCorpus(QThread):
                         fdatefile = self.outputcsv
                         with open(fdatefile, "a") as myfile:
                             myfile.write(fullline+"\n")
-
+        self.myprogress.Progrdialog.accept()
 
     def getJson(self, text):
         #http://localhost:8012/tint?text=Barack%20Obama%20era%20il%20presidente%20degli%20Stati%20Uniti%20d%27America.
         urltext = urllib.parse.quote(text)
+        #print(urltext)
         thisurl = self.Tintaddr+"?text=" + urltext
         if thisurl == '':
             return ''

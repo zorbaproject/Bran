@@ -161,6 +161,7 @@
     </property>
     <addaction name="actionEsporta_vista_attuale_in_CSV"/>
     <addaction name="actionRimuovi_vista_attuale_dal_corpus"/>
+    <addaction name="actionTraduci_i_tag_PoS_in_forma_leggibile"/>
    </widget>
    <widget class="QMenu" name="menuStrumenti">
     <property name="title">
@@ -183,6 +184,7 @@
     </property>
     <addaction name="actionConta_occorrenze"/>
     <addaction name="actionStatistiche_con_VdB"/>
+    <addaction name="actionCalcola_densit_lessicale"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuModifica"/>
@@ -203,7 +205,7 @@
   </action>
   <action name="actionDa_file_txt">
    <property name="text">
-    <string>Da file txt</string>
+    <string>Da file TXT</string>
    </property>
   </action>
   <action name="actionDa_file_zip">
@@ -279,6 +281,16 @@
   <action name="actionConfigurazione_Tint">
    <property name="text">
     <string>Configurazione Tint</string>
+   </property>
+  </action>
+  <action name="actionTraduci_i_tag_PoS_in_forma_leggibile">
+   <property name="text">
+    <string>Traduci i tag PoS in forma leggibile</string>
+   </property>
+  </action>
+  <action name="actionCalcola_densit_lessicale">
+   <property name="text">
+    <string>Calcola densità lessicale</string>
    </property>
   </action>
  </widget>

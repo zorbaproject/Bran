@@ -51,7 +51,7 @@ class Form(QDialog):
             else:
                 self.filesessione = ""
                 QMessageBox.critical(self, "Errore", "Questa cartella non contiene un valido file di sessione. Il file deve essere chiamato "+fileName+".")
-        if self.w.creafolder.text() != "":
+        elif self.w.creafolder.text() != "":
             lastchar = self.w.creasessione.text()[len(self.w.creasessione.text())-1]
             if lastchar == "/" or lastchar == "\\":
                 self.w.creasessione.setText(self.w.creasessione.text()[0:-1])
@@ -71,6 +71,8 @@ class Form(QDialog):
                 QMessageBox.critical(self, "Errore", "Impossibile creare la cartella "+folder+" e il file " + tempfile + ": forse non hai il permesso di scrivere in questa posizione, oppure la cartella esiste già.")
             #self.filesessione = tempfile
             #self.accept()
+        else:
+            self.isrejected()
 
     def isrejected(self):
         self.filesessione = ""

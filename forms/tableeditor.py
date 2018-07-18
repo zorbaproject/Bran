@@ -31,6 +31,7 @@ class Form(QDialog):
         self.w.rejected.connect(self.isrejected)
         self.w.apricsv.clicked.connect(self.apriCSV)
         self.w.salvacsv.clicked.connect(self.salvaCSV)
+        self.w.apricsv.hide()
         self.setWindowTitle("Visualizzazione tabella")
         self.sessionDir = "."
         self.separator = "\t"
