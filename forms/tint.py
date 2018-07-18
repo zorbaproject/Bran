@@ -112,13 +112,13 @@ class TintCorpus(QThread):
                     fileID = fileID+1
                     lines = ""
                     try:
-                        text_file = open(fileName, "r")
+                        text_file = open(fileName, "r", encoding='utf-8')
                         lines = text_file.read()
                         text_file.close()
                     except:
                         predefEncode = "ISO-8859-15"
                         #https://pypi.org/project/chardet/
-                        myencoding = QInputDialog.getText(self.w, "Scegli la codifica", "Sembra che questo file non sia codificato in UTF-8. Vuoi provare a specificare una codifica diversa?", QLineEdit.Normal, predefEncode)
+                        myencoding = QInputDialog.getText(self.w, "Scegli la codifica", "Sembra che questo file non sia codificato in UTF-8. Vuoi provare a specificare una codifica diversa? (Es: cp1252 oppure ISO-8859-15)", QLineEdit.Normal, predefEncode)
                         try:
                             text_file = open(fileName, "r", encoding=myencoding[0])
                             lines = text_file.read()
