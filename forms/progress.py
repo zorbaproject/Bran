@@ -18,6 +18,7 @@ from PySide2.QtWidgets import QTableWidgetItem
 import re
 import sys
 import os
+import platform
 
 
 class ProgressDialog(QThread):
@@ -26,34 +27,24 @@ class ProgressDialog(QThread):
     def __init__(self, widget):
         QThread.__init__(self)
         self.w = widget
-        #self.Progrdialog = myProgrdialog
-        #self.fileNames = fils
-        #self.setTerminationEnabled(True)
-        self.Progrdialog = Form(self.w)
-        #self.Progrdialog.rejected.connect(self.docancel)
+        self.Progrdialog = Form()
         self.cancelled = False
+        self.stupidwindows = 0
+        if platform.system() == "Windows":
+            self.stupidwindows = 1
 
     def __del__(self):
-        print("Shutting down thread")
+        print("Done")
 
     def run(self):
         self.loadDialog()
         return
 
-    #def docancel(self):
-        #self.cancelled = True
-
-    #def doclose(self):
-        #self.Progrdialog.isaccepted()
-
     def loadDialog(self):
-        #self.Progrdialog = Form(self.w)
-        #self.Progrdialog.setModal(False)
-        self.Progrdialog.exec()
-                        #self.Progrdialog.w.testo.setText("ATTENDI: Sto importando la riga numero "+str(rowN))
-                        #QApplication.processEvents()
-                            #if self.Progrdialog.result == 0:
-                            #    return
+        if self.stupidwindows == 1:
+            self.Progrdialog.show()
+        else:
+            self.Progrdialog.exec()
         #self.Progrdialog.isaccepted()
 
 
@@ -69,7 +60,6 @@ class Form(QDialog):
         layout = QVBoxLayout()
         layout.addWidget(self.w)
         self.setLayout(layout)
-        #self.w.accepted.connect(self.isaccepted)
         self.w.annulla.clicked.connect(self.isrejected)
         self.setWindowTitle("Operazione in corso")
 

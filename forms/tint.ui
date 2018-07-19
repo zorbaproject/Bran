@@ -108,14 +108,17 @@ Cosa vuoi fare?
       <string notr="true">background-color: rgb(0, 255, 0);</string>
      </property>
      <property name="text">
-      <string>Avvia il server</string>
+      <string>Avvia Tint</string>
      </property>
     </widget>
    </item>
    <item>
     <widget class="QPushButton" name="check">
+     <property name="styleSheet">
+      <string notr="true">background-color: rgb(255, 255, 0);</string>
+     </property>
      <property name="text">
-      <string>Controlla connessione</string>
+      <string>Connetti a Tint</string>
      </property>
     </widget>
    </item>

@@ -48,6 +48,7 @@ except:
 
 from PySide2.QtUiTools import QUiLoader
 from PySide2.QtCore import QFile
+from PySide2.QtCore import QDir
 from PySide2.QtCore import Qt
 from PySide2.QtCore import Signal
 from PySide2.QtWidgets import QLabel
@@ -108,7 +109,7 @@ class MainWindow(QMainWindow):
             'feat': 5,
             'IDword': 6
         }
-        self.legendaPos = {"A":["Aggettivo", "none"],"AP":["agg. Poss", "none"],"B":["Avverbio", "none"],"B+PC":["Avverbio+pron. clit. ", "none"],"BN":["avv, negazione", "none"],"CC":["Cong. coord", "none"],"CS":["Cong. Sub.", "none"],"DD":["Det. Dim.", "none"],"DE":["Det. escl. ", "none"],"DI":["Det. Indefinito", "none"],"DQ":["det. Int.", "none"],"DR":["Det. Rel", "none"],"E":["Preposizioni", "none"],"E+RD":["Prep. art. ", "none"],"FB":["Punteggiatura - \"\" () «» - - ", "none"],"FC":["Punteggiatura - : ;", "none"],"FF":["Punteggiatura - ,", "none"],"FS":["Punteggiatura - .?!", "none"],"I":["interiezione", "none"],"N":["Numero", "none"],"NO":["Numerale", "none"],"PC":["pron. Clitico", "none"],"PC+PC":["pron. clitico+clitico", "none"],"PD":["Pron. Dimostrativo", "none"],"PE":["pron. Pers. ", "none"],"PI":["Pron. Ind.", "none"],"PP":["pron. Poss.", "none"],"PQ":["Pron. Int.", "none"],"PR":["Pron. rel.", "none"],"RD":["Art. det.", "none"],"RI":["Art. ind.", "none"],"S":["Sost.", "none"],"SP":["Nome proprio", "none"],"SW":["forestierismo", "none"],"T":["Determinante (tutt*)", "none"],"V":["Verbi", "none"],"V+PC":["V+pron. Clitico", "none"],"V+PC+PC":["V+pron. Clitico + pron clitico", "none"],"VA":["V. ausiliare", "none"],"VA+PC":["V. aus+pron.clitico", "none"],"VM":["V. modale", "none"],"VM+PC":["Verbo mod + pron. Clitico", "none"],"X":["altro", "none"]}
+        self.legendaPos = { "A":["aggettivo", "none"], "AP":["agg. Poss", "none"], "B":["avverbio", "none"], "B+PC":["avverbio+pron. clit. ", "none"], "BN":["avv, negazione", "none"], "CC":["cong. coord", "none"], "CS":["cong. Sub.", "none"], "DD":["det. dim.", "none"], "DE":["det. esclam. ", "none"], "DI":["det. indefinito", "none"], "DQ":["det. int.", "none"], "DR":["det. rel", "none"], "E":["preposizione", "none"], "E+RD":["prep. art. ", "none"], "FB":["punteggiatura - \"\" () «» - - ", "none"], "FC":["punteggiatura - : ;", "none"], "FF":["punteggiatura - ,", "none"], "FS":["punteggiatura - .?!", "none"], "I":["interiezione", "none"], "N":["numero", "none"], "NO":["numerale", "none"], "PC":["pron. clitico", "none"], "PC+PC":["pron. clitico+clitico", "none"], "PD":["pron. dimostrativo", "none"], "PE":["pron. pers. ", "none"], "PI":["pron. indef.", "none"], "PP":["pron. poss.", "none"], "PQ":["pron. interr.", "none"], "PR":["pron. rel.", "none"], "RD":["art. det.", "none"], "RI":["art. ind.", "none"], "S":["sost.", "none"], "SP":["nome proprio", "none"], "SW":["forestierismo", "none"], "T":["determinante (tutt*)", "none"], "V":["verbo", "none"], "V+PC":["v+pron. clitico", "none"], "V+PC+PC":["V+pron. clitico + pron clitico", "none"], "VA":["V. ausiliare", "none"], "VA+PC":["v. aus+pron.clitico", "none"], "VM":["v. mod.", "none"], "VM+PC":["v. mod + pron. clitico", "none"], "X":["altro", "none"] }
         self.separator = "\t"
         self.enumeratecolumns(self.w.ccolumn)
         QApplication.processEvents()
@@ -116,12 +117,15 @@ class MainWindow(QMainWindow):
         self.ImportingFile = False
         self.sessionFile = ""
         self.sessionDir = "."
+        self.mycfgfile = QDir.homePath() + "/.brancfg"
+        self.mycfg = json.loads('{"javapath": "", "tintpath": "", "tintaddr": "", "tintport": "", "sessions" : []}')
+        self.loadPersonalCFG()
         self.loadSession()
         self.loadConfig()
         self.txtloadingstopped()
 
     def loadConfig(self):
-        self.TintSetdialog = tint.Form(self)
+        self.TintSetdialog = tint.Form(self, self.mycfg)
         self.TintSetdialog.w.start.clicked.connect(self.runServer)
         self.TintSetdialog.w.check.clicked.connect(self.checkServer)
         self.TintSetdialog.exec()
@@ -130,15 +134,50 @@ class MainWindow(QMainWindow):
         self.TintPort = self.TintSetdialog.w.port.text()
         self.TintAddr = "http://" + self.TintSetdialog.w.address.text() + ":" +self.TintPort +"/tint"
         #self.Java -classpath $_CLASSPATH eu.fbk.dh.tint.runner.TintServer -p self.TintPort
+        if not self.TintSetdialog.notint:
+            self.mycfg["javapath"] = self.TintSetdialog.w.java.text()
+            self.mycfg["tintpath"] = self.TintSetdialog.w.tintlib.text()
+            self.mycfg["tintaddr"] = self.TintSetdialog.w.address.text()
+            self.mycfg["tintport"] = self.TintSetdialog.w.port.text()
+            self.savePersonalCFG()
 
     def loadSession(self):
         seSdialog = sessione.Form(self)
+        seSdialog.loadhistory(self.mycfg["sessions"])
         seSdialog.exec()
         self.sessionFile = ""
         if seSdialog.result():
             self.sessionFile = seSdialog.filesessione
             if os.path.isfile(self.sessionFile):
+                self.setWindowTitle("Bran - "+self.sessionFile)
                 self.sessionDir = os.path.abspath(os.path.dirname(self.sessionFile))
+                tmpsess = [self.sessionFile]
+                for i in range(len(self.mycfg["sessions"])-1):
+                    it = len(self.mycfg["sessions"]) -i
+                    try:
+                        ind = tmpsess.index(self.mycfg["sessions"][it])
+                    except:
+                        tmpsess.append(self.mycfg["sessions"][it])
+                    if i > 10:
+                        break
+                self.mycfg["sessions"] = tmpsess
+                self.savePersonalCFG()
+
+
+    def loadPersonalCFG(self):
+        try:
+            text_file = open(self.mycfgfile, "r", encoding='utf-8')
+            lines = text_file.read()
+            text_file.close()
+            self.mycfg = json.loads(lines)
+        except:
+            print("Creo il file di configurazione")
+
+    def savePersonalCFG(self):
+        cfgtxt = json.dumps(self.mycfg)
+        text_file = open(self.mycfgfile, "w", encoding='utf-8')
+        text_file.write(cfgtxt)
+        text_file.close()
 
     def apriProgetto(self):
         self.loadSession()
@@ -224,6 +263,8 @@ class MainWindow(QMainWindow):
         TBdialog.sessionDir = self.sessionDir
         TBdialog.addcolumn("Part of Speech", 0)
         TBdialog.addcolumn("Occorrenze", 1)
+        TBdialog.addcolumn("Percentuale", 2)
+        #calcolo le occorrenze del pos
         self.myprogress = progress.ProgressDialog(self.w)
         self.myprogress.start()
         totallines = self.w.corpus.rowCount()
@@ -247,6 +288,7 @@ class MainWindow(QMainWindow):
                 TBdialog.addlinetotable(thistext, 0)
                 tbrow = TBdialog.w.tableWidget.rowCount()-1
                 TBdialog.setcelltotable("1", tbrow, 1)
+        #calcolo le somme di parole piene e vuote
         totallines = TBdialog.w.tableWidget.rowCount()
         paroletotali = 0
         parolepiene = 0
@@ -283,6 +325,15 @@ class MainWindow(QMainWindow):
         TBdialog.addlinetotable("Altri tokens", 0)
         tbrow = TBdialog.w.tableWidget.rowCount()-1
         TBdialog.setcelltotable(str(parolenone), tbrow, 1)
+        #calcolo le percentuali
+        for row in range(TBdialog.w.tableWidget.rowCount()):
+            self.myprogress.Progrdialog.w.testo.setText("Sto calcolando le percentuali su "+str(row))
+            self.myprogress.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            QApplication.processEvents()
+            ratio = (float(TBdialog.w.tableWidget.item(row,1).text())/float(paroletotali)*100)
+            ratios = f'{ratio:.3f}'
+            TBdialog.setcelltotable(ratios, row, 2)
+        #mostro i risultati
         self.myprogress.Progrdialog.accept()
         TBdialog.exec()
 
@@ -364,11 +415,6 @@ class MainWindow(QMainWindow):
         self.w.statusbar.showMessage("ATTENDI: Sto importando i file txt nel corpus...")
         self.TCThread = tint.TintCorpus(self.w, fileNames, self.corpuscols, self.TintAddr)
         self.TCThread.outputcsv = self.sessionFile
-        #if self.TCThread.outputcsv != "":
-        #    csvheader = ""
-        #    text_file = open(self.TCThread.outputcsv, "w")
-        #    text_file.write(csvheader)
-        #    text_file.close()
         self.TCThread.finished.connect(self.txtloadingstopped)
         self.TCThread.start()
 

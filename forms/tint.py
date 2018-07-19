@@ -227,7 +227,7 @@ class TintCorpus(QThread):
                     else:
                         fullline = IDcorpus + "\t" + str(token["originalText"]) + "\t" + str(token["lemma"]) + "\t" + str(token["pos"]) + "\t" + str(token["ner"]) + "\t" + morf + "\t" + str(token["index"])
                         fdatefile = self.outputcsv
-                        with open(fdatefile, "a") as myfile:
+                        with open(fdatefile, "a", encoding='utf-8') as myfile:
                             myfile.write(fullline+"\n")
         self.myprogress.Progrdialog.accept()
 
@@ -261,7 +261,7 @@ class TintCorpus(QThread):
 
 
 class Form(QDialog):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, mycfg=None):
         super(Form, self).__init__(parent)
         file = QFile(os.path.abspath(os.path.dirname(sys.argv[0]))+"/forms/tint.ui")
         file.open(QFile.ReadOnly)
@@ -270,11 +270,22 @@ class Form(QDialog):
         layout = QVBoxLayout()
         layout.addWidget(self.w)
         self.setLayout(layout)
-        self.loadsettings()
-        self.w.quit.clicked.connect(self.accept)
+        if mycfg == None or mycfg["tintaddr"] == "":
+            self.loadsettings()
+        else:
+            self.w.java.setText(mycfg["javapath"])
+            self.w.tintlib.setText(mycfg["tintpath"])
+            self.w.address.setText(mycfg["tintaddr"])
+            self.w.port.setText(mycfg["tintport"])
+        self.w.quit.clicked.connect(self.quitme)
         self.w.loadjava.clicked.connect(self.loadjava)
         self.w.loadtint.clicked.connect(self.loadtint)
         self.setWindowTitle("Impostazioni di Tint")
+        self.notint = False
+
+    def quitme(self):
+        self.notint = True
+        self.accept()
 
     def loadsettings(self):
         if platform.system() == "Windows":

@@ -29,6 +29,7 @@ class Form(QDialog):
         self.setLayout(layout)
         self.w.ok.clicked.connect(self.isaccepted)
         self.w.annulla.clicked.connect(self.isrejected)
+        self.w.cancelrecenti.clicked.connect(self.clearh)
         self.w.rejected.connect(self.isrejected)
         self.w.selectapri.clicked.connect(self.selectapri)
         self.w.selectcrea.clicked.connect(self.selectcrea)
@@ -69,8 +70,9 @@ class Form(QDialog):
                 self.accept()
             except:
                 QMessageBox.critical(self, "Errore", "Impossibile creare la cartella "+folder+" e il file " + tempfile + ": forse non hai il permesso di scrivere in questa posizione, oppure la cartella esiste già.")
-            #self.filesessione = tempfile
-            #self.accept()
+        elif len(self.w.recenti.selectedItems())>0:
+            self.filesessione = self.w.recenti.selectedItems()[0].text()
+            self.accept()
         else:
             self.isrejected()
 
@@ -78,6 +80,11 @@ class Form(QDialog):
         self.filesessione = ""
         QMessageBox.warning(self, "Sicuro sicuro?", "Stai per avviare Bran senza un file per la sessione di lavoro: questo significa che tutte le modifiche resteranno nella RAM. Se usi file di grandi dimensioni, la memoria potrebbe non bastare, e il programma andrebbe in crash. Sei sicuro di voler procedere senza una sessione di lavoro su file?")
         self.reject()
+
+    def clearh(self):
+        for i in range(self.w.recenti.count()):
+            item = self.w.recenti.item(i)
+            self.w.recenti.setItemSelected(item, False)
 
     def selectapri(self):
         fileName = QFileDialog.getExistingDirectory(self, "Seleziona la cartella in cui si trova la tua sessione di lavoro")
@@ -90,3 +97,8 @@ class Form(QDialog):
         if not fileName == "":
             if os.path.isdir(fileName):
                 self.w.creafolder.setText(fileName)
+
+    def loadhistory(self, history):
+        for olddir in history:
+            if os.path.isfile(olddir):
+                self.w.recenti.addItem(olddir)
