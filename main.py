@@ -110,6 +110,7 @@ class MainWindow(QMainWindow):
             'IDword': 6
         }
         self.legendaPos = { "A":["aggettivo", "none"], "AP":["agg. Poss", "none"], "B":["avverbio", "none"], "B+PC":["avverbio+pron. clit. ", "none"], "BN":["avv, negazione", "none"], "CC":["cong. coord", "none"], "CS":["cong. Sub.", "none"], "DD":["det. dim.", "none"], "DE":["det. esclam. ", "none"], "DI":["det. indefinito", "none"], "DQ":["det. int.", "none"], "DR":["det. rel", "none"], "E":["preposizione", "none"], "E+RD":["prep. art. ", "none"], "FB":["punteggiatura - \"\" () «» - - ", "none"], "FC":["punteggiatura - : ;", "none"], "FF":["punteggiatura - ,", "none"], "FS":["punteggiatura - .?!", "none"], "I":["interiezione", "none"], "N":["numero", "none"], "NO":["numerale", "none"], "PC":["pron. clitico", "none"], "PC+PC":["pron. clitico+clitico", "none"], "PD":["pron. dimostrativo", "none"], "PE":["pron. pers. ", "none"], "PI":["pron. indef.", "none"], "PP":["pron. poss.", "none"], "PQ":["pron. interr.", "none"], "PR":["pron. rel.", "none"], "RD":["art. det.", "none"], "RI":["art. ind.", "none"], "S":["sost.", "none"], "SP":["nome proprio", "none"], "SW":["forestierismo", "none"], "T":["determinante (tutt*)", "none"], "V":["verbo", "none"], "V+PC":["v+pron. clitico", "none"], "V+PC+PC":["V+pron. clitico + pron clitico", "none"], "VA":["V. ausiliare", "none"], "VA+PC":["v. aus+pron.clitico", "none"], "VM":["v. mod.", "none"], "VM+PC":["v. mod + pron. clitico", "none"], "X":["altro", "none"] }
+        self.ignorepos = ["punteggiatura - \"\" () «» - - ", "punteggiatura - : ;", "punteggiatura - ,", "punteggiatura - .?!", "altro"]
         self.separator = "\t"
         self.enumeratecolumns(self.w.ccolumn)
         QApplication.processEvents()
@@ -584,16 +585,96 @@ class MainWindow(QMainWindow):
         te.show()
 
     def statisticheconvdb(self):
-        tbdialog = tableeditor.Form(self)
-        tbdialog.setModal(False)
-        tbdialog.exec()
-        #usiamo la tabella per presentare i risultati, così è più facile esportarli
-
-        #parole presenti in vdb1980 (occorrenze per ogni parola, percentuale su parole totali)
-        #parole presenti in vdb2016 (occorrenze per ogni parola, percentuale su parole totali)
-        #forestierismi presenti (occorrenze per ogni parola, percentuale su parole totali)
-        if self.tbdialog.result():
-            QMessageBox.warning(self, "Errore", "Funzione non ancora implementata.")
+        ret = QMessageBox.question(self,'Domanda', "Vuoi ignorare la punteggiatura?", QMessageBox.Yes | QMessageBox.No)
+        #TODO: aggiungere forestierismi presenti (occorrenze per ogni parola, percentuale su parole totali)
+        col = self.corpuscols['Lemma']
+        TBdialog = tableeditor.Form(self)
+        TBdialog.sessionDir = self.sessionDir
+        TBdialog.addcolumn("Lemma", 0)
+        TBdialog.addcolumn("Occorrenze", 1)
+        TBdialog.addcolumn("Presente in VdB 1980", 2)
+        TBdialog.addcolumn("Presente in VdB 2016", 3)
+        #calcolo le occorrenze del pos
+        self.myprogress = progress.ProgressDialog(self.w)
+        self.myprogress.start()
+        totallines = self.w.corpus.rowCount()
+        for row in range(self.w.corpus.rowCount()):
+            self.myprogress.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
+            self.myprogress.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            QApplication.processEvents()
+            if self.myprogress.Progrdialog.w.annulla.isChecked():
+                return
+            thispos = "False"
+            try:
+                thistext = self.w.corpus.item(row,col).text()
+                if ret == QMessageBox.Yes:
+                    thispos = self.legendaPos[self.w.corpus.item(row,self.corpuscols['pos']).text()][0]
+            except:
+                thistext = ""
+            if not thispos in self.ignorepos and thistext != "":
+                tbitem = TBdialog.w.tableWidget.findItems(thistext,Qt.MatchExactly)
+                if len(tbitem)>0:
+                    tbrow = tbitem[0].row()
+                    tbval = int(TBdialog.w.tableWidget.item(tbrow,1).text())+1
+                    TBdialog.setcelltotable(str(tbval), tbrow, 1)
+                else:
+                    TBdialog.addlinetotable(thistext, 0)
+                    tbrow = TBdialog.w.tableWidget.rowCount()-1
+                    TBdialog.setcelltotable("1", tbrow, 1)
+        #carico i vdb
+        self.vdb2016 = []
+        self.vdbfile16 = os.path.abspath(os.path.dirname(sys.argv[0]))+"/dizionario/vdb2016.txt"
+        if os.path.isfile(self.vdbfile16):
+            self.vdb2016 = [line.rstrip('\n') for line in open(self.vdbfile16, "r", encoding='utf-8')]
+        self.vdb1980 = []
+        self.vdbfile80 = os.path.abspath(os.path.dirname(sys.argv[0]))+"/dizionario/vdb1980.txt"
+        if os.path.isfile(self.vdbfile80):
+            self.vdb1980 = [line.rstrip('\n') for line in open(self.vdbfile80, "r", encoding='utf-8')]
+        #controllo per ogni parola se appartiene a un VdB
+        totallines = TBdialog.w.tableWidget.rowCount()
+        paroletotali = 0
+        parole2016 = 0
+        parole1980 = 0
+        for row in range(TBdialog.w.tableWidget.rowCount()):
+            self.myprogress.Progrdialog.w.testo.setText("Sto controllando la riga numero "+str(row))
+            self.myprogress.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            QApplication.processEvents()
+            thistext = TBdialog.w.tableWidget.item(row,0).text()
+            if thistext in self.vdb1980:
+                TBdialog.setcelltotable("1", row, 2)
+            else:
+                TBdialog.setcelltotable("0", row, 2)
+            if thistext in self.vdb2016:
+                TBdialog.setcelltotable("1", row, 3)
+            else:
+                TBdialog.setcelltotable("0", row, 3)
+        #calcolo le percentuali
+        for row in range(TBdialog.w.tableWidget.rowCount()):
+            self.myprogress.Progrdialog.w.testo.setText("Sto calcolando le somme su "+str(row))
+            self.myprogress.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            QApplication.processEvents()
+            paroletotali = paroletotali + int(TBdialog.w.tableWidget.item(row,1).text())
+            parole1980 = parole1980 + int(TBdialog.w.tableWidget.item(row,2).text())*int(TBdialog.w.tableWidget.item(row,1).text())
+            parole2016 = parole2016 + int(TBdialog.w.tableWidget.item(row,3).text())*int(TBdialog.w.tableWidget.item(row,1).text())
+        TBdialog.addlinetotable("Totale", 0)
+        tbrow = TBdialog.w.tableWidget.rowCount()-1
+        TBdialog.setcelltotable(str(paroletotali), tbrow, 1)
+        TBdialog.setcelltotable(str(parole1980), tbrow, 2)
+        TBdialog.setcelltotable(str(parole2016), tbrow, 3)
+        TBdialog.addlinetotable("Percentuale", 0)
+        tbrow = TBdialog.w.tableWidget.rowCount()-1
+        ratio = (float(paroletotali)/float(paroletotali)*100)
+        ratios = f'{ratio:.3f}'
+        TBdialog.setcelltotable(str(ratios), tbrow, 1)
+        ratio = (float(parole1980)/float(paroletotali)*100)
+        ratios = f'{ratio:.3f}'
+        TBdialog.setcelltotable(str(ratios), tbrow, 2)
+        ratio = (float(parole2016)/float(paroletotali)*100)
+        ratios = f'{ratio:.3f}'
+        TBdialog.setcelltotable(str(ratios), tbrow, 3)
+        #mostro i risultati
+        self.myprogress.Progrdialog.accept()
+        TBdialog.exec()
 
 
 if __name__ == "__main__":
