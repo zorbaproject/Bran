@@ -78,8 +78,9 @@ class Form(QDialog):
 
     def isrejected(self):
         self.filesessione = ""
-        QMessageBox.warning(self, "Sicuro sicuro?", "Stai per avviare Bran senza un file per la sessione di lavoro: questo significa che tutte le modifiche resteranno nella RAM. Se usi file di grandi dimensioni, la memoria potrebbe non bastare, e il programma andrebbe in crash. Sei sicuro di voler procedere senza una sessione di lavoro su file?")
-        self.reject()
+        ret = QMessageBox.question(self,'Sicuro sicuro?', "Stai per avviare Bran senza un file per la sessione di lavoro: questo significa che tutte le modifiche resteranno nella RAM. Se usi file di grandi dimensioni, la memoria potrebbe non bastare, e il programma andrebbe in crash. Sei sicuro di voler procedere senza una sessione di lavoro su file?", QMessageBox.Yes | QMessageBox.No)
+        if ret == QMessageBox.Yes:
+            self.reject()
 
     def clearh(self):
         for i in range(self.w.recenti.count()):

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 #would be nice: https://github.com/yarolig/pyqtc
+#Deploy as Docker container on Windows: https://robscode.onl/docker-run-gui-app-in-linux-container-on-windows-host/
 
 
 import pip
@@ -70,7 +71,7 @@ from forms import tint
 from forms import progress
 from forms import sessione
 from forms import ripetizioni
-
+from forms import about
 
 
 
@@ -100,6 +101,7 @@ class MainWindow(QMainWindow):
         self.w.actionSalva.triggered.connect(self.salvaProgetto)
         self.w.actionApri.triggered.connect(self.apriProgetto)
         self.w.actionEditor_di_testo.triggered.connect(self.texteditor)
+        self.w.actionAbout_Bran.triggered.connect(self.aboutbran)
         self.w.actionStatistiche_con_VdB.triggered.connect(self.statisticheconvdb)
         self.w.actionTrova_ripetizioni.triggered.connect(self.trovaripetizioni)
         self.w.actionConta_verbi.triggered.connect(self.contaverbi)
@@ -734,6 +736,10 @@ class MainWindow(QMainWindow):
     def texteditor(self):
         te = texteditor.TextEditor()
         te.show()
+
+    def aboutbran(self):
+        aw = about.Form(self)
+        aw.exec()
 
     def statisticheconvdb(self):
         ret = QMessageBox.question(self,'Domanda', "Vuoi ignorare la punteggiatura?", QMessageBox.Yes | QMessageBox.No)
