@@ -102,6 +102,7 @@ class MainWindow(QMainWindow):
         self.w.actionEditor_di_testo.triggered.connect(self.texteditor)
         self.w.actionStatistiche_con_VdB.triggered.connect(self.statisticheconvdb)
         self.w.actionTrova_ripetizioni.triggered.connect(self.trovaripetizioni)
+        self.w.actionConta_verbi.triggered.connect(self.contaverbi)
         self.corpuscols = {
             'IDcorpus': 0,
             'Orig': 1,
@@ -111,7 +112,7 @@ class MainWindow(QMainWindow):
             'feat': 5,
             'IDword': 6
         }
-        self.legendaPos = { "A":["aggettivo", "none"], "AP":["agg. Poss", "none"], "B":["avverbio", "none"], "B+PC":["avverbio+pron. clit. ", "none"], "BN":["avv, negazione", "none"], "CC":["cong. coord", "none"], "CS":["cong. Sub.", "none"], "DD":["det. dim.", "none"], "DE":["det. esclam. ", "none"], "DI":["det. indefinito", "none"], "DQ":["det. int.", "none"], "DR":["det. rel", "none"], "E":["preposizione", "none"], "E+RD":["prep. art. ", "none"], "FB":["punteggiatura - \"\" () «» - - ", "none"], "FC":["punteggiatura - : ;", "none"], "FF":["punteggiatura - ,", "none"], "FS":["punteggiatura - .?!", "none"], "I":["interiezione", "none"], "N":["numero", "none"], "NO":["numerale", "none"], "PC":["pron. clitico", "none"], "PC+PC":["pron. clitico+clitico", "none"], "PD":["pron. dimostrativo", "none"], "PE":["pron. pers. ", "none"], "PI":["pron. indef.", "none"], "PP":["pron. poss.", "none"], "PQ":["pron. interr.", "none"], "PR":["pron. rel.", "none"], "RD":["art. det.", "none"], "RI":["art. ind.", "none"], "S":["sost.", "none"], "SP":["nome proprio", "none"], "SW":["forestierismo", "none"], "T":["determinante (tutt*)", "none"], "V":["verbo", "none"], "V+PC":["v+pron. clitico", "none"], "V+PC+PC":["V+pron. clitico + pron clitico", "none"], "VA":["V. ausiliare", "none"], "VA+PC":["v. aus+pron.clitico", "none"], "VM":["v. mod.", "none"], "VM+PC":["v. mod + pron. clitico", "none"], "X":["altro", "none"] }
+        self.legendaPos = {"A":["aggettivo", "none"],"AP":["agg. Poss", "none"],"B":["avverbio", "none"],"B+PC":["avverbio+pron. clit. ", "none"],"BN":["avv, negazione", "none"],"CC":["cong. coord", "none"],"CS":["cong. Sub.", "none"],"DD":["det. dim.", "none"],"DE":["det. esclam. ", "none"],"DI":["det. indefinito", "none"],"DQ":["det. int.", "none"],"DR":["det. rel", "none"],"E":["preposizione", "none"],"E+RD":["prep. art. ", "none"],"FB":["punteggiatura - \"\" () «» - - ", "none"],"FC":["punteggiatura - : ;", "none"],"FF":["punteggiatura - ,", "none"],"FS":["punteggiatura - .?!", "none"],"I":["interiezione", "none"],"N":["numero", "none"],"NO":["numerale", "none"],"PC":["pron. clitico", "none"],"PC+PC":["pron. clitico+clitico", "none"],"PD":["pron. dimostrativo", "none"],"PE":["pron. pers. ", "none"],"PI":["pron. indef.", "none"],"PP":["pron. poss.", "none"],"PQ":["pron. interr.", "none"],"PR":["pron. rel.", "none"],"RD":["art. det.", "none"],"RI":["art. ind.", "none"],"S":["sost.", "none"],"SP":["nome proprio", "none"],"SW":["forestierismo", "none"],"T":["determinante (tutt*)", "none"],"V":["verbo", "none"],"V+PC":["verbo + pron. clitico", "none"],"V+PC+PC":["verbo + pron. clitico + pron clitico", "none"],"VA":["verbo ausiliare", "none"],"VA+PC":["verbo ausiliare + pron.clitico", "none"],"VM":["verbo mod", "none"],"VM+PC":["verbo mod + pron. clitico", "none"],"X":["altro", "none"]}
         self.ignorepos = ["punteggiatura - \"\" () «» - - ", "punteggiatura - : ;", "punteggiatura - ,", "punteggiatura - .?!", "altro"]
         self.separator = "\t"
         self.enumeratecolumns(self.w.ccolumn)
@@ -235,6 +236,52 @@ class MainWindow(QMainWindow):
                 TBdialog.addlinetotable(thistext, 0)
                 tbrow = TBdialog.w.tableWidget.rowCount()-1
                 TBdialog.setcelltotable("1", tbrow, 1)
+        self.myprogress.Progrdialog.accept()
+        TBdialog.exec()
+
+    def contaverbi(self):
+        poscol = self.corpuscols["pos"] #thisname.index(column[0])
+        morfcol = self.corpuscols["feat"]
+        TBdialog = tableeditor.Form(self)
+        TBdialog.sessionDir = self.sessionDir
+        TBdialog.addcolumn("Modo+Tempo", 0)
+        TBdialog.addcolumn("Occorrenze", 1)
+        self.myprogress = progress.ProgressDialog(self.w)
+        self.myprogress.start()
+        totallines = self.w.corpus.rowCount()
+        for row in range(self.w.corpus.rowCount()):
+            self.myprogress.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
+            self.myprogress.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            QApplication.processEvents()
+            if self.myprogress.Progrdialog.w.annulla.isChecked():
+                return
+            try:
+                thispos = self.legendaPos[self.w.corpus.item(row,self.corpuscols['pos']).text()][0]
+            except:
+                thispos = ""
+            thistext = ""
+            if thispos.split(" ")[0] == "verbo":
+                for ind in range(1,4):
+                    try:
+                        tmpos = self.legendaPos[self.w.corpus.item(row-ind,self.corpuscols['pos']).text()][0]
+                    except:
+                        tmpos = ""
+                    if tmpos == "verbo ausiliare":
+                        thistext = thistext + self.w.corpus.item(row-ind,morfcol).text() + "/"
+                        break
+                thistext = thistext + self.w.corpus.item(row,morfcol).text()
+                if not "v+" in self.w.corpus.item(row,morfcol).text():
+                    thistext = ""
+            if thistext != "":
+                tbitem = TBdialog.w.tableWidget.findItems(thistext,Qt.MatchExactly)
+                if len(tbitem)>0:
+                    tbrow = tbitem[0].row()
+                    tbval = int(TBdialog.w.tableWidget.item(tbrow,1).text())+1
+                    TBdialog.setcelltotable(str(tbval), tbrow, 1)
+                else:
+                    TBdialog.addlinetotable(thistext, 0)
+                    tbrow = TBdialog.w.tableWidget.rowCount()-1
+                    TBdialog.setcelltotable("1", tbrow, 1)
         self.myprogress.Progrdialog.accept()
         TBdialog.exec()
 

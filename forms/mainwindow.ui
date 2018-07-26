@@ -186,6 +186,7 @@
     <addaction name="actionStatistiche_con_VdB"/>
     <addaction name="actionCalcola_densit_lessicale"/>
     <addaction name="actionTrova_ripetizioni"/>
+    <addaction name="actionConta_verbi"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuModifica"/>
@@ -297,6 +298,11 @@
   <action name="actionTrova_ripetizioni">
    <property name="text">
     <string>Trova ripetizioni</string>
+   </property>
+  </action>
+  <action name="actionConta_verbi">
+   <property name="text">
+    <string>Conta verbi</string>
    </property>
   </action>
  </widget>
