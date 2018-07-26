@@ -185,6 +185,7 @@
     <addaction name="actionConta_occorrenze"/>
     <addaction name="actionStatistiche_con_VdB"/>
     <addaction name="actionCalcola_densit_lessicale"/>
+    <addaction name="actionTrova_ripetizioni"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuModifica"/>
@@ -291,6 +292,11 @@
   <action name="actionCalcola_densit_lessicale">
    <property name="text">
     <string>Calcola densità lessicale</string>
+   </property>
+  </action>
+  <action name="actionTrova_ripetizioni">
+   <property name="text">
+    <string>Trova ripetizioni</string>
    </property>
   </action>
  </widget>

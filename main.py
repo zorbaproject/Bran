@@ -69,6 +69,7 @@ from forms import tableeditor
 from forms import tint
 from forms import progress
 from forms import sessione
+from forms import ripetizioni
 
 
 
@@ -100,6 +101,7 @@ class MainWindow(QMainWindow):
         self.w.actionApri.triggered.connect(self.apriProgetto)
         self.w.actionEditor_di_testo.triggered.connect(self.texteditor)
         self.w.actionStatistiche_con_VdB.triggered.connect(self.statisticheconvdb)
+        self.w.actionTrova_ripetizioni.triggered.connect(self.trovaripetizioni)
         self.corpuscols = {
             'IDcorpus': 0,
             'Orig': 1,
@@ -235,6 +237,90 @@ class MainWindow(QMainWindow):
                 TBdialog.setcelltotable("1", tbrow, 1)
         self.myprogress.Progrdialog.accept()
         TBdialog.exec()
+
+    def trovaripetizioni(self):
+        ipunct = ["punteggiatura - \"\" () «» - - ", "punteggiatura - : ;", "punteggiatura - ,", "punteggiatura - .?!", "altro"]
+        Repetdialog = ripetizioni.Form(self)
+        Repetdialog.loadipos(ipunct)
+        Repetdialog.exec()
+        if Repetdialog.result():
+            tokenda = Repetdialog.w.tokenda.value()
+            tokena = Repetdialog.w.tokena.value()
+            minoccur = Repetdialog.w.minoccurr.value()
+            ignorecase = Repetdialog.w.ignorecase.isChecked()
+            remspaces = Repetdialog.w.remspaces.isChecked()
+            TBdialog = tableeditor.Form(self)
+            TBdialog.sessionDir = self.sessionDir
+            TBdialog.addcolumn("nGram", 0)
+            TBdialog.addcolumn("Occorrenze", 1)
+            self.myprogress = progress.ProgressDialog(self.w)
+            self.myprogress.start()
+            for tokens in range(tokenda, tokena+1):
+                self.findngrams(tokens, minoccur, TBdialog, self.myprogress, ignorecase, remspaces, ipunct)
+            self.myprogress.Progrdialog.accept()
+            TBdialog.exec()
+
+    def findngrams(self, tokens, minoccur, TBdialog, myprogress, ignorecase, remspaces, ipunct):
+        mycorpus = ""
+        col = self.corpuscols['Orig']
+        totallines = self.w.corpus.rowCount()
+        for row in range(self.w.corpus.rowCount()):
+            myprogress.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
+            myprogress.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            QApplication.processEvents()
+            if myprogress.Progrdialog.w.annulla.isChecked():
+                return
+            thispos = self.legendaPos[self.w.corpus.item(row,self.corpuscols['pos']).text()][0]
+            if not thispos in ipunct:
+                mycorpus = mycorpus + self.w.corpus.item(row,col).text() + " "
+        if ignorecase:
+            mycorpus = mycorpus.lower()
+        searchthis = " "
+        if remspaces:
+            #e se mettessimo la rimozione spazi solo durante l'inserimento della frase nella tabella?
+            punt = re.escape(" (\.,;!\?)")
+            mycorpus = re.sub(punt, "\1", mycorpus, flags=re.IGNORECASE|re.DOTALL)
+            mycorpus = re.sub("' ", "'", mycorpus, flags=re.IGNORECASE|re.DOTALL)
+            searchthis = " " #we should take care about .,?!;:
+        active = True
+        pos = 0
+        totallines = len(mycorpus)
+        while active:
+            wpos = pos
+            npos = pos
+            myprogress.Progrdialog.w.testo.setText("Sto conteggiando il carattere numero "+str(pos))
+            myprogress.Progrdialog.w.progressBar.setValue(int((pos/totallines)*100))
+            QApplication.processEvents()
+            if myprogress.Progrdialog.w.annulla.isChecked():
+                return
+            #read a specific number of words
+            for i in range(tokens):
+                wpos = mycorpus.find(searchthis, npos+1)
+                if wpos > 0:
+                    npos = wpos
+            #check if we reached someway the end of text
+            if npos > len(mycorpus)-1:
+                if pos > len(mycorpus)-1:
+                    break
+                else:
+                    npos = len(mycorpus)-1
+            #read this phrase
+            tmpstring = mycorpus[pos:npos]
+            #look for all occurrences of this phrase
+            if tmpstring != "" and tmpstring.count(searchthis)==tokens-1:
+                tcount = mycorpus.count(tmpstring)
+                if tcount >= minoccur:
+                    tbitem = TBdialog.w.tableWidget.findItems(tmpstring,Qt.MatchExactly)
+                    if len(tbitem)<=0:
+                        TBdialog.addlinetotable(tmpstring, 0)
+                        tbrow = TBdialog.w.tableWidget.rowCount()-1
+                        TBdialog.setcelltotable(str(tcount), tbrow, 1)
+                #newtext = nth_replace(mycorpus, tmpstring, "", 2, "all right")
+                #text = newtext
+            pos = mycorpus.find(searchthis, pos+1)+1 #continue from next word
+            if pos <= 0:
+                pos = len(mycorpus)
+
 
     def translatePos(self):
         col = self.corpuscols['pos']
