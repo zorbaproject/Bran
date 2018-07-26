@@ -242,6 +242,7 @@ class MainWindow(QMainWindow):
         ipunct = ["punteggiatura - \"\" () «» - - ", "punteggiatura - : ;", "punteggiatura - ,", "punteggiatura - .?!", "altro"]
         Repetdialog = ripetizioni.Form(self)
         Repetdialog.loadipos(ipunct)
+        Repetdialog.loadallpos(self.legendaPos)
         Repetdialog.exec()
         if Repetdialog.result():
             tokenda = Repetdialog.w.tokenda.value()
@@ -249,6 +250,9 @@ class MainWindow(QMainWindow):
             minoccur = Repetdialog.w.minoccurr.value()
             ignorecase = Repetdialog.w.ignorecase.isChecked()
             remspaces = Repetdialog.w.remspaces.isChecked()
+            ipunct = []
+            for i in range(Repetdialog.w.ignorapos.count()):
+                ipunct.append(Repetdialog.w.ignorapos.item(i).text())
             TBdialog = tableeditor.Form(self)
             TBdialog.sessionDir = self.sessionDir
             TBdialog.addcolumn("nGram", 0)
@@ -276,12 +280,11 @@ class MainWindow(QMainWindow):
         if ignorecase:
             mycorpus = mycorpus.lower()
         searchthis = " "
-        if remspaces:
-            #e se mettessimo la rimozione spazi solo durante l'inserimento della frase nella tabella?
-            punt = re.escape(" (\.,;!\?)")
-            mycorpus = re.sub(punt, "\1", mycorpus, flags=re.IGNORECASE|re.DOTALL)
-            mycorpus = re.sub("' ", "'", mycorpus, flags=re.IGNORECASE|re.DOTALL)
-            searchthis = " " #we should take care about .,?!;:
+        #if remspaces:
+            #punt = re.escape(" (\.,;!\?)")
+            #mycorpus = re.sub(punt, "\1", mycorpus, flags=re.IGNORECASE|re.DOTALL)
+            #mycorpus = re.sub("' ", "'", mycorpus, flags=re.IGNORECASE|re.DOTALL)
+            #searchthis = " " #we should take care about .,?!;:
         active = True
         pos = 0
         totallines = len(mycorpus)
@@ -310,6 +313,11 @@ class MainWindow(QMainWindow):
             if tmpstring != "" and tmpstring.count(searchthis)==tokens-1:
                 tcount = mycorpus.count(tmpstring)
                 if tcount >= minoccur:
+                    if remspaces:
+                        punt = "( ["+re.escape(".,;!?")+ "])"
+                        tmpstring = re.sub(punt, "\1", tmpstring, flags=re.IGNORECASE|re.DOTALL)
+                        punt = "(["+re.escape("'’")+ "]) "
+                        tmpstring = re.sub(punt, "\1", tmpstring, flags=re.IGNORECASE|re.DOTALL)
                     tbitem = TBdialog.w.tableWidget.findItems(tmpstring,Qt.MatchExactly)
                     if len(tbitem)<=0:
                         TBdialog.addlinetotable(tmpstring, 0)

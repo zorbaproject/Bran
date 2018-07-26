@@ -74,7 +74,7 @@
    <item>
     <widget class="QCheckBox" name="remspaces">
      <property name="text">
-      <string>Rimuovi spazi inutili (bad idea)</string>
+      <string>Rimuovi spazi inutili</string>
      </property>
     </widget>
    </item>

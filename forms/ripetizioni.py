@@ -29,14 +29,13 @@ class Form(QDialog):
         self.setLayout(layout)
         self.w.accepted.connect(self.isaccepted)
         self.w.rejected.connect(self.isrejected)
-        #self.w.cancelrecenti.clicked.connect(self.clearh)
         self.w.rejected.connect(self.isrejected)
-        #self.w.selectapri.clicked.connect(self.selectapri)
-        #self.w.selectcrea.clicked.connect(self.selectcrea)
+        self.w.aggiungi.clicked.connect(self.selectaggiungi)
+        self.w.rimuovi.clicked.connect(self.rimuovi)
         self.setWindowTitle("Scegli come cercare le ripetizioni")
-        #self.filesessione = ""
         self.w.remspaces.setChecked(False)
         self.w.ignorecase.setChecked(True)
+        self.allPos = []
 
     def isaccepted(self):
         self.accept()
@@ -44,16 +43,17 @@ class Form(QDialog):
     def isrejected(self):
         self.reject()
 
-    def clearh(self):
-        for i in range(self.w.recenti.count()):
-            item = self.w.recenti.item(i)
-            self.w.recenti.setItemSelected(item, False)
+    def rimuovi(self):
+        for i in self.w.ignorapos.selectedItems():
+            self.w.ignorapos.takeItem(self.w.ignorapos.row(i))
 
-    def selectapri(self):
-        fileName = QFileDialog.getExistingDirectory(self, "Seleziona la cartella in cui si trova la tua sessione di lavoro")
-        if not fileName == "":
-            if os.path.isdir(fileName):
-                self.w.aprisessione.setText(fileName)
+    def selectaggiungi(self):
+        mypos = QInputDialog.getItem(self, "Scegli la categoria", "Scegli la categoria PoS da aggiungere alla lista di PoS da ignorare",self.allPos,current=0,editable=False)
+        self.w.ignorapos.addItem(mypos[0])
+
+    def loadallpos(self, legenda):
+        for item in legenda:
+            self.allPos.append(legenda[item][0])
 
     def loadipos(self, history):
         for olddir in history:
