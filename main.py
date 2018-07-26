@@ -260,18 +260,28 @@ class MainWindow(QMainWindow):
             except:
                 thispos = ""
             thistext = ""
+            thistext2 = ""
             if thispos.split(" ")[0] == "verbo":
                 for ind in range(1,4):
                     try:
                         tmpos = self.legendaPos[self.w.corpus.item(row-ind,self.corpuscols['pos']).text()][0]
+                        thistext2 = self.w.corpus.item(row,morfcol).text()
                     except:
                         tmpos = ""
                     if tmpos == "verbo ausiliare":
                         thistext = thistext + self.w.corpus.item(row-ind,morfcol).text() + "/"
+                        if bool(re.match('^v\+.*?$', thistext))==False:
+                            thistext = ""
                         break
-                thistext = thistext + self.w.corpus.item(row,morfcol).text()
-                if not "v+" in self.w.corpus.item(row,morfcol).text():
-                    thistext = ""
+                if len(thistext.split("+")) >= 3:
+                    tmptext = thistext.split("+")[0] + "+" +thistext.split("+")[1] + "+" +thistext.split("+")[2]
+                    thistext = tmptext + "/"
+                if len(thistext2.split("+")) >= 3:
+                    tmptext = thistext2.split("+")[0] + "+" +thistext2.split("+")[1] + "+" +thistext2.split("+")[2]
+                    thistext2 = tmptext
+                if bool(re.match('^v\+.*?$', thistext2))==False:
+                    thistext2 = ""
+                thistext = thistext + thistext2
             if thistext != "":
                 tbitem = TBdialog.w.tableWidget.findItems(thistext,Qt.MatchExactly)
                 if len(tbitem)>0:
