@@ -177,23 +177,46 @@ class TintCorpus(QThread):
                 #print("Errore nella lettura:")
                 #print(line)
                 myarray = {'sentences': []}
-            legenda = {'A': ['adj'], 'AP': ['adj'], 'B': ['adv','prep'], 'BN': ['adv'], 'S': ['n'], 'T': ['pron'], 'RI': ['art'], 'RD': ['art','pron'], 'V': ['v'], 'E': ['prep'], 'VA': ['v'], 'CC': ['conj'], 'PC': ['art','pron'], 'PR': ['conj'], 'VM': ['v'], 'CS': ['conj'], 'PE': ['pron'], 'DD': ['adj'], 'DI': ['pron'], 'PI': ['pron'], 'SW': ['n']}
+            oldtokens = ["A", "A", "A"]
+            indoltk = 0
+            legenda = {'A': ['adj'], 'AP': ['adj'], 'B': ['adv','prep'], 'BN': ['adv'], 'I': ['adv'], 'S': ['n'], 'T': ['pron'], 'RI': ['art'], 'RD': ['art','pron'], 'V': ['v'], 'E': ['prep'], 'VA': ['v'], 'CC': ['conj'], 'PC': ['art','pron'], 'PR': ['conj', 'pron'], 'VM': ['v'], 'CS': ['conj'], 'PE': ['pron'], 'DD': ['adj'], 'DI': ['pron', 'adj'], 'PI': ['pron'], 'SW': ['n']}
             for sentence in myarray["sentences"]:
                 for token in sentence["tokens"]:
                     morfL = str(token["full_morpho"]).split(' ')
                     posL = str(token["pos"]).split('+')
+                    oldtokens[indoltk%3] = posL[0]
+                    indoltk = indoltk +1
                     morf = ""
                     try:
                         posN = 0
                         for pos in posL:
                             posML = legenda[pos]
                             ind = 0
+                            c = False
                             for morfT in morfL:
-                                c = False
+                                #c = False
+                                if ind == 0 and pos=="V" and "VA" in oldtokens:
+                                    oldtokens = ["A", "A", "A"]
+                                    #se preceduto da ausiliare, è un participio
+                                    indo2 = 0
+                                    for morfT in morfL:
+                                        if "v+part+" in morfT:
+                                            ind = indo2
+                                            c = True
+                                            break
+                                        indo2 = indo2 +1
+                                stupidoimperativo = True
                                 for posM in posML:
                                     if bool(re.match('.*?\+'+posM+'([\+/].*?|$)', morfT)):
-                                        c = True
-                                        break
+                                        if "v+imp+pres+" in morfT:
+                                            if stupidoimperativo == False:
+                                                if "+2+plur" in morfT or "+2+sing" in morfT:
+                                                    if 'I' in oldtokens:
+                                                        c = True #il modo imperativo è legittimo solo per seconda persona e solo se c'è una interiezione
+                                                        break
+                                        else:
+                                            c = True
+                                            break
                                 if c:
                                     break
                                 ind = ind + 1

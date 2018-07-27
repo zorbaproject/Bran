@@ -248,6 +248,7 @@ class MainWindow(QMainWindow):
         TBdialog.sessionDir = self.sessionDir
         TBdialog.addcolumn("Modo+Tempo", 0)
         TBdialog.addcolumn("Occorrenze", 1)
+        TBdialog.addcolumn("Percentuali", 1)
         self.myprogress = progress.ProgressDialog(self.w)
         self.myprogress.start()
         totallines = self.w.corpus.rowCount()
@@ -264,26 +265,37 @@ class MainWindow(QMainWindow):
             thistext = ""
             thistext2 = ""
             if thispos.split(" ")[0] == "verbo":
+                thistext = self.w.corpus.item(row,morfcol).text()
+            if "ausiliare" in thispos:
+                for ind in range(1,4):
+                    try:
+                        tmpos = self.legendaPos[self.w.corpus.item(row+ind,self.corpuscols['pos']).text()][0]
+                    except:
+                        tmpos = ""
+                    if "verbo" in tmpos:
+                        thistext = ""
+                        break
+            elif thispos.split(" ")[0] == "verbo":
                 for ind in range(1,4):
                     try:
                         tmpos = self.legendaPos[self.w.corpus.item(row-ind,self.corpuscols['pos']).text()][0]
-                        thistext2 = self.w.corpus.item(row,morfcol).text()
                     except:
                         tmpos = ""
-                    if tmpos == "verbo ausiliare":
-                        thistext = thistext + self.w.corpus.item(row-ind,morfcol).text() + "/"
-                        if bool(re.match('^v\+.*?$', thistext))==False:
-                            thistext = ""
+                    if "ausiliare" in tmpos and "v+part" in thistext:
+                        thistext2 = thistext2 + self.w.corpus.item(row-ind,morfcol).text()
                         break
-                if len(thistext.split("+")) >= 3:
-                    tmptext = thistext.split("+")[0] + "+" +thistext.split("+")[1] + "+" +thistext.split("+")[2]
-                    thistext = tmptext + "/"
-                if len(thistext2.split("+")) >= 3:
-                    tmptext = thistext2.split("+")[0] + "+" +thistext2.split("+")[1] + "+" +thistext2.split("+")[2]
-                    thistext2 = tmptext
-                if bool(re.match('^v\+.*?$', thistext2))==False:
-                    thistext2 = ""
-                thistext = thistext + thistext2
+            if bool(re.match('^v\+.*?$', thistext))==False:
+                thistext = ""
+            if bool(re.match('^v\+.*?$', thistext2))==False:
+                thistext2 = ""
+            if len(thistext.split("+")) >= 3:
+                tmptext = thistext.split("+")[0] + "+" +thistext.split("+")[1] + "+" +thistext.split("+")[2]
+                thistext = tmptext
+            if len(thistext2.split("+")) >= 3:
+                tmptext = thistext2.split("+")[0] + "+" +thistext2.split("+")[1] + "+" +thistext2.split("+")[2]
+                thistext2 = tmptext + "/"
+            if thistext != "":
+                thistext = thistext2 + thistext
             if thistext != "":
                 tbitem = TBdialog.w.tableWidget.findItems(thistext,Qt.MatchExactly)
                 if len(tbitem)>0:
@@ -294,6 +306,18 @@ class MainWindow(QMainWindow):
                     TBdialog.addlinetotable(thistext, 0)
                     tbrow = TBdialog.w.tableWidget.rowCount()-1
                     TBdialog.setcelltotable("1", tbrow, 1)
+        #calcolo le percentuali
+        totallines = TBdialog.w.tableWidget.rowCount()
+        verbitotali = 0
+        for row in range(TBdialog.w.tableWidget.rowCount()):
+            verbitotali = verbitotali + int(TBdialog.w.tableWidget.item(row,1).text())
+        for row in range(TBdialog.w.tableWidget.rowCount()):
+            self.myprogress.Progrdialog.w.testo.setText("Sto calcolando le percentuali su "+str(row))
+            self.myprogress.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            QApplication.processEvents()
+            ratio = (float(TBdialog.w.tableWidget.item(row,1).text())/float(verbitotali)*100)
+            ratios = f'{ratio:.3f}'
+            TBdialog.setcelltotable(ratios, row, 2)
         self.myprogress.Progrdialog.accept()
         TBdialog.exec()
 
