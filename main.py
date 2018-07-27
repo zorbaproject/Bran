@@ -282,8 +282,12 @@ class MainWindow(QMainWindow):
                     except:
                         tmpos = ""
                     if "ausiliare" in tmpos and "v+part" in thistext:
-                        thistext2 = thistext2 + self.w.corpus.item(row-ind,morfcol).text()
+                        thistext2 = thistext2 + "/" + self.w.corpus.item(row-ind,morfcol).text()
+                    if "verbo" in tmpos and not "ausiliare" in tmpos:
                         break
+            if len(thistext2)>0:
+                if thistext2[0]=="/":
+                    thistext2=thistext2[1:]
             if bool(re.match('^v\+.*?$', thistext))==False:
                 thistext = ""
             if bool(re.match('^v\+.*?$', thistext2))==False:
@@ -291,11 +295,20 @@ class MainWindow(QMainWindow):
             if len(thistext.split("+")) >= 3:
                 tmptext = thistext.split("+")[0] + "+" +thistext.split("+")[1] + "+" +thistext.split("+")[2]
                 thistext = tmptext
+            thistext3 = ""
+            if len(thistext2.split("/"))>1:
+                thistext3 = thistext2.split("/")[1]
+                thistext2 = thistext2.split("/")[0]
+            if bool(re.match('^v\+.*?$', thistext3))==False:
+                thistext3 = ""
             if len(thistext2.split("+")) >= 3:
                 tmptext = thistext2.split("+")[0] + "+" +thistext2.split("+")[1] + "+" +thistext2.split("+")[2]
                 thistext2 = tmptext + "/"
+            if len(thistext3.split("+")) >= 3:
+                tmptext = thistext3.split("+")[0] + "+" +thistext3.split("+")[1] + "+" +thistext3.split("+")[2]
+                thistext3 = tmptext + "/"
             if thistext != "":
-                thistext = thistext2 + thistext
+                thistext = thistext3 + thistext2 + thistext
             if thistext != "":
                 tbitem = TBdialog.w.tableWidget.findItems(thistext,Qt.MatchExactly)
                 if len(tbitem)>0:
