@@ -216,14 +216,14 @@ class MainWindow(QMainWindow):
         TBdialog.sessionDir = self.sessionDir
         TBdialog.addcolumn(column[0], 0)
         TBdialog.addcolumn("Occorrenze", 1)
-        self.myprogress = progress.ProgressDialog(self.w)
-        self.myprogress.start()
+        self.Progrdialog = progress.Form()
+        self.Progrdialog.show()
         totallines = self.w.corpus.rowCount()
         for row in range(self.w.corpus.rowCount()):
-            self.myprogress.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
-            self.myprogress.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
+            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
             QApplication.processEvents()
-            if self.myprogress.Progrdialog.w.annulla.isChecked():
+            if self.Progrdialog.w.annulla.isChecked():
                 return
             try:
                 thistext = self.w.corpus.item(row,col).text()
@@ -238,7 +238,7 @@ class MainWindow(QMainWindow):
                 TBdialog.addlinetotable(thistext, 0)
                 tbrow = TBdialog.w.tableWidget.rowCount()-1
                 TBdialog.setcelltotable("1", tbrow, 1)
-        self.myprogress.Progrdialog.accept()
+        self.Progrdialog.accept()
         TBdialog.exec()
 
     def contaverbi(self):
@@ -249,14 +249,14 @@ class MainWindow(QMainWindow):
         TBdialog.addcolumn("Modo+Tempo", 0)
         TBdialog.addcolumn("Occorrenze", 1)
         TBdialog.addcolumn("Percentuali", 1)
-        self.myprogress = progress.ProgressDialog(self.w)
-        self.myprogress.start()
+        self.Progrdialog = progress.Form()
+        self.Progrdialog.show()
         totallines = self.w.corpus.rowCount()
         for row in range(self.w.corpus.rowCount()):
-            self.myprogress.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
-            self.myprogress.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
+            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
             QApplication.processEvents()
-            if self.myprogress.Progrdialog.w.annulla.isChecked():
+            if self.Progrdialog.w.annulla.isChecked():
                 return
             try:
                 thispos = self.legendaPos[self.w.corpus.item(row,self.corpuscols['pos']).text()][0]
@@ -325,13 +325,13 @@ class MainWindow(QMainWindow):
         for row in range(TBdialog.w.tableWidget.rowCount()):
             verbitotali = verbitotali + int(TBdialog.w.tableWidget.item(row,1).text())
         for row in range(TBdialog.w.tableWidget.rowCount()):
-            self.myprogress.Progrdialog.w.testo.setText("Sto calcolando le percentuali su "+str(row))
-            self.myprogress.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            self.Progrdialog.w.testo.setText("Sto calcolando le percentuali su "+str(row))
+            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
             QApplication.processEvents()
             ratio = (float(TBdialog.w.tableWidget.item(row,1).text())/float(verbitotali)*100)
             ratios = f'{ratio:.3f}'
             TBdialog.setcelltotable(ratios, row, 2)
-        self.myprogress.Progrdialog.accept()
+        self.Progrdialog.accept()
         TBdialog.exec()
 
     def trovaripetizioni(self):
@@ -353,11 +353,11 @@ class MainWindow(QMainWindow):
             TBdialog.sessionDir = self.sessionDir
             TBdialog.addcolumn("nGram", 0)
             TBdialog.addcolumn("Occorrenze", 1)
-            self.myprogress = progress.ProgressDialog(self.w)
-            self.myprogress.start()
+            self.Progrdialog = progress.Form()
+            self.Progrdialog.show()
             for tokens in range(tokenda, tokena+1):
                 self.findngrams(tokens, minoccur, TBdialog, self.myprogress, ignorecase, remspaces, ipunct)
-            self.myprogress.Progrdialog.accept()
+            self.Progrdialog.accept()
             TBdialog.exec()
 
     def findngrams(self, tokens, minoccur, TBdialog, myprogress, ignorecase, remspaces, ipunct):
@@ -428,14 +428,14 @@ class MainWindow(QMainWindow):
 
     def translatePos(self):
         col = self.corpuscols['pos']
-        self.myprogress = progress.ProgressDialog(self.w)
-        self.myprogress.start()
+        self.Progrdialog = progress.Form()
+        self.Progrdialog.show()
         totallines = self.w.corpus.rowCount()
         for row in range(self.w.corpus.rowCount()):
-            self.myprogress.Progrdialog.w.testo.setText("Sto lavorando sulla riga numero "+str(row))
-            self.myprogress.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            self.Progrdialog.w.testo.setText("Sto lavorando sulla riga numero "+str(row))
+            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
             QApplication.processEvents()
-            if self.myprogress.Progrdialog.w.annulla.isChecked():
+            if self.Progrdialog.w.annulla.isChecked():
                 return
             try:
                 thistext = self.w.corpus.item(row,col).text()
@@ -446,7 +446,7 @@ class MainWindow(QMainWindow):
             except:
                 newtext = thistext
             self.setcelltocorpus(newtext, row, col)
-        self.myprogress.Progrdialog.accept()
+        self.Progrdialog.accept()
 
     def densitalessico(self):
         col = self.corpuscols['pos']
@@ -456,14 +456,14 @@ class MainWindow(QMainWindow):
         TBdialog.addcolumn("Occorrenze", 1)
         TBdialog.addcolumn("Percentuale", 2)
         #calcolo le occorrenze del pos
-        self.myprogress = progress.ProgressDialog(self.w)
-        self.myprogress.start()
+        self.Progrdialog = progress.Form()
+        self.Progrdialog.show()
         totallines = self.w.corpus.rowCount()
         for row in range(self.w.corpus.rowCount()):
-            self.myprogress.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
-            self.myprogress.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
+            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
             QApplication.processEvents()
-            if self.myprogress.Progrdialog.w.annulla.isChecked():
+            if self.Progrdialog.w.annulla.isChecked():
                 return
             try:
                 thistextO = self.w.corpus.item(row,col).text()
@@ -486,8 +486,8 @@ class MainWindow(QMainWindow):
         parolevuote = 0
         parolenone = 0
         for row in range(TBdialog.w.tableWidget.rowCount()):
-            self.myprogress.Progrdialog.w.testo.setText("Sto sommando la riga numero "+str(row))
-            self.myprogress.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            self.Progrdialog.w.testo.setText("Sto sommando la riga numero "+str(row))
+            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
             QApplication.processEvents()
             thistext = TBdialog.w.tableWidget.item(row,0).text()
             for key in self.legendaPos:
@@ -518,14 +518,14 @@ class MainWindow(QMainWindow):
         TBdialog.setcelltotable(str(parolenone), tbrow, 1)
         #calcolo le percentuali
         for row in range(TBdialog.w.tableWidget.rowCount()):
-            self.myprogress.Progrdialog.w.testo.setText("Sto calcolando le percentuali su "+str(row))
-            self.myprogress.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            self.Progrdialog.w.testo.setText("Sto calcolando le percentuali su "+str(row))
+            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
             QApplication.processEvents()
             ratio = (float(TBdialog.w.tableWidget.item(row,1).text())/float(paroletotali)*100)
             ratios = f'{ratio:.3f}'
             TBdialog.setcelltotable(ratios, row, 2)
         #mostro i risultati
-        self.myprogress.Progrdialog.accept()
+        self.Progrdialog.accept()
         TBdialog.exec()
 
     def salvaProgetto(self):
@@ -534,15 +534,15 @@ class MainWindow(QMainWindow):
             if fileName != "":
                 self.sessionFile = fileName
         if self.sessionFile != "":
-            self.myprogress = progress.ProgressDialog(self.w)
-            self.myprogress.start()
-            self.CSVsaver(self.sessionFile, self.myprogress.Progrdialog, False)
+            self.Progrdialog = progress.Form()
+            self.Progrdialog.show()
+            self.CSVsaver(self.sessionFile, self.Progrdialog, False)
 
     def salvaCSV(self):
         fileName = QFileDialog.getSaveFileName(self, "Salva file CSV", self.sessionDir, "Text files (*.csv *.txt)")[0]
-        self.myprogress = progress.ProgressDialog(self.w)
-        self.myprogress.start()
-        self.CSVsaver(fileName, self.myprogress.Progrdialog, True)
+        self.Progrdialog = progress.Form()
+        self.Progrdialog.show()
+        self.CSVsaver(fileName, self.Progrdialog, True)
 
     def CSVsaver(self, fileName, Progrdialog, addheader = False):
         if fileName != "":
@@ -641,10 +641,10 @@ class MainWindow(QMainWindow):
     def loadCSV(self):
         if self.ImportingFile == False:
             fileNames = QFileDialog.getOpenFileNames(self, "Apri file CSV", self.sessionDir, "File CSV (*.txt *.csv)")[0]
-            self.myprogress = progress.ProgressDialog(self.w)
-            self.myprogress.start()
+            self.Progrdialog = progress.Form() #self.Progrdialog = progress.Form()
+            self.Progrdialog.show() #self.Progrdialog.show()
             self.ImportingFile = True
-            self.CSVloader(fileNames, self.myprogress.Progrdialog)
+            self.CSVloader(fileNames, self.Progrdialog) #self.CSVloader(fileNames, self.Progrdialog)
 
     def CSVloader(self, fileNames, Progrdialog):
         fileID = 0
@@ -701,12 +701,12 @@ class MainWindow(QMainWindow):
                 if not os.path.getsize(self.sessionFile) > 1:
                     return
             try:
-                self.myprogress = progress.ProgressDialog(self.w)
-                self.myprogress.start()
+                self.Progrdialog = progress.Form()
+                self.Progrdialog.show()
                 self.ImportingFile = True
                 fileNames = ['']
                 fileNames[0] = self.sessionFile
-                self.CSVloader(fileNames, self.myprogress.Progrdialog)
+                self.CSVloader(fileNames, self.Progrdialog)
             except:
                 try:
                     self.myprogress.reject()
@@ -789,14 +789,14 @@ class MainWindow(QMainWindow):
         TBdialog.addcolumn("Presente in VdB 1980", 2)
         TBdialog.addcolumn("Presente in VdB 2016", 3)
         #calcolo le occorrenze del pos
-        self.myprogress = progress.ProgressDialog(self.w)
-        self.myprogress.start()
+        self.Progrdialog = progress.Form()
+        self.Progrdialog.show()
         totallines = self.w.corpus.rowCount()
         for row in range(self.w.corpus.rowCount()):
-            self.myprogress.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
-            self.myprogress.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
+            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
             QApplication.processEvents()
-            if self.myprogress.Progrdialog.w.annulla.isChecked():
+            if self.Progrdialog.w.annulla.isChecked():
                 return
             thispos = "False"
             try:
@@ -830,8 +830,8 @@ class MainWindow(QMainWindow):
         parole2016 = 0
         parole1980 = 0
         for row in range(TBdialog.w.tableWidget.rowCount()):
-            self.myprogress.Progrdialog.w.testo.setText("Sto controllando la riga numero "+str(row))
-            self.myprogress.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            self.Progrdialog.w.testo.setText("Sto controllando la riga numero "+str(row))
+            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
             QApplication.processEvents()
             thistext = TBdialog.w.tableWidget.item(row,0).text()
             if thistext in self.vdb1980:
@@ -844,8 +844,8 @@ class MainWindow(QMainWindow):
                 TBdialog.setcelltotable("0", row, 3)
         #calcolo le percentuali
         for row in range(TBdialog.w.tableWidget.rowCount()):
-            self.myprogress.Progrdialog.w.testo.setText("Sto calcolando le somme su "+str(row))
-            self.myprogress.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            self.Progrdialog.w.testo.setText("Sto calcolando le somme su "+str(row))
+            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
             QApplication.processEvents()
             paroletotali = paroletotali + int(TBdialog.w.tableWidget.item(row,1).text())
             parole1980 = parole1980 + int(TBdialog.w.tableWidget.item(row,2).text())*int(TBdialog.w.tableWidget.item(row,1).text())
@@ -867,7 +867,7 @@ class MainWindow(QMainWindow):
         ratios = f'{ratio:.3f}'
         TBdialog.setcelltotable(str(ratios), tbrow, 3)
         #mostro i risultati
-        self.myprogress.Progrdialog.accept()
+        self.Progrdialog.accept()
         TBdialog.exec()
 
 

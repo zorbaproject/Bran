@@ -157,16 +157,16 @@ class TintCorpus(QThread):
         itext = itext.replace('?','?\n')
         itext = itext.split('\n')
         #itext = re.split('[\n\.\?]', text)
-        self.myprogress = progress.ProgressDialog(self.w)
-        self.myprogress.start()
+        self.Progrdialog = progress.Form()
+        self.Progrdialog.show()
         totallines = len(itext)
         row = 0
         for line in itext:
             row = row + 1
-            self.myprogress.Progrdialog.w.testo.setText("Sto lavorando sulla frase numero "+str(row))
-            self.myprogress.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            self.Progrdialog.w.testo.setText("Sto lavorando sulla frase numero "+str(row))
+            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
             QApplication.processEvents()
-            if self.myprogress.Progrdialog.w.annulla.isChecked():
+            if self.Progrdialog.w.annulla.isChecked():
                 return
             myres = ""
             if line != "":
@@ -252,7 +252,7 @@ class TintCorpus(QThread):
                         fdatefile = self.outputcsv
                         with open(fdatefile, "a", encoding='utf-8') as myfile:
                             myfile.write(fullline+"\n")
-        self.myprogress.Progrdialog.accept()
+        self.Progrdialog.accept()
 
     def getJson(self, text):
         #http://localhost:8012/tint?text=Barack%20Obama%20era%20il%20presidente%20degli%20Stati%20Uniti%20d%27America.
