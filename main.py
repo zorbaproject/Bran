@@ -356,19 +356,19 @@ class MainWindow(QMainWindow):
             self.Progrdialog = progress.Form()
             self.Progrdialog.show()
             for tokens in range(tokenda, tokena+1):
-                self.findngrams(tokens, minoccur, TBdialog, self.myprogress, ignorecase, remspaces, ipunct)
+                self.findngrams(tokens, minoccur, TBdialog, self.Progrdialog, ignorecase, remspaces, ipunct)
             self.Progrdialog.accept()
             TBdialog.exec()
 
-    def findngrams(self, tokens, minoccur, TBdialog, myprogress, ignorecase, remspaces, ipunct):
+    def findngrams(self, tokens, minoccur, TBdialog, Progrdialog, ignorecase, remspaces, ipunct):
         mycorpus = ""
         col = self.corpuscols['Orig']
         totallines = self.w.corpus.rowCount()
         for row in range(self.w.corpus.rowCount()):
-            myprogress.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
-            myprogress.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
+            Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
             QApplication.processEvents()
-            if myprogress.Progrdialog.w.annulla.isChecked():
+            if Progrdialog.w.annulla.isChecked():
                 return
             thispos = self.legendaPos[self.w.corpus.item(row,self.corpuscols['pos']).text()][0]
             if not thispos in ipunct:
@@ -387,10 +387,10 @@ class MainWindow(QMainWindow):
         while active:
             wpos = pos
             npos = pos
-            myprogress.Progrdialog.w.testo.setText("Sto conteggiando il carattere numero "+str(pos))
-            myprogress.Progrdialog.w.progressBar.setValue(int((pos/totallines)*100))
+            Progrdialog.w.testo.setText("Sto conteggiando il carattere numero "+str(pos))
+            Progrdialog.w.progressBar.setValue(int((pos/totallines)*100))
             QApplication.processEvents()
-            if myprogress.Progrdialog.w.annulla.isChecked():
+            if Progrdialog.w.annulla.isChecked():
                 return
             #read a specific number of words
             for i in range(tokens):
