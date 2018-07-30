@@ -161,7 +161,6 @@
     </property>
     <addaction name="actionEsporta_vista_attuale_in_CSV"/>
     <addaction name="actionRimuovi_vista_attuale_dal_corpus"/>
-    <addaction name="actionTraduci_i_tag_PoS_in_forma_leggibile"/>
    </widget>
    <widget class="QMenu" name="menuStrumenti">
     <property name="title">

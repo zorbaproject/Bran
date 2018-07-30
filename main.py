@@ -92,9 +92,10 @@ class MainWindow(QMainWindow):
         self.w.actionScarica_corpus_da_sito_web.triggered.connect(self.web2corpus)
         self.w.actionConta_occorrenze.triggered.connect(self.contaoccorrenze)
         self.w.actionEsporta_corpus_in_CSV_unico.triggered.connect(self.salvaCSV)
+        self.w.actionRimuovi_vista_attuale_dal_corpus.triggered.connect(self.removevisiblerows)
         self.w.actionCalcola_densit_lessicale.triggered.connect(self.densitalessico)
         self.w.actionDa_file_txt.triggered.connect(self.loadtxt)
-        self.w.actionTraduci_i_tag_PoS_in_forma_leggibile.triggered.connect(self.translatePos)
+        #self.w.actionTraduci_i_tag_PoS_in_forma_leggibile.triggered.connect(self.translatePos)
         self.w.actionDa_file_JSON.triggered.connect(self.loadjson)
         self.w.actionDa_file_CSV.triggered.connect(self.loadCSV)
         self.w.actionConfigurazione_Tint.triggered.connect(self.loadConfig)
@@ -114,7 +115,7 @@ class MainWindow(QMainWindow):
             'feat': 5,
             'IDword': 6
         }
-        self.legendaPos = {"A":["aggettivo", "none"],"AP":["agg. Poss", "none"],"B":["avverbio", "none"],"B+PC":["avverbio+pron. clit. ", "none"],"BN":["avv, negazione", "none"],"CC":["cong. coord", "none"],"CS":["cong. Sub.", "none"],"DD":["det. dim.", "none"],"DE":["det. esclam. ", "none"],"DI":["det. indefinito", "none"],"DQ":["det. int.", "none"],"DR":["det. rel", "none"],"E":["preposizione", "none"],"E+RD":["prep. art. ", "none"],"FB":["punteggiatura - \"\" () «» - - ", "none"],"FC":["punteggiatura - : ;", "none"],"FF":["punteggiatura - ,", "none"],"FS":["punteggiatura - .?!", "none"],"I":["interiezione", "none"],"N":["numero", "none"],"NO":["numerale", "none"],"PC":["pron. clitico", "none"],"PC+PC":["pron. clitico+clitico", "none"],"PD":["pron. dimostrativo", "none"],"PE":["pron. pers. ", "none"],"PI":["pron. indef.", "none"],"PP":["pron. poss.", "none"],"PQ":["pron. interr.", "none"],"PR":["pron. rel.", "none"],"RD":["art. det.", "none"],"RI":["art. ind.", "none"],"S":["sost.", "none"],"SP":["nome proprio", "none"],"SW":["forestierismo", "none"],"T":["determinante (tutt*)", "none"],"V":["verbo", "none"],"V+PC":["verbo + pron. clitico", "none"],"V+PC+PC":["verbo + pron. clitico + pron clitico", "none"],"VA":["verbo ausiliare", "none"],"VA+PC":["verbo ausiliare + pron.clitico", "none"],"VM":["verbo mod", "none"],"VM+PC":["verbo mod + pron. clitico", "none"],"X":["altro", "none"]}
+        self.legendaPos = {"A":["aggettivo", "aggettivi", "piene"],"AP":["agg. poss", "aggettivi", "piene"],"B":["avverbio", "avverbi", "piene"],"B+PC":["avverbio+pron. clit. ", "avverbi", "piene"],"BN":["avv, negazione", "avverbi", "piene"],"CC":["cong. coord", "congiunzioni", "vuote"],"CS":["cong. sub.", "congiunzioni", "vuote"],"DD":["det. dim.", "aggettivi", "piene"],"DE":["det. esclam.", "aggettivi", "piene"],"DI":["det. indefinito", "aggettivi", "piene"],"DQ":["det. interr.", "aggettivi", "piene"],"DR":["det. Rel", "aggettivi", "piene"],"E":["preposizione", "preposizioni", "vuote"],"E+RD":["prep. art. ", "preposizioni", "vuote"],"FB":["punteggiatura - \"\" () «» - - ", "punteggiatura", "none"],"FC":["punteggiatura - : ;", "punteggiatura", "none"],"FF":["punteggiatura - ,", "punteggiatura", "none"],"FS":["punteggiatura - .?!", "punteggiatura", "none"],"I":["interiezione", "interiezioni", "vuote"],"N":["numero", "altro", "none"],"NO":["numerale", "aggettivi", "piene"],"PC":["pron. Clitico", "pronomi", "vuote"],"PC+PC":["pron. clitico+clitico", "pronomi", "vuote"],"PD":["pron. dimostrativo", "pronomi","vuote"],"PE":["pron. pers. ", "pronomi", "vuote"],"PI":["pron. indef.", "pronomi", "vuote"],"PP":["pron. poss.", "pronomi", "vuote"],"PQ":["pron. interr.", "pronomi", "vuote"],"PR":["pron. rel.", "pronomi", "vuote"],"RD":["art. Det.", "articoli", "vuote"],"RI":["art. ind.", "articoli", "vuote"],"S":["sost.", "sostantivi", "piene"],"SP":["nome proprio", "sostantivi", "piene"],"SW":["forestierismo", "altro", "none"],"T":["det. coll.)", "aggettivi", "piene"],"V":["verbo", "verbi", "piene"],"V+PC":["verbo + pron. clitico", "verbi", "piene"],"V+PC+PC":["verbo + pron. clitico + pron clitico", "verbi", "piene"],"VA":["verbo ausiliare", "verbi", "piene"],"VA+PC":["verbo ausiliare + pron.clitico", "verbi", "piene"],"VM":["verbo mod", "verbi", "piene"],"VM+PC":["verbo mod + pron. clitico", "verbi", "piene"],"X":["altro", "altro", "none"]}
         self.ignorepos = ["punteggiatura - \"\" () «» - - ", "punteggiatura - : ;", "punteggiatura - ,", "punteggiatura - .?!", "altro"]
         self.separator = "\t"
         self.enumeratecolumns(self.w.ccolumn)
@@ -195,7 +196,15 @@ class MainWindow(QMainWindow):
         self.enumeratecolumns(repCdialog.w.colcombo)
         repCdialog.exec()
         if repCdialog.result():
+            self.Progrdialog = progress.Form()
+            self.Progrdialog.show()
+            totallines = self.w.corpus.rowCount()
             for row in range(self.w.corpus.rowCount()):
+                self.Progrdialog.w.testo.setText("Sto cercando nella riga numero "+str(row))
+                self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+                QApplication.processEvents()
+                if self.Progrdialog.w.annulla.isChecked():
+                    return
                 for col in range(self.w.corpus.columnCount()):
                     if repCdialog.w.colcheck.isChecked() or (not repCdialog.w.colcheck.isChecked() and col == repCdialog.w.colcombo.currentIndex()):
                         origstr = self.w.corpus.item(row,col).text()
@@ -205,6 +214,7 @@ class MainWindow(QMainWindow):
                         else:
                             newstr = re.sub(repCdialog.w.orig.text(), repCdialog.w.dest.text(), origstr, flags=re.DOTALL)
                         self.setcelltocorpus(newstr, row, col)
+            self.Progrdialog.accept()
 
     def contaoccorrenze(self):
         thisname = []
@@ -227,6 +237,8 @@ class MainWindow(QMainWindow):
                 return
             try:
                 thistext = self.w.corpus.item(row,col).text()
+                if col == self.corpuscols["pos"]:
+                    thistext = self.legendaPos[thistext][0]
             except:
                 thistext = ""
             tbitem = TBdialog.w.tableWidget.findItems(thistext,Qt.MatchExactly)
@@ -453,12 +465,14 @@ class MainWindow(QMainWindow):
         TBdialog = tableeditor.Form(self)
         TBdialog.sessionDir = self.sessionDir
         TBdialog.addcolumn("Part of Speech", 0)
-        TBdialog.addcolumn("Occorrenze", 1)
-        TBdialog.addcolumn("Percentuale", 2)
+        TBdialog.addcolumn("Macrocategoria", 1)
+        TBdialog.addcolumn("Occorrenze", 2)
+        TBdialog.addcolumn("Percentuale", 3)
         #calcolo le occorrenze del pos
         self.Progrdialog = progress.Form()
         self.Progrdialog.show()
         totallines = self.w.corpus.rowCount()
+        mytypes = {}
         for row in range(self.w.corpus.rowCount()):
             self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
             self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
@@ -468,17 +482,25 @@ class MainWindow(QMainWindow):
             try:
                 thistextO = self.w.corpus.item(row,col).text()
                 thistext = self.legendaPos[thistextO][0]
+                thisposc = self.legendaPos[self.w.corpus.item(row,self.corpuscols['pos']).text()][1]
+                try:
+                    mytypes[thisposc] = mytypes[thisposc] +1
+                except:
+                    mytypes[thisposc] = 1
             except:
                 thistext = ""
-            tbitem = TBdialog.w.tableWidget.findItems(thistext,Qt.MatchExactly)
-            if len(tbitem)>0:
-                tbrow = tbitem[0].row()
-                tbval = int(TBdialog.w.tableWidget.item(tbrow,1).text())+1
-                TBdialog.setcelltotable(str(tbval), tbrow, 1)
-            else:
-                TBdialog.addlinetotable(thistext, 0)
-                tbrow = TBdialog.w.tableWidget.rowCount()-1
-                TBdialog.setcelltotable("1", tbrow, 1)
+                thistextO = ""
+            if thistext != "":
+                tbitem = TBdialog.w.tableWidget.findItems(thistext,Qt.MatchExactly)
+                if len(tbitem)>0:
+                    tbrow = tbitem[0].row()
+                    tbval = int(TBdialog.w.tableWidget.item(tbrow,2).text())+1
+                    TBdialog.setcelltotable(str(tbval), tbrow, 2)
+                else:
+                    TBdialog.addlinetotable(thistext, 0)
+                    tbrow = TBdialog.w.tableWidget.rowCount()-1
+                    TBdialog.setcelltotable(self.legendaPos[thistextO][1], tbrow, 1)
+                    TBdialog.setcelltotable("1", tbrow, 2)
         #calcolo le somme di parole piene e vuote
         totallines = TBdialog.w.tableWidget.rowCount()
         paroletotali = 0
@@ -492,38 +514,43 @@ class MainWindow(QMainWindow):
             thistext = TBdialog.w.tableWidget.item(row,0).text()
             for key in self.legendaPos:
                 if thistext == self.legendaPos[key][0]:
-                    if "piene" == self.legendaPos[key][1]:
-                        paroletotali = paroletotali + int(TBdialog.w.tableWidget.item(row,1).text())
-                        parolepiene = parolepiene + int(TBdialog.w.tableWidget.item(row,1).text())
+                    if "piene" == self.legendaPos[key][2]:
+                        paroletotali = paroletotali + int(TBdialog.w.tableWidget.item(row,2).text())
+                        parolepiene = parolepiene + int(TBdialog.w.tableWidget.item(row,2).text())
                         break
-                    if "vuote" == self.legendaPos[key][1]:
-                        paroletotali = paroletotali + int(TBdialog.w.tableWidget.item(row,1).text())
-                        parolevuote = parolevuote + int(TBdialog.w.tableWidget.item(row,1).text())
+                    if "vuote" == self.legendaPos[key][2]:
+                        paroletotali = paroletotali + int(TBdialog.w.tableWidget.item(row,2).text())
+                        parolevuote = parolevuote + int(TBdialog.w.tableWidget.item(row,2).text())
                         break
-                    if "none" == self.legendaPos[key][1]:
-                        paroletotali = paroletotali + int(TBdialog.w.tableWidget.item(row,1).text())
-                        parolenone = parolenone + int(TBdialog.w.tableWidget.item(row,1).text())
+                    if "none" == self.legendaPos[key][2]:
+                        paroletotali = paroletotali + int(TBdialog.w.tableWidget.item(row,2).text())
+                        parolenone = parolenone + int(TBdialog.w.tableWidget.item(row,2).text())
                         break
         TBdialog.addlinetotable("Parole totali", 0)
         tbrow = TBdialog.w.tableWidget.rowCount()-1
-        TBdialog.setcelltotable(str(paroletotali), tbrow, 1)
+        TBdialog.setcelltotable(str(paroletotali), tbrow, 2)
         TBdialog.addlinetotable("Parole piene", 0)
         tbrow = TBdialog.w.tableWidget.rowCount()-1
-        TBdialog.setcelltotable(str(parolepiene), tbrow, 1)
+        TBdialog.setcelltotable(str(parolepiene), tbrow, 2)
         TBdialog.addlinetotable("Parole vuote", 0)
         tbrow = TBdialog.w.tableWidget.rowCount()-1
-        TBdialog.setcelltotable(str(parolevuote), tbrow, 1)
+        TBdialog.setcelltotable(str(parolevuote), tbrow, 2)
         TBdialog.addlinetotable("Altri tokens", 0)
         tbrow = TBdialog.w.tableWidget.rowCount()-1
-        TBdialog.setcelltotable(str(parolenone), tbrow, 1)
+        TBdialog.setcelltotable(str(parolenone), tbrow, 2)
+        #presento le macrocategorie
+        for key in mytypes:
+            TBdialog.addlinetotable(key, 1)
+            tbrow = TBdialog.w.tableWidget.rowCount()-1
+            TBdialog.setcelltotable(str(mytypes[key]), tbrow, 2)
         #calcolo le percentuali
         for row in range(TBdialog.w.tableWidget.rowCount()):
             self.Progrdialog.w.testo.setText("Sto calcolando le percentuali su "+str(row))
             self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
             QApplication.processEvents()
-            ratio = (float(TBdialog.w.tableWidget.item(row,1).text())/float(paroletotali)*100)
+            ratio = (float(TBdialog.w.tableWidget.item(row,2).text())/float(paroletotali)*100)
             ratios = f'{ratio:.3f}'
-            TBdialog.setcelltotable(ratios, row, 2)
+            TBdialog.setcelltotable(ratios, row, 3)
         #mostro i risultati
         self.Progrdialog.accept()
         TBdialog.exec()
@@ -576,9 +603,27 @@ class MainWindow(QMainWindow):
         w2Cdialog.exec()
 
     def delselected(self):
-        for i in range(self.w.corpus.selectedItems()):
+        self.Progrdialog = progress.Form()
+        self.Progrdialog.show()
+        totallines = len(self.w.corpus.selectedItems())
+        toselect = []
+        for i in range(len(self.w.corpus.selectedItems())):
             row = self.w.corpus.selectedItems()[i].row()
-        QMessageBox.warning(self, "Errore", "Funzione non ancora implementata.")
+            self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(i))
+            self.Progrdialog.w.progressBar.setValue(int((i/totallines)*100))
+            QApplication.processEvents()
+            if self.Progrdialog.w.annulla.isChecked():
+                return
+            toselect.append(row)
+        totallines = len(toselect)
+        for row in range(len(toselect),0,-1):
+            self.Progrdialog.w.testo.setText("Sto eliminando la riga numero "+str(row))
+            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            QApplication.processEvents()
+            if self.Progrdialog.w.annulla.isChecked():
+                return
+            self.w.corpus.removeRow(toselect[row-1])
+        self.Progrdialog.accept()
 
     def enumeratecolumns(self, combo):
         for col in range(self.w.corpus.columnCount()):
@@ -586,6 +631,7 @@ class MainWindow(QMainWindow):
             combo.addItem(thisname)
 
     def dofiltra(self):
+        tcount = 0
         for row in range(self.w.corpus.rowCount()):
             col = self.w.ccolumn.currentIndex()
             ctext = self.w.corpus.item(row,col).text()
@@ -594,6 +640,31 @@ class MainWindow(QMainWindow):
                 self.w.corpus.setRowHidden(row, False)
             else:
                 self.w.corpus.setRowHidden(row, True)
+                tcount = tcount +1
+        #self.w.statusbar.showMessage("Risultati totali: " +str(tcount))
+
+    def removevisiblerows(self):
+        self.Progrdialog = progress.Form()
+        self.Progrdialog.show()
+        totallines = self.w.corpus.rowCount()
+        toselect = []
+        for row in range(self.w.corpus.rowCount()):
+            self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
+            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            QApplication.processEvents()
+            if self.Progrdialog.w.annulla.isChecked():
+                return
+            if not self.w.corpus.isRowHidden(row):
+                toselect.append(row)
+        totallines = len(toselect)
+        for row in range(len(toselect),0,-1):
+            self.Progrdialog.w.testo.setText("Sto eliminando la riga numero "+str(row))
+            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            QApplication.processEvents()
+            if self.Progrdialog.w.annulla.isChecked():
+                return
+            self.w.corpus.removeRow(toselect[row-1])
+        self.Progrdialog.accept()
 
     def cancelfiltro(self):
         for row in range(self.w.corpus.rowCount()):
@@ -603,7 +674,7 @@ class MainWindow(QMainWindow):
         fileNames = QFileDialog.getOpenFileNames(self, "Apri file TXT", self.sessionDir, "Text files (*.txt *.md)")[0]
         if len(fileNames)<1:
             return
-        self.w.statusbar.showMessage("ATTENDI: Sto importando i file txt nel corpus...")
+        #self.w.statusbar.showMessage("ATTENDI: Sto importando i file txt nel corpus...")
         self.TCThread = tint.TintCorpus(self.w, fileNames, self.corpuscols, self.TintAddr)
         self.TCThread.outputcsv = self.sessionFile
         self.TCThread.finished.connect(self.txtloadingstopped)
@@ -792,20 +863,28 @@ class MainWindow(QMainWindow):
         self.Progrdialog = progress.Form()
         self.Progrdialog.show()
         totallines = self.w.corpus.rowCount()
+        totaltypes = 0
+        mytypes = {}
         for row in range(self.w.corpus.rowCount()):
             self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
             self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
             QApplication.processEvents()
             if self.Progrdialog.w.annulla.isChecked():
                 return
-            thispos = "False"
+            thisposc = "False"
+            myignore = []
             try:
                 thistext = self.w.corpus.item(row,col).text()
+                thisposc = self.legendaPos[self.w.corpus.item(row,self.corpuscols['pos']).text()][1]
                 if ret == QMessageBox.Yes:
-                    thispos = self.legendaPos[self.w.corpus.item(row,self.corpuscols['pos']).text()][0]
+                    myignore = ["punteggiatura"]
+                try:
+                    mytypes[thisposc] = mytypes[thisposc] +1
+                except:
+                    mytypes[thisposc] = 1
             except:
                 thistext = ""
-            if not thispos in self.ignorepos and thistext != "":
+            if not thisposc in myignore and thistext != "":
                 tbitem = TBdialog.w.tableWidget.findItems(thistext,Qt.MatchExactly)
                 if len(tbitem)>0:
                     tbrow = tbitem[0].row()
@@ -815,6 +894,14 @@ class MainWindow(QMainWindow):
                     TBdialog.addlinetotable(thistext, 0)
                     tbrow = TBdialog.w.tableWidget.rowCount()-1
                     TBdialog.setcelltotable("1", tbrow, 1)
+                    totaltypes = totaltypes + 1
+        hapax = 0
+        for row in range(TBdialog.w.tableWidget.rowCount()):
+            self.Progrdialog.w.testo.setText("Sto cercando gli hapax su "+str(row))
+            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            QApplication.processEvents()
+            if int(TBdialog.w.tableWidget.item(row,1).text()) == 1:
+                hapax = hapax + 1
         #carico i vdb
         self.vdb2016 = []
         self.vdbfile16 = os.path.abspath(os.path.dirname(sys.argv[0]))+"/dizionario/vdb2016.txt"
@@ -866,6 +953,28 @@ class MainWindow(QMainWindow):
         ratio = (float(parole2016)/float(paroletotali)*100)
         ratios = f'{ratio:.3f}'
         TBdialog.setcelltotable(str(ratios), tbrow, 3)
+        #presento le macrocategorie
+        #for key in mytypes:
+        #    if not key in myignore:
+        #        TBdialog.addlinetotable(key, 0)
+        #        tbrow = TBdialog.w.tableWidget.rowCount()-1
+        #        TBdialog.setcelltotable(str(mytypes[key]), tbrow, 1)
+        TBdialog.addlinetotable("Types", 0)
+        tbrow = TBdialog.w.tableWidget.rowCount()-1
+        TBdialog.setcelltotable(str(totaltypes), tbrow, 1)
+        TBdialog.addlinetotable("Types/Tokens", 0)
+        tbrow = TBdialog.w.tableWidget.rowCount()-1
+        ratio = (float(totaltypes)/float(paroletotali))
+        ratios = f'{ratio:.3f}'
+        TBdialog.setcelltotable(str(ratios), tbrow, 1)
+        TBdialog.addlinetotable("Hapax", 0)
+        tbrow = TBdialog.w.tableWidget.rowCount()-1
+        TBdialog.setcelltotable(str(hapax), tbrow, 1)
+        TBdialog.addlinetotable("Hapax/Tokens", 0)
+        tbrow = TBdialog.w.tableWidget.rowCount()-1
+        ratio = (float(hapax)/float(paroletotali))
+        ratios = f'{ratio:.3f}'
+        TBdialog.setcelltotable(str(ratios), tbrow, 1)
         #mostro i risultati
         self.Progrdialog.accept()
         TBdialog.exec()

@@ -75,7 +75,10 @@ class Form(QDialog):
                 for col in range(self.w.tableWidget.columnCount()):
                     if col > 0:
                         csv = csv + self.separator
-                    csv = csv + self.w.tableWidget.item(row,col).text()
+                    try:
+                        csv = csv + self.w.tableWidget.item(row,col).text()
+                    except:
+                        csv = csv + ""
             text_file = open(fileName, "w")
             text_file.write(csv)
             text_file.close()
