@@ -31,6 +31,7 @@ class Form(QDialog):
         self.w.rejected.connect(self.isrejected)
         self.w.apricsv.clicked.connect(self.apriCSV)
         self.w.salvacsv.clicked.connect(self.salvaCSV)
+        self.w.tableWidget.itemSelectionChanged.connect(self.selOps)
         self.w.apricsv.hide()
         self.setWindowTitle("Visualizzazione tabella")
         self.sessionDir = "."
@@ -79,9 +80,22 @@ class Form(QDialog):
                         csv = csv + self.w.tableWidget.item(row,col).text()
                     except:
                         csv = csv + ""
-            text_file = open(fileName, "w")
+            text_file = open(fileName, "w", encoding='utf-8')
             text_file.write(csv)
             text_file.close()
 
     def apriCSV(self):
         print("Niente")
+
+    def selOps(self):
+        somma = 0.0
+        try:
+            for i in range(len(self.w.tableWidget.selectedItems())):
+                row = self.w.tableWidget.selectedItems()[i].row()
+                col = self.w.tableWidget.selectedItems()[i].column()
+                somma = somma + float(self.w.tableWidget.item(row,col).text())
+            sommas = f'{somma:.3f}'
+            self.w.statusbar.setText("Somma: " +str(sommas))
+        except:
+            if (self.w.statusbar.text() != ""):
+                self.w.statusbar.setText("")

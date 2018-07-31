@@ -145,6 +145,7 @@
       <string>Esporta</string>
      </property>
      <addaction name="actionEsporta_corpus_in_CSV_unico"/>
+     <addaction name="actionEsporta_vista_attuale_in_CSV"/>
      <addaction name="actionEsporta_corpus_in_un_CSV_per_ogni_ID"/>
     </widget>
     <addaction name="actionApri"/>
@@ -159,8 +160,9 @@
     <property name="title">
      <string>&amp;Modifica</string>
     </property>
-    <addaction name="actionEsporta_vista_attuale_in_CSV"/>
     <addaction name="actionRimuovi_vista_attuale_dal_corpus"/>
+    <addaction name="actionRimuovi_righe_selezionate"/>
+    <addaction name="actionSostituisci_nel_corpus_con_RegEx"/>
    </widget>
    <widget class="QMenu" name="menuStrumenti">
     <property name="title">
@@ -246,7 +248,7 @@
   </action>
   <action name="actionChiudi">
    <property name="text">
-    <string>Chiudi</string>
+    <string>Chiudi progetto</string>
    </property>
   </action>
   <action name="actionEsci">
@@ -302,6 +304,16 @@
   <action name="actionConta_verbi">
    <property name="text">
     <string>Conta verbi</string>
+   </property>
+  </action>
+  <action name="actionSostituisci_nel_corpus_con_RegEx">
+   <property name="text">
+    <string>Sostituisci nel corpus con RegEx</string>
+   </property>
+  </action>
+  <action name="actionRimuovi_righe_selezionate">
+   <property name="text">
+    <string>Rimuovi righe selezionate</string>
    </property>
   </action>
  </widget>

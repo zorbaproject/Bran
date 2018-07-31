@@ -86,12 +86,16 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.w)
         self.setWindowTitle("Bran")
         self.w.replace_in_corpus.clicked.connect(self.replaceCorpus)
+        self.w.actionSostituisci_nel_corpus_con_RegEx.triggered.connect(self.replaceCorpus)
         self.w.dofiltra.clicked.connect(self.dofiltra)
         self.w.cancelfiltro.clicked.connect(self.cancelfiltro)
         self.w.delselected.clicked.connect(self.delselected)
+        self.w.actionRimuovi_righe_selezionate.triggered.connect(self.delselected)
         self.w.actionScarica_corpus_da_sito_web.triggered.connect(self.web2corpus)
+        self.w.actionEsporta_corpus_in_un_CSV_per_ogni_ID.triggered.connect(self.esportaCSVperID)
         self.w.actionConta_occorrenze.triggered.connect(self.contaoccorrenze)
         self.w.actionEsporta_corpus_in_CSV_unico.triggered.connect(self.salvaCSV)
+        self.w.actionEsporta_vista_attuale_in_CSV.triggered.connect(self.esportavistaCSV)
         self.w.actionRimuovi_vista_attuale_dal_corpus.triggered.connect(self.removevisiblerows)
         self.w.actionCalcola_densit_lessicale.triggered.connect(self.densitalessico)
         self.w.actionDa_file_txt.triggered.connect(self.loadtxt)
@@ -101,6 +105,7 @@ class MainWindow(QMainWindow):
         self.w.actionConfigurazione_Tint.triggered.connect(self.loadConfig)
         self.w.actionSalva.triggered.connect(self.salvaProgetto)
         self.w.actionApri.triggered.connect(self.apriProgetto)
+        self.w.actionChiudi.triggered.connect(self.chiudiProgetto)
         self.w.actionEditor_di_testo.triggered.connect(self.texteditor)
         self.w.actionAbout_Bran.triggered.connect(self.aboutbran)
         self.w.actionStatistiche_con_VdB.triggered.connect(self.statisticheconvdb)
@@ -159,15 +164,13 @@ class MainWindow(QMainWindow):
                 self.setWindowTitle("Bran - "+self.sessionFile)
                 self.sessionDir = os.path.abspath(os.path.dirname(self.sessionFile))
                 tmpsess = [self.sessionFile]
-                for i in range(len(self.mycfg["sessions"])-1):
-                    it = len(self.mycfg["sessions"]) -i
-                    try:
-                        ind = tmpsess.index(self.mycfg["sessions"][it])
-                    except:
-                        tmpsess.append(self.mycfg["sessions"][it])
+                for i in range(len(self.mycfg["sessions"])-1,-1,-1):
+                    if not self.mycfg["sessions"][i] in tmpsess:
+                        tmpsess.append(self.mycfg["sessions"][i])
                     if i > 10:
                         break
                 self.mycfg["sessions"] = tmpsess
+                #print(tmpsess)
                 self.savePersonalCFG()
 
 
@@ -189,6 +192,15 @@ class MainWindow(QMainWindow):
     def apriProgetto(self):
         self.loadSession()
         self.txtloadingstopped()
+
+    def chiudiProgetto(self):
+        self.sessionFile = ""
+        self.sessionDir = "."
+        for row in range(self.w.corpus.rowCount()):
+            self.w.corpus.removeRow(0)
+            if row<100 or row%100==0:
+                QApplication.processEvents()
+        self.setWindowTitle("Bran")
 
     def replaceCorpus(self):
         repCdialog = regex_replace.Form(self)
@@ -526,6 +538,11 @@ class MainWindow(QMainWindow):
                         paroletotali = paroletotali + int(TBdialog.w.tableWidget.item(row,2).text())
                         parolenone = parolenone + int(TBdialog.w.tableWidget.item(row,2).text())
                         break
+        #presento le macrocategorie
+        for key in mytypes:
+            TBdialog.addlinetotable(key, 1)
+            tbrow = TBdialog.w.tableWidget.rowCount()-1
+            TBdialog.setcelltotable(str(mytypes[key]), tbrow, 2)
         TBdialog.addlinetotable("Parole totali", 0)
         tbrow = TBdialog.w.tableWidget.rowCount()-1
         TBdialog.setcelltotable(str(paroletotali), tbrow, 2)
@@ -538,11 +555,6 @@ class MainWindow(QMainWindow):
         TBdialog.addlinetotable("Altri tokens", 0)
         tbrow = TBdialog.w.tableWidget.rowCount()-1
         TBdialog.setcelltotable(str(parolenone), tbrow, 2)
-        #presento le macrocategorie
-        for key in mytypes:
-            TBdialog.addlinetotable(key, 1)
-            tbrow = TBdialog.w.tableWidget.rowCount()-1
-            TBdialog.setcelltotable(str(mytypes[key]), tbrow, 2)
         #calcolo le percentuali
         for row in range(TBdialog.w.tableWidget.rowCount()):
             self.Progrdialog.w.testo.setText("Sto calcolando le percentuali su "+str(row))
@@ -571,8 +583,10 @@ class MainWindow(QMainWindow):
         self.Progrdialog.show()
         self.CSVsaver(fileName, self.Progrdialog, True)
 
-    def CSVsaver(self, fileName, Progrdialog, addheader = False):
+    def CSVsaver(self, fileName, Progrdialog, addheader = False, onlyrows = []):
         if fileName != "":
+            if fileName[-4:] != ".csv":
+                fileName = fileName + ".csv"
             csv = ""
             if addheader:
                 for col in range(self.w.corpus.columnCount()):
@@ -583,8 +597,11 @@ class MainWindow(QMainWindow):
             text_file = open(fileName, "w", encoding='utf-8')
             text_file.write(csv)
             text_file.close()
-            for row in range(self.w.corpus.rowCount()):
-                csv = csv + "\n"
+            if len(onlyrows)==0:
+                onlyrows = range(self.w.corpus.rowCount())
+            for row in onlyrows:
+                #csv = csv + "\n"
+                csv = ""
                 Progrdialog.w.testo.setText("Sto salvando la riga numero "+str(row))
                 Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
                 QApplication.processEvents()
@@ -597,6 +614,50 @@ class MainWindow(QMainWindow):
                 with open(fileName, "a", encoding='utf-8') as myfile:
                     myfile.write(csv+"\n")
             Progrdialog.accept()
+
+    def esportavistaCSV(self):
+        fileName = QFileDialog.getSaveFileName(self, "Salva file CSV", self.sessionDir, "Text files (*.csv *.txt)")[0]
+        self.Progrdialog = progress.Form()
+        self.Progrdialog.show()
+        totallines = self.w.corpus.rowCount()
+        toselect = []
+        for row in range(self.w.corpus.rowCount()):
+            self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
+            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            QApplication.processEvents()
+            if self.Progrdialog.w.annulla.isChecked():
+                return
+            if not self.w.corpus.isRowHidden(row):
+                toselect.append(row)
+        self.CSVsaver(fileName, self.Progrdialog, True, toselect)
+
+    def esportaCSVperID(self):
+        fileName = QFileDialog.getSaveFileName(self, "Salva file CSV", self.sessionDir, "Text files (*.csv *.txt)")[0]
+        self.Progrdialog = progress.Form()
+        self.Progrdialog.show()
+        totallines = self.w.corpus.rowCount()
+        IDs = []
+        col = self.corpuscols['IDcorpus']
+        for row in range(self.w.corpus.rowCount()):
+            self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
+            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            QApplication.processEvents()
+            if self.Progrdialog.w.annulla.isChecked():
+                return
+            if not self.w.corpus.item(row,col).text() in IDs:
+                IDs.append(self.w.corpus.item(row,col).text())
+        for i in range(len(IDs)):
+            toselect = []
+            for row in range(self.w.corpus.rowCount()):
+                self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
+                self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+                if self.Progrdialog.w.annulla.isChecked():
+                    return
+                if IDs[i] == self.w.corpus.item(row,col).text():
+                    toselect.append(row)
+                    QApplication.processEvents()
+            fileNameT = fileName + str(i).zfill(6) + ".csv"
+            self.CSVsaver(fileNameT, self.Progrdialog, True, toselect)
 
     def web2corpus(self):
         w2Cdialog = url2corpus.Form(self)
@@ -618,7 +679,7 @@ class MainWindow(QMainWindow):
         totallines = len(toselect)
         for row in range(len(toselect),0,-1):
             self.Progrdialog.w.testo.setText("Sto eliminando la riga numero "+str(row))
-            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            self.Progrdialog.w.progressBar.setValue(int(((len(toselect)-row)/totallines)*100))
             QApplication.processEvents()
             if self.Progrdialog.w.annulla.isChecked():
                 return
@@ -638,10 +699,33 @@ class MainWindow(QMainWindow):
             ftext = self.w.cfilter.text()
             if bool(re.match(ftext, ctext)):
                 self.w.corpus.setRowHidden(row, False)
+                tcount = tcount +1
             else:
                 self.w.corpus.setRowHidden(row, True)
+        self.w.statusbar.showMessage("Risultati totali: " +str(tcount))
+
+    def dofiltra2(self):
+        tcount = 0
+        self.Progrdialog = progress.Form()
+        self.Progrdialog.show()
+        totallines = self.w.corpus.rowCount()
+        for row in range(self.w.corpus.rowCount()):
+            self.Progrdialog.w.testo.setText("Sto filtrando la riga numero "+str(row))
+            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            if row<100 or row%100==0:
+                QApplication.processEvents()
+            if self.Progrdialog.w.annulla.isChecked():
+                return
+            col = self.w.ccolumn.currentIndex()
+            ctext = self.w.corpus.item(row,col).text()
+            ftext = self.w.cfilter.text()
+            if bool(re.match(ftext, ctext)):
+                self.w.corpus.setRowHidden(row, False)
                 tcount = tcount +1
-        #self.w.statusbar.showMessage("Risultati totali: " +str(tcount))
+            else:
+                self.w.corpus.setRowHidden(row, True)
+        self.w.statusbar.showMessage("Risultati totali: " +str(tcount))
+        self.Progrdialog.accept()
 
     def removevisiblerows(self):
         self.Progrdialog = progress.Form()
@@ -659,7 +743,7 @@ class MainWindow(QMainWindow):
         totallines = len(toselect)
         for row in range(len(toselect),0,-1):
             self.Progrdialog.w.testo.setText("Sto eliminando la riga numero "+str(row))
-            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            self.Progrdialog.w.progressBar.setValue(int(((len(toselect)-row)/totallines)*100))
             QApplication.processEvents()
             if self.Progrdialog.w.annulla.isChecked():
                 return
@@ -740,10 +824,12 @@ class MainWindow(QMainWindow):
                     for line in lines.split('\n'):
                         Progrdialog.w.testo.setText("Sto importando la riga numero "+str(rowN))
                         Progrdialog.w.progressBar.setValue(int((rowN/totallines)*100))
-                        QApplication.processEvents()
+                        if rowN<100 or rowN%100==0:
+                            QApplication.processEvents()
                         colN = 0
                         for col in line.split(self.separator):
                             if Progrdialog.w.annulla.isChecked():
+                                rowN = 0
                                 Progrdialog.reject()
                                 self.ImportingFile = False
                                 return

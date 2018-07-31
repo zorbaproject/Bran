@@ -34,6 +34,7 @@ class Form(QDialog):
         self.w.selectapri.clicked.connect(self.selectapri)
         self.w.selectcrea.clicked.connect(self.selectcrea)
         self.setWindowTitle("Scegli una sessione di lavoro")
+        #self.w.recenti.horizontalScrollBar().setValue(self.w.recenti.horizontalScrollBar().maximum())
         self.filesessione = ""
 
     def isaccepted(self):
