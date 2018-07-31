@@ -5,8 +5,10 @@ from PySide2.QtWidgets import QApplication, QDialog, QLineEdit, QPushButton, QVB
 from PySide2.QtUiTools import QUiLoader
 from PySide2.QtWidgets import QLabel
 from PySide2.QtWidgets import QGraphicsScene
+from PySide2.QtGui import QPixmap
 from PySide2.QtWidgets import QMessageBox
 from PySide2.QtCore import QFile
+from PySide2.QtCore import Qt
 
 import re
 import sys
@@ -36,16 +38,23 @@ class Form(QDialog):
         self.reject()
 
     def setlabel(self):
-        mytext = "Bran è un programma per la linguistica dei corpora\n\n"
-        mytext = mytext + "Bran è stato sviluppato da Floriana Sciumbata(email) e Luca Tringali(TRINGALINVENT@libero.it)\n"
-        mytext = mytext + "Se utilizzi Bran per una ricerca accademica, ti chiediamo gentilmente di citarlo così:\n"
-        mytext = mytext + "{Bran, Floriana Sciumbata, Università di Udine}\n"
-        mytext = mytext + "Bran è basato su Tint, un fork italiano di StanfordCore NLP, e fornisce una interfaccia grafica\n"
-        mytext = mytext + "per l'analisi dei corpora. Utilizza anche il vocabolario di base di Tullio De Mauro.\n"
-        mytext = mytext + "Il nome \"bran\" in lingua inglese indica la crusca, ed è un riferimento all'Accademia della Crusca."
+        mytext = "<html>Bran è un programma per la linguistica dei corpora<br><br>"
+        mytext = mytext + "Bran è stato sviluppato da Floriana Sciumbata(email) e Luca Tringali(TRINGALINVENT@libero.it)<br>"
+        mytext = mytext + "Se utilizzi Bran per una pubblicazione accademica, ti chiediamo gentilmente di citarlo così:<br>"
+        mytext = mytext + "<pre>{Bran, Floriana Sciumbata, Università di Udine}</pre>"
+        mytext = mytext + "<pre>{Italy goes to Stanford: a collection of CoreNLP modules for Italian},\n {{Palmero Aprosio}, A. and {Moretti}, G.,\n Fondazione Bruno Kessler Trento}</pre><br>"
+        mytext = mytext + "Bran è basato su Tint, un fork italiano di StanfordCore NLP, e fornisce una interfaccia grafica<br>"
+        mytext = mytext + "per l'analisi dei corpora. Utilizza anche il vocabolario di base di Tullio De Mauro.<br>"
+        mytext = mytext + "Il nome \"bran\" in lingua inglese indica la crusca, ed è un riferimento all'Accademia della Crusca.<br><br>"
+        mytext = mytext + "Bran è rilasciato come software libero con licenza GNU GPL, sei libero di modificarlo come preferisci.<br>"
+        mytext = mytext + "Se vuoi collaborare allo sviluppo di Bran, controlla il repository GitHub <br><a href=\"https://github.com/zorbaproject/VdB-Hacking\">https://github.com/zorbaproject/VdB-Hacking</a></html>"
         self.w.label.setText(mytext)
+        self.w.label.setTextInteractionFlags(Qt.TextSelectableByMouse)
 
     def setlogo(self):
         scene = QGraphicsScene()
-        scene.addText("Hello, world!")
+        image = QPixmap(os.path.abspath(os.path.dirname(sys.argv[0]))+"/bran-logo.png").scaledToHeight(128)
+        scene.addPixmap(image)
         self.w.logo.setScene(scene)
+        self.w.logo.setFixedSize(image.width()+10, image.height()+10)
+        #self.w.logo.fitInView(0, 0, image.width(), image.height(), Qt.KeepAspectRatio)

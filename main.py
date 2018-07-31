@@ -363,6 +363,8 @@ class MainWindow(QMainWindow):
         Repetdialog = ripetizioni.Form(self)
         Repetdialog.loadipos(ipunct)
         Repetdialog.loadallpos(self.legendaPos)
+        self.enumeratecolumns(Repetdialog.w.colonna)
+        Repetdialog.w.colonna.setCurrentIndex(self.corpuscols['Orig'])
         Repetdialog.exec()
         if Repetdialog.result():
             tokenda = Repetdialog.w.tokenda.value()
@@ -370,6 +372,7 @@ class MainWindow(QMainWindow):
             minoccur = Repetdialog.w.minoccurr.value()
             ignorecase = Repetdialog.w.ignorecase.isChecked()
             remspaces = Repetdialog.w.remspaces.isChecked()
+            col = Repetdialog.w.colonna.currentIndex()
             ipunct = []
             for i in range(Repetdialog.w.ignorapos.count()):
                 ipunct.append(Repetdialog.w.ignorapos.item(i).text())
@@ -380,13 +383,14 @@ class MainWindow(QMainWindow):
             self.Progrdialog = progress.Form()
             self.Progrdialog.show()
             for tokens in range(tokenda, tokena+1):
-                self.findngrams(tokens, minoccur, TBdialog, self.Progrdialog, ignorecase, remspaces, ipunct)
+                self.findngrams(tokens, minoccur, TBdialog, self.Progrdialog, ignorecase, remspaces, ipunct, col)
             self.Progrdialog.accept()
             TBdialog.exec()
 
-    def findngrams(self, tokens, minoccur, TBdialog, Progrdialog, ignorecase, remspaces, ipunct):
+    def findngrams(self, tokens, minoccur, TBdialog, Progrdialog, ignorecase, remspaces, ipunct, col):
         mycorpus = ""
-        col = self.corpuscols['Orig']
+        if col == "":
+            col = self.corpuscols['Orig']
         totallines = self.w.corpus.rowCount()
         for row in range(self.w.corpus.rowCount()):
             Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
