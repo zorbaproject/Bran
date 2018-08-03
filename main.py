@@ -46,6 +46,23 @@ except:
         except:
             sys.exit(1)
 
+try:
+    import tweepy
+except:
+    try:
+        from tkinter import messagebox
+        thispkg = "la libreria per Twitter"
+        messagebox.showinfo("Installazione, attendi prego", "Sto per installare "+ thispkg +" e ci vorrà del tempo. Premi Ok e vai a prenderti un caffè.")
+        pip.main(["install", "tweepy"])
+        import tweepy
+    except:
+        try:
+            from pip._internal import main
+            main(["install", "tweepy"])
+            import tweepy
+        except:
+            sys.exit(1)
+
 
 from PySide2.QtUiTools import QUiLoader
 from PySide2.QtCore import QFile

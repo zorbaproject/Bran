@@ -8,6 +8,8 @@ import sys
 import os
 import datetime
 from socket import timeout
+import tweepy
+import csv
 
 from PySide2.QtWidgets import QApplication, QDialog, QLineEdit, QPushButton, QVBoxLayout
 from PySide2.QtUiTools import QUiLoader
@@ -58,6 +60,8 @@ class TXTdownloader(QThread):
             self.downloadtxt()
         if self.whattodo == "searchrep":
             self.searchrep()
+        if self.whattodo == "dotwitter":
+            self.dotwitter()
         return
 
     def find_between(self, s, first, last ):
@@ -408,6 +412,70 @@ class TXTdownloader(QThread):
                             with open(articlesfile, "a") as myfile:
                                 myfile.write(links[i]+"\n")
 
+
+    def get_all_tweets(screen_name):
+        #Twitter only allows access to a users most recent 3240 tweets with this method
+        consumer_key = self.w.consumer_key.text()
+        consumer_secret = self.w.consumer_secret.text()
+        access_key = self.w.access_key.text()
+        access_secret = self.w.access_key.text()
+
+        #authorize twitter, initialize tweepy
+        auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+        auth.set_access_token(access_key, access_secret)
+        api = tweepy.API(auth)
+
+        #initialize a list to hold all the tweepy Tweets
+        alltweets = []
+
+        #make initial request for most recent tweets (200 is the maximum allowed count)
+        new_tweets = api.user_timeline(screen_name = screen_name,count=200)
+
+        #save most recent tweets
+        alltweets.extend(new_tweets)
+
+        #save the id of the oldest tweet less one
+        oldest = alltweets[-1].id - 1
+
+        #keep grabbing tweets until there are no tweets left to grab
+        while len(new_tweets) > 0:
+                #print "getting tweets before %s" % (oldest)
+
+                #all subsiquent requests use the max_id param to prevent duplicates
+                new_tweets = api.user_timeline(screen_name = screen_name,count=200,max_id=oldest)
+
+                #save most recent tweets
+                alltweets.extend(new_tweets)
+
+                #update the id of the oldest tweet less one
+                oldest = alltweets[-1].id - 1
+
+                #print "...%s tweets downloaded so far" % (len(alltweets))
+
+
+        #transform the tweepy tweets into a 2D array that will populate the csv	| you can comment out data you don't need
+        outtweets = [[tweet.id_str,
+                                tweet.created_at,
+                                tweet.favorite_count,
+                                tweet.retweet_count,
+                                tweet.retweeted,
+                                tweet.source.encode("utf-8"),
+                                tweet.text.encode("utf-8"),] for tweet in alltweets]
+
+        #write the csv
+        with open(screen_name+'_tweets.csv', 'wb') as f:
+                writer = csv.writer(f)
+                writer.writerow(["id",
+                                "created_at",
+                                "favorites",
+                                "retweets",
+                                "retweeted",
+                                "source",
+                                "text"])
+                writer.writerows(outtweets)
+
+        pass
+
     def downloadtxt(self):
         thisurl = self.w.url.text()
         output = ""
@@ -453,6 +521,8 @@ class TXTdownloader(QThread):
         else:
             return
 
+    def dotwitter(self):
+        self.get_all_tweets(self.w.twittername.text()) #nome senza la @
 
         #    print('USAGE: ./url2corpus.py URL ./corpus/ -r')
         #    print('Example URLS:\n http://www.repubblica.it/esteri/2018/05/18/news/aereo_incidente_schianto_cuba_decollo-196760241/\n https://www.ansa.it/sito/notizie/politica/2018/05/14/governo-di-maio-e-salvini-al-colle-nel-pomeriggio.-resta-nodo-premier_308ebf3c-4e34-4251-876c-9c9d83606e91.html\n http://www.repubblica.it/rss/homepage/rss2.0.xml\n http://www.ansa.it/sito/notizie/cronaca/cronaca_rss.xml\nYou can also download from Repubblica.it search engine:\n ./url2corpus.py "RICERCAREPUBBLICA:" ./corpus-ricerche/ 2000-01-01\nin this case the last argument should be the date from which you want to start downloading (YYYY-MM-DD). In the first argument you can specify a search query after the double mark.\nIf you append -novdb option after -r, then the VdB will not be used.')
@@ -476,6 +546,7 @@ class Form(QDialog):
         self.w.resultsgrp.setTitle("In attesa")
         self.w.download.clicked.connect(self.downloadtxt)
         self.w.searchrep.clicked.connect(self.searchrep)
+        self.w.dotwitter.clicked.connect(self.dotwitter)
         #self.w.stopall.clicked.connect(self.stopall)
         self.w.choosefolder.clicked.connect(self.choosefolder)
         self.w.ignoreext.setText(".*(\.zip|\.xml|\.pdf|\.avi|\.gif|\.jpeg|\.jpg|\.ico|\.png|\.wav|\.mp3|\.mp4|\.mpg|\.mpeg|\.tif|\.tiff|\.css|\.json|\.rar)$")
@@ -492,6 +563,11 @@ class Form(QDialog):
 
     def searchrep(self):
         self.myThread = TXTdownloader(self.w, "searchrep")
+        self.myThread.finished.connect(self.threadstopped)
+        self.myThread.start()
+
+    def dotwitter(self):
+        self.myThread = TXTdownloader(self.w, "dotwitter")
         self.myThread.finished.connect(self.threadstopped)
         self.myThread.start()
 
