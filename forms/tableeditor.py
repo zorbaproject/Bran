@@ -66,6 +66,8 @@ class Form(QDialog):
     def salvaCSV(self):
         fileName = QFileDialog.getSaveFileName(self, "Salva file CSV", self.sessionDir, "Text files (*.csv *.txt)")[0]
         if fileName != "":
+            if fileName[-4:] != ".csv":
+                fileName = fileName + ".csv"
             csv = ""
             for col in range(self.w.tableWidget.columnCount()):
                 if col > 0:
