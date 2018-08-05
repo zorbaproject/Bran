@@ -16,9 +16,7 @@ import datetime
 import time
 import json
 from socket import timeout
-import json
 import subprocess
-from socket import timeout
 import platform
 import mmap
 
@@ -322,7 +320,7 @@ class MainWindow(QMainWindow):
                         tmpos = self.legendaPos[self.w.corpus.item(row-ind,self.corpuscols['pos']).text()][0]
                     except:
                         tmpos = ""
-                    if "ausiliare" in tmpos and "v+part" in thistext:
+                    if "ausiliare" in tmpos and "v+part+pass" in thistext:
                         thistext2 = thistext2 + "/" + self.w.corpus.item(row-ind,morfcol).text()
                     if "verbo" in tmpos and not "ausiliare" in tmpos:
                         break
@@ -682,6 +680,7 @@ class MainWindow(QMainWindow):
 
     def web2corpus(self):
         w2Cdialog = url2corpus.Form(self)
+        w2Cdialog.setmycfgfile(self.mycfgfile)
         w2Cdialog.exec()
 
     def delselected(self):

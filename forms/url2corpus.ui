@@ -284,14 +284,17 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_8">
          <item>
-          <widget class="QRadioButton" name="radioButton">
+          <widget class="QRadioButton" name="astxt">
            <property name="text">
             <string>Scarica co&amp;me TXT</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QRadioButton" name="radioButton_2">
+          <widget class="QRadioButton" name="ascsv">
            <property name="text">
             <string>Scarica come CS&amp;V</string>
            </property>

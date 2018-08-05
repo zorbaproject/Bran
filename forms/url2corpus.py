@@ -6,6 +6,7 @@ import re
 import html
 import sys
 import os
+import json
 import datetime
 from socket import timeout
 import tweepy
@@ -44,7 +45,7 @@ class TXTdownloader(QThread):
         self.vdb = []
         self.vdbfile = os.path.abspath(os.path.dirname(sys.argv[0]))+"/dizionario/vdb2016.txt"
         if os.path.isfile(self.vdbfile):
-            self.vdb = [line.rstrip('\n') for line in open(self.vdbfile)]
+            self.vdb = [line.rstrip('\n') for line in open(self.vdbfile, encoding='utf-8')]
         else:
             QMessageBox.warning(self.w, "Errore", "Non ho trovato il VdB 2016 in "+self.vdbfile)
         self.todate = datetime.datetime.now().strftime('%Y-%m-%d')
@@ -337,7 +338,7 @@ class TXTdownloader(QThread):
         else:
             fname = output + "/" + self.url2name(thisurl)
             if thishtml != "":
-                text_file = open(fname, "w")
+                text_file = open(fname, "w", encoding='utf-8')
                 text_file.write(thishtml)
                 text_file.close()
                 self.w.results.addItem(thisurl)
@@ -369,7 +370,7 @@ class TXTdownloader(QThread):
                     lbaseurl = m.group(1)
                 if re.sub("\?.*$", "", links[i]) not in self.visited and baseurl in lbaseurl:
                     #print(links[i])
-                    with open(self.visitedfile, "a") as myfile:
+                    with open(self.visitedfile, "a", encoding='utf-8') as myfile:
                         myfile.write(links[i]+"\n")
                     self.runRecursive(links[i],output)
 
@@ -390,7 +391,7 @@ class TXTdownloader(QThread):
             alllinks = []
             articlesfile = output + "/articles.tmp"
             if os.path.isfile(articlesfile):
-                alllinks = [line.rstrip('\n') for line in open(articlesfile)]
+                alllinks = [line.rstrip('\n') for line in open(articlesfile, encoding='utf-8')]
             for i in range(len(links)):
                 if self.w.stopall.isChecked():
                     self.quit()
@@ -403,22 +404,23 @@ class TXTdownloader(QThread):
                         pagehtml = self.geturl(links[i])
                         pagehtml = self.cleanGeneric(pagehtml)
                         if pagehtml != "":
-                            text_file = open(fname, "w")
+                            text_file = open(fname, "w", encoding='utf-8')
                             text_file.write(pagehtml)
                             text_file.close()
                             alllinks.append(links[i])
                             self.w.results.addItem(links[i])
                             self.w.results.setCurrentRow(self.w.results.count()-1)
-                            with open(articlesfile, "a") as myfile:
+                            with open(articlesfile, "a", encoding='utf-8') as myfile:
                                 myfile.write(links[i]+"\n")
 
 
-    def get_all_tweets(screen_name):
+    def get_all_tweets(self, screen_name):
+        #Special thanks to https://gist.github.com/lamthuyvo/44e682f39021c18d28bdd8133b934782 for the elegant source code
         #Twitter only allows access to a users most recent 3240 tweets with this method
         consumer_key = self.w.consumer_key.text()
         consumer_secret = self.w.consumer_secret.text()
         access_key = self.w.access_key.text()
-        access_secret = self.w.access_key.text()
+        access_secret = self.w.access_secret.text()
 
         #authorize twitter, initialize tweepy
         auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
@@ -439,18 +441,20 @@ class TXTdownloader(QThread):
 
         #keep grabbing tweets until there are no tweets left to grab
         while len(new_tweets) > 0:
-                #print "getting tweets before %s" % (oldest)
-
+                if self.w.stopall.isChecked():
+                    break
+                    #self.quit()
+                    #return
                 #all subsiquent requests use the max_id param to prevent duplicates
                 new_tweets = api.user_timeline(screen_name = screen_name,count=200,max_id=oldest)
-
                 #save most recent tweets
                 alltweets.extend(new_tweets)
-
                 #update the id of the oldest tweet less one
                 oldest = alltweets[-1].id - 1
-
                 #print "...%s tweets downloaded so far" % (len(alltweets))
+                self.w.results.addItem(str(alltweets[len(alltweets)-1].created_at))
+                self.w.results.setCurrentRow(self.w.results.count()-1)
+                QApplication.processEvents()
 
 
         #transform the tweepy tweets into a 2D array that will populate the csv	| you can comment out data you don't need
@@ -462,18 +466,26 @@ class TXTdownloader(QThread):
                                 tweet.source.encode("utf-8"),
                                 tweet.text.encode("utf-8"),] for tweet in alltweets]
 
-        #write the csv
-        with open(screen_name+'_tweets.csv', 'wb') as f:
-                writer = csv.writer(f)
-                writer.writerow(["id",
-                                "created_at",
-                                "favorites",
-                                "retweets",
-                                "retweeted",
-                                "source",
-                                "text"])
-                writer.writerows(outtweets)
+        if self.w.ascsv.isChecked():
+            #write the csv
+            fname = self.w.folder.text() + "/" + screen_name + '_tweets.csv'
+            with open(fname, 'wb', encoding='utf-8') as f:
+                    writer = csv.writer(f)
+                    writer.writerow(["id",
+                                    "created_at",
+                                    "favorites",
+                                    "retweets",
+                                    "retweeted",
+                                    "source",
+                                    "text"])
+                    writer.writerows(outtweets)
 
+        if self.w.astxt.isChecked():
+            for i in range(len(outtweets)):
+                fname = self.w.folder.text() + "/" + screen_name + "_" + outtweets[1] + "_" + outtweets[5] + '.txt'
+                text_file = open(fname, "w", encoding='utf-8')
+                text_file.write(outtweets[6])
+                text_file.close()
         pass
 
     def downloadtxt(self):
@@ -488,7 +500,7 @@ class TXTdownloader(QThread):
         if self.w.recursive.isChecked():
             self.visitedfile = output + "/visited.tmp"
             if os.path.isfile(self.visitedfile):
-                self.visited = [line.rstrip('\n') for line in open(self.visitedfile)]
+                self.visited = [line.rstrip('\n') for line in open(self.visitedfile, encoding='utf-8')]
             self.runRecursive(thisurl, output)
         else:
             self.runOnPage(thisurl, output)
@@ -513,7 +525,7 @@ class TXTdownloader(QThread):
                         self.quit()
                         return
                     fdatefile = output + "/fromdate.tmp"
-                    with open(fdatefile, "a") as myfile:
+                    with open(fdatefile, "a", encoding='utf-8') as myfile:
                         myfile.write(str(nfromdate)+"\n")
                     self.runSearchRepubblica(thisurl, output, nfromdate, todate)
                 frommonth = 1
@@ -523,10 +535,6 @@ class TXTdownloader(QThread):
 
     def dotwitter(self):
         self.get_all_tweets(self.w.twittername.text()) #nome senza la @
-
-        #    print('USAGE: ./url2corpus.py URL ./corpus/ -r')
-        #    print('Example URLS:\n http://www.repubblica.it/esteri/2018/05/18/news/aereo_incidente_schianto_cuba_decollo-196760241/\n https://www.ansa.it/sito/notizie/politica/2018/05/14/governo-di-maio-e-salvini-al-colle-nel-pomeriggio.-resta-nodo-premier_308ebf3c-4e34-4251-876c-9c9d83606e91.html\n http://www.repubblica.it/rss/homepage/rss2.0.xml\n http://www.ansa.it/sito/notizie/cronaca/cronaca_rss.xml\nYou can also download from Repubblica.it search engine:\n ./url2corpus.py "RICERCAREPUBBLICA:" ./corpus-ricerche/ 2000-01-01\nin this case the last argument should be the date from which you want to start downloading (YYYY-MM-DD). In the first argument you can specify a search query after the double mark.\nIf you append -novdb option after -r, then the VdB will not be used.')
-
 
 
 class Form(QDialog):
@@ -554,6 +562,26 @@ class Form(QDialog):
         self.w.aanno.setValue(int(todate.split('-')[0]))
         self.w.amese.setValue(int(todate.split('-')[1]))
         self.w.agiorno.setValue(int(todate.split('-')[2]))
+        self.mycfgfile = ""
+        self.mycfg = json.loads('{"javapath": "", "tintpath": "", "tintaddr": "", "tintport": "", "sessions" : []}')
+
+    def loadPersonalCFG(self):
+        try:
+            text_file = open(self.mycfgfile, "r", encoding='utf-8')
+            lines = text_file.read()
+            text_file.close()
+            self.mycfg = json.loads(lines)
+        except:
+            print("Creo il file di configurazione")
+
+    def savePersonalCFG(self):
+        try:
+            cfgtxt = json.dumps(self.mycfg)
+            text_file = open(self.mycfgfile, "w", encoding='utf-8')
+            text_file.write(cfgtxt)
+            text_file.close()
+        except:
+            print("Non posso salvare la configurazione")
 
 
     def downloadtxt(self):
@@ -567,12 +595,31 @@ class Form(QDialog):
         self.myThread.start()
 
     def dotwitter(self):
+        consumer_key = self.w.consumer_key.text()
+        consumer_secret = self.w.consumer_secret.text()
+        access_key = self.w.access_key.text()
+        access_secret = self.w.access_secret.text()
+        tmptw = [consumer_key, consumer_secret, access_key, access_secret]
+        self.mycfg["twitter"] = tmptw
+        self.savePersonalCFG()
         self.myThread = TXTdownloader(self.w, "dotwitter")
         self.myThread.finished.connect(self.threadstopped)
         self.myThread.start()
 
     def threadstopped(self):
         self.w.stopall.setChecked(False)
+
+    def setmycfgfile(self, mfile):
+        self.mycfgfile = mfile
+        self.mycfg = json.loads('{"javapath": "", "tintpath": "", "tintaddr": "", "tintport": "", "sessions" : []}')
+        self.loadPersonalCFG()
+        try:
+            self.w.consumer_key.setText(self.mycfg["twitter"][0])
+            self.w.consumer_secret.setText(self.mycfg["twitter"][1])
+            self.w.access_key.setText(self.mycfg["twitter"][2])
+            self.w.access_secret.setText(self.mycfg["twitter"][3])
+        except:
+            return
 
     def choosefolder(self):
         fileName = QFileDialog.getExistingDirectory(self, "Seleziona la cartella in cui salvare il corpus")
