@@ -17,7 +17,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>2</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
@@ -350,6 +350,76 @@
         <widget class="QPushButton" name="dotwitter">
          <property name="text">
           <string>Scarica feed twitter</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_4">
+      <attribute name="title">
+       <string>Facebook</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_6">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_9">
+         <item>
+          <widget class="QLabel" name="label_16">
+           <property name="text">
+            <string>Nome della pagina</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="fbname"/>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_10">
+         <item>
+          <widget class="QRadioButton" name="fbtxt">
+           <property name="text">
+            <string>Scarica co&amp;me TXT</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="fbcsv">
+           <property name="text">
+            <string>Scarica come CS&amp;V</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QFormLayout" name="formLayout_2">
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_17">
+           <property name="text">
+            <string>App ID</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLineEdit" name="fbappid"/>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_18">
+           <property name="text">
+            <string>App Secret</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QLineEdit" name="fbappsecret"/>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QPushButton" name="dofb">
+         <property name="text">
+          <string>Scarica feed facebook</string>
          </property>
         </widget>
        </item>

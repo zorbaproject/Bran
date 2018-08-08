@@ -52,12 +52,25 @@ except:
         thispkg = "la libreria per Twitter"
         messagebox.showinfo("Installazione, attendi prego", "Sto per installare "+ thispkg +" e ci vorrà del tempo. Premi Ok e vai a prenderti un caffè.")
         pip.main(["install", "tweepy"])
-        import tweepy
     except:
         try:
             from pip._internal import main
             main(["install", "tweepy"])
-            import tweepy
+        except:
+            sys.exit(1)
+
+try:
+    from facepy import GraphAPI
+except:
+    try:
+        from tkinter import messagebox
+        thispkg = "la libreria per Facebook"
+        messagebox.showinfo("Installazione, attendi prego", "Sto per installare "+ thispkg +" e ci vorrà del tempo. Premi Ok e vai a prenderti un caffè.")
+        pip.main(["install", "facepy"])
+    except:
+        try:
+            from pip._internal import main
+            main(["install", "facepy"])
         except:
             sys.exit(1)
 

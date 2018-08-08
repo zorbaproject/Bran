@@ -11,6 +11,7 @@ import datetime
 from socket import timeout
 import tweepy
 import csv
+from facepy import GraphAPI
 
 from PySide2.QtWidgets import QApplication, QDialog, QLineEdit, QPushButton, QVBoxLayout
 from PySide2.QtUiTools import QUiLoader
@@ -63,6 +64,8 @@ class TXTdownloader(QThread):
             self.searchrep()
         if self.whattodo == "dotwitter":
             self.dotwitter()
+        if self.whattodo == "dofb":
+            self.dofb()
         return
 
     def find_between(self, s, first, last ):
@@ -536,6 +539,37 @@ class TXTdownloader(QThread):
     def dotwitter(self):
         self.get_all_tweets(self.w.twittername.text()) #nome senza la @
 
+    def fetch_app_access_token(self, fb_app_id, fb_app_secret):
+        aurl = 'https://graph.facebook.com/oauth/access_token?client_id=' + fb_app_id + '&client_secret=' + fb_app_secret + '&grant_type=client_credentials'
+        res = self.geturl(aurl)
+        try:
+            resa = json.loads(res)
+            token = resa["access_token"]
+        except:
+            token = ""
+        return token
+
+    def dofb(self):
+        #we do need: Page Public Content Access
+        #https://docs.loginradius.com/development/social-network/facebook-app-review
+        fbname = self.w.fbname.text()
+        fbappid = self.w.fbappid.text()
+        fbappsecret = self.w.fbappsecret.text()
+        mytoken = self.fetch_app_access_token(fbappid,fbappsecret)
+        #print(mytoken)
+        #https://graph.facebook.com/v3.1/page-id/feed #tutti i post, anche quelli pubblicati da altri sulla pagina
+        #/feed?fields=from,message,created_time&limit=10
+        #https://graph.facebook.com/v3.1/page-id/posts #solo i post pubblicati dalla pagina
+        graph = GraphAPI(mytoken)
+        res = graph.get(fbname+'/posts')
+        if self.w.fbtxt.isChecked():
+            timestamp = "000"
+            fname = self.w.folder.text()+'/'+fbname+ + "-"+ timestamp +'.txt'
+            print(res)
+        if self.w.fbcsv.isChecked():
+            fname = self.w.folder.text()+'/'+fbname+'_posts.csv'
+            print(res)
+
 
 class Form(QDialog):
     def __init__(self, parent=None):
@@ -555,6 +589,7 @@ class Form(QDialog):
         self.w.download.clicked.connect(self.downloadtxt)
         self.w.searchrep.clicked.connect(self.searchrep)
         self.w.dotwitter.clicked.connect(self.dotwitter)
+        self.w.dofb.clicked.connect(self.dofb)
         #self.w.stopall.clicked.connect(self.stopall)
         self.w.choosefolder.clicked.connect(self.choosefolder)
         self.w.ignoreext.setText(".*(\.zip|\.xml|\.pdf|\.avi|\.gif|\.jpeg|\.jpg|\.ico|\.png|\.wav|\.mp3|\.mp4|\.mpg|\.mpeg|\.tif|\.tiff|\.css|\.json|\.rar)$")
@@ -606,6 +641,16 @@ class Form(QDialog):
         self.myThread.finished.connect(self.threadstopped)
         self.myThread.start()
 
+    def dofb(self):
+        fbappid = self.w.fbappid.text()
+        fbappsecret = self.w.fbappsecret.text()
+        tmpfb = [fbappid, fbappsecret]
+        self.mycfg["facebook"] = tmpfb
+        self.savePersonalCFG()
+        self.myThread = TXTdownloader(self.w, "dofb")
+        self.myThread.finished.connect(self.threadstopped)
+        self.myThread.start()
+
     def threadstopped(self):
         self.w.stopall.setChecked(False)
 
@@ -618,6 +663,8 @@ class Form(QDialog):
             self.w.consumer_secret.setText(self.mycfg["twitter"][1])
             self.w.access_key.setText(self.mycfg["twitter"][2])
             self.w.access_secret.setText(self.mycfg["twitter"][3])
+            self.w.fbappid.setText(self.mycfg["facebook"][0])
+            self.w.fbappsecret.setText(self.mycfg["facebook"][1])
         except:
             return
 
