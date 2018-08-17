@@ -105,10 +105,20 @@ def scrapefacebook(mypage):
         fbdomain = ""
         pageid = ""
     fname = "fb_" + pagename + ".txt"
+    alllinks = []
+    linksfile = "fb_" + pagename + ".tmp"
+    if os.path.isfile(linksfile):
+        alllinks = [line.rstrip('\n') for line in open(linksfile, encoding='utf-8')]
     timelineiter = 0
+    ripristino = False
     active = True
     while active:
         link = fbdomain + lstart + pageid + lending
+        if timelineiter == 0 and len(alllinks)>0:
+            link = alllinks[len(alllinks)-1]
+            ripristino = True
+        with open(linksfile, "a", encoding='utf-8') as lfile:
+            lfile.write(link+'\n')
         print(link)
         newhtml = geturl(link)
         try:
@@ -119,6 +129,7 @@ def scrapefacebook(mypage):
             postshtml = postshtml.encode("utf-8").decode('unicode-escape')
             postshtml = re.sub(r'[\uD800-\uDFFF]',"",postshtml)
             #dividi per <div e tieni solo quello che sta tra <p> e </p>
+            #data-utime, print(datetime.utcfromtimestamp(int(utime)).strftime('%Y-%m-%d %H:%M:%S'))
             postsarray = re.split('<div', postshtml)
             for i in range(len(postsarray)):
                 indexes = [(m.start(0), m.end(0)) for m in re.finditer('<p>(.*?)<\\\\/p>', postsarray[i])]
@@ -151,10 +162,9 @@ def scrapefacebook(mypage):
             for i in range(len(postsarray)):
                 if postsarray[i] != "":
                     postsfile = postsfile + postsarray[i] + "\n"
-            if timelineiter == 0:
+            if timelineiter == 0 and ripristino==False:
                 text_file = open(fname, "w", encoding='utf-8')
                 text_file.write(postsfile)
-                #text_file.write(newhtml)
                 text_file.close()
             else:
                 with open(fname, "a", encoding='utf-8') as myfile:
