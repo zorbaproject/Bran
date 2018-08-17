@@ -466,6 +466,8 @@ class TXTdownloader(QThread):
 
     def scrapefacebook(self, mypage):
         TOSELECT_FB = 'pages_reaction_units'
+        startposts = "{\"__html\":"
+        endposts = "]]"
         maxresults = 300
         towait = 10
         lstart = '/pages_reaction_units/more/?page_id='
@@ -521,17 +523,26 @@ class TXTdownloader(QThread):
                 return
             newhtml = self.geturl(link)
             try:
-                start = newhtml.index("{\"__html\":")
-                end = newhtml.index("]]")
+                start = newhtml.index(startposts)
+                end = newhtml.index(endposts)
                 postshtml = newhtml[start:end]
                 #eliminazione caratteri unicode surrogati
                 postshtml = postshtml.encode("utf-8").decode('unicode-escape')
                 postshtml = re.sub(r'[\uD800-\uDFFF]',"",postshtml)
-                #dividi per <div e tieni solo quello che sta tra <p> e </p>
-                #data-utime, print(datetime.utcfromtimestamp(int(utime)).strftime('%Y-%m-%d %H:%M:%S'))
-                postsarray = re.split('<div', postshtml)
+                #dividi per data-utime e tieni solo quello che sta tra <p> e </p>
+                postsarray = re.split('data-utime', postshtml)
                 timearray = []
                 for i in range(len(postsarray)):
+                    try:
+                        start = postsarray[i].index('"')
+                        end = postsarray[i].index('"',start+2)
+                        utime = postsarray[i][start:end]
+                        utime = re.sub(r'[^0-9]',"",utime)
+                        utimei = int(utime)
+                    except:
+                        utimei = 0
+                    thistime = datetime.datetime.utcfromtimestamp(utimei).strftime('%Y-%m-%d %H:%M:%S')
+                    timearray.append(thistime)
                     indexes = [(m.start(0), m.end(0)) for m in re.finditer('<p>(.*?)<\\\\/p>', postsarray[i])]
                     thispost = ""
                     for n in range(len(indexes)):
@@ -540,6 +551,8 @@ class TXTdownloader(QThread):
                         thispost = thispost + postsarray[i][start:end]
                     #pulisco i tag non necessari
                     postsarray[i] = re.sub(r'<.*?>',"",thispost)
+                    #tolgo gli slash non necessari
+                    postsarray[i] = re.sub('\\\\/',"/",postsarray[i])
                 #print(postsarray)
                 try:
                     maxresults = 8
