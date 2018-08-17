@@ -365,12 +365,16 @@
          <item>
           <widget class="QLabel" name="label_16">
            <property name="text">
-            <string>Nome della pagina</string>
+            <string>URL della pagina</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="fbname"/>
+          <widget class="QLineEdit" name="fbname">
+           <property name="text">
+            <string>https://it-it.facebook.com/chiesapastafarianaitaliana/</string>
+           </property>
+          </widget>
          </item>
         </layout>
        </item>
@@ -381,6 +385,9 @@
            <property name="text">
             <string>Scarica co&amp;me TXT</string>
            </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
           </widget>
          </item>
          <item>
@@ -389,30 +396,6 @@
             <string>Scarica come CS&amp;V</string>
            </property>
           </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QFormLayout" name="formLayout_2">
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_17">
-           <property name="text">
-            <string>App ID</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QLineEdit" name="fbappid"/>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_18">
-           <property name="text">
-            <string>App Secret</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QLineEdit" name="fbappsecret"/>
          </item>
         </layout>
        </item>

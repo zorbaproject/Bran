@@ -2,16 +2,15 @@
 # -*- coding: utf-8 -*-
 
 import urllib.request
+import urllib.parse
 import re
 import html
 import sys
 import os
 import json
 import datetime
+import time
 from socket import timeout
-import tweepy
-import csv
-from facepy import GraphAPI
 
 from PySide2.QtWidgets import QApplication, QDialog, QLineEdit, QPushButton, QVBoxLayout
 from PySide2.QtUiTools import QUiLoader
@@ -416,81 +415,6 @@ class TXTdownloader(QThread):
                             with open(articlesfile, "a", encoding='utf-8') as myfile:
                                 myfile.write(links[i]+"\n")
 
-
-    def get_all_tweets(self, screen_name):
-        #Special thanks to https://gist.github.com/lamthuyvo/44e682f39021c18d28bdd8133b934782 for the elegant source code
-        #Twitter only allows access to a users most recent 3240 tweets with this method
-        consumer_key = self.w.consumer_key.text()
-        consumer_secret = self.w.consumer_secret.text()
-        access_key = self.w.access_key.text()
-        access_secret = self.w.access_secret.text()
-
-        #authorize twitter, initialize tweepy
-        auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-        auth.set_access_token(access_key, access_secret)
-        api = tweepy.API(auth)
-
-        #initialize a list to hold all the tweepy Tweets
-        alltweets = []
-
-        #make initial request for most recent tweets (200 is the maximum allowed count)
-        new_tweets = api.user_timeline(screen_name = screen_name,count=200)
-
-        #save most recent tweets
-        alltweets.extend(new_tweets)
-
-        #save the id of the oldest tweet less one
-        oldest = alltweets[-1].id - 1
-
-        #keep grabbing tweets until there are no tweets left to grab
-        while len(new_tweets) > 0:
-                if self.w.stopall.isChecked():
-                    break
-                    #self.quit()
-                    #return
-                #all subsiquent requests use the max_id param to prevent duplicates
-                new_tweets = api.user_timeline(screen_name = screen_name,count=200,max_id=oldest)
-                #save most recent tweets
-                alltweets.extend(new_tweets)
-                #update the id of the oldest tweet less one
-                oldest = alltweets[-1].id - 1
-                #print "...%s tweets downloaded so far" % (len(alltweets))
-                self.w.results.addItem(str(alltweets[len(alltweets)-1].created_at))
-                self.w.results.setCurrentRow(self.w.results.count()-1)
-                QApplication.processEvents()
-
-
-        #transform the tweepy tweets into a 2D array that will populate the csv	| you can comment out data you don't need
-        outtweets = [[tweet.id_str,
-                                tweet.created_at,
-                                tweet.favorite_count,
-                                tweet.retweet_count,
-                                tweet.retweeted,
-                                tweet.source.encode("utf-8"),
-                                tweet.text.encode("utf-8"),] for tweet in alltweets]
-
-        if self.w.ascsv.isChecked():
-            #write the csv
-            fname = self.w.folder.text() + "/" + screen_name + '_tweets.csv'
-            with open(fname, 'wb', encoding='utf-8') as f:
-                    writer = csv.writer(f)
-                    writer.writerow(["id",
-                                    "created_at",
-                                    "favorites",
-                                    "retweets",
-                                    "retweeted",
-                                    "source",
-                                    "text"])
-                    writer.writerows(outtweets)
-
-        if self.w.astxt.isChecked():
-            for i in range(len(outtweets)):
-                fname = self.w.folder.text() + "/" + screen_name + "_" + outtweets[1] + "_" + outtweets[5] + '.txt'
-                text_file = open(fname, "w", encoding='utf-8')
-                text_file.write(outtweets[6])
-                text_file.close()
-        pass
-
     def downloadtxt(self):
         thisurl = self.w.url.text()
         output = ""
@@ -537,38 +461,126 @@ class TXTdownloader(QThread):
             return
 
     def dotwitter(self):
-        self.get_all_tweets(self.w.twittername.text()) #nome senza la @
+        #self.get_all_tweets(self.w.twittername.text()) #nome senza la @
+        print("Not implemented")
 
-    def fetch_app_access_token(self, fb_app_id, fb_app_secret):
-        aurl = 'https://graph.facebook.com/oauth/access_token?client_id=' + fb_app_id + '&client_secret=' + fb_app_secret + '&grant_type=client_credentials'
-        res = self.geturl(aurl)
+    def scrapefacebook(self, mypage):
+        TOSELECT_FB = 'pages_reaction_units'
+        maxresults = 300
+        towait = 10
+        lstart = '/pages_reaction_units/more/?page_id='
+        lending = '&cursor={"card_id":"videos","has_next_page":true}&surface=www_pages_home&unit_count='+str(maxresults)+'&referrer&dpr=1&__user=0&__a=1'
+        output = ""
+        if os.path.isdir(self.w.folder.text()):
+            output = self.w.folder.text() + "/"
+        self.w.results.addItem(mypage)
+        self.w.results.setCurrentRow(self.w.results.count()-1)
+        allhtml = self.geturl(mypage)
         try:
-            resa = json.loads(res)
-            token = resa["access_token"]
+            start = mypage.index("https://")
+            end = mypage.index('/',start+8)
+            fbdomain = mypage[start:end]
+            indexes = [(m.start(0), m.end(0)) for m in re.finditer(TOSELECT_FB, allhtml[start+1:])]
+            start = indexes[0][0]
+            end = allhtml.index('"',start+1)
+            thislink = allhtml[start:end]
+            #estrapola page_id
+            #https://it-it.facebook.com/pages_reaction_units/more/?page_id=286796408016028&cursor={"card_id":"videos","has_next_page":true}&surface=www_pages_home&unit_count=300&referrer&dpr=1&__user=0&__a=1
+            start = thislink.index("page_id=")
+            end = thislink.index('&',start+9)
+            pageid = thislink[start+8:end]
+            start = mypage.index("facebook.com")
+            pagename = mypage[start+12:]
+            pagename = re.sub(r'[^A-Za-z0-9]',"",pagename)
         except:
-            token = ""
-        return token
+            fbdomain = ""
+            pageid = ""
+        fname = output + "fb_" + pagename + ".txt"
+        if self.w.fbcsv.isChecked():
+            fname = output + "fb_" + pagename + ".csv"
+        alllinks = []
+        linksfile = output + "fb_" + pagename + ".tmp"
+        if os.path.isfile(linksfile):
+            alllinks = [line.rstrip('\n') for line in open(linksfile, encoding='utf-8')]
+        timelineiter = 0
+        ripristino = False
+        active = True
+        while active:
+            link = fbdomain + lstart + pageid + lending
+            if timelineiter == 0 and len(alllinks)>0:
+                link = alllinks[len(alllinks)-1]
+                ripristino = True
+            with open(linksfile, "a", encoding='utf-8') as lfile:
+                lfile.write(link+'\n')
+            #print(link)
+            self.w.results.addItem(link)
+            self.w.results.setCurrentRow(self.w.results.count()-1)
+            if self.w.stopall.isChecked():
+                active = False
+                self.quit()
+                return
+            newhtml = self.geturl(link)
+            try:
+                start = newhtml.index("{\"__html\":")
+                end = newhtml.index("]]")
+                postshtml = newhtml[start:end]
+                #eliminazione caratteri unicode surrogati
+                postshtml = postshtml.encode("utf-8").decode('unicode-escape')
+                postshtml = re.sub(r'[\uD800-\uDFFF]',"",postshtml)
+                #dividi per <div e tieni solo quello che sta tra <p> e </p>
+                #data-utime, print(datetime.utcfromtimestamp(int(utime)).strftime('%Y-%m-%d %H:%M:%S'))
+                postsarray = re.split('<div', postshtml)
+                timearray = []
+                for i in range(len(postsarray)):
+                    indexes = [(m.start(0), m.end(0)) for m in re.finditer('<p>(.*?)<\\\\/p>', postsarray[i])]
+                    thispost = ""
+                    for n in range(len(indexes)):
+                        start = indexes[n][0]
+                        end = indexes[n][1]
+                        thispost = thispost + postsarray[i][start:end]
+                    #pulisco i tag non necessari
+                    postsarray[i] = re.sub(r'<.*?>',"",thispost)
+                #print(postsarray)
+                try:
+                    maxresults = 8
+                    start = newhtml.index('&cursor=')
+                    end = newhtml.index("&unit_count=", start+1)
+                    lending = newhtml[start:end]
+                    #eliminazione caratteri unicode surrogati
+                    lending = lending.encode("utf-8").decode('unicode-escape')
+                    lending = re.sub(r'[\uD800-\uDFFF]',"",lending)
+                    lending = urllib.parse.unquote(lending)
+                    lending = lending + '&unit_count='+str(maxresults)+'&dpr=1&__user=0&__a=1'
+                    #https://it-it.facebook.com/pages_reaction_units/more/?page_id=286796408016028&cursor={"timeline_cursor":"timeline_unit:1:00000000001528624041:04611686018427387904:09223372036854775793:04611686018427387904","timeline_section_cursor":{},"has_next_page":true}&surface=www_pages_home&unit_count=8&dpr=1&__user=0&__a=1
+                except:
+                    active = False
+            except:
+                postsarray = []
+                timearray = []
+            #salvo il risultato in un file: se è il primo ciclo creo il file, altrimenti aggiungo
+            if fname != "":
+                postsfile = ""
+                for i in range(len(postsarray)):
+                    if postsarray[i] != "":
+                        if self.w.fbcsv.isChecked():
+                            postsfile = postsfile + timearray[i] + "\t"
+                        postsfile = postsfile + postsarray[i] + "\n"
+                if timelineiter == 0 and ripristino==False:
+                    text_file = open(fname, "w", encoding='utf-8')
+                    text_file.write(postsfile)
+                    text_file.close()
+                else:
+                    with open(fname, "a", encoding='utf-8') as myfile:
+                        myfile.write(postsfile)
+            timelineiter = timelineiter +1
+            time.sleep(towait)
 
     def dofb(self):
-        #we do need: Page Public Content Access
-        #https://docs.loginradius.com/development/social-network/facebook-app-review
+        self.w.results.clear()
+        self.w.resultsgrp.setTitle("STO LAVORANDO:")
         fbname = self.w.fbname.text()
-        fbappid = self.w.fbappid.text()
-        fbappsecret = self.w.fbappsecret.text()
-        mytoken = self.fetch_app_access_token(fbappid,fbappsecret)
-        #print(mytoken)
-        #https://graph.facebook.com/v3.1/page-id/feed #tutti i post, anche quelli pubblicati da altri sulla pagina
-        #/feed?fields=from,message,created_time&limit=10
-        #https://graph.facebook.com/v3.1/page-id/posts #solo i post pubblicati dalla pagina
-        graph = GraphAPI(mytoken)
-        res = graph.get(fbname+'/posts')
-        if self.w.fbtxt.isChecked():
-            timestamp = "000"
-            fname = self.w.folder.text()+'/'+fbname+ + "-"+ timestamp +'.txt'
-            print(res)
-        if self.w.fbcsv.isChecked():
-            fname = self.w.folder.text()+'/'+fbname+'_posts.csv'
-            print(res)
+        self.scrapefacebook(fbname)
+        self.w.resultsgrp.setTitle("In attesa")
 
 
 class Form(QDialog):
@@ -642,10 +654,10 @@ class Form(QDialog):
         self.myThread.start()
 
     def dofb(self):
-        fbappid = self.w.fbappid.text()
-        fbappsecret = self.w.fbappsecret.text()
-        tmpfb = [fbappid, fbappsecret]
-        self.mycfg["facebook"] = tmpfb
+        #fbappid = self.w.fbappid.text()
+        #fbappsecret = self.w.fbappsecret.text()
+        #tmpfb = [fbappid, fbappsecret]
+        #self.mycfg["facebook"] = tmpfb
         self.savePersonalCFG()
         self.myThread = TXTdownloader(self.w, "dofb")
         self.myThread.finished.connect(self.threadstopped)
@@ -663,8 +675,8 @@ class Form(QDialog):
             self.w.consumer_secret.setText(self.mycfg["twitter"][1])
             self.w.access_key.setText(self.mycfg["twitter"][2])
             self.w.access_secret.setText(self.mycfg["twitter"][3])
-            self.w.fbappid.setText(self.mycfg["facebook"][0])
-            self.w.fbappsecret.setText(self.mycfg["facebook"][1])
+            #self.w.fbappid.setText(self.mycfg["facebook"][0])
+            #self.w.fbappsecret.setText(self.mycfg["facebook"][1])
         except:
             return
 
