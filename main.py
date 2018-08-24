@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 #would be nice: https://github.com/yarolig/pyqtc
-#Deploy as Docker container on Windows: https://robscode.onl/docker-run-gui-app-in-linux-container-on-windows-host/
 
+#Lavorare con R: https://www.tidytextmining.com/twitter.html
 
 import pip
 import sys

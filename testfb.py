@@ -14,9 +14,9 @@ import datetime
 import time
 from socket import timeout
 
-#START_PAGE = "https://it-it.facebook.com/chiesapastafarianaitaliana/"
+START_PAGE = "https://it-it.facebook.com/chiesapastafarianaitaliana/"
 #START_PAGE = "https://it-it.facebook.com/salviniofficial/"
-START_PAGE = "https://twitter.com/DioSpaghetto"
+#START_PAGE = "https://twitter.com/DioSpaghetto"
 
 useragent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
 
@@ -80,10 +80,14 @@ def fixunicode(oldstring):
 
 def scrapefacebook(mypage):
     TOSELECT_FB = 'pages_reaction_units'
+    startposts = "{\"__html\":"
+    endposts = "]]"
     maxresults = 300
     towait = 10
     lstart = '/pages_reaction_units/more/?page_id='
     lending = '&cursor={"card_id":"videos","has_next_page":true}&surface=www_pages_home&unit_count='+str(maxresults)+'&referrer&dpr=1&__user=0&__a=1'
+    output = "./"
+    ascsv = False
     allhtml = geturl(mypage)
     try:
         start = mypage.index("https://")
@@ -104,9 +108,11 @@ def scrapefacebook(mypage):
     except:
         fbdomain = ""
         pageid = ""
-    fname = "fb_" + pagename + ".txt"
+    fname = output + "fb_" + pagename + ".txt"
+    if ascsv:
+        fname = output + "fb_" + pagename + ".csv"
     alllinks = []
-    linksfile = "fb_" + pagename + ".tmp"
+    linksfile = output + "fb_" + pagename + ".tmp"
     if os.path.isfile(linksfile):
         alllinks = [line.rstrip('\n') for line in open(linksfile, encoding='utf-8')]
     timelineiter = 0
@@ -122,16 +128,26 @@ def scrapefacebook(mypage):
         print(link)
         newhtml = geturl(link)
         try:
-            start = newhtml.index("{\"__html\":")
-            end = newhtml.index("]]")
+            start = newhtml.index(startposts)
+            end = newhtml.index(endposts)
             postshtml = newhtml[start:end]
             #eliminazione caratteri unicode surrogati
             postshtml = postshtml.encode("utf-8").decode('unicode-escape')
             postshtml = re.sub(r'[\uD800-\uDFFF]',"",postshtml)
-            #dividi per <div e tieni solo quello che sta tra <p> e </p>
-            #data-utime, print(datetime.utcfromtimestamp(int(utime)).strftime('%Y-%m-%d %H:%M:%S'))
-            postsarray = re.split('<div', postshtml)
+            #dividi per data-utime e tieni solo quello che sta tra <p> e </p>
+            postsarray = re.split('data-utime', postshtml)
+            timearray = []
             for i in range(len(postsarray)):
+                try:
+                    start = postsarray[i].index('"')
+                    end = postsarray[i].index('"',start+2)
+                    utime = postsarray[i][start:end]
+                    utime = re.sub(r'[^0-9]',"",utime)
+                    utimei = int(utime)
+                except:
+                    utimei = 0
+                thistime = datetime.datetime.utcfromtimestamp(utimei).strftime('%Y-%m-%d %H:%M:%S')
+                timearray.append(thistime)
                 indexes = [(m.start(0), m.end(0)) for m in re.finditer('<p>(.*?)<\\\\/p>', postsarray[i])]
                 thispost = ""
                 for n in range(len(indexes)):
@@ -140,6 +156,8 @@ def scrapefacebook(mypage):
                     thispost = thispost + postsarray[i][start:end]
                 #pulisco i tag non necessari
                 postsarray[i] = re.sub(r'<.*?>',"",thispost)
+                #tolgo gli slash non necessari
+                postsarray[i] = re.sub('\\\\/',"/",postsarray[i])
             print(postsarray)
             try:
                 maxresults = 8
@@ -156,11 +174,14 @@ def scrapefacebook(mypage):
                 active = False
         except:
             postsarray = []
+            timearray = []
         #salvo il risultato in un file: se è il primo ciclo creo il file, altrimenti aggiungo
         if fname != "":
             postsfile = ""
             for i in range(len(postsarray)):
                 if postsarray[i] != "":
+                    if ascsv:
+                        postsfile = postsfile + timearray[i] + "\t"
                     postsfile = postsfile + postsarray[i] + "\n"
             if timelineiter == 0 and ripristino==False:
                 text_file = open(fname, "w", encoding='utf-8')
@@ -174,6 +195,7 @@ def scrapefacebook(mypage):
 
 
 def scrapetwitter(mypage):
+    #https://github.com/Jefferson-Henrique/GetOldTweets-python
     #https://twitter.com/i/profiles/show/DioSpaghetto/timeline/tweets?composed_count=0&include_available_features=1&include_entities=1&include_new_items_bar=true&interval=30000&latent_count=0&min_position=1029148848562872326
     #https://twitter.com/i/profiles/show/DioSpaghetto/timeline/tweets?include_available_features=1&include_entities=1&max_position=1001537618130210816&reset_error_state=false
         

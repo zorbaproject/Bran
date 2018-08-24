@@ -462,6 +462,7 @@ class TXTdownloader(QThread):
 
     def dotwitter(self):
         #self.get_all_tweets(self.w.twittername.text()) #nome senza la @
+        #https://github.com/Jefferson-Henrique/GetOldTweets-python
         print("Not implemented")
 
     def scrapefacebook(self, mypage):
