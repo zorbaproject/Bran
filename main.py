@@ -33,14 +33,36 @@ except:
         from tkinter import messagebox
         thispkg = "le librerie grafiche"
         messagebox.showinfo("Installazione, attendi prego", "Sto per installare "+ thispkg +" e ci vorrà del tempo. Premi Ok e vai a prenderti un caffè.")
-        pip.main(["install", "--index-url=http://download.qt.io/snapshots/ci/pyside/5.9/latest/", "pyside2", "--trusted-host", "download.qt.io"])
+        pip.main(["install", "PySide2"])
         #pip install --index-url=http://download.qt.io/snapshots/ci/pyside/5.9/latest/ pyside2 --trusted-host download.qt.io
         from PySide2.QtWidgets import QApplication
     except:
         try:
-            from pip._internal import main
-            main(["install", "--index-url=http://download.qt.io/snapshots/ci/pyside/5.9/latest/", "pyside2", "--trusted-host", "download.qt.io"])
+            from pip._internal import main as pipmain
+            from tkinter import messagebox
+            pipmain(["install", "PySide2"])
             from PySide2.QtWidgets import QApplication
+        except:
+            sys.exit(1)
+
+try:
+    from pyquery import PyQuery as pqtest
+    from lxml import etree
+except:
+    try:
+        from tkinter import messagebox
+        thispkg = "le librerie per scaricare i tweet"
+        messagebox.showinfo("Installazione, attendi prego", "Sto per installare "+ thispkg +" e ci vorrà del tempo. Premi Ok e vai a prenderti un caffè.")
+        pip.main(["install", "pyquery"])
+        pip.main(["install", "lxml"])
+        messagebox.showinfo("Prendi nota", "Probabilmente dovrai installare i pacchetti di sviluppo, su Ubuntu basta questo comando: sudo apt-get install libxml2-dev libxslt1-dev python-dev")
+    except:
+        try:
+            from pip._internal import main as pipmain
+            from tkinter import messagebox
+            pipmain(["install", "pyquery"])
+            pipmain(["install", "lxml"])
+            messagebox.showinfo("Prendi nota", "Probabilmente dovrai installare i pacchetti di sviluppo, su Ubuntu basta questo comando: sudo apt-get install libxml2-dev libxslt1-dev python-dev")
         except:
             sys.exit(1)
 

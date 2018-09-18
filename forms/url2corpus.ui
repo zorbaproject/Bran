@@ -17,7 +17,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>3</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
@@ -268,23 +268,37 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_5">
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_7">
-         <item>
+        <layout class="QGridLayout" name="gridLayout_2">
+         <item row="2" column="0">
+          <widget class="QLabel" name="label_13">
+           <property name="text">
+            <string>Query di ricerca:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
           <widget class="QLabel" name="label_15">
            <property name="text">
             <string>Nome utente da scaricare:</string>
            </property>
           </widget>
          </item>
-         <item>
-          <widget class="QLineEdit" name="twittername"/>
+         <item row="0" column="1">
+          <widget class="QLineEdit" name="twittername">
+           <property name="text">
+            <string>dio</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QLineEdit" name="twitterquery"/>
          </item>
         </layout>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_8">
          <item>
-          <widget class="QRadioButton" name="astxt">
+          <widget class="QRadioButton" name="twtxt">
            <property name="text">
             <string>Scarica co&amp;me TXT</string>
            </property>
@@ -294,7 +308,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QRadioButton" name="ascsv">
+          <widget class="QRadioButton" name="twcsv">
            <property name="text">
             <string>Scarica come CS&amp;V</string>
            </property>
@@ -307,42 +321,22 @@
          <item row="0" column="0">
           <widget class="QLabel" name="label_11">
            <property name="text">
-            <string>Consumer Key:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_12">
-           <property name="text">
-            <string>Consumer Secret:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="label_13">
-           <property name="text">
-            <string>Access Key:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="0">
-          <widget class="QLabel" name="label_14">
-           <property name="text">
-            <string>Access Secret:</string>
+            <string>Dalla data (YYYY-MM-DD):</string>
            </property>
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="QLineEdit" name="consumer_key"/>
+          <widget class="QLineEdit" name="twitterfrom"/>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_12">
+           <property name="text">
+            <string>Fino alla data (YYYY-MM-DD):</string>
+           </property>
+          </widget>
          </item>
          <item row="1" column="1">
-          <widget class="QLineEdit" name="consumer_secret"/>
-         </item>
-         <item row="2" column="1">
-          <widget class="QLineEdit" name="access_key"/>
-         </item>
-         <item row="3" column="1">
-          <widget class="QLineEdit" name="access_secret"/>
+          <widget class="QLineEdit" name="twitterto"/>
          </item>
         </layout>
        </item>

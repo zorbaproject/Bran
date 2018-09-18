@@ -22,6 +22,9 @@ from PySide2.QtWidgets import QFileDialog
 from PySide2.QtWidgets import QMainWindow
 from PySide2.QtWidgets import QListWidget
 
+import got3 as got
+
+
 class TXTdownloader(QThread):
 
     def __init__(self, widget, whattodo):
@@ -461,9 +464,70 @@ class TXTdownloader(QThread):
             return
 
     def dotwitter(self):
-        #self.get_all_tweets(self.w.twittername.text()) #nome senza la @
         #https://github.com/Jefferson-Henrique/GetOldTweets-python
-        print("Not implemented")
+        self.w.results.clear()
+        self.w.resultsgrp.setTitle("STO LAVORANDO:")
+        tname = self.w.twittername.text()
+        tquery = self.w.twitterquery.text()
+        tfrom = self.w.twitterfrom.text()
+        tto = self.w.twitterto.text()
+        output = ""
+        if os.path.isdir(self.w.folder.text()):
+            output = self.w.folder.text() + "/"
+        tweets = []
+        pagename = ""
+        if tname != "":
+            self.w.results.addItem(tname)
+            self.w.results.setCurrentRow(self.w.results.count()-1)
+            if tfrom != "" and tto != "":
+                tweetCriteria = got.manager.TweetCriteria().setUsername(tname).setSince(tfrom).setUntil(tto)
+            elif tfrom != "" and tto == "":
+                tweetCriteria = got.manager.TweetCriteria().setUsername(tname).setSince(tfrom)
+            else:
+                tweetCriteria = got.manager.TweetCriteria().setUsername(tname)
+            tweets = got.manager.TweetManager.getTweets(tweetCriteria)
+            pagename = tname
+        elif tquery != "":
+            self.w.results.addItem(tquery)
+            self.w.results.setCurrentRow(self.w.results.count()-1)
+            if tfrom != "" and tto != "":
+                tweetCriteria = got.manager.TweetCriteria().setQuerySearch(tquery).setSince(tfrom).setUntil(tto)
+            elif tfrom != "" and tto == "":
+                tweetCriteria = got.manager.TweetCriteria().setQuerySearch(tquery).setSince(tfrom)
+            else:
+                tweetCriteria = got.manager.TweetCriteria().setQuerySearch(tquery)
+            tweets = got.manager.TweetManager.getTweets(tweetCriteria)
+            pagename = tquery
+        if self.w.stopall.isChecked():
+            self.quit()
+            return
+        #salvo il risultato in un file: se è il primo ciclo creo il file, altrimenti aggiungo
+        pagename = re.sub(r'[^A-Za-z0-9]',"",pagename)
+        fname = output + "twitter_" + pagename + ".txt"
+        if self.w.twcsv.isChecked():
+            fname = output + "twitter_" + pagename + ".csv"
+        if fname != "" and pagename != "":
+            postsfile = ""
+            timelineiter = 0
+            for i in range(len(tweets)):
+                self.w.results.addItem(tweets[i].text)
+                self.w.results.setCurrentRow(self.w.results.count()-1)
+                if self.w.stopall.isChecked():
+                    self.quit()
+                    return
+                if tweets[i].text != "":
+                    if self.w.twcsv.isChecked():
+                        postsfile = postsfile + str(tweets[i].username) + "\t" + str(tweets[i].retweets) + "\t" + str(tweets[i].hashtags) + "\t" + str(tweets[i].mentions) + "\t"
+                    postsfile = postsfile + str(tweets[i].text) + "\n"
+                    if timelineiter == 0:
+                        text_file = open(fname, "w", encoding='utf-8')
+                        text_file.write(postsfile)
+                        text_file.close()
+                    else:
+                        with open(fname, "a", encoding='utf-8') as myfile:
+                            myfile.write(postsfile)
+                    timelineiter = timelineiter + 1
+        self.w.resultsgrp.setTitle("In attesa")
 
     def scrapefacebook(self, mypage):
         TOSELECT_FB = 'pages_reaction_units'
@@ -656,13 +720,6 @@ class Form(QDialog):
         self.myThread.start()
 
     def dotwitter(self):
-        consumer_key = self.w.consumer_key.text()
-        consumer_secret = self.w.consumer_secret.text()
-        access_key = self.w.access_key.text()
-        access_secret = self.w.access_secret.text()
-        tmptw = [consumer_key, consumer_secret, access_key, access_secret]
-        self.mycfg["twitter"] = tmptw
-        self.savePersonalCFG()
         self.myThread = TXTdownloader(self.w, "dotwitter")
         self.myThread.finished.connect(self.threadstopped)
         self.myThread.start()
