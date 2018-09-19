@@ -507,9 +507,9 @@ class TXTdownloader(QThread):
         if self.w.twcsv.isChecked():
             fname = output + "twitter_" + pagename + ".csv"
         if fname != "" and pagename != "":
-            postsfile = ""
             timelineiter = 0
             for i in range(len(tweets)):
+                postsfile = ""
                 self.w.results.addItem(tweets[i].text)
                 self.w.results.setCurrentRow(self.w.results.count()-1)
                 if self.w.stopall.isChecked():
