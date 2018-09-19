@@ -396,6 +396,14 @@ class MainWindow(QMainWindow):
             ipunct = []
             for i in range(Repetdialog.w.ignorapos.count()):
                 ipunct.append(Repetdialog.w.ignorapos.item(i).text())
+            vuoteI = []
+            if Repetdialog.w.ignoreI.isChecked():
+                for i in range(Repetdialog.w.vuoteI.count()):
+                    vuoteI.append(Repetdialog.w.vuoteI.item(i).text())
+            vuoteF = []
+            if Repetdialog.w.ignoreF.isChecked():
+                for i in range(Repetdialog.w.vuoteF.count()):
+                    vuoteF.append(Repetdialog.w.vuoteF.item(i).text())
             TBdialog = tableeditor.Form(self)
             TBdialog.sessionDir = self.sessionDir
             TBdialog.addcolumn("nGram", 0)
@@ -403,11 +411,11 @@ class MainWindow(QMainWindow):
             self.Progrdialog = progress.Form()
             self.Progrdialog.show()
             for tokens in range(tokenda, tokena+1):
-                self.findngrams(tokens, minoccur, TBdialog, self.Progrdialog, ignorecase, remspaces, ipunct, col)
+                self.findngrams(tokens, minoccur, TBdialog, self.Progrdialog, ignorecase, remspaces, ipunct, col, vuoteI, vuoteF)
             self.Progrdialog.accept()
             TBdialog.exec()
 
-    def findngrams(self, tokens, minoccur, TBdialog, Progrdialog, ignorecase, remspaces, ipunct, col):
+    def findngrams(self, tokens, minoccur, TBdialog, Progrdialog, ignorecase, remspaces, ipunct, col, vuoteI, vuoteF):
         mycorpus = ""
         if col == "":
             col = self.corpuscols['Orig']
@@ -453,8 +461,10 @@ class MainWindow(QMainWindow):
                     npos = len(mycorpus)-1
             #read this phrase
             tmpstring = mycorpus[pos:npos]
+            parolai = re.sub(" .*", "", tmpstring, flags=re.IGNORECASE|re.DOTALL)
+            parolaf = re.sub(".* ", "", tmpstring, flags=re.IGNORECASE|re.DOTALL)
             #look for all occurrences of this phrase
-            if tmpstring != "" and tmpstring.count(searchthis)==tokens-1:
+            if tmpstring != "" and tmpstring.count(searchthis)==tokens-1 and bool(not parolai in vuoteI) and bool(not parolaf in vuoteF):
                 tcount = mycorpus.count(tmpstring)
                 if tcount >= minoccur:
                     if remspaces:

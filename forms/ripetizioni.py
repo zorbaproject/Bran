@@ -32,10 +32,15 @@ class Form(QDialog):
         self.w.rejected.connect(self.isrejected)
         self.w.aggiungi.clicked.connect(self.selectaggiungi)
         self.w.rimuovi.clicked.connect(self.rimuovi)
+        self.w.addI.clicked.connect(self.addI)
+        self.w.remI.clicked.connect(self.remI)
+        self.w.addF.clicked.connect(self.addF)
+        self.w.remF.clicked.connect(self.remF)
         self.setWindowTitle("Scegli come cercare le ripetizioni")
         self.w.remspaces.setChecked(False)
         self.w.ignorecase.setChecked(True)
         self.allPos = []
+        self.loadvuote()
 
     def isaccepted(self):
         self.accept()
@@ -51,6 +56,26 @@ class Form(QDialog):
         mypos = QInputDialog.getItem(self, "Scegli la categoria", "Scegli la categoria PoS da aggiungere alla lista di PoS da ignorare",self.allPos,current=0,editable=False)
         self.w.ignorapos.addItem(mypos[0])
 
+    def addI(self):
+        words = QInputDialog.getText(self.w, "Scegli la codifica", "Scrivi le parole che vuoi aggiungere separate da spazi:")
+        wordsL = words[0].split(" ")
+        for myword in wordsL:
+            self.w.vuoteI.addItem(myword)
+
+    def addF(self):
+        words = QInputDialog.getText(self.w, "Scegli la codifica", "Scrivi le parole che vuoi aggiungere separate da spazi:")
+        wordsL = words[0].split(" ")
+        for myword in wordsL:
+            self.w.vuoteF.addItem(myword)
+
+    def remI(self):
+        for i in self.w.vuoteI.selectedItems():
+            self.w.vuoteI.takeItem(self.w.vuoteI.row(i))
+
+    def remF(self):
+        for i in self.w.vuoteF.selectedItems():
+            self.w.vuoteF.takeItem(self.w.vuoteF.row(i))
+
     def loadallpos(self, legenda):
         for item in legenda:
             self.allPos.append(legenda[item][0])
@@ -58,3 +83,15 @@ class Form(QDialog):
     def loadipos(self, history):
         for olddir in history:
             self.w.ignorapos.addItem(olddir)
+
+    def loadvuote(self):
+        vuoteifile = os.path.abspath(os.path.dirname(sys.argv[0]))+"/dizionario/VuoteI.txt"
+        vuoteffile = os.path.abspath(os.path.dirname(sys.argv[0]))+"/dizionario/VuoteF.txt"
+        if os.path.isfile(vuoteifile):
+            vuotei = [line.rstrip('\n') for line in open(vuoteifile, encoding='utf-8')]
+            for vuota in vuotei:
+                self.w.vuoteI.addItem(vuota)
+        if os.path.isfile(vuoteffile):
+            vuotef = [line.rstrip('\n') for line in open(vuoteffile, encoding='utf-8')]
+            for vuota in vuotef:
+                self.w.vuoteF.addItem(vuota)
