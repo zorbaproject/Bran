@@ -134,7 +134,7 @@
     </property>
     <widget class="QMenu" name="menuImporta_corpus">
      <property name="title">
-      <string>Importa corpus</string>
+      <string>&amp;Importa corpus</string>
      </property>
      <addaction name="actionDa_file_txt"/>
      <addaction name="actionDa_file_JSON"/>
@@ -142,7 +142,7 @@
     </widget>
     <widget class="QMenu" name="menuEsporta">
      <property name="title">
-      <string>Esporta</string>
+      <string>&amp;Esporta</string>
      </property>
      <addaction name="actionEsporta_corpus_in_CSV_unico"/>
      <addaction name="actionEsporta_vista_attuale_in_CSV"/>
@@ -181,7 +181,7 @@
    </widget>
    <widget class="QMenu" name="menuAnalisi">
     <property name="title">
-     <string>Analisi</string>
+     <string>A&amp;nalisi</string>
     </property>
     <addaction name="actionConta_occorrenze"/>
     <addaction name="actionStatistiche_con_VdB"/>
@@ -198,17 +198,17 @@
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionApri">
    <property name="text">
-    <string>Apri progetto</string>
+    <string>&amp;Apri progetto</string>
    </property>
   </action>
   <action name="actionSalva">
    <property name="text">
-    <string>Salva progetto</string>
+    <string>&amp;Salva progetto</string>
    </property>
   </action>
   <action name="actionDa_file_txt">
    <property name="text">
-    <string>Da file TXT</string>
+    <string>&amp;Da file TXT</string>
    </property>
   </action>
   <action name="actionDa_file_zip">
@@ -218,37 +218,37 @@
   </action>
   <action name="actionScarica_corpus_da_sito_web">
    <property name="text">
-    <string>Scarica corpus da sito web</string>
+    <string>&amp;Scarica corpus da sito web</string>
    </property>
   </action>
   <action name="actionEditor_di_testo">
    <property name="text">
-    <string>Editor di testo</string>
+    <string>&amp;Editor di testo</string>
    </property>
   </action>
   <action name="actionAbout_Bran">
    <property name="text">
-    <string>About Bran</string>
+    <string>&amp;About Bran</string>
    </property>
   </action>
   <action name="actionConta_occorrenze">
    <property name="text">
-    <string>Conta occorrenze</string>
+    <string>&amp;Conta occorrenze</string>
    </property>
   </action>
   <action name="actionEsporta_corpus_in_CSV_unico">
    <property name="text">
-    <string>Esporta corpus in CSV unico</string>
+    <string>&amp;Esporta corpus in CSV unico</string>
    </property>
   </action>
   <action name="actionEsporta_corpus_in_un_CSV_per_ogni_ID">
    <property name="text">
-    <string>Esporta corpus in un CSV per ogni ID</string>
+    <string>Esporta &amp;corpus in un CSV per ogni ID</string>
    </property>
   </action>
   <action name="actionChiudi">
    <property name="text">
-    <string>Chiudi progetto</string>
+    <string>&amp;Chiudi progetto</string>
    </property>
   </action>
   <action name="actionEsci">
@@ -258,32 +258,32 @@
   </action>
   <action name="actionEsporta_vista_attuale_in_CSV">
    <property name="text">
-    <string>Esporta vista attuale in CSV</string>
+    <string>Esporta &amp;vista attuale in CSV</string>
    </property>
   </action>
   <action name="actionRimuovi_vista_attuale_dal_corpus">
    <property name="text">
-    <string>Rimuovi vista attuale dal corpus</string>
+    <string>&amp;Rimuovi vista attuale dal corpus</string>
    </property>
   </action>
   <action name="actionStatistiche_con_VdB">
    <property name="text">
-    <string>Statistiche con VdB</string>
+    <string>&amp;Statistiche con VdB</string>
    </property>
   </action>
   <action name="actionDa_file_JSON">
    <property name="text">
-    <string>Da file JSON</string>
+    <string>Da &amp;file JSON</string>
    </property>
   </action>
   <action name="actionDa_file_CSV">
    <property name="text">
-    <string>Da file CSV</string>
+    <string>Da file &amp;CSV</string>
    </property>
   </action>
   <action name="actionConfigurazione_Tint">
    <property name="text">
-    <string>Configurazione Tint</string>
+    <string>&amp;Configurazione Tint</string>
    </property>
   </action>
   <action name="actionTraduci_i_tag_PoS_in_forma_leggibile">
@@ -293,27 +293,27 @@
   </action>
   <action name="actionCalcola_densit_lessicale">
    <property name="text">
-    <string>Calcola densità lessicale</string>
+    <string>Calcola &amp;densità lessicale</string>
    </property>
   </action>
   <action name="actionTrova_ripetizioni">
    <property name="text">
-    <string>Trova ripetizioni</string>
+    <string>&amp;Trova segmenti ripetuti</string>
    </property>
   </action>
   <action name="actionConta_verbi">
    <property name="text">
-    <string>Conta verbi</string>
+    <string>Conta &amp;verbi</string>
    </property>
   </action>
   <action name="actionSostituisci_nel_corpus_con_RegEx">
    <property name="text">
-    <string>Sostituisci nel corpus con RegEx</string>
+    <string>&amp;Sostituisci nel corpus con RegEx</string>
    </property>
   </action>
   <action name="actionRimuovi_righe_selezionate">
    <property name="text">
-    <string>Rimuovi righe selezionate</string>
+    <string>R&amp;imuovi righe selezionate</string>
    </property>
   </action>
  </widget>

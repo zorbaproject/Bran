@@ -79,6 +79,13 @@
     </widget>
    </item>
    <item>
+    <widget class="QCheckBox" name="sigindex">
+     <property name="text">
+      <string>Calcola indice di significatività</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
       <widget class="QLabel" name="label_3">
@@ -150,14 +157,14 @@
         <item>
          <widget class="QPushButton" name="addF">
           <property name="text">
-           <string>+</string>
+           <string>Aggiungi</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QPushButton" name="remF">
           <property name="text">
-           <string>-</string>
+           <string>Rimuovi</string>
           </property>
          </widget>
         </item>
@@ -175,14 +182,14 @@
         <item>
          <widget class="QPushButton" name="addI">
           <property name="text">
-           <string>+</string>
+           <string>Aggiungi</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QPushButton" name="remI">
           <property name="text">
-           <string>-</string>
+           <string>Rimuovi</string>
           </property>
          </widget>
         </item>

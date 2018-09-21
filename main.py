@@ -391,7 +391,7 @@ class MainWindow(QMainWindow):
             tokena = Repetdialog.w.tokena.value()
             minoccur = Repetdialog.w.minoccurr.value()
             ignorecase = Repetdialog.w.ignorecase.isChecked()
-            remspaces = Repetdialog.w.remspaces.isChecked()
+            remspaces = bool(Repetdialog.w.remspaces.isChecked() and not Repetdialog.w.sigindex.isChecked())
             col = Repetdialog.w.colonna.currentIndex()
             ipunct = []
             for i in range(Repetdialog.w.ignorapos.count()):
@@ -408,10 +408,50 @@ class MainWindow(QMainWindow):
             TBdialog.sessionDir = self.sessionDir
             TBdialog.addcolumn("nGram", 0)
             TBdialog.addcolumn("Occorrenze", 1)
+            TBdialog.addcolumn("Parole piene", 2)
             self.Progrdialog = progress.Form()
             self.Progrdialog.show()
             for tokens in range(tokenda, tokena+1):
                 self.findngrams(tokens, minoccur, TBdialog, self.Progrdialog, ignorecase, remspaces, ipunct, col, vuoteI, vuoteF)
+            if Repetdialog.w.sigindex.isChecked():
+                TBdialog.addcolumn("Significatività assoluta", 3)
+                TBdialog.addcolumn("Significatività relativa", 4)
+                for row in range(TBdialog.w.tableWidget.rowCount()):
+                    totallines = TBdialog.w.tableWidget.rowCount()
+                    self.Progrdialog.w.testo.setText("Sto calcolando la significatività nella riga "+str(row))
+                    self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+                    QApplication.processEvents()
+                    if self.Progrdialog.w.annulla.isChecked():
+                        return
+                    sigass = 0.0
+                    sigrel = 0.0
+                    tmpstring = TBdialog.w.tableWidget.item(row,0).text()
+                    Fseg = int(TBdialog.w.tableWidget.item(row,1).text())*1.0
+                    sommatoria = 0.0
+                    tmplist = tmpstring.split(" ")
+                    for tmpword in tmplist:
+                        crpitems = self.w.corpus.findItems(tmpword,Qt.MatchFixedString)
+                        Fw = len(crpitems)*1.0
+                        sommatoria = sommatoria + (Fseg/Fw)
+                    sigass = sommatoria * int(TBdialog.w.tableWidget.item(row,2).text())*1.0
+                    ampiezza = len(tmplist) + 1
+                    sigrel = (sigass*1.0)/(ampiezza*ampiezza)
+                    TBdialog.setcelltotable(str(sigass), row, 3)
+                    TBdialog.setcelltotable(str(sigrel), row, 4)
+            if Repetdialog.w.remspaces.isChecked():
+                for row in range(TBdialog.w.tableWidget.rowCount()):
+                    totallines = TBdialog.w.tableWidget.rowCount()
+                    self.Progrdialog.w.testo.setText("Sto pulendo gli spazi nella riga "+str(row))
+                    self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+                    QApplication.processEvents()
+                    if self.Progrdialog.w.annulla.isChecked():
+                        return
+                    tmpstring = TBdialog.w.tableWidget.item(row,0).text()
+                    punt = "( ["+re.escape(".,;!?")+ "])"
+                    tmpstring = re.sub(punt, "\1", tmpstring, flags=re.IGNORECASE|re.DOTALL)
+                    punt = "(["+re.escape("'’")+ "]) "
+                    tmpstring = re.sub(punt, "\1", tmpstring, flags=re.IGNORECASE|re.DOTALL)
+                    TBdialog.setcelltotable(tmpstring, row, 0)
             self.Progrdialog.accept()
             TBdialog.exec()
 
@@ -432,11 +472,6 @@ class MainWindow(QMainWindow):
         if ignorecase:
             mycorpus = mycorpus.lower()
         searchthis = " "
-        #if remspaces:
-            #punt = re.escape(" (\.,;!\?)")
-            #mycorpus = re.sub(punt, "\1", mycorpus, flags=re.IGNORECASE|re.DOTALL)
-            #mycorpus = re.sub("' ", "'", mycorpus, flags=re.IGNORECASE|re.DOTALL)
-            #searchthis = " " #we should take care about .,?!;:
         active = True
         pos = 0
         totallines = len(mycorpus)
@@ -467,16 +502,37 @@ class MainWindow(QMainWindow):
             if tmpstring != "" and tmpstring.count(searchthis)==tokens-1 and bool(not parolai in vuoteI) and bool(not parolaf in vuoteF):
                 tcount = mycorpus.count(tmpstring)
                 if tcount >= minoccur:
-                    if remspaces:
-                        punt = "( ["+re.escape(".,;!?")+ "])"
-                        tmpstring = re.sub(punt, "\1", tmpstring, flags=re.IGNORECASE|re.DOTALL)
-                        punt = "(["+re.escape("'’")+ "]) "
-                        tmpstring = re.sub(punt, "\1", tmpstring, flags=re.IGNORECASE|re.DOTALL)
+                    #if remspaces:
+                    #    punt = "( ["+re.escape(".,;!?")+ "])"
+                    #    tmpstring = re.sub(punt, "\1", tmpstring, flags=re.IGNORECASE|re.DOTALL)
+                    #    punt = "(["+re.escape("'’")+ "]) "
+                    #    tmpstring = re.sub(punt, "\1", tmpstring, flags=re.IGNORECASE|re.DOTALL)
                     tbitem = TBdialog.w.tableWidget.findItems(tmpstring,Qt.MatchExactly)
                     if len(tbitem)<=0:
                         TBdialog.addlinetotable(tmpstring, 0)
                         tbrow = TBdialog.w.tableWidget.rowCount()-1
                         TBdialog.setcelltotable(str(tcount), tbrow, 1)
+                        ppcount = 0
+                        tmplist = tmpstring.split(" ")
+                        for tmpword in tmplist:
+                            if ignorecase:
+                                crpitem = self.w.corpus.findItems(tmpword,Qt.MatchFixedString)
+                            else:
+                                crpitem = self.w.corpus.findItems(tmpword,Qt.MatchExactly)
+                            if len(crpitem)<=0:
+                                print("Parola non riconosciuta: "+tmpword)
+                                ppcount = ppcount + 1
+                            else:
+                                tmprow = crpitem[0].row()
+                                posword = self.w.corpus.item(tmprow,self.corpuscols['pos']).text()
+                                for key in self.legendaPos:
+                                    if posword == self.legendaPos[key][0] or posword == key:
+                                        if "piene" == self.legendaPos[key][2]:
+                                            ppcount = ppcount + 1
+                                            break
+                                        if "vuote" == self.legendaPos[key][2]:
+                                            break
+                        TBdialog.setcelltotable(str(ppcount), tbrow, 2)
                 #newtext = nth_replace(mycorpus, tmpstring, "", 2, "all right")
                 #text = newtext
             pos = mycorpus.find(searchthis, pos+1)+1 #continue from next word
