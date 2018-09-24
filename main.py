@@ -87,6 +87,7 @@ from forms import regex_replace
 from forms import url2corpus
 from forms import texteditor
 from forms import tableeditor
+from forms import confronto
 from forms import tint
 from forms import progress
 from forms import sessione
@@ -127,6 +128,7 @@ class MainWindow(QMainWindow):
         self.w.actionApri.triggered.connect(self.apriProgetto)
         self.w.actionChiudi.triggered.connect(self.chiudiProgetto)
         self.w.actionEditor_di_testo.triggered.connect(self.texteditor)
+        self.w.actionConfronta_corpora.triggered.connect(self.confronto)
         self.w.actionAbout_Bran.triggered.connect(self.aboutbran)
         self.w.actionStatistiche_con_VdB.triggered.connect(self.statisticheconvdb)
         self.w.actionTrova_ripetizioni.triggered.connect(self.trovaripetizioni)
@@ -1020,7 +1022,11 @@ class MainWindow(QMainWindow):
 
     def texteditor(self):
         te = texteditor.TextEditor()
-        te.show()
+        te.exec()
+
+    def confronto(self):
+        cf = confronto.Confronto()
+        cf.exec()
 
     def aboutbran(self):
         aw = about.Form(self)

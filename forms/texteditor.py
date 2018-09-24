@@ -7,20 +7,26 @@ import os
 import csv
 #import re
 
+from PySide2.QtWidgets import QApplication, QDialog, QLineEdit, QPushButton, QVBoxLayout
 from PySide2.QtUiTools import QUiLoader
+from PySide2.QtWidgets import QLabel
+from PySide2.QtWidgets import QMessageBox
 from PySide2.QtCore import QFile
 from PySide2.QtWidgets import QFileDialog
 from PySide2.QtWidgets import QMainWindow
+from PySide2.QtWidgets import QDialog
 
-class TextEditor(QMainWindow):
+class TextEditor(QDialog):
 
     def __init__(self, parent=None):
         super(TextEditor, self).__init__(parent)
         file = QFile(os.path.abspath(os.path.dirname(sys.argv[0]))+"/forms/texteditor.ui")
         file.open(QFile.ReadOnly)
-        loader = QUiLoader(self)
+        loader = QUiLoader()
         self.w = loader.load(file)
-        self.setCentralWidget(self.w)
+        layout = QVBoxLayout()
+        layout.addWidget(self.w)
+        self.setLayout(layout)
         #self.w.replace_in_corpus.clicked.connect(self.replaceCorpus)
         self.w.actionConta_occorrenze.triggered.connect(self.contaoccorrenze)
         self.w.actionRimuovi_frasi_ripetute.triggered.connect(self.rm_doublephrases)

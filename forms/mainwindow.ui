@@ -169,6 +169,7 @@
      <string>Str&amp;umenti</string>
     </property>
     <addaction name="actionScarica_corpus_da_sito_web"/>
+    <addaction name="actionConfronta_corpora"/>
     <addaction name="actionEditor_di_testo"/>
     <addaction name="separator"/>
     <addaction name="actionConfigurazione_Tint"/>
@@ -314,6 +315,11 @@
   <action name="actionRimuovi_righe_selezionate">
    <property name="text">
     <string>R&amp;imuovi righe selezionate</string>
+   </property>
+  </action>
+  <action name="actionConfronta_corpora">
+   <property name="text">
+    <string>Confronta corpora</string>
    </property>
   </action>
  </widget>
