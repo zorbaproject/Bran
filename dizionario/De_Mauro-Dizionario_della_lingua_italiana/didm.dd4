@@ -1,0 +1,17 @@
+Authors=Tullio De Mauro
+CodePage=1252
+LUStyle=1
+HasMultiwords=1
+Monolingual=1
+Name=Dizionario italiano De Mauro
+SLWCL=$0010
+Vendor=Paravia
+ViewTemplateCount=1
+FieldsLU=Lemma,A,Ord,1
+FieldsLE=Comment,X,Date,X,Ethymology,X,Full_lemma,X,Grammar_notes,X,Flex_info,A
+FieldsLL=Lu_key,4,Flags,1
+FieldsSL=Ref_key,4,Ref_lbl,A
+FieldsRf=Definition,X
+FieldsTL=Lu_key,4,Flags,1
+FlexField=Flex_info
+HasSynonyms=1
