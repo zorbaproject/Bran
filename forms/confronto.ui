@@ -27,6 +27,129 @@
       <property name="title">
        <string>Seleziona i file da confrontare</string>
       </property>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="QListWidget" name="corpora"/>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="QPushButton" name="addfile">
+           <property name="text">
+            <string>Aggiungi</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="rmfile">
+           <property name="text">
+            <string>Rimuovi</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="groupBox_4">
+      <property name="title">
+       <string>Confronta con</string>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="6" column="0">
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QRadioButton" name="radioButton_8">
+           <property name="text">
+            <string>Altro file:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="lineEdit"/>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButton_2">
+           <property name="text">
+            <string>...</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="2" column="0">
+        <layout class="QGridLayout" name="gridLayout_3">
+         <item row="1" column="0">
+          <widget class="QRadioButton" name="demauro2000">
+           <property name="text">
+            <string>Dizionario De Mauro 2&amp;000</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QRadioButton" name="baronerampante">
+           <property name="text">
+            <string>Il barone rampante - Italo Cal&amp;vino</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QRadioButton" name="vdb2016">
+           <property name="text">
+            <string>&amp;VdB2016</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QRadioButton" name="debiblioteca">
+           <property name="text">
+            <string>De Bibliotheca - &amp;Umberto Eco</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2">
+          <widget class="QRadioButton" name="guglielmoscilla">
+           <property name="text">
+            <string>Twitter Wilwoosh</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="2">
+          <widget class="QRadioButton" name="lercio">
+           <property name="text">
+            <string>&amp;Lercio.it</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QRadioButton" name="vdb1980">
+           <property name="text">
+            <string>VdB1&amp;980</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QRadioButton" name="mattiapascal">
+           <property name="text">
+            <string>Il fu &amp;Mattia Pascal - Luigi Pirandello</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="2">
+          <widget class="QRadioButton" name="wikipedia">
+           <property name="text">
+            <string>Wi&amp;kipedia</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
      </widget>
     </item>
     <item>
@@ -36,34 +159,79 @@
       </property>
       <layout class="QGridLayout" name="gridLayout">
        <item row="0" column="0">
-        <widget class="QRadioButton" name="radioButton">
-         <property name="text">
-          <string>Occorrenze parole originali (to&amp;ken)</string>
+        <widget class="QTabWidget" name="tabWidget">
+         <property name="currentIndex">
+          <number>0</number>
          </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QRadioButton" name="radioButton_2">
-         <property name="text">
-          <string>Occorrenze parole lemmate</string>
-         </property>
+         <widget class="QWidget" name="tab_3">
+          <attribute name="title">
+           <string>Occorrenze parole</string>
+          </attribute>
+          <layout class="QVBoxLayout" name="verticalLayout_3">
+           <item>
+            <widget class="QRadioButton" name="occ_diff">
+             <property name="text">
+              <string>Trova le differenze</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="occ_ds">
+             <property name="text">
+              <string>Calcola Deviazione Standard</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="occ_rms">
+             <property name="text">
+              <string>Calcola Root Mean S&amp;quare</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="do_occ">
+             <property name="text">
+              <string>Confronta</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="tab_4">
+          <attribute name="title">
+           <string>Occorrenze PoS</string>
+          </attribute>
+          <layout class="QVBoxLayout" name="verticalLayout_4">
+           <item>
+            <widget class="QPushButton" name="pushButton_3">
+             <property name="text">
+              <string>Confronta</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="tab_5">
+          <attribute name="title">
+           <string>Segmenti ripetuti</string>
+          </attribute>
+          <layout class="QVBoxLayout" name="verticalLayout_5">
+           <item>
+            <widget class="QPushButton" name="pushButton_4">
+             <property name="text">
+              <string>Confronta</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
         </widget>
        </item>
       </layout>
-     </widget>
-    </item>
-    <item>
-     <widget class="QGroupBox" name="groupBox_3">
-      <property name="title">
-       <string>Opzioni</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QPushButton" name="pushButton">
-      <property name="text">
-       <string>Confronta</string>
-      </property>
      </widget>
     </item>
    </layout>

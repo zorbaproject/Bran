@@ -1025,7 +1025,7 @@ class MainWindow(QMainWindow):
         te.exec()
 
     def confronto(self):
-        cf = confronto.Confronto()
+        cf = confronto.Confronto(self.sessionDir)
         cf.exec()
 
     def aboutbran(self):
