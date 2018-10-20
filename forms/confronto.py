@@ -46,6 +46,7 @@ class Confronto(QDialog):
         self.sessionDir = sessionDir
         self.w.addfile.clicked.connect(self.addfile)
         self.w.rmfile.clicked.connect(self.rmfile)
+        self.w.altrofileselect.clicked.connect(self.altrofileselect)
 
     def addfile(self):
         fileNames = QFileDialog.getOpenFileNames(self, "Apri file CSV", self.sessionDir, "CSV files (*.csv *.txt)")[0]
@@ -55,6 +56,12 @@ class Confronto(QDialog):
     def rmfile(self):
         for i in self.w.corpora.selectedItems():
             self.w.corpora.takeItem(self.w.corpora.row(i))
+
+    def altrofileselect(self):
+        fileNames = QFileDialog.getOpenFileNames(self, "Apri file CSV", self.sessionDir, "CSV files (*.csv *.txt)")[0]
+        for fileName in fileNames:
+            self.w.altrofilename.setText(fileName)
+            self.w.altrofile.setChecked(True)
 
     def readcsv(self, fileName, separator = "\t"):
         text_file = open(fileName, "r", encoding='utf-8')
@@ -67,67 +74,102 @@ class Confronto(QDialog):
 
     def getRiferimento(self, action):
         fileName = ""
-        if self.w.vdb2016.isChecked:
+        if self.w.vdb2016.isChecked():
             fileName = os.path.abspath(os.path.dirname(sys.argv[0])) + "/dizionario/vdb2016.txt"
-        if action == "do_occ" and not bool(self.w.vdb2016.isChecked or self.w.vdb1980.isChecked):
-            fileName = fileName + "-lemmi.txt"
+        if self.w.vdb1980.isChecked():
+            fileName = os.path.abspath(os.path.dirname(sys.argv[0])) + "/dizionario/vdb1980.txt"
+        if self.w.demauro2000.isChecked():
+            fileName = os.path.abspath(os.path.dirname(sys.argv[0])) + "/De_Mauro-Dizionario_della_lingua_italiana/dizionario-de-mauro-pulito.txt"
+        if not bool(self.w.vdb2016.isChecked() or self.w.vdb1980.isChecked() or self.w.demauro2000.isChecked()):
+            if action == "do_occ":
+                fileName = fileName + "-lemmi.txt"
+        if self.w.altrofile.isChecked():
+            fileName = self.w.altrofilename.text()
         return fileName
 
     def do_occ(self):
+        self.do_confronta("occ")
+
+    def do_confronta(self, context):
         thisname = []
         riferimentoName = self.getRiferimento("do_occ")
         riferimento = self.readcsv(riferimentoName)
         TBdialog = tableeditor.Form(self)
         TBdialog.sessionDir = self.sessionDir
         TBdialog.addcolumn("Lemma", 0)
-        self.Progrdialog = progress.Form()
+        self.Progrdialog = progress.Form(self)
         self.Progrdialog.show()
-        if 1==1:
-            if 1==1: #try:
-                thistext = ""
-                thisvalue = ""
-                indexes = 1 + self.w.corpora.count()
-                for i in range(indexes):
-                    if i == 0:
-                        corpus = riferimento
-                        colname = riferimentoName
-                    else:
-                        corpus = self.readcsv(self.w.corpora.item(i-1).text())
-                        colname = os.path.basename(self.w.corpora.item(i-1).text())
-                    TBdialog.addcolumn(colname, i+1)
-                    totallines = len(corpus)
-                    for row in range(len(corpus)):
-                        self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
-                        self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
-                        QApplication.processEvents()
-                        if self.Progrdialog.w.annulla.isChecked():
-                            return
-                        thistext = corpus[row][0]
-                        if self.w.occ_ds.isChecked() or self.w.occ_rms.isChecked():
-                            try:
-                                thisvalue = corpus[row][1]
-                            except:
-                                thisvalue = "1"
-                        if self.w.occ_diff.isChecked():
+        if 1==1: #try:
+            thistext = ""
+            thisvalue = ""
+            indexes = 1 + self.w.corpora.count()
+            for i in range(indexes):
+                if i == 0:
+                    corpus = riferimento
+                    colname = os.path.basename(riferimentoName)
+                else:
+                    corpus = self.readcsv(self.w.corpora.item(i-1).text())
+                    colname = os.path.basename(self.w.corpora.item(i-1).text())
+                TBdialog.addcolumn(colname, i+1)
+                totallines = len(corpus)
+                startrow = 0
+                if self.w.ignorefirstrow.isChecked():
+                    startrow = 1
+                for row in range(startrow, len(corpus)):
+                    self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
+                    self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+                    QApplication.processEvents()
+                    if self.Progrdialog.w.annulla.isChecked():
+                        return
+                    thistext = corpus[row][0]
+                    if self.w.occ_ds.isChecked() or self.w.occ_rms.isChecked():
+                        try:
+                            thisvalue = corpus[row][1]
+                        except:
                             thisvalue = "1"
-                        tbitem = TBdialog.w.tableWidget.findItems(thistext,Qt.MatchExactly)
-                        if len(tbitem)>0:
-                            tbrow = tbitem[0].row()
-                            tbval = thisvalue
-                            if self.w.occ_ds.isChecked and i>1:
+                    if self.w.occ_diff.isChecked():
+                        thisvalue = "1"
+                    tbitem = TBdialog.w.tableWidget.findItems(thistext,Qt.MatchExactly)
+                    if len(tbitem)>0:
+                        tbrow = tbitem[0].row()
+                        tbval = thisvalue
+                        if self.w.occ_ds.isChecked() and i>0:
+                            N = 2
+                            try:
                                 rifval = int(TBdialog.w.tableWidget.item(tbrow,1).text())
-                                tbval = rifval-int(thisvalue)
-                            if self.w.occ_rms.isChecked and i>1:
+                            except:
+                                rifval = 0
+                            mean = (rifval+int(thisvalue))/N
+                            tbval = math.sqrt((math.pow(rifval-mean,2)+ math.pow(int(thisvalue)-mean,2))/N)
+                        if self.w.occ_rms.isChecked() and i>0:
+                            N = 2
+                            try:
                                 rifval = int(TBdialog.w.tableWidget.item(tbrow,1).text())
-                                tbval = math.sqrt(((rifval*rifval)+(int(thisvalue)*int(thisvalue)))/2)
-                            TBdialog.setcelltotable(str(tbval), tbrow, i+1)
-                        else:
-                            TBdialog.addlinetotable(thistext, 0)
-                            tbrow = TBdialog.w.tableWidget.rowCount()-1
-                            TBdialog.setcelltotable(thisvalue, tbrow, i+1)
-                            for itemp in range(1,i+1):
-                                TBdialog.setcelltotable("0", tbrow, itemp)
-            #except:
-            #    thistext = ""
+                            except:
+                                rifval = 0
+                            tbval = math.sqrt((math.pow(rifval,2)+ math.pow(int(thisvalue),2))/N)
+                        TBdialog.setcelltotable(str(tbval), tbrow, i+1)
+                    else:
+                        TBdialog.addlinetotable(thistext, 0)
+                        tbrow = TBdialog.w.tableWidget.rowCount()-1
+                        TBdialog.setcelltotable(thisvalue, tbrow, i+1)
+                        for itemp in range(1,i+1):
+                            TBdialog.setcelltotable("0", tbrow, itemp)
+        #except:
+        #    thistext = ""
+        totallines = TBdialog.w.tableWidget.rowCount()
+        for col in range(TBdialog.w.tableWidget.columnCount()):
+            for row in range(totallines):
+                self.Progrdialog.w.testo.setText("Sto controllando la riga numero "+str(row))
+                self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+                QApplication.processEvents()
+                if self.Progrdialog.w.annulla.isChecked():
+                    return
+                try:
+                    teststring = TBdialog.w.tableWidget.item(row,col).text()
+                    if col > 0 and float(teststring) == 0:
+                        TBdialog.setcelltotable("0", row, col)
+                except:
+                    TBdialog.setcelltotable("0", row, col)
         self.Progrdialog.accept()
         TBdialog.exec()
