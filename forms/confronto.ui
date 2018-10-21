@@ -58,6 +58,30 @@
        <string>Confronta con</string>
       </property>
       <layout class="QGridLayout" name="gridLayout_2">
+       <item row="1" column="0">
+        <layout class="QGridLayout" name="gridLayout_4">
+         <item row="0" column="0">
+          <widget class="QRadioButton" name="sel_dict">
+           <property name="text">
+            <string>Dizionario:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QComboBox" name="with_dict"/>
+         </item>
+         <item row="1" column="1">
+          <widget class="QComboBox" name="with_corpora"/>
+         </item>
+         <item row="1" column="0">
+          <widget class="QRadioButton" name="sel_corpora">
+           <property name="text">
+            <string>Corpora:</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
        <item row="6" column="0">
         <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
@@ -74,76 +98,6 @@
           <widget class="QPushButton" name="altrofileselect">
            <property name="text">
             <string>...</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item row="2" column="0">
-        <layout class="QGridLayout" name="gridLayout_3">
-         <item row="1" column="0">
-          <widget class="QRadioButton" name="demauro2000">
-           <property name="text">
-            <string>Dizionario De Mauro 2&amp;000</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QRadioButton" name="baronerampante">
-           <property name="text">
-            <string>Il barone rampante - Italo Cal&amp;vino</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0">
-          <widget class="QRadioButton" name="vdb2016">
-           <property name="text">
-            <string>&amp;VdB2016</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QRadioButton" name="debiblioteca">
-           <property name="text">
-            <string>De Bibliotheca - &amp;Umberto Eco</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="2">
-          <widget class="QRadioButton" name="guglielmoscilla">
-           <property name="text">
-            <string>Twitter Wilwoosh</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="2">
-          <widget class="QRadioButton" name="lercio">
-           <property name="text">
-            <string>&amp;Lercio.it</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QRadioButton" name="vdb1980">
-           <property name="text">
-            <string>VdB1&amp;980</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="QRadioButton" name="mattiapascal">
-           <property name="text">
-            <string>Il fu &amp;Mattia Pascal - Luigi Pirandello</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="2">
-          <widget class="QRadioButton" name="wikipedia">
-           <property name="text">
-            <string>Wi&amp;kipedia</string>
            </property>
           </widget>
          </item>

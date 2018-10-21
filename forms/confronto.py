@@ -47,6 +47,9 @@ class Confronto(QDialog):
         self.w.addfile.clicked.connect(self.addfile)
         self.w.rmfile.clicked.connect(self.rmfile)
         self.w.altrofileselect.clicked.connect(self.altrofileselect)
+        self.w.with_dict.currentIndexChanged.connect(self.dictselect)
+        self.w.with_corpora.currentIndexChanged.connect(self.corporaselect)
+        self.fillcombos()
 
     def addfile(self):
         fileNames = QFileDialog.getOpenFileNames(self, "Apri file CSV", self.sessionDir, "CSV files (*.csv *.txt)")[0]
@@ -63,6 +66,12 @@ class Confronto(QDialog):
             self.w.altrofilename.setText(fileName)
             self.w.altrofile.setChecked(True)
 
+    def dictselect(self):
+        self.w.sel_dict.setChecked(True)
+
+    def corporaselect(self):
+        self.w.sel_corpora.setChecked(True)
+
     def readcsv(self, fileName, separator = "\t"):
         text_file = open(fileName, "r", encoding='utf-8')
         lines = text_file.read()
@@ -72,27 +81,44 @@ class Confronto(QDialog):
             mylist[i] = mylist[i].split(separator)
         return mylist
 
+    def fillcombos(self):
+        branroot = os.path.abspath(os.path.dirname(sys.argv[0]))
+        self.dizionari = {
+        "VdB 2016": branroot  + "/dizionario/vdb2016.txt",
+        "VdB 1980": branroot  + "/dizionario/vdb1980.txt",
+        "Dizionario De Mauro 2000": branroot + "/dizionario/De_Mauro-Dizionario_della_lingua_italiana/dizionario-de-mauro-pulito.txt",
+        "Wikizionario": branroot + "/dizionario/wikitionary/wikitionary-it-pulito.txt"
+        }
+        self.corpora = {
+        "Il barone rampante": branroot  + "/corpora/barone-rampante/barone-rampante",
+        "Il fu Mattia Pascal": branroot  + "/corpora/",
+        "Twitter Wilwoosh": branroot  + "/corpora/",
+        "Lercio.it": branroot  + "/corpora/",
+        "Wikipedia": branroot  + "/corpora/"}
+        for key in self.dizionari:
+            self.w.with_dict.addItem(key)
+        for key in self.corpora:
+            self.w.with_corpora.addItem(key)
+        self.w.sel_dict.setChecked(True)
+
     def getRiferimento(self, action):
         fileName = ""
-        if self.w.vdb2016.isChecked():
-            fileName = os.path.abspath(os.path.dirname(sys.argv[0])) + "/dizionario/vdb2016.txt"
-        if self.w.vdb1980.isChecked():
-            fileName = os.path.abspath(os.path.dirname(sys.argv[0])) + "/dizionario/vdb1980.txt"
-        if self.w.demauro2000.isChecked():
-            fileName = os.path.abspath(os.path.dirname(sys.argv[0])) + "/De_Mauro-Dizionario_della_lingua_italiana/dizionario-de-mauro-pulito.txt"
-        if not bool(self.w.vdb2016.isChecked() or self.w.vdb1980.isChecked() or self.w.demauro2000.isChecked()):
+        if self.w.sel_dict.isChecked():
+            fileName = self.dizionari[self.w.with_dict.currentText()]
+        if self.w.sel_corpora.isChecked():
+            fileName = self.corpora[self.w.with_corpora.currentText()]
             if action == "do_occ":
-                fileName = fileName + "-lemmi.txt"
+                fileName = fileName + "-occorrenze-lemma.csv"
         if self.w.altrofile.isChecked():
             fileName = self.w.altrofilename.text()
         return fileName
 
     def do_occ(self):
-        self.do_confronta("occ")
+        self.do_confronta("do_occ")
 
     def do_confronta(self, context):
         thisname = []
-        riferimentoName = self.getRiferimento("do_occ")
+        riferimentoName = self.getRiferimento(context)
         riferimento = self.readcsv(riferimentoName)
         TBdialog = tableeditor.Form(self)
         TBdialog.sessionDir = self.sessionDir
