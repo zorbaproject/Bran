@@ -88,6 +88,13 @@ class TintCorpus(QThread):
         self.outputcsv = ""
         self.loadvariables()
         self.setTerminationEnabled(True)
+        self.iscli = False
+        try:
+            if self.w == "cli":
+                self.iscli = True
+        except:
+            self.iscli = False
+        self.rowfilename = ""
 
     def loadvariables(self):
         #http://localhost:8012/tint?text=Barack%20Obama%20era%20il%20presidente%20degli%20Stati%20Uniti%20d%27America.
@@ -106,8 +113,11 @@ class TintCorpus(QThread):
         for fileName in self.fileNames:
             if not fileName == "":
                 if os.path.isfile(fileName):
-                    if self.w.corpus.rowCount() >0:
-                        fileID = int(self.w.corpus.item(self.w.corpus.rowCount()-1,0).text().split("_")[0])
+                    try:
+                        if self.w.corpus.rowCount() >0:
+                            fileID = int(self.w.corpus.item(self.w.corpus.rowCount()-1,0).text().split("_")[0])
+                    except:
+                        fileID = 0
                     #QApplication.processEvents()
                     fileID = fileID+1
                     lines = ""
@@ -118,13 +128,18 @@ class TintCorpus(QThread):
                     except:
                         predefEncode = "ISO-8859-15"
                         #https://pypi.org/project/chardet/
-                        myencoding = QInputDialog.getText(self.w, "Scegli la codifica", "Sembra che questo file non sia codificato in UTF-8. Vuoi provare a specificare una codifica diversa? (Es: cp1252 oppure ISO-8859-15)", QLineEdit.Normal, predefEncode)
+                        try:
+                            myencoding = QInputDialog.getText(self.w, "Scegli la codifica", "Sembra che questo file non sia codificato in UTF-8. Vuoi provare a specificare una codifica diversa? (Es: cp1252 oppure ISO-8859-15)", QLineEdit.Normal, predefEncode)
+                        except:
+                            print("Sembra che questo file non sia codificato in UTF-8. Vuoi provare a specificare una codifica diversa? (Es: cp1252 oppure ISO-8859-15)")
+                            myencoding = [input()]
                         try:
                             text_file = open(fileName, "r", encoding=myencoding[0])
                             lines = text_file.read()
                             text_file.close()
                         except:
                            return
+                    self.rowfilename = fileName + ".tmp"
                     self.text2corpusTINT(lines, str(fileID)+"_"+os.path.basename(fileName))
         if self.fileNames == []:
             testline = "Il gatto è sopra al tetto."
@@ -158,101 +173,127 @@ class TintCorpus(QThread):
         itext = itext.split('\n')
         #itext = re.split('[\n\.\?]', text)
         self.Progrdialog = progress.Form()
-        self.Progrdialog.show()
+        if not self.iscli:
+            self.Progrdialog.show()
         totallines = len(itext)
+        print("Total lines: "+str(totallines))
+        try:
+            if os.path.isfile(self.rowfilename):
+                ch = "Y"
+                if self.iscli:
+                    print("Ho trovato un file di ripristino, lo devo usare? [Y/N]")
+                    ch = input()
+                else:
+                    ret = QMessageBox.question(self,'Ripristino', "Ho trovato un file di ripristino, lo devo usare? Se rispondi si, l'importazione del file riprenderà da dove si era interrotta, altrimenti ricomincerà da capo.", QMessageBox.Yes | QMessageBox.No)
+                    if ret == QMessageBox.Yes:
+                        ch = "Y"
+                    else:
+                        ch = "N"
+                if ch == "Y" or ch == "y":
+                    with open(self.rowfilename, "r", encoding='utf-8') as tempfile:
+                       lastline = (list(tempfile)[-1])
+                    startatrow = int(lastline)
+                    print("Comincio dalla riga " + str(startatrow))
+        except:
+            startatrow = -1
         row = 0
         for line in itext:
             row = row + 1
-            self.Progrdialog.w.testo.setText("Sto lavorando sulla frase numero "+str(row))
-            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
-            QApplication.processEvents()
-            if self.Progrdialog.w.annulla.isChecked():
-                return
-            myres = ""
-            if line != "":
-                myres = self.getJson(line)
-            try:
-                myarray = json.loads(myres)
-            except:
-                #print("Errore nella lettura:")
-                #print(line)
-                myarray = {'sentences': []}
-            oldtokens = ["A", "A", "A"]
-            indoltk = 0
-            legenda = {'A': ['adj'], 'AP': ['adj'], 'B': ['adv','prep'], 'BN': ['adv'], 'I': ['adv'], 'S': ['n'], 'T': ['pron'], 'RI': ['art'], 'RD': ['art','pron'], 'V': ['v'], 'E': ['prep'], 'VA': ['v'], 'CC': ['conj'], 'PC': ['art','pron'], 'PR': ['conj', 'pron'], 'VM': ['v'], 'CS': ['conj'], 'PE': ['pron'], 'DD': ['adj'], 'DI': ['pron', 'adj'], 'PI': ['pron'], 'SW': ['n']}
-            for sentence in myarray["sentences"]:
-                for token in sentence["tokens"]:
-                    morfL = str(token["full_morpho"]).split(' ')
-                    posL = str(token["pos"]).split('+')
-                    oldtokens[indoltk%3] = posL[0]
-                    indoltk = indoltk +1
-                    morf = ""
-                    try:
-                        posN = 0
-                        for pos in posL:
-                            posML = legenda[pos]
-                            ind = 0
-                            c = False
-                            for morfT in morfL:
-                                #c = False
-                                if ind == 0 and pos=="V" and "VA" in oldtokens:
-                                    oldtokens = ["A", "A", "A"]
-                                    #se preceduto da ausiliare, è un participio
-                                    indo2 = 0
-                                    for morfT in morfL:
-                                        if "v+part+" in morfT:
-                                            ind = indo2
-                                            c = True
-                                            break
-                                        indo2 = indo2 +1
-                                stupidoimperativo = True
-                                for posM in posML:
-                                    if bool(re.match('.*?\+'+posM+'([\+/].*?|$)', morfT)):
-                                        if "v+imp+pres+" in morfT:
-                                            if stupidoimperativo == False:
-                                                if "+2+plur" in morfT or "+2+sing" in morfT:
-                                                    if 'I' in oldtokens:
-                                                        c = True #il modo imperativo è legittimo solo per seconda persona e solo se c'è una interiezione
-                                                        break
-                                        else:
-                                            c = True
-                                            break
-                                if c:
-                                    break
-                                ind = ind + 1
-                            txt = morfL[ind]
-                            if posN > 0:
-                                stind = txt.index('/')+1
-                                stind = txt.index('~',stind)+1
-                                stind = txt.index('+',stind)+1
-                                txt = txt[stind:]
-                            else:
-                                stind = txt.index('+')+1
-                                if '/' in txt:
-                                    enind = txt.index('/')+1
+            if row > startatrow:
+                self.Progrdialog.w.testo.setText("Sto lavorando sulla frase numero "+str(row))
+                self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+                QApplication.processEvents()
+                if self.Progrdialog.w.annulla.isChecked():
+                    return
+                myres = ""
+                if line != "":
+                    myres = self.getJson(line)
+                try:
+                    myarray = json.loads(myres)
+                except:
+                    #print("Errore nella lettura:")
+                    #print(line)
+                    myarray = {'sentences': []}
+                oldtokens = ["A", "A", "A"]
+                indoltk = 0
+                legenda = {'A': ['adj'], 'AP': ['adj'], 'B': ['adv','prep'], 'BN': ['adv'], 'I': ['adv'], 'S': ['n'], 'T': ['pron'], 'RI': ['art'], 'RD': ['art','pron'], 'V': ['v'], 'E': ['prep'], 'VA': ['v'], 'CC': ['conj'], 'PC': ['art','pron'], 'PR': ['conj', 'pron'], 'VM': ['v'], 'CS': ['conj'], 'PE': ['pron'], 'DD': ['adj'], 'DI': ['pron', 'adj'], 'PI': ['pron'], 'SW': ['n']}
+                for sentence in myarray["sentences"]:
+                    for token in sentence["tokens"]:
+                        morfL = str(token["full_morpho"]).split(' ')
+                        posL = str(token["pos"]).split('+')
+                        oldtokens[indoltk%3] = posL[0]
+                        indoltk = indoltk +1
+                        morf = ""
+                        try:
+                            posN = 0
+                            for pos in posL:
+                                posML = legenda[pos]
+                                ind = 0
+                                c = False
+                                for morfT in morfL:
+                                    #c = False
+                                    if ind == 0 and pos=="V" and "VA" in oldtokens:
+                                        oldtokens = ["A", "A", "A"]
+                                        #se preceduto da ausiliare, è un participio
+                                        indo2 = 0
+                                        for morfT in morfL:
+                                            if "v+part+" in morfT:
+                                                ind = indo2
+                                                c = True
+                                                break
+                                            indo2 = indo2 +1
+                                    stupidoimperativo = True
+                                    for posM in posML:
+                                        if bool(re.match('.*?\+'+posM+'([\+/].*?|$)', morfT)):
+                                            if "v+imp+pres+" in morfT:
+                                                if stupidoimperativo == False:
+                                                    if "+2+plur" in morfT or "+2+sing" in morfT:
+                                                        if 'I' in oldtokens:
+                                                            c = True #il modo imperativo è legittimo solo per seconda persona e solo se c'è una interiezione
+                                                            break
+                                            else:
+                                                c = True
+                                                break
+                                    if c:
+                                        break
+                                    ind = ind + 1
+                                txt = morfL[ind]
+                                if posN > 0:
+                                    stind = txt.index('/')+1
+                                    stind = txt.index('~',stind)+1
+                                    stind = txt.index('+',stind)+1
+                                    txt = txt[stind:]
                                 else:
-                                    enind = len(txt)
-                                txt = txt[stind:enind]
-                            morf = morf + txt
-                            posN = posN +1
-                    except:
-                        morf = str(token["full_morpho"]) #.split(" ")[0]
-                        #print(posL)
-                        #print(str(token["full_morpho"]))
-                    if self.outputcsv == "":
-                        rowN = self.addlinetocorpus(IDcorpus, self.corpuscols["IDcorpus"])
-                        self.setcelltocorpus(str(token["index"]), rowN, self.corpuscols["IDword"])
-                        self.setcelltocorpus(str(token["originalText"]), rowN, self.corpuscols["Orig"])
-                        self.setcelltocorpus(str(token["lemma"]), rowN, self.corpuscols["Lemma"])
-                        self.setcelltocorpus(str(token["pos"]), rowN, self.corpuscols["pos"])
-                        self.setcelltocorpus(str(token["ner"]), rowN, self.corpuscols["ner"])
-                        self.setcelltocorpus(morf, rowN, self.corpuscols["feat"])
-                    else:
-                        fullline = IDcorpus + "\t" + str(token["originalText"]) + "\t" + str(token["lemma"]) + "\t" + str(token["pos"]) + "\t" + str(token["ner"]) + "\t" + morf + "\t" + str(token["index"])
-                        fdatefile = self.outputcsv
-                        with open(fdatefile, "a", encoding='utf-8') as myfile:
-                            myfile.write(fullline+"\n")
+                                    stind = txt.index('+')+1
+                                    if '/' in txt:
+                                        enind = txt.index('/')+1
+                                    else:
+                                        enind = len(txt)
+                                    txt = txt[stind:enind]
+                                morf = morf + txt
+                                posN = posN +1
+                        except:
+                            morf = str(token["full_morpho"]) #.split(" ")[0]
+                            #print(posL)
+                            #print(str(token["full_morpho"]))
+                        if self.outputcsv == "":
+                            rowN = self.addlinetocorpus(IDcorpus, self.corpuscols["IDcorpus"])
+                            self.setcelltocorpus(str(token["index"]), rowN, self.corpuscols["IDword"])
+                            self.setcelltocorpus(str(token["originalText"]), rowN, self.corpuscols["Orig"])
+                            self.setcelltocorpus(str(token["lemma"]), rowN, self.corpuscols["Lemma"])
+                            self.setcelltocorpus(str(token["pos"]), rowN, self.corpuscols["pos"])
+                            self.setcelltocorpus(str(token["ner"]), rowN, self.corpuscols["ner"])
+                            self.setcelltocorpus(morf, rowN, self.corpuscols["feat"])
+                        else:
+                            fullline = IDcorpus + "\t" + str(token["originalText"]) + "\t" + str(token["lemma"]) + "\t" + str(token["pos"]) + "\t" + str(token["ner"]) + "\t" + morf + "\t" + str(token["index"])
+                            fdatefile = self.outputcsv
+                            with open(fdatefile, "a", encoding='utf-8') as myfile:
+                                myfile.write(fullline+"\n")
+                with open(self.rowfilename, "a", encoding='utf-8') as rowfile:
+                    rowfile.write(str(row)+"\n")
         self.Progrdialog.accept()
+        if self.iscli:
+            print("Done")
 
     def getJson(self, text):
         #http://localhost:8012/tint?text=Barack%20Obama%20era%20il%20presidente%20degli%20Stati%20Uniti%20d%27America.

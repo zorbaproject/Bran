@@ -4,7 +4,14 @@ Il nome "bran" in lingua inglese indica la crusca, ed è un riferimento all'Acca
 ![Logo di Bran](https://raw.githubusercontent.com/zorbaproject/VdB-Hacking/master/bran-logo-small.png)
 
 ## Come funziona Bran
-Bran utilizza le librerie grafiche PySide2 per disegnare una interfaccia grafica comoda. Inoltre, utilizza Tint, la versione italiana di StanfordCoreNLP per ottenere lemmatizzazione e PoS tagging dei testi, al posto dell'ormai inaffidabile treetagger. È stato testato su Windows (7-10) e GNU/Linux (Kubuntu). L'unico requisito per far funzionare Bran è Python3.6 a 64bit, poi basta lanciare lo script *main.py*. Al primo avvio, il programma installa tutte le librerie di cui ha bisogno. Il classico worflow è il seguente: 
+Bran utilizza le librerie grafiche PySide2 per disegnare una interfaccia grafica comoda. Inoltre, utilizza Tint, la versione italiana di StanfordCoreNLP per ottenere lemmatizzazione e PoS tagging dei testi, al posto dell'ormai inaffidabile treetagger. È stato testato su Windows (7-10) e GNU/Linux (Kubuntu). L'unico requisito per far funzionare Bran è Python3.6 a 64bit, poi basta lanciare lo script *main.py*. Al primo avvio, il programma installa tutte le librerie di cui ha bisogno. 
+Per avere Python3 su un sistema Ubuntu si danno i comandi:
+```
+sudo apt-get install python3-pip
+sudo apt-get install python3-tk
+sudo apt-get install libxml2-dev libxslt1-dev python-dev
+```
+Il classico workflow è il seguente: 
 - Si avvia Bran, non si crea alcuna sessione di lavoro, si avvia Tint. Si chiude l'interfaccia grafica lasciando attivo solo il terminale. 
 - Si avvia di nuovo Bran, stavolta creando una nuova sessione di lavoro (o aprendo una esistente).
 - Si importa un file TXT, attendendo che venga integrato nella tabella del corpus

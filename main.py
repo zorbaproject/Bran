@@ -1162,12 +1162,56 @@ class MainWindow(QMainWindow):
         self.Progrdialog.accept()
         TBdialog.exec()
 
+def clitxtloadingstopped():
+    sys.exit(0)
 
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    w = MainWindow()
-    w.show()
-    sys.exit(app.exec_())
+    if len(sys.argv)>1:
+        corpuscols = {
+                    'IDcorpus': 0,
+                    'Orig': 1,
+                    'Lemma': 2,
+                    'pos': 3,
+                    'ner': 4,
+                    'feat': 5,
+                    'IDword': 6
+        }
+        w = "cli"
+        app = QApplication(sys.argv)
+        if sys.argv[1] == "help" or sys.argv[1] == "aiuto":
+            print("Elenco dei comandi:\n")
+            print("python3 main.py tintstart\n")
+            print("python3 main.py txt2corpus file.txt [indirizzoServerTint]\n")
+            print("python3 main.py txt2corpus cartella [indirizzoServerTint]\n")
+            print("python3 main.py splitbigfile file.txt []\n")
+            print("python3 main.py occorrenze file.csv [colonna]\n")
+            print("python3 main.py extractcolumn file.csv colonna\n")
+            print("python3 main.py mergetables file.csv colonnaChiave\n")
+            print("Gli argomenti tra parentesi [] sono facoltativi.")
+        if sys.argv[1] == "txt2corpus":
+            fileNames = []
+            if os.path.isfile(sys.argv[2]):
+                fileNames = [sys.argv[2]]
+            if os.path.isdir(sys.argv[2]):
+                for tfile in os.listdir(sys.argv[2]):
+                    fileNames.append(os.path.join(sys.argv[2],tfile))
+            try:
+                tmpurl = sys.argv[3]
+            except:
+                tmpurl = "localhost"
+            tinturl = "http://" + tmpurl + ":8012/tint"
+            TCThread = tint.TintCorpus(w, fileNames, corpuscols, tinturl)
+            TCThread.outputcsv = fileNames[1] + ".csv"
+            #TCThread.finished.connect(clitxtloadingstopped)
+            TCThread.finished.connect(sys.exit)
+            TCThread.start()
+            while True:
+                time.sleep(10)
+    else:
+        app = QApplication(sys.argv)
+        w = MainWindow()
+        w.show()
+        sys.exit(app.exec_())
 
 
 
