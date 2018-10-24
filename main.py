@@ -1277,6 +1277,64 @@ def estrai_colonna():
                         rowfile.write(str(row)+"\n")
                 row = row + 1
 
+def splitbigfile():
+    separator = '\t'
+    if os.path.isfile(sys.argv[2]):
+        fileName = sys.argv[2]
+        ext = fileName[-3:]
+    try:
+        maxrow = int(sys.argv[3])
+    except:
+        maxrow = 100000
+        if ext == "csv":
+            maxrow = 1000000
+    splitdot = False
+    try:
+        if sys.argv[3] == "." and ext == "txt":
+            splitdot = True
+    except:
+        splitdot = False
+    part = 0
+    row = 0
+    partrow = 0
+    output = fileName + "-part" + str(part) + "." + ext
+    recovery = output + ".tmp"
+    startatrow = -1
+    try:
+        if os.path.isfile(recovery):
+            ch = "Y"
+            print("Ho trovato un file di ripristino, lo devo usare? [Y/N]")
+            ch = input()
+            if ch == "Y" or ch == "y":
+                with open(recovery, "r", encoding='utf-8') as tempfile:
+                   lastline = (list(tempfile)[-1].split(",")[0])
+                startatrow = int(lastline)
+                part = int(list(tempfile)[-1].split(",")[1])
+                partrow = int(list(tempfile)[-1].split(",")[2])
+                print("Comincio dalla riga " + str(startatrow))
+    except:
+        startatrow = -1
+        part = 0
+    with open(fileName, "r", encoding='utf-8') as ins:
+        for line in ins:
+            if row > startatrow:
+                try:
+                    thistext = line
+                    if ext == "txt" and splitdot:
+                        partrow = partrow + len(line.split(".")) -1
+                except:
+                    thistext = ""
+                if partrow > (maxrow-1):
+                    partrow = 0
+                    part = part + 1
+                output = fileName + "-part" + str(part) + "." + ext
+                with open(output, "a", encoding='utf-8') as outfile:
+                    outfile.write(thistext)
+                with open(recovery, "a", encoding='utf-8') as rowfile:
+                    rowfile.write(str(row)+","+str(part)+","+str(partrow)+"\n")
+                partrow = partrow + 1
+            row = row + 1
+
 
 if __name__ == "__main__":
     if len(sys.argv)>1:
@@ -1295,7 +1353,7 @@ if __name__ == "__main__":
             print("Elenco dei comandi:\n")
             print("python3 main.py tintstart [javapath]\n")
             print("python3 main.py txt2corpus file.txt|cartella [indirizzoServerTint]\n")
-            print("* python3 main.py splitbigfile file.txt []\n")
+            print("python3 main.py splitbigfile file.txt [maxnumberoflines] [.]\n")
             print("python3 main.py occorrenze file.csv [colonna]\n")
             print("python3 main.py extractcolumn file.csv colonna\n")
             print("* python3 main.py mergetables file.csv colonnaChiave [sum|mean|diff]\n")
@@ -1330,6 +1388,8 @@ if __name__ == "__main__":
             calcola_occorrenze()
         if sys.argv[1] == "extractcolumn":
             estrai_colonna()
+        if sys.argv[1] == "splitbigfile":
+            splitbigfile()
     else:
         app = QApplication(sys.argv)
         w = MainWindow()
