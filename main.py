@@ -1314,7 +1314,7 @@ if __name__ == "__main__":
                 tmpurl = "localhost"
             tinturl = "http://" + tmpurl + ":8012/tint"
             TCThread = tint.TintCorpus(w, fileNames, corpuscols, tinturl)
-            TCThread.outputcsv = fileNames[1] + ".csv"
+            TCThread.outputcsv = fileNames[0] + ".csv"
             TCThread.finished.connect(sys.exit)
             TCThread.start()
             while True:
