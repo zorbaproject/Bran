@@ -38,6 +38,12 @@ class TintRunner(QThread):
     def __init__(self, widget,addr = ""):
         QThread.__init__(self)
         self.w = widget
+        self.iscli = False
+        try:
+            if self.w == "cli":
+                self.iscli = True
+        except:
+            self.iscli = False
         self.setTerminationEnabled(True)
 
     def loadvariables(self, javavar, tintdirvar, tintportvar):
@@ -63,10 +69,12 @@ class TintRunner(QThread):
             while True:
                 lineb = p.stdout.readline()
                 line = str(lineb)
-                #print("++"+line+"++")
-                self.w.loglist.addItem(line)
-                self.w.loglist.setCurrentRow(self.w.loglist.count()-1)
-                QApplication.processEvents()
+                if self.iscli:
+                    print("++"+line+"++")
+                else:
+                    self.w.loglist.addItem(line)
+                    self.w.loglist.setCurrentRow(self.w.loglist.count()-1)
+                    QApplication.processEvents()
                 if readystring in line:
                     break
             self.dataReceived.emit(True)
@@ -177,6 +185,7 @@ class TintCorpus(QThread):
             self.Progrdialog.show()
         totallines = len(itext)
         print("Total lines: "+str(totallines))
+        startatrow = -1
         try:
             if os.path.isfile(self.rowfilename):
                 ch = "Y"

@@ -3,16 +3,16 @@
 import sys
 import re
 
-print("wiki-pages-extract.py itwiki-20181001-pages-articles.xml wiki-it.txt")
+print("wiki-pages-extract-clean.py itwiki-20181001-pages-articles.xml wiki-it.txt")
 
 
-file = open(sys.argv[2],"w")
+file = open(sys.argv[2],"w", encoding='utf-8')
 file.write("")
-file.close() 
+file.close()
 
 ispage = False
 towrite = False
-with open(sys.argv[1], "r") as ins:
+with open(sys.argv[1], "r", encoding='utf-8') as ins:
     for line in ins:
         if "<page>" in line:
             ispage = True

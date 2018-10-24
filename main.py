@@ -1162,8 +1162,121 @@ class MainWindow(QMainWindow):
         self.Progrdialog.accept()
         TBdialog.exec()
 
-def clitxtloadingstopped():
-    sys.exit(0)
+def findintable(table, stringa, col=0):
+    resrow = -1
+    for row in range(len(table)):
+        if table[row][col] == stringa:
+            resrow = row
+            break
+    return resrow
+
+def savetable(table, output):
+    tabletext = ""
+    for row in table:
+        coln = 0
+        for col in row:
+            if coln > 0:
+                tabletext = tabletext + '\t'
+            tabletext = tabletext + str(col)
+            coln = coln + 1
+        tabletext = tabletext + "\n"
+    file = open(output,"w", encoding='utf-8')
+    file.write(tabletext)
+    file.close()
+
+def calcola_occorrenze():
+    separator = '\t'
+    fileNames = []
+    if os.path.isfile(sys.argv[2]):
+        fileNames = [sys.argv[2]]
+    if os.path.isdir(sys.argv[2]):
+        for tfile in os.listdir(sys.argv[2]):
+            fileNames.append(os.path.join(sys.argv[2],tfile))
+    try:
+        col = int(sys.argv[3])
+    except:
+        col = 0
+    for fileName in fileNames:
+        table = []
+        table.append([os.path.basename(fileName)+"-"+str(col),"Occorrenze"])
+        row = 0
+        output = fileName + "-occorrenze-" + str(col) + ".csv"
+        recovery = output + ".tmp"
+        startatrow = -1
+        try:
+            if os.path.isfile(recovery):
+                ch = "Y"
+                print("Ho trovato un file di ripristino, lo devo usare? [Y/N]")
+                ch = input()
+                if ch == "Y" or ch == "y":
+                    with open(recovery, "r", encoding='utf-8') as tempfile:
+                       lastline = (list(tempfile)[-1])
+                    startatrow = int(lastline)
+                    print("Comincio dalla riga " + str(startatrow))
+        except:
+            startatrow = -1
+        with open(fileName, "r", encoding='utf-8') as ins:
+            for line in ins:
+                if row > startatrow:
+                    try:
+                        thistext = line.split(separator)[col]
+                    except:
+                        thistext = ""
+                    tbrow = findintable(table, thistext, 0)
+                    if tbrow>=0:
+                        tbval = int(table[tbrow][1])+1
+                        table[tbrow][1] = tbval
+                    else:
+                        newrow = [thistext, "1"]
+                        table.append(newrow)
+                    savetable(table, output)
+                    with open(recovery, "a", encoding='utf-8') as rowfile:
+                        rowfile.write(str(row)+"\n")
+                row = row + 1
+
+
+def estrai_colonna():
+    separator = '\t'
+    fileNames = []
+    if os.path.isfile(sys.argv[2]):
+        fileNames = [sys.argv[2]]
+    if os.path.isdir(sys.argv[2]):
+        for tfile in os.listdir(sys.argv[2]):
+            fileNames.append(os.path.join(sys.argv[2],tfile))
+    try:
+        col = int(sys.argv[3])
+    except:
+        col = 0
+    for fileName in fileNames:
+        row = 0
+        output = fileName + "-colonna-" + str(col) + ".csv"
+        recovery = output + ".tmp"
+        startatrow = -1
+        try:
+            if os.path.isfile(recovery):
+                ch = "Y"
+                print("Ho trovato un file di ripristino, lo devo usare? [Y/N]")
+                ch = input()
+                if ch == "Y" or ch == "y":
+                    with open(recovery, "r", encoding='utf-8') as tempfile:
+                       lastline = (list(tempfile)[-1])
+                    startatrow = int(lastline)
+                    print("Comincio dalla riga " + str(startatrow))
+        except:
+            startatrow = -1
+        with open(fileName, "r", encoding='utf-8') as ins:
+            for line in ins:
+                if row > startatrow:
+                    try:
+                        thistext = line.split(separator)[col]
+                    except:
+                        thistext = ""
+                    with open(output, "a", encoding='utf-8') as outfile:
+                        outfile.write(thistext+"\n")
+                    with open(recovery, "a", encoding='utf-8') as rowfile:
+                        rowfile.write(str(row)+"\n")
+                row = row + 1
+
 
 if __name__ == "__main__":
     if len(sys.argv)>1:
@@ -1180,14 +1293,14 @@ if __name__ == "__main__":
         app = QApplication(sys.argv)
         if sys.argv[1] == "help" or sys.argv[1] == "aiuto":
             print("Elenco dei comandi:\n")
-            print("python3 main.py tintstart\n")
-            print("python3 main.py txt2corpus file.txt [indirizzoServerTint]\n")
-            print("python3 main.py txt2corpus cartella [indirizzoServerTint]\n")
-            print("python3 main.py splitbigfile file.txt []\n")
+            print("python3 main.py tintstart [javapath]\n")
+            print("python3 main.py txt2corpus file.txt|cartella [indirizzoServerTint]\n")
+            print("* python3 main.py splitbigfile file.txt []\n")
             print("python3 main.py occorrenze file.csv [colonna]\n")
             print("python3 main.py extractcolumn file.csv colonna\n")
-            print("python3 main.py mergetables file.csv colonnaChiave\n")
+            print("* python3 main.py mergetables file.csv colonnaChiave [sum|mean|diff]\n")
             print("Gli argomenti tra parentesi [] sono facoltativi.")
+            print("\nI comandi preceduti da * sono sperimentali o non ancora implementati.")
         if sys.argv[1] == "txt2corpus":
             fileNames = []
             if os.path.isfile(sys.argv[2]):
@@ -1202,11 +1315,21 @@ if __name__ == "__main__":
             tinturl = "http://" + tmpurl + ":8012/tint"
             TCThread = tint.TintCorpus(w, fileNames, corpuscols, tinturl)
             TCThread.outputcsv = fileNames[1] + ".csv"
-            #TCThread.finished.connect(clitxtloadingstopped)
             TCThread.finished.connect(sys.exit)
             TCThread.start()
             while True:
                 time.sleep(10)
+        if sys.argv[1] == "tintstart":
+            TintThread = tint.TintRunner(w)
+            Java = "/usr/bin/java"
+            TintPort = "8012"
+            TintDir = os.path.abspath(os.path.dirname(sys.argv[0]))+"/tint/lib"
+            TintThread.loadvariables(Java, TintDir, TintPort)
+            TintThread.start()
+        if sys.argv[1] == "occorrenze":
+            calcola_occorrenze()
+        if sys.argv[1] == "extractcolumn":
+            estrai_colonna()
     else:
         app = QApplication(sys.argv)
         w = MainWindow()
