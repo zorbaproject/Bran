@@ -1362,8 +1362,15 @@ def samplebigfile():
             splitdot = True
     except:
         splitdot = False
+    if splitdot == True:
+        with open(fileName, "r", encoding='utf-8') as ins:
+            for line in ins:
+                thistext = line.replace('.','.\n')
+                with open(fileName + "-splitondot.txt", "a", encoding='utf-8') as outfile:
+                    outfile.write(thistext)
+        fileName = fileName + "-splitondot.txt"
     row = 0
-    output = fileName + "-sample." + ext
+    output = fileName + "-estratto." + ext
     startatrow = -1
     totallines = linescount(fileName)
     print("Total Lines: " + str(totallines))
@@ -1451,6 +1458,8 @@ if __name__ == "__main__":
             estrai_colonna()
         if sys.argv[1] == "splitbigfile":
             splitbigfile()
+        if sys.argv[1] == "samplebigfile":
+            samplebigfile()
     else:
         app = QApplication(sys.argv)
         w = MainWindow()
