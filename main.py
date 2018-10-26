@@ -1391,17 +1391,20 @@ def samplebigfile():
         trow = random.randint(start, end)
         getrows.append(trow)
     print("Estraggo le righe in un nuovo file")
-    for myrow in getrows:
-        with open(fileName, "r", encoding='utf-8') as ins:
-            for line in ins:
-                if row == myrow:
-                    try:
-                        thistext = line
-                    except:
-                        thistext = ""
-                    with open(output, "a", encoding='utf-8') as outfile:
-                        outfile.write(thistext)
-                row = row + 1
+    ir = 0
+    with open(fileName, "r", encoding='utf-8') as ins:
+        for line in ins:
+            if row == getrows[ir]:
+                try:
+                    thistext = line
+                except:
+                    thistext = ""
+                ir = ir + 1
+                if ir ==len(getrows):
+                    break
+                with open(output, "a", encoding='utf-8') as outfile:
+                    outfile.write(thistext)
+            row = row + 1
 
 
 if __name__ == "__main__":
