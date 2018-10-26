@@ -20,6 +20,7 @@ import subprocess
 import platform
 import mmap
 import random
+import math
 
 arch = platform.architecture()[0]
 if arch != '64bit':
