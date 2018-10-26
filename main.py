@@ -19,6 +19,7 @@ from socket import timeout
 import subprocess
 import platform
 import mmap
+import random
 
 arch = platform.architecture()[0]
 if arch != '64bit':
@@ -1170,6 +1171,15 @@ def findintable(table, stringa, col=0):
             break
     return resrow
 
+def linescount(filename):
+    f = open(filename, "r+", encoding='utf-8')
+    buf = mmap.mmap(f.fileno(), 0)
+    lines = 0
+    readline = buf.readline
+    while readline():
+        lines += 1
+    return lines
+
 def savetable(table, output):
     tabletext = ""
     for row in table:
@@ -1285,9 +1295,9 @@ def splitbigfile():
     try:
         maxrow = int(sys.argv[3])
     except:
-        maxrow = 100000
+        maxrow = 20000
         if ext == "csv":
-            maxrow = 1000000
+            maxrow = 500000
     splitdot = False
     try:
         if sys.argv[3] == "." and ext == "txt":
@@ -1335,6 +1345,54 @@ def splitbigfile():
                 partrow = partrow + 1
             row = row + 1
 
+def samplebigfile():
+    separator = '\t'
+    if os.path.isfile(sys.argv[2]):
+        fileName = sys.argv[2]
+        ext = fileName[-3:]
+    try:
+        maxrow = int(sys.argv[3])
+    except:
+        maxrow = 20000
+        if ext == "csv":
+            maxrow = 500000
+    splitdot = False
+    try:
+        if sys.argv[3] == "." and ext == "txt":
+            splitdot = True
+    except:
+        splitdot = False
+    row = 0
+    output = fileName + "-sample." + ext
+    startatrow = -1
+    totallines = linescount(fileName)
+    print("Total Lines: " + str(totallines))
+    #ripristino impossibile, è un sistema casuale
+    chunkf = float(totallines)/float(maxrow)
+    chunk = int(math.floor(chunkf))
+    if chunk < 2:
+        print("Non ci sono abbastanza righe nel file")
+        return
+    getrows = []
+    start = 0
+    print("Calcolo le righe da selezionare")
+    for i in range(maxrow):
+        end = start+chunk
+        if end >= totallines:
+            end = totallines -1
+        trow = random.randint(start, end)
+        getrows.append(trow)
+    print("Estraggo le righe in un nuovo file")
+    with open(fileName, "r", encoding='utf-8') as ins:
+        for line in ins:
+            if row in getrows:
+                try:
+                    thistext = line
+                except:
+                    thistext = ""
+                with open(output, "a", encoding='utf-8') as outfile:
+                    outfile.write(thistext)
+            row = row + 1
 
 if __name__ == "__main__":
     if len(sys.argv)>1:
@@ -1354,9 +1412,10 @@ if __name__ == "__main__":
             print("python3 main.py tintstart [javapath]\n")
             print("python3 main.py txt2corpus file.txt|cartella [indirizzoServerTint]\n")
             print("python3 main.py splitbigfile file.txt [maxnumberoflines] [.]\n")
-            print("python3 main.py occorrenze file.csv [colonna]\n")
-            print("python3 main.py extractcolumn file.csv colonna\n")
-            print("* python3 main.py mergetables file.csv colonnaChiave [sum|mean|diff]\n")
+            print("* python3 main.py samplebigfile file.txt [maxnumberoflines] [.]\n")
+            print("python3 main.py occorrenze file.csv|cartella [colonna]\n")
+            print("python3 main.py extractcolumn file.csv|cartella colonna\n")
+            print("* python3 main.py mergetables cartella colonnaChiave [sum|mean|diff]\n")
             print("Gli argomenti tra parentesi [] sono facoltativi.")
             print("\nI comandi preceduti da * sono sperimentali o non ancora implementati.")
         if sys.argv[1] == "txt2corpus":
@@ -1384,6 +1443,8 @@ if __name__ == "__main__":
             TintDir = os.path.abspath(os.path.dirname(sys.argv[0]))+"/tint/lib"
             TintThread.loadvariables(Java, TintDir, TintPort)
             TintThread.start()
+            while True:
+                time.sleep(10)
         if sys.argv[1] == "occorrenze":
             calcola_occorrenze()
         if sys.argv[1] == "extractcolumn":
