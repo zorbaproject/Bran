@@ -1385,11 +1385,14 @@ def samplebigfile():
     start = 0
     print("Calcolo le righe da selezionare")
     for i in range(maxrow):
-        end = start+chunk
+        end = start+chunk -1
+        if start >= totallines-1:
+            start = totallines -2
         if end >= totallines:
             end = totallines -1
         trow = random.randint(start, end)
         getrows.append(trow)
+        start = end + 1
     print("Estraggo le righe in un nuovo file")
     ir = 0
     with open(fileName, "r", encoding='utf-8') as ins:
@@ -1400,7 +1403,7 @@ def samplebigfile():
                 except:
                     thistext = ""
                 ir = ir + 1
-                if ir ==len(getrows):
+                if ir == len(getrows):
                     break
                 with open(output, "a", encoding='utf-8') as outfile:
                     outfile.write(thistext)
