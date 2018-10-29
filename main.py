@@ -984,7 +984,7 @@ class MainWindow(QMainWindow):
             self.TintThread.start()
         else:
             if platform.system() == "Windows":
-                QMessageBox.information(self, "Come usare il server su Windows", "Sembra che tu stia usando Windows. Su questo sistema, per utilizzare il server Tint l'interfaccia di Bran verrà chiusa automaticamente. Dovrai aprire di nuovo Bran, così verrà caricata una nuova interfaccia grafica.")
+                QMessageBox.information(self, "Come usare il server su Windows", "Sembra che tu stia usando Windows. Su questo sistema, per utilizzare il server Tint l'interfaccia di Bran verrà chiusa automaticamente: il terminale dovrà rimanere aperto. Dovrai aprire di nuovo Bran, così verrà caricata una nuova interfaccia grafica.")
                 sys.exit(0)
             self.w.statusbar.showMessage("OK, il server è attivo")
 
@@ -1441,7 +1441,8 @@ if __name__ == "__main__":
                 fileNames = [sys.argv[2]]
             if os.path.isdir(sys.argv[2]):
                 for tfile in os.listdir(sys.argv[2]):
-                    fileNames.append(os.path.join(sys.argv[2],tfile))
+                    if tfile[-4:] == ".txt":
+                        fileNames.append(os.path.join(sys.argv[2],tfile))
             try:
                 tmpurl = sys.argv[3]
             except:
