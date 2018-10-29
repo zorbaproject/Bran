@@ -1426,9 +1426,9 @@ if __name__ == "__main__":
         if sys.argv[1] == "help" or sys.argv[1] == "aiuto":
             print("Elenco dei comandi:\n")
             print("python3 main.py tintstart [javapath]\n")
-            print("python3 main.py txt2corpus file.txt|cartella [indirizzoServerTint]\n")
+            print("python3 main.py txt2corpus file.txt|cartella [indirizzoServerTint] [y]\n")
             print("python3 main.py splitbigfile file.txt [maxnumberoflines] [.]\n")
-            print("* python3 main.py samplebigfile file.txt [maxnumberoflines] [.]\n")
+            print("python3 main.py samplebigfile file.txt [maxnumberoflines] [.]\n")
             print("python3 main.py occorrenze file.csv|cartella [colonna]\n")
             print("python3 main.py extractcolumn file.csv|cartella colonna\n")
             print("* python3 main.py mergetables cartella colonnaChiave [sum|mean|diff]\n")
@@ -1448,6 +1448,11 @@ if __name__ == "__main__":
             tinturl = "http://" + tmpurl + ":8012/tint"
             TCThread = tint.TintCorpus(w, fileNames, corpuscols, tinturl)
             TCThread.outputcsv = fileNames[0] + ".csv"
+            try:
+                if sys.argv[4] == "y" or sys.argv[4] == "Y":
+                    TCThread.alwaysyes = True
+            except:
+                TCThread.alwaysyes = False
             TCThread.finished.connect(sys.exit)
             TCThread.start()
             while True:
@@ -1459,8 +1464,7 @@ if __name__ == "__main__":
             TintDir = os.path.abspath(os.path.dirname(sys.argv[0]))+"/tint/lib"
             TintThread.loadvariables(Java, TintDir, TintPort)
             TintThread.start()
-            while True:
-                time.sleep(10)
+            time.sleep(30)
         if sys.argv[1] == "occorrenze":
             calcola_occorrenze()
         if sys.argv[1] == "extractcolumn":

@@ -102,11 +102,12 @@ class TintCorpus(QThread):
                 self.iscli = True
         except:
             self.iscli = False
+        self.alwaysyes = False
         self.rowfilename = ""
 
     def loadvariables(self):
         #http://localhost:8012/tint?text=Barack%20Obama%20era%20il%20presidente%20degli%20Stati%20Uniti%20d%27America.
-        self.TintTimeout = 300
+        self.TintTimeout = 60 #300
         self.useragent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
 
     def __del__(self):
@@ -190,8 +191,11 @@ class TintCorpus(QThread):
             if os.path.isfile(self.rowfilename):
                 ch = "Y"
                 if self.iscli:
-                    print("Ho trovato un file di ripristino, lo devo usare? [Y/N]")
-                    ch = input()
+                    if self.alwaysyes:
+                        ch = "y"
+                    else:
+                        print("Ho trovato un file di ripristino, lo devo usare? [Y/N]")
+                        ch = input()
                 else:
                     ret = QMessageBox.question(self,'Ripristino', "Ho trovato un file di ripristino, lo devo usare? Se rispondi si, l'importazione del file riprenderà da dove si era interrotta, altrimenti ricomincerà da capo.", QMessageBox.Yes | QMessageBox.No)
                     if ret == QMessageBox.Yes:
@@ -325,6 +329,14 @@ class TintCorpus(QThread):
             ft = f.read() #we should stop if this is taking too long
         except:
             ft = ""
+            msg = "ERRORE: Tint non risponde. Prova a chiudere il processo \"java\" e riavviare."
+            if self.iscli:
+                print(msg)
+                sys.exit(1)
+            else:
+                ret = QMessageBox.question(self,'Errore', msg + " Vuoi chiudere Bran?", QMessageBox.Yes | QMessageBox.No)
+                if ret == QMessageBox.Yes:
+                    sys.exit(1)
         try:
             thishtml = ft.decode('utf-8', 'backslashreplace')
         except:
