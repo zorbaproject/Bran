@@ -198,17 +198,11 @@ class TintCorpus(QThread):
                     else:
                         print("Ho trovato un file di ripristino, lo devo usare? [Y/N]")
                         ch = input()
-                else:
-                    ret = QMessageBox.question(self,'Ripristino', "Ho trovato un file di ripristino, lo devo usare? Se rispondi si, l'importazione del file riprenderà da dove si era interrotta, altrimenti ricomincerà da capo.", QMessageBox.Yes | QMessageBox.No)
-                    if ret == QMessageBox.Yes:
-                        ch = "Y"
-                    else:
-                        ch = "N"
-                if ch == "Y" or ch == "y":
-                    with open(self.rowfilename, "r", encoding='utf-8') as tempfile:
-                       lastline = (list(tempfile)[-1])
-                    startatrow = int(lastline)
-                    print("Comincio dalla riga " + str(startatrow))
+                    if ch == "Y" or ch == "y":
+                        with open(self.rowfilename, "r", encoding='utf-8') as tempfile:
+                           lastline = (list(tempfile)[-1])
+                        startatrow = int(lastline)
+                        print("Comincio dalla riga " + str(startatrow))
         except:
             startatrow = -1
         row = 0
@@ -217,7 +211,8 @@ class TintCorpus(QThread):
             if row > startatrow:
                 self.Progrdialog.w.testo.setText("Sto lavorando sulla frase numero "+str(row))
                 self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
-                QApplication.processEvents()
+                if not self.iscli and row % 20 == 0:
+                    QApplication.processEvents()
                 if self.Progrdialog.w.annulla.isChecked():
                     return
                 myres = ""
@@ -304,8 +299,9 @@ class TintCorpus(QThread):
                             fdatefile = self.outputcsv
                             with open(fdatefile, "a", encoding='utf-8') as myfile:
                                 myfile.write(fullline+"\n")
-                with open(self.rowfilename, "a", encoding='utf-8') as rowfile:
-                    rowfile.write(str(row)+"\n")
+                if self.iscli:
+                    with open(self.rowfilename, "a", encoding='utf-8') as rowfile:
+                        rowfile.write(str(row)+"\n")
         self.Progrdialog.accept()
         if self.iscli:
             print("Done")
@@ -336,7 +332,7 @@ class TintCorpus(QThread):
                 print(msg)
                 sys.exit(1)
             else:
-                ret = QMessageBox.question(self,'Errore', msg + " Vuoi chiudere Bran?", QMessageBox.Yes | QMessageBox.No)
+                ret = QMessageBox.question(self.w,'Errore', msg + " Vuoi chiudere Bran?", QMessageBox.Yes | QMessageBox.No)
                 if ret == QMessageBox.Yes:
                     sys.exit(1)
         try:

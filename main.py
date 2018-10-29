@@ -984,7 +984,8 @@ class MainWindow(QMainWindow):
             self.TintThread.start()
         else:
             if platform.system() == "Windows":
-                QMessageBox.information(self, "Come usare il server su Windows", "Sembra che tu stia usando Windows. Su questo sistema, per utilizzare il server Tint, devi chiudere l'interfaccia di Bran, lasciando aperto solo il terminale. Poi puoi aprire di nuovo Bran (caricherà un altro terminale e una nuova interfaccia grafica).")
+                QMessageBox.information(self, "Come usare il server su Windows", "Sembra che tu stia usando Windows. Su questo sistema, per utilizzare il server Tint l'interfaccia di Bran verrà chiusa automaticamente. Dovrai aprire di nuovo Bran, così verrà caricata una nuova interfaccia grafica.")
+                sys.exit(0)
             self.w.statusbar.showMessage("OK, il server è attivo")
 
     def checkServer(self, ok = False):
