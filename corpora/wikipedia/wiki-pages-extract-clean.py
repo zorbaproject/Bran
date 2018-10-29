@@ -3,13 +3,14 @@
 import sys
 import re
 
-print("wiki-pages-extract-clean.py itwiki-20181001-pages-articles.xml wiki-it.txt")
+print("wiki-pages-extract-clean.py itwiki-20181001-pages-articles.xml wiki-it-pulito.txt")
 
 
 file = open(sys.argv[2],"w", encoding='utf-8')
 file.write("")
 file.close()
 
+iglist = ["PlotArea","PlotData", "DateFormat", "TimeAxis", "PlotArea", "BackgroundColors", "ScaleMajor", "Period", "BarData", "DateFormat", "ImageSize", "TextData", "AlignBars", "Colors", "ScaleMinor"]
 ispage = False
 towrite = False
 with open(sys.argv[1], "r", encoding='utf-8') as ins:
@@ -22,7 +23,13 @@ with open(sys.argv[1], "r", encoding='utf-8') as ins:
             towrite = True
         if "</text>" in line:
             towrite = False
-        if towrite and bool(re.match('^[A-Za-zàèéìòùÈ]', line)):
+        ignoreme = False
+        if "=" in line:
+            tmpw = re.sub("=.*", "", line, flags=re.IGNORECASE|re.DOTALL)
+            tmpw = re.sub(" ", "", tmpw, flags=re.IGNORECASE|re.DOTALL)
+            if tmpw in iglist:
+                ignoreme = True
+        if towrite and bool(re.match('^[A-Za-zàèéìòùÈ]', line)) and not ignoreme:
             line = line.replace("'''", "")
             line = line.replace("''", "")
             line = re.sub("\[\[[^\[\]]*?\|(.*?)\]\]", "\g<1>", line, flags=re.IGNORECASE|re.DOTALL)
