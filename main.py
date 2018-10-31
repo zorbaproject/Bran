@@ -1425,6 +1425,9 @@ if __name__ == "__main__":
         w = "cli"
         app = QApplication(sys.argv)
         if sys.argv[1] == "help" or sys.argv[1] == "aiuto":
+            print("Le colonne di un corpus sono le seguenti:\n")
+            print(corpuscols)
+            print("\n")
             print("Elenco dei comandi:\n")
             print("python3 main.py tintstart [javapath]\n")
             print("python3 main.py txt2corpus file.txt|cartella [indirizzoServerTint] [y]\n")

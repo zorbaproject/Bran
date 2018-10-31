@@ -151,6 +151,7 @@ class TintCorpus(QThread):
                     self.rowfilename = fileName + ".tmp"
                     if self.iscli:
                         self.outputcsv = fileName + ".csv"
+                    print(fileName + " -> " + self.outputcsv)
                     self.text2corpusTINT(lines, str(fileID)+"_"+os.path.basename(fileName))
         if self.fileNames == []:
             testline = "Il gatto è sopra al tetto."

@@ -69,12 +69,12 @@
       </column>
       <column>
        <property name="text">
-        <string>Originale</string>
+        <string>Forma grafica</string>
        </property>
       </column>
       <column>
        <property name="text">
-        <string>Lemmato</string>
+        <string>Lemma</string>
        </property>
       </column>
       <column>
