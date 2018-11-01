@@ -1210,23 +1210,36 @@ def calcola_occorrenze():
         col = 0
     for fileName in fileNames:
         table = []
-        table.append([os.path.basename(fileName)+"-"+str(col),"Occorrenze"])
         row = 0
         output = fileName + "-occorrenze-" + str(col) + ".csv"
         recovery = output + ".tmp"
         startatrow = -1
+        print(fileName + " -> " + output)
         try:
             if os.path.isfile(recovery):
                 ch = "Y"
-                print("Ho trovato un file di ripristino, lo devo usare? [Y/N]")
-                ch = input()
+                try:
+                    if sys.argv[4] == "y" or sys.argv[4] == "Y":
+                        ch = "Y"
+                except:
+                    print("Ho trovato un file di ripristino, lo devo usare? [Y/N]")
+                    ch = input()
                 if ch == "Y" or ch == "y":
                     with open(recovery, "r", encoding='utf-8') as tempfile:
                        lastline = (list(tempfile)[-1])
                     startatrow = int(lastline)
+                    print("Carico la tabella")
+                    with open(output, "r", encoding='utf-8') as ins:
+                        for line in ins:
+                            table.append(line.replace("\n","").split(separator))
                     print("Comincio dalla riga " + str(startatrow))
+                else:
+                    table.append([os.path.basename(fileName)+"-"+str(col),"Occorrenze"])
+            else:
+                table.append([os.path.basename(fileName)+"-"+str(col),"Occorrenze"])
         except:
             startatrow = -1
+            table.append([os.path.basename(fileName)+"-"+str(col),"Occorrenze"])
         with open(fileName, "r", encoding='utf-8') as ins:
             for line in ins:
                 if row > startatrow:
@@ -1241,9 +1254,10 @@ def calcola_occorrenze():
                     else:
                         newrow = [thistext, "1"]
                         table.append(newrow)
-                    savetable(table, output)
-                    with open(recovery, "a", encoding='utf-8') as rowfile:
-                        rowfile.write(str(row)+"\n")
+                    if row % 500 == 0:
+                        savetable(table, output)
+                        with open(recovery, "a", encoding='utf-8') as rowfile:
+                            rowfile.write(str(row)+"\n")
                 row = row + 1
 
 
@@ -1433,7 +1447,7 @@ if __name__ == "__main__":
             print("python3 main.py txt2corpus file.txt|cartella [indirizzoServerTint] [y]\n")
             print("python3 main.py splitbigfile file.txt [maxnumberoflines] [.]\n")
             print("python3 main.py samplebigfile file.txt [maxnumberoflines] [.]\n")
-            print("python3 main.py occorrenze file.csv|cartella [colonna]\n")
+            print("python3 main.py occorrenze file.csv|cartella [colonna] [y]\n")
             print("python3 main.py extractcolumn file.csv|cartella colonna\n")
             print("* python3 main.py mergetables cartella colonnaChiave [sum|mean|diff]\n")
             print("Gli argomenti tra parentesi [] sono facoltativi.")
