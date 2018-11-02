@@ -1203,7 +1203,8 @@ def calcola_occorrenze():
         fileNames = [sys.argv[2]]
     if os.path.isdir(sys.argv[2]):
         for tfile in os.listdir(sys.argv[2]):
-            fileNames.append(os.path.join(sys.argv[2],tfile))
+            if tfile[-4:] == ".csv":
+                fileNames.append(os.path.join(sys.argv[2],tfile))
     try:
         col = int(sys.argv[3])
     except:
@@ -1302,6 +1303,120 @@ def estrai_colonna():
                     with open(recovery, "a", encoding='utf-8') as rowfile:
                         rowfile.write(str(row)+"\n")
                 row = row + 1
+
+
+def mergetables():
+    separator = '\t'
+    fileNames = []
+    if os.path.isdir(sys.argv[2]):
+        for tfile in os.listdir(sys.argv[2]):
+            if tfile[-4:] == ".csv" and tfile[-11:] != "-merged.csv":
+                fileNames.append(os.path.join(sys.argv[2],tfile))
+    else:
+        return
+    dirName = os.path.basename(os.path.dirname(sys.argv[2]))
+    try:
+        col = int(sys.argv[3])
+    except:
+        col = 0
+    output = os.path.join(sys.argv[2],dirName + "-merged.csv")
+    with open(fileNames[0], "r", encoding='utf-8') as f:
+        first_line = f.readline().replace("\n","")
+    try:
+        opstr = str(sys.argv[4])
+        opers = opstr.split(",")
+    except:
+        opers = ["sum"]
+    try:
+        startatrow = int(sys.argv[5])-1
+        useheader = True
+    except:
+        startatrow = -1
+        useheader = False
+    table = []
+    firstfile = -1
+    for fileName in fileNames:
+        firstfile = firstfile + 1
+        row = 0
+        recovery = fileName + ".tmp"
+        print(fileName + " -> " + output)
+        totallines = linescount(fileName)
+        ch = "N"
+        try:
+            if os.path.isfile(recovery):
+                try:
+                    if sys.argv[6] == "y" or sys.argv[6] == "Y":
+                        ch = "Y"
+                except:
+                    print("Ho trovato un file di ripristino, lo devo usare? [Y/N]")
+                    ch = input()
+                if ch == "Y" or ch == "y":
+                    with open(recovery, "r", encoding='utf-8') as tempfile:
+                       lastline = (list(tempfile)[-1])
+                    startatrow = int(lastline)
+                    print("Carico la tabella")
+                    with open(output, "r", encoding='utf-8') as ins:
+                        for line in ins:
+                            table.append(line.replace("\n","").split(separator))
+                    print("Comincio dalla riga " + str(startatrow))
+                    useheader = False
+            else:
+                if useheader:
+                    table.append(first_line.split(separator))
+                    useheader = False
+        except:
+            if useheader:
+                table.append(first_line.split(separator))
+                useheader = False
+        with open(fileName, "r", encoding='utf-8') as ins:
+            for line in ins:
+                if row > startatrow:
+                    try:
+                        thislist = line.split(separator)
+                        thistext = thislist[col].replace("\n", "")
+                    except:
+                        thislist = []
+                        thistext = ""
+                    thisvalues = []
+                    for valcol in range(len(thislist)):
+                        if valcol != col:
+                            try:
+                                thisvalues.append(thislist[valcol].replace("\n", ""))
+                            except:
+                                thisvalues.append("")
+                    while len(thisvalues)<len(opers):
+                        thisvalues.append("")
+                    tbrow = findintable(table, thistext, 0)
+                    if tbrow>=0:
+                        for valind in range(len(opers)):
+                            tbval = float(table[tbrow][valind+1])
+                            if opers[valind] == "sum":
+                                tbval = float(tbval) + float(thisvalues[valind])
+                            if opers[valind] == "mean":
+                                tbval = (float(tbval) + float(thisvalues[valind]))
+                            if opers[valind] == "diff":
+                                tbval = float(tbval) - float(thisvalues[valind])
+                            table[tbrow][valind+1] = tbval
+                    else:
+                        newrow = [thistext]
+                        for valind in range(len(thisvalues)):
+                            newrow.append(thisvalues[valind])
+                        table.append(newrow)
+                    if row % 500 == 0:
+                        savetable(table, output)
+                        with open(recovery, "a", encoding='utf-8') as rowfile:
+                            rowfile.write(str(row)+"\n")
+                row = row + 1
+            if "mean" in opers and firstfile > 0 and row == totallines and startatrow < totallines:
+                for mrow in range(len(table)):
+                    for valind in range(len(opers)):
+                        if opers[valind] == "mean":
+                            try:
+                                table[mrow][valind+1] = float(table[mrow][valind+1])/2
+                            except:
+                                err = True
+                savetable(table, output)
+
 
 def splitbigfile():
     separator = '\t'
@@ -1449,7 +1564,7 @@ if __name__ == "__main__":
             print("python3 main.py samplebigfile file.txt [maxnumberoflines] [.]\n")
             print("python3 main.py occorrenze file.csv|cartella [colonna] [y]\n")
             print("python3 main.py extractcolumn file.csv|cartella colonna\n")
-            print("* python3 main.py mergetables cartella colonnaChiave [sum|mean|diff]\n")
+            print("* python3 main.py mergetables cartella colonnaChiave [sum|mean|diff,sum|mean|diff] [1] [y]\n")
             print("Gli argomenti tra parentesi [] sono facoltativi.")
             print("\nI comandi preceduti da * sono sperimentali o non ancora implementati.")
         if sys.argv[1] == "txt2corpus":
@@ -1492,6 +1607,8 @@ if __name__ == "__main__":
             splitbigfile()
         if sys.argv[1] == "samplebigfile":
             samplebigfile()
+        if sys.argv[1] == "mergetables":
+            mergetables()
     else:
         app = QApplication(sys.argv)
         w = MainWindow()
