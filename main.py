@@ -1416,7 +1416,8 @@ def mergetables():
                             except:
                                 err = True
                 savetable(table, output)
-
+    print("Done")
+    savetable(table, output)
 
 def splitbigfile():
     separator = '\t'
