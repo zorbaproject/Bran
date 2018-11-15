@@ -279,7 +279,7 @@
          <item row="0" column="0">
           <widget class="QLabel" name="label_15">
            <property name="text">
-            <string>Nome utente da scaricare:</string>
+            <string>Nomi utente da scaricare:</string>
            </property>
           </widget>
          </item>
