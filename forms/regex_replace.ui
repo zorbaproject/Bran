@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>370</height>
+    <height>410</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -86,7 +86,7 @@ p, li { white-space: pre-wrap; }
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <widget class="QLabel" name="label_3">
+      <widget class="QLabel" name="lbl_in">
        <property name="text">
         <string>Cerca in</string>
        </property>

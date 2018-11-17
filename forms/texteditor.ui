@@ -16,7 +16,21 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QPlainTextEdit" name="plainTextEdit"/>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QListWidget" name="filelist">
+        <property name="maximumSize">
+         <size>
+          <width>150</width>
+          <height>16777215</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPlainTextEdit" name="plainTextEdit"/>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>
@@ -44,6 +58,11 @@
     <property name="title">
      <string>&amp;Modifica</string>
     </property>
+    <addaction name="actionCopia"/>
+    <addaction name="actionIncolla"/>
+    <addaction name="actionTaglia"/>
+    <addaction name="actionCerca_e_sostituisci"/>
+    <addaction name="actionBatch_mode"/>
    </widget>
    <widget class="QMenu" name="menuStrumenti">
     <property name="title">
@@ -58,50 +77,120 @@
     </property>
     <addaction name="actionAbout_this_text_editor"/>
    </widget>
+   <widget class="QMenu" name="menuNormalizza">
+    <property name="title">
+     <string>&amp;Normalizza</string>
+    </property>
+    <widget class="QMenu" name="menuMaiuscole_Minuscole">
+     <property name="title">
+      <string>Maiuscole/Minuscole</string>
+     </property>
+     <addaction name="actionTutto_maiuscolo"/>
+     <addaction name="actionTutto_minuscolo"/>
+     <addaction name="actionIniziali_sempre_minuscole"/>
+    </widget>
+    <addaction name="menuMaiuscole_Minuscole"/>
+    <addaction name="actionElimina_parole_con_numeri"/>
+    <addaction name="actionElimina_invii_a_capo_multipli"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuModifica"/>
+   <addaction name="menuNormalizza"/>
    <addaction name="menuStrumenti"/>
    <addaction name="menuAbout"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionAbout_this_text_editor">
    <property name="text">
-    <string>About this text editor</string>
+    <string>&amp;About this text editor</string>
    </property>
   </action>
   <action name="actionNuovo">
    <property name="text">
-    <string>Nuovo</string>
+    <string>&amp;Nuovo</string>
    </property>
   </action>
   <action name="actionApri">
    <property name="text">
-    <string>Apri</string>
+    <string>&amp;Apri</string>
    </property>
   </action>
   <action name="actionSalva">
    <property name="text">
-    <string>Salva</string>
+    <string>&amp;Salva</string>
    </property>
   </action>
   <action name="actionSalva_come">
    <property name="text">
-    <string>Salva come</string>
+    <string>Sa&amp;lva come</string>
    </property>
   </action>
   <action name="actionChiudi">
    <property name="text">
-    <string>Chiudi</string>
+    <string>&amp;Chiudi</string>
    </property>
   </action>
   <action name="actionConta_occorrenze">
    <property name="text">
-    <string>Conta occorrenze</string>
+    <string>&amp;Conta occorrenze</string>
    </property>
   </action>
   <action name="actionRimuovi_frasi_ripetute">
    <property name="text">
-    <string>Rimuovi frasi ripetute</string>
+    <string>&amp;Rimuovi frasi ripetute</string>
+   </property>
+  </action>
+  <action name="actionCerca_e_sostituisci">
+   <property name="text">
+    <string>Cerca e sostituisci</string>
+   </property>
+  </action>
+  <action name="actionCopia">
+   <property name="text">
+    <string>Copia</string>
+   </property>
+  </action>
+  <action name="actionIncolla">
+   <property name="text">
+    <string>Incolla</string>
+   </property>
+  </action>
+  <action name="actionTaglia">
+   <property name="text">
+    <string>Taglia</string>
+   </property>
+  </action>
+  <action name="actionTutto_maiuscolo">
+   <property name="text">
+    <string>Tutto maiuscolo</string>
+   </property>
+  </action>
+  <action name="actionTutto_minuscolo">
+   <property name="text">
+    <string>Tutto minuscolo</string>
+   </property>
+  </action>
+  <action name="actionIniziali_sempre_minuscole">
+   <property name="text">
+    <string>Iniziali sempre minuscole</string>
+   </property>
+  </action>
+  <action name="actionElimina_parole_con_numeri">
+   <property name="text">
+    <string>Elimina parole con numeri</string>
+   </property>
+  </action>
+  <action name="actionElimina_invii_a_capo_multipli">
+   <property name="text">
+    <string>Elimina invii a capo multipli</string>
+   </property>
+  </action>
+  <action name="actionBatch_mode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Modalità batch</string>
    </property>
   </action>
  </widget>

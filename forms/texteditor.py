@@ -5,7 +5,7 @@ from os import path
 import sys
 import os
 import csv
-#import re
+import re
 
 from PySide2.QtWidgets import QApplication, QDialog, QLineEdit, QPushButton, QVBoxLayout
 from PySide2.QtUiTools import QUiLoader
@@ -15,6 +15,10 @@ from PySide2.QtCore import QFile
 from PySide2.QtWidgets import QFileDialog
 from PySide2.QtWidgets import QMainWindow
 from PySide2.QtWidgets import QDialog
+
+from forms import regex_replace
+from forms import progress
+from forms import about
 
 class TextEditor(QDialog):
 
@@ -30,6 +34,117 @@ class TextEditor(QDialog):
         #self.w.replace_in_corpus.clicked.connect(self.replaceCorpus)
         self.w.actionConta_occorrenze.triggered.connect(self.contaoccorrenze)
         self.w.actionRimuovi_frasi_ripetute.triggered.connect(self.rm_doublephrases)
+        self.w.actionCerca_e_sostituisci.triggered.connect(self.searchreplace)
+        self.w.actionNuovo.triggered.connect(self.nuovo)
+        self.w.actionApri.triggered.connect(self.apri)
+        self.w.actionSalva.triggered.connect(self.salva)
+        self.w.actionSalva_come.triggered.connect(self.salvacome)
+        self.w.actionBatch_mode.triggered.connect(self.batchmodeshift)
+        self.w.actionElimina_invii_a_capo_multipli.triggered.connect(self.delmultiplecrlf)
+        self.currentFilename = ""
+        self.batchmode = False
+        self.donotshow = False
+        self.sessionDir = "."
+
+    def nuovo(self):
+        self.currentFilename = ""
+        self.w.plainTextEdit.setPlainText("")
+
+    def salva(self):
+        self.currentFilename = ""
+        self.w.plainTextEdit.setPlainText("")
+
+    def salvacome(self):
+        self.currentFilename = ""
+        self.w.plainTextEdit.setPlainText("")
+
+    def apri(self):
+        fileNames = QFileDialog.getOpenFileNames(self, "Apri file TXT", self.sessionDir, "Text files (*.txt *.md)")[0]
+        if len(fileNames)<1:
+            return
+        if len(fileNames)>1 and not self.batchmode:
+            ret = QMessageBox.question(self,'Domanda', "Hai selezionato più di un file. Se attivi la modalità batch, le modifiche eseguite con gli strumenti di ricerca e sostituzione verranno applicate automaticamente a tutti i file, altrimenti saranno applicate solo al file attivo. Vuoi attivare la modalità batch?", QMessageBox.Yes | QMessageBox.No)
+            if ret == QMessageBox.Yes:
+                self.batchmode = True
+                self.w.actionBatch_mode.setChecked(True)
+        for fileName in fileNames:
+            self.w.filelist.addItem(fileName)
+        fileName = fileNames[-1]
+        #TODO: Controllo se il file è troppo grande, nel caso chiedo se procedere
+        try:
+            text_file = open(fileName, "r", encoding='utf-8')
+            lines = text_file.read()
+            text_file.close()
+        except:
+            predefEncode = "ISO-8859-15"
+            #https://pypi.org/project/chardet/
+            myencoding = QInputDialog.getText(self, "Scegli la codifica", "Sembra che questo file non sia codificato in UTF-8. Vuoi provare a specificare una codifica diversa? (Es: cp1252 oppure ISO-8859-15)", QLineEdit.Normal, predefEncode)
+            try:
+                text_file = open(fileName, "r", encoding=myencoding[0])
+                lines = text_file.read()
+                text_file.close()
+            except:
+               return
+        self.currentFilename = fileName
+        self.w.filelist.setCurrentRow(self.w.filelist.count()-1)
+        self.w.plainTextEdit.setPlainText(lines)
+
+    def batchmodeshift(self):
+        if self.batchmode:
+            self.batchmode = False
+            self.w.actionBatch_mode.setChecked(False)
+        else:
+            self.batchmode = True
+            self.w.actionBatch_mode.setChecked(True)
+
+    def searchreplace(self):
+        self.do_searchreplace()
+
+    def delmultiplecrlf(self):
+        #ripeti finché non ce ne sono più
+        self.do_searchreplace("\\n\\n","\\n", False)
+
+    def do_searchreplace(self, searchstr = "", replstr = "", oneline = True):
+        repCdialog = regex_replace.Form(self)
+        repCdialog.setModal(False)
+        repCdialog.w.lbl_in.hide()
+        repCdialog.w.colcombo.hide()
+        repCdialog.w.orig.setText(searchstr)
+        repCdialog.w.dest.setText(replstr)
+        repCdialog.w.colcheck.setText("Considera una riga alla volta")
+        repCdialog.w.colcheck.setChecked(oneline)
+        repCdialog.exec()
+        if repCdialog.result():
+            self.Progrdialog = progress.Form(self)
+            self.Progrdialog.show()
+            newtext = ""
+            if repCdialog.w.colcheck.isChecked():
+                textlist = self.w.plainTextEdit.toPlainText().split("\n")
+                totallines = len(textlist)
+                for row in range(totallines):
+                    self.Progrdialog.w.testo.setText("Sto cercando nella riga numero "+str(row))
+                    self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+                    QApplication.processEvents()
+                    if self.Progrdialog.w.annulla.isChecked():
+                        return
+                    origstr = textlist[row]
+                    newstr = ""
+                    if repCdialog.w.ignorecase.isChecked():
+                        newstr = re.sub(repCdialog.w.orig.text(), repCdialog.w.dest.text(), origstr, flags=re.IGNORECASE|re.DOTALL)
+                    else:
+                        newstr = re.sub(repCdialog.w.orig.text(), repCdialog.w.dest.text(), origstr, flags=re.DOTALL)
+                    if row > 0:
+                        newtext = newtext + "\n"
+                    newtext = newtext + newstr
+            else:
+                origstr = self.w.plainTextEdit.toPlainText()
+                newtext = ""
+                if repCdialog.w.ignorecase.isChecked():
+                    newtext = re.sub(repCdialog.w.orig.text(), repCdialog.w.dest.text(), origstr, flags=re.IGNORECASE|re.DOTALL)
+                else:
+                    newtext = re.sub(repCdialog.w.orig.text(), repCdialog.w.dest.text(), origstr, flags=re.DOTALL)
+            self.w.plainTextEdit.setPlainText(newtext)
+            self.Progrdialog.accept()
 
     def rm_doublephrases(self):
         #dele phrases repeated: https://pastebin.com/7Krbii0d
