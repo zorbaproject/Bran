@@ -209,7 +209,7 @@
                 </widget>
                </item>
                <item>
-                <widget class="QSpinBox" name="spinBox"/>
+                <widget class="QSpinBox" name="genRifKey"/>
                </item>
                <item>
                 <widget class="QLabel" name="label_5">
@@ -219,7 +219,11 @@
                 </widget>
                </item>
                <item>
-                <widget class="QSpinBox" name="spinBox_2"/>
+                <widget class="QSpinBox" name="genRifVal">
+                 <property name="value">
+                  <number>1</number>
+                 </property>
+                </widget>
                </item>
               </layout>
              </item>
@@ -247,7 +251,7 @@
                 </widget>
                </item>
                <item>
-                <widget class="QSpinBox" name="spinBox_3"/>
+                <widget class="QSpinBox" name="genConfKey"/>
                </item>
                <item>
                 <widget class="QLabel" name="label_7">
@@ -257,7 +261,11 @@
                 </widget>
                </item>
                <item>
-                <widget class="QSpinBox" name="spinBox_4"/>
+                <widget class="QSpinBox" name="genConfVal">
+                 <property name="value">
+                  <number>1</number>
+                 </property>
+                </widget>
                </item>
               </layout>
              </item>
@@ -266,23 +274,33 @@
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_4">
              <item>
-              <widget class="QRadioButton" name="radioButton">
+              <widget class="QRadioButton" name="gen_diff">
                <property name="text">
                 <string>Trova le differenze</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QRadioButton" name="radioButton_2">
+              <widget class="QRadioButton" name="gen_ds">
                <property name="text">
                 <string>De&amp;viazione standard</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="gen_rms">
+               <property name="text">
+                <string>Root Mean S&amp;quare</string>
                </property>
               </widget>
              </item>
             </layout>
            </item>
            <item>
-            <widget class="QPushButton" name="pushButton">
+            <widget class="QPushButton" name="do_gen">
              <property name="text">
               <string>Confronta</string>
              </property>

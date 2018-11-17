@@ -42,6 +42,7 @@ class Confronto(QDialog):
         #self.w.rejected.connect(self.isrejected)
         self.setWindowTitle("Confronta dati estratti dai corpora")
         self.w.do_occ.clicked.connect(self.do_occ)
+        self.w.do_gen.clicked.connect(self.do_gen)
         #self.w.actionConta_occorrenze.triggered.connect(self.contaoccorrenze)
         self.sessionDir = sessionDir
         self.w.addfile.clicked.connect(self.addfile)
@@ -132,18 +133,28 @@ class Confronto(QDialog):
         context = self.w.datatype.currentText()
         self.do_confronta(context)
 
+    def do_gen(self):
+        context = "generico"
+        self.do_confronta(context)
+
     def do_confronta(self, context):
         thisname = []
-        riferimentoName = self.getRiferimento(context)
-        riferimento = self.readcsv(riferimentoName)
-        corpKeyCol = 0
-        corpValueCol = 1
+        if context != "generico":
+            riferimentoName = self.getRiferimento(context)
+        else:
+            riferimentoName = self.w.altrofilename.text()
+        riferimento = ""
+        try:
+            riferimento = self.readcsv(riferimentoName)
+        except:
+            print("Impossibile leggere la tabella di riferimento")
+            return
         TBdialog = tableeditor.Form(self)
         TBdialog.sessionDir = self.sessionDir
         TBdialog.addcolumn(context, 0)
         self.Progrdialog = progress.Form(self)
         self.Progrdialog.show()
-        if 1==1: #try:
+        try:
             thistext = ""
             thisvalue = ""
             indexes = 1 + self.w.corpora.count()
@@ -161,7 +172,23 @@ class Confronto(QDialog):
                 if self.w.occ_rms.isChecked():
                     TBdialog.addcolumn(colname+" RMS", outputcol+1)
                 totallines = len(corpus)
-                colincrease = 0
+                corpKeyCol = 0
+                corpValueCol = 1
+                if context != "generico":
+                    corpKeyCol = 0
+                    corpValueCol = 1
+                else:
+                    corpKeyCol = self.w.genConfKey.value()
+                    corpValueCol = self.w.genConfVal.value()
+                    if i == 0:
+                        corpKeyCol = self.w.genRifKey.value()
+                        corpValueCol = self.w.genRifVal.value()
+                    if self.w.gen_diff.isChecked():
+                        self.w.occ_diff.setChecked(True)
+                    if self.w.gen_ds.isChecked():
+                        self.w.occ_ds.setChecked(True)
+                    if self.w.gen_rms.isChecked():
+                        self.w.occ_rms.setChecked(True)
                 startrow = 0
                 if self.w.ignorefirstrow.isChecked():
                     startrow = 1
@@ -223,8 +250,8 @@ class Confronto(QDialog):
                     outputcol = outputcol + 2
                 else:
                     outputcol = outputcol + 1
-        #except:
-        #    thistext = ""
+        except:
+            thistext = ""
         totallines = TBdialog.w.tableWidget.rowCount()
         for col in range(TBdialog.w.tableWidget.columnCount()):
             for row in range(totallines):
