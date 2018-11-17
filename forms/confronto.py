@@ -50,6 +50,7 @@ class Confronto(QDialog):
         self.w.with_dict.currentIndexChanged.connect(self.dictselect)
         self.w.with_corpora.currentIndexChanged.connect(self.corporaselect)
         self.fillcombos()
+        self.legendaPos = []
 
     def addfile(self):
         fileNames = QFileDialog.getOpenFileNames(self, "Apri file CSV", self.sessionDir, "CSV files (*.csv *.txt)")[0]
@@ -100,6 +101,10 @@ class Confronto(QDialog):
         for key in self.corpora:
             self.w.with_corpora.addItem(key)
         self.w.sel_dict.setChecked(True)
+        self.datatype = ['Occorrenze Lemma','Occorrenze PoS', 'Statistiche VdB', 'Contaverbi', 'Densità lessicale', 'Segmenti ripetuti']
+        for key in self.datatype:
+            self.w.datatype.addItem(key)
+        self.w.datatype.setCurrentIndex(0)
 
     def getRiferimento(self, action):
         fileName = ""
@@ -107,28 +112,42 @@ class Confronto(QDialog):
             fileName = self.dizionari[self.w.with_dict.currentText()]
         if self.w.sel_corpora.isChecked():
             fileName = self.corpora[self.w.with_corpora.currentText()]
-            if action == "do_occ":
+            if action == "Occorrenze Lemma":
                 fileName = fileName + "-occorrenze-lemma.csv"
+            if action == "Occorrenze PoS":
+                fileName = fileName + "-occorrenze-pos.csv"
+            if action == "Statistiche VdB":
+                fileName = fileName + "-vdb.csv"
+            if action == "Contaverbi":
+                fileName = fileName + "-contaverbi.csv"
+            if action == "Densità lessicale":
+                fileName = fileName + "-densita.csv"
+            if action == "Segmenti ripetuti":
+                fileName = fileName + "-ngrams.csv"
         if self.w.altrofile.isChecked():
             fileName = self.w.altrofilename.text()
         return fileName
 
     def do_occ(self):
-        self.do_confronta("do_occ")
+        context = self.w.datatype.currentText()
+        self.do_confronta(context)
 
     def do_confronta(self, context):
         thisname = []
         riferimentoName = self.getRiferimento(context)
         riferimento = self.readcsv(riferimentoName)
+        corpKeyCol = 0
+        corpValueCol = 1
         TBdialog = tableeditor.Form(self)
         TBdialog.sessionDir = self.sessionDir
-        TBdialog.addcolumn("Lemma", 0)
+        TBdialog.addcolumn(context, 0)
         self.Progrdialog = progress.Form(self)
         self.Progrdialog.show()
         if 1==1: #try:
             thistext = ""
             thisvalue = ""
             indexes = 1 + self.w.corpora.count()
+            outputcol = 1;
             for i in range(indexes):
                 if i == 0:
                     corpus = riferimento
@@ -137,7 +156,12 @@ class Confronto(QDialog):
                     corpus = self.readcsv(self.w.corpora.item(i-1).text())
                     colname = os.path.basename(self.w.corpora.item(i-1).text())
                 TBdialog.addcolumn(colname, i+1)
+                if self.w.occ_ds.isChecked():
+                    TBdialog.addcolumn(colname+" DS", outputcol+1)
+                if self.w.occ_rms.isChecked():
+                    TBdialog.addcolumn(colname+" RMS", outputcol+1)
                 totallines = len(corpus)
+                colincrease = 0
                 startrow = 0
                 if self.w.ignorefirstrow.isChecked():
                     startrow = 1
@@ -147,10 +171,15 @@ class Confronto(QDialog):
                     QApplication.processEvents()
                     if self.Progrdialog.w.annulla.isChecked():
                         return
-                    thistext = corpus[row][0]
+                    thistext = corpus[row][corpKeyCol]
+                    if context == "Occorrenze PoS":
+                        try:
+                            thistext = self.legendaPos[corpus[row][corpKeyCol]][0]
+                        except:
+                            thistext = corpus[row][corpKeyCol]
                     if self.w.occ_ds.isChecked() or self.w.occ_rms.isChecked():
                         try:
-                            thisvalue = corpus[row][1]
+                            thisvalue = corpus[row][corpValueCol]
                         except:
                             thisvalue = "1"
                     if self.w.occ_diff.isChecked():
@@ -165,22 +194,35 @@ class Confronto(QDialog):
                                 rifval = int(TBdialog.w.tableWidget.item(tbrow,1).text())
                             except:
                                 rifval = 0
-                            mean = (rifval+int(thisvalue))/N
-                            tbval = math.sqrt((math.pow(rifval-mean,2)+ math.pow(int(thisvalue)-mean,2))/N)
+                            mean = (rifval+float(thisvalue))/N
+                            tbval = math.sqrt((math.pow(rifval-mean,2)+ math.pow(float(thisvalue)-mean,2))/N)
                         if self.w.occ_rms.isChecked() and i>0:
                             N = 2
                             try:
                                 rifval = int(TBdialog.w.tableWidget.item(tbrow,1).text())
                             except:
                                 rifval = 0
-                            tbval = math.sqrt((math.pow(rifval,2)+ math.pow(int(thisvalue),2))/N)
-                        TBdialog.setcelltotable(str(tbval), tbrow, i+1)
+                            tbval = math.sqrt((math.pow(rifval,2)+ math.pow(float(thisvalue),2))/N)
+                        if self.w.occ_ds.isChecked() or self.w.occ_rms.isChecked():
+                            TBdialog.setcelltotable(str(thisvalue), tbrow, outputcol)
+                            TBdialog.setcelltotable(str(tbval), tbrow, outputcol+1)
+                        else:
+                            TBdialog.setcelltotable(str(tbval), tbrow, i+1)
                     else:
                         TBdialog.addlinetotable(thistext, 0)
                         tbrow = TBdialog.w.tableWidget.rowCount()-1
-                        TBdialog.setcelltotable(thisvalue, tbrow, i+1)
+                        #TBdialog.setcelltotable(thisvalue, tbrow, i+1)
+                        if bool(self.w.occ_ds.isChecked() or self.w.occ_rms.isChecked()) and i>0:
+                            TBdialog.setcelltotable(str(thisvalue), tbrow, outputcol)
+                            TBdialog.setcelltotable("0", tbrow, outputcol+1)
+                        else:
+                            TBdialog.setcelltotable(str(thisvalue), tbrow, i+1)
                         for itemp in range(1,i+1):
                             TBdialog.setcelltotable("0", tbrow, itemp)
+                if self.w.occ_ds.isChecked() or self.w.occ_rms.isChecked():
+                    outputcol = outputcol + 2
+                else:
+                    outputcol = outputcol + 1
         #except:
         #    thistext = ""
         totallines = TBdialog.w.tableWidget.rowCount()

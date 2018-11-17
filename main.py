@@ -1029,6 +1029,7 @@ class MainWindow(QMainWindow):
 
     def confronto(self):
         cf = confronto.Confronto(self.sessionDir)
+        cf.legendaPos = self.legendaPos
         cf.exec()
 
     def aboutbran(self):

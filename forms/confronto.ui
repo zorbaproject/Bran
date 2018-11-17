@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1213</width>
-    <height>667</height>
+    <height>759</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -25,7 +25,7 @@
     <item>
      <widget class="QGroupBox" name="groupBox">
       <property name="title">
-       <string>Seleziona i file da confrontare</string>
+       <string>File da confrontare</string>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
@@ -63,7 +63,7 @@
          <item row="0" column="0">
           <widget class="QRadioButton" name="sel_dict">
            <property name="text">
-            <string>Dizionario:</string>
+            <string>Di&amp;zionario:</string>
            </property>
           </widget>
          </item>
@@ -87,7 +87,7 @@
          <item>
           <widget class="QRadioButton" name="altrofile">
            <property name="text">
-            <string>Altro file:</string>
+            <string>&amp;Altro file:</string>
            </property>
           </widget>
          </item>
@@ -122,20 +122,40 @@
        <string>Cosa stai confrontando?</string>
       </property>
       <layout class="QGridLayout" name="gridLayout">
-       <item row="0" column="0">
+       <item row="1" column="0">
         <widget class="QTabWidget" name="tabWidget">
          <property name="currentIndex">
           <number>0</number>
          </property>
          <widget class="QWidget" name="tab_3">
           <attribute name="title">
-           <string>Occorrenze parole</string>
+           <string>Risultati delle analisi di Bran</string>
           </attribute>
           <layout class="QVBoxLayout" name="verticalLayout_3">
            <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_5">
+             <item>
+              <widget class="QLabel" name="label_8">
+               <property name="maximumSize">
+                <size>
+                 <width>90</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>Tipo di analisi</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="datatype"/>
+             </item>
+            </layout>
+           </item>
+           <item>
             <widget class="QRadioButton" name="occ_diff">
              <property name="text">
-              <string>Trova le differenze</string>
+              <string>Tro&amp;va le differenze</string>
              </property>
              <property name="checked">
               <bool>true</bool>
@@ -165,37 +185,9 @@
            </item>
           </layout>
          </widget>
-         <widget class="QWidget" name="tab_4">
-          <attribute name="title">
-           <string>Occorrenze PoS</string>
-          </attribute>
-          <layout class="QVBoxLayout" name="verticalLayout_4">
-           <item>
-            <widget class="QPushButton" name="pushButton_3">
-             <property name="text">
-              <string>Confronta</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-         <widget class="QWidget" name="tab_5">
-          <attribute name="title">
-           <string>Segmenti ripetuti</string>
-          </attribute>
-          <layout class="QVBoxLayout" name="verticalLayout_5">
-           <item>
-            <widget class="QPushButton" name="pushButton_4">
-             <property name="text">
-              <string>Confronta</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
          <widget class="QWidget" name="tab_6">
           <attribute name="title">
-           <string>Generico</string>
+           <string>Tabelle generiche</string>
           </attribute>
           <layout class="QVBoxLayout" name="verticalLayout_8">
            <item>
@@ -276,14 +268,14 @@
              <item>
               <widget class="QRadioButton" name="radioButton">
                <property name="text">
-                <string>Mostra valori</string>
+                <string>Trova le differenze</string>
                </property>
               </widget>
              </item>
              <item>
               <widget class="QRadioButton" name="radioButton_2">
                <property name="text">
-                <string>Deviazione standard</string>
+                <string>De&amp;viazione standard</string>
                </property>
               </widget>
              </item>
