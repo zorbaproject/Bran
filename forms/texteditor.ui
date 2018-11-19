@@ -49,6 +49,7 @@
     </property>
     <addaction name="actionNuovo"/>
     <addaction name="actionApri"/>
+    <addaction name="actionPreview_mode"/>
     <addaction name="actionSalva"/>
     <addaction name="actionSalva_come"/>
     <addaction name="separator"/>
@@ -191,6 +192,14 @@
    </property>
    <property name="text">
     <string>Modalità batch</string>
+   </property>
+  </action>
+  <action name="actionPreview_mode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Mostra solo anteprima</string>
    </property>
   </action>
  </widget>

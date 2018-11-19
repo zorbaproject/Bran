@@ -1601,6 +1601,19 @@ if __name__ == "__main__":
             TintThread.loadvariables(Java, TintDir, TintPort)
             TintThread.start()
             time.sleep(30)
+        if sys.argv[1] == "texteditor":
+            te = texteditor.TextEditor()
+            if len(sys.argv)>2:
+                fileNames = []
+                for i in range(2, len(sys.argv)):
+                    if os.path.isfile(sys.argv[i]):
+                        fileNames = [sys.argv[i]]
+                    if os.path.isdir(sys.argv[i]):
+                        for tfile in os.listdir(sys.argv[i]):
+                            if tfile[-4:] == ".txt":
+                                fileNames.append(os.path.join(sys.argv[i],tfile))
+                    te.aprilista(fileNames)
+            te.exec()
         if sys.argv[1] == "occorrenze":
             calcola_occorrenze()
         if sys.argv[1] == "extractcolumn":
