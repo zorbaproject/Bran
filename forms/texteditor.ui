@@ -16,21 +16,20 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <item>
-       <widget class="QListWidget" name="filelist">
-        <property name="maximumSize">
-         <size>
-          <width>150</width>
-          <height>16777215</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPlainTextEdit" name="plainTextEdit"/>
-      </item>
-     </layout>
+     <widget class="QSplitter" name="splitter">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <widget class="QListWidget" name="filelist">
+       <property name="maximumSize">
+        <size>
+         <width>150</width>
+         <height>16777215</height>
+        </size>
+       </property>
+      </widget>
+      <widget class="QPlainTextEdit" name="plainTextEdit"/>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -71,6 +70,7 @@
     </property>
     <addaction name="actionConta_occorrenze"/>
     <addaction name="actionRimuovi_frasi_ripetute"/>
+    <addaction name="actionEstrai_con_RegEx"/>
    </widget>
    <widget class="QMenu" name="menuAbout">
     <property name="title">
@@ -110,15 +110,24 @@
    <property name="text">
     <string>&amp;Nuovo</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
   </action>
   <action name="actionApri">
    <property name="text">
     <string>&amp;Apri</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
   </action>
   <action name="actionSalva">
    <property name="text">
     <string>&amp;Salva</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
    </property>
   </action>
   <action name="actionSalva_come">
@@ -129,6 +138,9 @@
   <action name="actionChiudi">
    <property name="text">
     <string>&amp;Chiudi</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+W</string>
    </property>
   </action>
   <action name="actionConta_occorrenze">
@@ -200,6 +212,11 @@
    </property>
    <property name="text">
     <string>Mostra solo anteprima</string>
+   </property>
+  </action>
+  <action name="actionEstrai_con_RegEx">
+   <property name="text">
+    <string>Estrai con RegEx</string>
    </property>
   </action>
  </widget>

@@ -17,6 +17,7 @@ from PySide2.QtCore import QFile
 from PySide2.QtWidgets import QFileDialog
 from PySide2.QtWidgets import QMainWindow
 from PySide2.QtWidgets import QDialog
+from PySide2.QtCore import Qt
 
 
 from forms import regex_replace
@@ -38,32 +39,65 @@ class TextEditor(QDialog):
         self.w.actionRimuovi_frasi_ripetute.triggered.connect(self.rm_doublephrases)
         self.w.actionCerca_e_sostituisci.triggered.connect(self.searchreplace)
         self.w.actionNuovo.triggered.connect(self.nuovo)
+        self.w.actionChiudi.triggered.connect(self.chiudi)
         self.w.actionApri.triggered.connect(self.apri)
         self.w.actionSalva.triggered.connect(self.salva)
         self.w.actionSalva_come.triggered.connect(self.salvacome)
+        self.w.actionCopia.triggered.connect(self.copia)
+        self.w.actionTaglia.triggered.connect(self.taglia)
+        self.w.actionIncolla.triggered.connect(self.incolla)
         self.w.actionBatch_mode.triggered.connect(self.batchmodeshift)
         self.w.actionPreview_mode.triggered.connect(self.previewmodeshift)
         self.w.actionElimina_invii_a_capo_multipli.triggered.connect(self.delmultiplecrlf)
         self.w.filelist.currentRowChanged.connect(self.switchfile)
         self.w.plainTextEdit.cursorPositionChanged.connect(self.showcurpos)
+        self.w.plainTextEdit.textChanged.connect(self.textchanged)
         self.currentFilename = ""
         self.batchmode = False
         self.donotshow = False
         self.previewlimit = 500000
         self.showpreview = False
         self.sessionDir = "."
+        self.modified = -1
         self.setWindowTitle("Bran Text Editor")
 
     def nuovo(self):
         self.currentFilename = ""
         self.w.plainTextEdit.setPlainText("")
         self.setWindowTitle("Bran Text Editor")
+        self.modified = -1
+        self.w.plainTextEdit.document().clearUndoRedoStacks()
 
     def switchfile(self):
+        if self.modified == 1:
+            ret = QMessageBox.question(self,'Domanda', "Il file attuale è stato modificato, se passi a un altro file le modifiche verranno perse. Vuoi salvare il file attuale?", QMessageBox.Yes | QMessageBox.No)
+            if ret == QMessageBox.Yes:
+                self.salva()
         fileName = self.w.filelist.item(self.w.filelist.currentRow()).text()
         self.setWindowTitle("Bran Text Editor - "+fileName)
         self.loadfile(fileName)
         self.currentFilename = fileName
+
+    def textchanged(self):
+        if self.w.plainTextEdit.toPlainText() != "":
+            self.modified = 1
+
+    def chiudi(self):
+        for i in self.w.filelist.selectedItems():
+            self.w.filelist.takeItem(self.w.filelist.row(i))
+        for i in range(self.w.filelist.count()):
+            item = self.w.filelist.item(i)
+            self.w.filelist.setItemSelected(item, False)
+        self.nuovo()
+
+    def copia(self):
+        self.w.plainTextEdit.copy()
+
+    def incolla(self):
+        self.w.plainTextEdit.paste()
+
+    def taglia(self):
+        self.w.plainTextEdit.cut()
 
     def showcurpos(self):
         row = self.w.plainTextEdit.textCursor().blockNumber()
@@ -71,16 +105,23 @@ class TextEditor(QDialog):
         self.w.statusBar().showMessage("Riga: "+str(row)+" Colonna: "+str(col))
 
     def linescount(self, filename):
-        f = open(filename, "r+", encoding='utf-8')
-        buf = mmap.mmap(f.fileno(), 0)
         lines = 0
-        readline = buf.readline
-        while readline():
-            lines += 1
+        try:
+            f = open(filename, "r+", encoding='utf-8')
+            buf = mmap.mmap(f.fileno(), 0)
+            readline = buf.readline
+            while readline():
+                lines += 1
+        except:
+            lines = 0
         return lines
 
     def salva(self, onlycurrent = ""):
         if self.currentFilename == "":
+            self.salvacome()
+            return
+        if self.showpreview:
+            QMessageBox.information(self, "Attenzione", "È abilitata la modalità di anteprima: significa che il testo attualmente visualizzato potrebbe non essere il completo contenuto del file originale. Per evitare sovrascritture, ti verrà chiesto di salvare su un nuovo file.")
             self.salvacome()
             return
         fileName = self.currentFilename
@@ -88,25 +129,21 @@ class TextEditor(QDialog):
         text_file = open(fileName, "w", encoding='utf-8')
         text_file.write("")
         text_file.close()
+        self.Progrdialog = progress.Form(self)
+        self.Progrdialog.show()
+        row = 0
+        totallines = len(textlist)
         for line in textlist:
+            self.Progrdialog.w.testo.setText("Sto salvando la riga numero "+str(row))
+            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            QApplication.processEvents()
+            if self.Progrdialog.w.annulla.isChecked():
+                return
             with open(fileName, "a", encoding='utf-8') as myfile:
                 myfile.write(line+"\n")
-
-    def saveregexedit(self, orig, dest):
-        fileNames = []
-        if not self.batchmode:
-            fileNames.append(self.currentFilename)
-        else:
-            for i in range(self.w.filelist.count()):
-                fileNames.append(self.w.filelist.item(i).text())
-        #for fileName in fileNames:
-            #textlist = self.w.plainTextEdit.toPlainText().split("\n")
-            #text_file = open(fileName, "w", encoding='utf-8')
-            #text_file.write("")
-            #text_file.close()
-            #for line in textlist:
-                #with open(fileName, "a", encoding='utf-8') as myfile:
-                    #myfile.write(line+"\n")
+            row = row + 1
+        self.modified = 0
+        self.Progrdialog.accept()
 
     def salvacome(self):
         fileName = QFileDialog.getSaveFileName(self, "Salva file TXT", self.sessionDir, "Text files (*.txt)")[0]
@@ -118,21 +155,22 @@ class TextEditor(QDialog):
 
     def apri(self):
         fileNames = QFileDialog.getOpenFileNames(self, "Apri file TXT", self.sessionDir, "Text files (*.txt *.md)")[0]
-        aprilista(fileNames)
+        self.aprilista(fileNames)
 
     def aprilista(self, fileNames):
         if len(fileNames)<1:
             return
-        if len(fileNames)>1 and not self.batchmode:
+        for fileName in fileNames:
+            if len(self.w.filelist.findItems(fileName, Qt.MatchExactly))==0:
+                self.w.filelist.addItem(fileName)
+        fileName = fileNames[-1]
+        self.currentFilename = fileName
+        self.w.filelist.setCurrentRow(self.w.filelist.count()-1)
+        if self.w.filelist.count()>1 and not self.batchmode:
             ret = QMessageBox.question(self,'Domanda', "Hai selezionato più di un file. Se attivi la modalità batch, le modifiche eseguite con gli strumenti di ricerca e sostituzione verranno applicate automaticamente a tutti i file, altrimenti saranno applicate solo al file attivo. Vuoi attivare la modalità batch?", QMessageBox.Yes | QMessageBox.No)
             if ret == QMessageBox.Yes:
                 self.batchmode = True
                 self.w.actionBatch_mode.setChecked(True)
-        for fileName in fileNames:
-            self.w.filelist.addItem(fileName)
-        fileName = fileNames[-1]
-        self.currentFilename = fileName
-        self.w.filelist.setCurrentRow(self.w.filelist.count()-1)
         self.loadfile(fileName)
 
     def loadfile(self, fileName = ""):
@@ -153,7 +191,8 @@ class TextEditor(QDialog):
             self.nuovo()
             lines = self.openwithencoding(fileName, myencoding[0])
             if lines == "ERRORE BRAN: Codifica errata":
-               return
+                self.loadfile(fileName)
+                return
         self.setWindowTitle("Bran Text Editor - "+fileName)
         self.currentFilename = fileName
 
@@ -184,6 +223,8 @@ class TextEditor(QDialog):
         except:
             lines = "ERRORE BRAN: Codifica errata"
         self.Progrdialog.accept()
+        self.modified = 0
+        self.w.plainTextEdit.document().clearUndoRedoStacks()
         return lines
 
     def batchopenwithencoding(self, fileName, myencoding = 'utf-8', totallines = -1):
@@ -202,8 +243,6 @@ class TextEditor(QDialog):
                         QApplication.processEvents()
                         if self.Progrdialog.w.annulla.isChecked():
                             return
-                    if row>0:
-                        lines = lines + "\n"
                     lines = lines + line
                     row = row + 1
         except:
@@ -228,13 +267,13 @@ class TextEditor(QDialog):
             self.w.actionPreview_mode.setChecked(True)
 
     def searchreplace(self):
-        self.do_searchreplace()
+        self.do_searchreplace(self.w.plainTextEdit.toPlainText())
 
     def delmultiplecrlf(self):
         #ripeti finché non ce ne sono più
-        self.do_searchreplace("\\n\\n","\\n", False)
+        self.do_searchreplace(self.w.plainTextEdit.toPlainText(), "\\n\\n","\\n", False)
 
-    def do_searchreplace(self, searchstr = "", replstr = "", oneline = True):
+    def do_searchreplace(self, mytext, searchstr = "", replstr = "", oneline = True):
         repCdialog = regex_replace.Form(self)
         repCdialog.setModal(False)
         repCdialog.w.lbl_in.hide()
@@ -245,36 +284,74 @@ class TextEditor(QDialog):
         repCdialog.w.colcheck.setChecked(oneline)
         repCdialog.exec()
         if repCdialog.result():
-            self.Progrdialog = progress.Form(self)
-            self.Progrdialog.show()
-            newtext = ""
-            if repCdialog.w.colcheck.isChecked():
-                textlist = self.w.plainTextEdit.toPlainText().split("\n")
-                totallines = len(textlist)
-                for row in range(totallines):
-                    self.Progrdialog.w.testo.setText("Sto cercando nella riga numero "+str(row))
-                    self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
-                    QApplication.processEvents()
-                    if self.Progrdialog.w.annulla.isChecked():
-                        return
-                    origstr = textlist[row]
-                    newstr = ""
-                    if repCdialog.w.ignorecase.isChecked():
-                        newstr = re.sub(repCdialog.w.orig.text(), repCdialog.w.dest.text(), origstr, flags=re.IGNORECASE|re.DOTALL)
-                    else:
-                        newstr = re.sub(repCdialog.w.orig.text(), repCdialog.w.dest.text(), origstr, flags=re.DOTALL)
-                    if row > 0:
-                        newtext = newtext + "\n"
-                    newtext = newtext + newstr
+            if repCdialog.w.ignorecase.isChecked():
+                myflags=re.IGNORECASE|re.DOTALL
             else:
-                origstr = self.w.plainTextEdit.toPlainText()
-                newtext = ""
-                if repCdialog.w.ignorecase.isChecked():
-                    newtext = re.sub(repCdialog.w.orig.text(), repCdialog.w.dest.text(), origstr, flags=re.IGNORECASE|re.DOTALL)
+                myflags=re.DOTALL
+            newtext = ""
+            fileNames = []
+            if self.batchmode:
+                for i in range(self.w.filelist.count()):
+                    fileNames.append(self.w.filelist.item(i).text())
+            else:
+                fileNames.append("")
+            totfiles = len(fileNames)
+            filen = 0
+            Progrdialog = progress.Form(self)
+            Progrdialog.show()
+            for fileName in fileNames:
+                if fileName != "" and os.path.isfile(fileName) and self.batchmode:
+                    mytext = self.batchopenwithencoding(fileName, 'utf-8')
+                    if mytext == "ERRORE BRAN: Codifica errata":
+                        predefEncode = "ISO-8859-15"
+                        #https://pypi.org/project/chardet/
+                        myencoding = QInputDialog.getText(self, "Scegli la codifica", "Sembra che questo file non sia codificato in UTF-8. Vuoi provare a specificare una codifica diversa? (Es: cp1252 oppure ISO-8859-15)", QLineEdit.Normal, predefEncode)
+                        self.nuovo()
+                        mytext = self.openwithencoding(fileName, myencoding[0])
+                        if mytext == "ERRORE BRAN: Codifica errata":
+                           return
                 else:
-                    newtext = re.sub(repCdialog.w.orig.text(), repCdialog.w.dest.text(), origstr, flags=re.DOTALL)
-            self.w.plainTextEdit.setPlainText(newtext)
-            self.Progrdialog.accept()
+                    self.w.plainTextEdit.setPlainText("")
+                if repCdialog.w.colcheck.isChecked():
+                    textlist = mytext.split("\n")
+                    totallines = len(textlist)
+                    for row in range(totallines):
+                        Progrdialog.w.testo.setText("Sto cercando nella riga numero "+str(row))
+                        Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+                        QApplication.processEvents()
+                        if Progrdialog.w.annulla.isChecked():
+                            return
+                        origstr = textlist[row]
+                        newstr = re.sub(repCdialog.w.orig.text(), repCdialog.w.dest.text(), origstr, flags=myflags)
+                        newtext = newstr
+                        if not self.batchmode:
+                            self.w.plainTextEdit.appendPlainText(newtext)
+                        else:
+                            if row == 0:
+                                text_file = open(fileName, "w", encoding='utf-8')
+                                text_file.write("")
+                                text_file.close()
+                            with open(fileName, "a", encoding='utf-8') as myfile:
+                                if row > 0:
+                                    newtext = "\n" + newtext
+                                myfile.write(newtext)
+                else:
+                    Progrdialog.w.testo.setText("Sto cercando nel file numero "+str(filen))
+                    Progrdialog.w.progressBar.setValue(int((filen/totfiles)*100))
+                    QApplication.processEvents()
+                    if Progrdialog.w.annulla.isChecked():
+                        return
+                    newtext = re.sub(repCdialog.w.orig.text(), repCdialog.w.dest.text(), mytext, flags=myflags)
+                    if fileName != "":
+                        text_file = open(fileName, "w", encoding='utf-8')
+                        text_file.write(newtext)
+                        text_file.close()
+                    else:
+                        self.w.plainTextEdit.setPlainText(newtext)
+                    filen = filen + 1
+            Progrdialog.accept()
+            if self.batchmode:
+                self.switchfile()
 
     def rm_doublephrases(self):
         #dele phrases repeated: https://pastebin.com/7Krbii0d
@@ -358,7 +435,7 @@ class TextEditor(QDialog):
         mycol = 1
         csvfile = ""
         mydelimiter = '\t'
-        res = occ_count(csvfile, "", mycol, mydelimiter)
+        res = self.occ_count(csvfile, "", mycol, mydelimiter)
 
     def occ_count(self, csvfile = "", outputfile = "", mycol = 1, mydelimiter = '\t'):
         mycsv = []
