@@ -96,13 +96,13 @@ class Confronto(QDialog):
         "Il fu Mattia Pascal": branroot  + "/corpora/",
         "Twitter Wilwoosh": branroot  + "/corpora/",
         "Lercio.it": branroot  + "/corpora/",
-        "Wikipedia": branroot  + "/corpora/"}
+        "Wikipedia": branroot  + "/corpora/wikipedia/wiki-it"}
         for key in self.dizionari:
             self.w.with_dict.addItem(key)
         for key in self.corpora:
             self.w.with_corpora.addItem(key)
         self.w.sel_dict.setChecked(True)
-        self.datatype = ['Occorrenze Lemma','Occorrenze PoS', 'Statistiche VdB', 'Contaverbi', 'Densità lessicale', 'Segmenti ripetuti']
+        self.datatype = ['Occorrenze Lemma', 'Occorrenze forma grafica','Occorrenze PoS', 'Statistiche VdB', 'Contaverbi', 'Densità lessicale', 'Segmenti ripetuti']
         for key in self.datatype:
             self.w.datatype.addItem(key)
         self.w.datatype.setCurrentIndex(0)
@@ -117,6 +117,8 @@ class Confronto(QDialog):
                 fileName = fileName + "-occorrenze-lemma.csv"
             if action == "Occorrenze PoS":
                 fileName = fileName + "-occorrenze-pos.csv"
+            if action == "Occorrenze forma grafica":
+                fileName = fileName + "-occorrenze-token.csv"
             if action == "Statistiche VdB":
                 fileName = fileName + "-vdb.csv"
             if action == "Contaverbi":
@@ -154,50 +156,55 @@ class Confronto(QDialog):
         TBdialog.addcolumn(context, 0)
         self.Progrdialog = progress.Form(self)
         self.Progrdialog.show()
-        try:
-            thistext = ""
-            thisvalue = ""
-            indexes = 1 + self.w.corpora.count()
-            outputcol = 1;
-            for i in range(indexes):
+        thistext = ""
+        thisvalue = ""
+        indexes = 1 + self.w.corpora.count()
+        outputcol = 1;
+        for i in range(indexes):
+            corpKeyCol = 0
+            corpValueCol = 1
+            if context == "generico":
+                corpKeyCol = self.w.genConfKey.value()
+                corpValueCol = self.w.genConfVal.value()
                 if i == 0:
-                    corpus = riferimento
-                    colname = os.path.basename(riferimentoName)
-                else:
-                    corpus = self.readcsv(self.w.corpora.item(i-1).text())
-                    colname = os.path.basename(self.w.corpora.item(i-1).text())
-                TBdialog.addcolumn(colname, i+1)
-                if self.w.occ_ds.isChecked():
-                    TBdialog.addcolumn(colname+" DS", outputcol+1)
-                if self.w.occ_rms.isChecked():
-                    TBdialog.addcolumn(colname+" RMS", outputcol+1)
-                totallines = len(corpus)
-                corpKeyCol = 0
-                corpValueCol = 1
-                if context != "generico":
-                    corpKeyCol = 0
-                    corpValueCol = 1
-                else:
-                    corpKeyCol = self.w.genConfKey.value()
-                    corpValueCol = self.w.genConfVal.value()
-                    if i == 0:
-                        corpKeyCol = self.w.genRifKey.value()
-                        corpValueCol = self.w.genRifVal.value()
-                    if self.w.gen_diff.isChecked():
-                        self.w.occ_diff.setChecked(True)
-                    if self.w.gen_ds.isChecked():
-                        self.w.occ_ds.setChecked(True)
-                    if self.w.gen_rms.isChecked():
-                        self.w.occ_rms.setChecked(True)
-                startrow = 0
-                if self.w.ignorefirstrow.isChecked():
-                    startrow = 1
+                    corpKeyCol = self.w.genRifKey.value()
+                    corpValueCol = self.w.genRifVal.value()
+                if self.w.gen_diff.isChecked():
+                    self.w.occ_diff.setChecked(True)
+                if self.w.gen_ds.isChecked():
+                    self.w.occ_ds.setChecked(True)
+                if self.w.gen_rms.isChecked():
+                    self.w.occ_rms.setChecked(True)
+            if i == 0:
+                corpus = riferimento
+                colname = os.path.basename(riferimentoName)
+            else:
+                corpus = self.readcsv(self.w.corpora.item(i-1).text())
+                colname = os.path.basename(self.w.corpora.item(i-1).text())
+            TBdialog.addcolumn(colname, i+1)
+            if self.w.occ_ds.isChecked():
+                TBdialog.addcolumn(colname+" SCARTO", outputcol+1)
+            if self.w.occ_rms.isChecked():
+                TBdialog.addcolumn(colname+" RMS", outputcol+1)
+            totallines = len(corpus)
+            startrow = 0
+            if self.w.ignorefirstrow.isChecked():
+                startrow = 1
+            thistotal = 0.0
+            if self.w.dopercent.isChecked():
                 for row in range(startrow, len(corpus)):
-                    self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
-                    self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
-                    QApplication.processEvents()
-                    if self.Progrdialog.w.annulla.isChecked():
-                        return
+                    try:
+                        thisvalue = corpus[row][corpValueCol]
+                    except:
+                        thisvalue = "0"
+                    thistotal = thistotal + float(thisvalue) #vogliamo considerare solo il valore assoluto?
+            for row in range(startrow, len(corpus)):
+                self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
+                self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+                QApplication.processEvents()
+                if self.Progrdialog.w.annulla.isChecked():
+                    return
+                try:
                     thistext = corpus[row][corpKeyCol]
                     if context == "Occorrenze PoS":
                         try:
@@ -207,6 +214,8 @@ class Confronto(QDialog):
                     if self.w.occ_ds.isChecked() or self.w.occ_rms.isChecked():
                         try:
                             thisvalue = corpus[row][corpValueCol]
+                            if self.w.dopercent.isChecked() and not self.w.occ_diff.isChecked():
+                                thisvalue = str(float((float(thisvalue)/thistotal)*100))
                         except:
                             thisvalue = "1"
                     if self.w.occ_diff.isChecked():
@@ -218,17 +227,16 @@ class Confronto(QDialog):
                         if self.w.occ_ds.isChecked() and i>0:
                             N = 2
                             try:
-                                rifval = int(TBdialog.w.tableWidget.item(tbrow,1).text())
+                                rifval = float(TBdialog.w.tableWidget.item(tbrow,1).text())
                             except:
-                                rifval = 0
-                            mean = (rifval+float(thisvalue))/N
-                            tbval = math.sqrt((math.pow(rifval-mean,2)+ math.pow(float(thisvalue)-mean,2))/N)
+                                rifval = 0.0
+                            tbval = float((float(thisvalue)-rifval)/math.sqrt(rifval))
                         if self.w.occ_rms.isChecked() and i>0:
                             N = 2
                             try:
-                                rifval = int(TBdialog.w.tableWidget.item(tbrow,1).text())
+                                rifval = float(TBdialog.w.tableWidget.item(tbrow,1).text())
                             except:
-                                rifval = 0
+                                rifval = 0.0
                             tbval = math.sqrt((math.pow(rifval,2)+ math.pow(float(thisvalue),2))/N)
                         if self.w.occ_ds.isChecked() or self.w.occ_rms.isChecked():
                             TBdialog.setcelltotable(str(thisvalue), tbrow, outputcol)
@@ -238,7 +246,6 @@ class Confronto(QDialog):
                     else:
                         TBdialog.addlinetotable(thistext, 0)
                         tbrow = TBdialog.w.tableWidget.rowCount()-1
-                        #TBdialog.setcelltotable(thisvalue, tbrow, i+1)
                         if bool(self.w.occ_ds.isChecked() or self.w.occ_rms.isChecked()) and i>0:
                             TBdialog.setcelltotable(str(thisvalue), tbrow, outputcol)
                             TBdialog.setcelltotable("0", tbrow, outputcol+1)
@@ -246,12 +253,12 @@ class Confronto(QDialog):
                             TBdialog.setcelltotable(str(thisvalue), tbrow, i+1)
                         for itemp in range(1,i+1):
                             TBdialog.setcelltotable("0", tbrow, itemp)
-                if self.w.occ_ds.isChecked() or self.w.occ_rms.isChecked():
-                    outputcol = outputcol + 2
-                else:
-                    outputcol = outputcol + 1
-        except:
-            thistext = ""
+                except:
+                    thistext = ""
+            if self.w.occ_ds.isChecked() or self.w.occ_rms.isChecked():
+                outputcol = outputcol + 2
+            else:
+                outputcol = outputcol + 1
         totallines = TBdialog.w.tableWidget.rowCount()
         for col in range(TBdialog.w.tableWidget.columnCount()):
             for row in range(totallines):

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1213</width>
-    <height>759</height>
+    <height>715</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -107,14 +107,25 @@
      </widget>
     </item>
     <item>
-     <widget class="QCheckBox" name="ignorefirstrow">
-      <property name="text">
-       <string>Ignora la prima riga (di solito è l'intestazione della tabella)</string>
-      </property>
-      <property name="checked">
-       <bool>true</bool>
-      </property>
-     </widget>
+     <layout class="QHBoxLayout" name="horizontalLayout_6">
+      <item>
+       <widget class="QCheckBox" name="ignorefirstrow">
+        <property name="text">
+         <string>Ignora la prima riga (di solito è l'intestazione della tabella)</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="dopercent">
+        <property name="text">
+         <string>Calcola percentuali (per comparare corpora di dimensione diversa)</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
     <item>
      <widget class="QGroupBox" name="groupBox_2">
@@ -165,7 +176,7 @@
            <item>
             <widget class="QRadioButton" name="occ_ds">
              <property name="text">
-              <string>Calcola Deviazione Standard</string>
+              <string>Calcola scarto standardizzato</string>
              </property>
             </widget>
            </item>
@@ -202,28 +213,32 @@
                 </widget>
                </item>
                <item>
-                <widget class="QLabel" name="label_4">
-                 <property name="text">
-                  <string>Colonna chiave:</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QSpinBox" name="genRifKey"/>
-               </item>
-               <item>
-                <widget class="QLabel" name="label_5">
-                 <property name="text">
-                  <string>Colonna valore:</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QSpinBox" name="genRifVal">
-                 <property name="value">
-                  <number>1</number>
-                 </property>
-                </widget>
+                <layout class="QGridLayout" name="gridLayout_3">
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="label_4">
+                   <property name="text">
+                    <string>Colonna chiave:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QSpinBox" name="genRifKey"/>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QLabel" name="label_5">
+                   <property name="text">
+                    <string>Colonna valore:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="1">
+                  <widget class="QSpinBox" name="genRifVal">
+                   <property name="value">
+                    <number>1</number>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
                </item>
               </layout>
              </item>
@@ -244,28 +259,32 @@
                 </widget>
                </item>
                <item>
-                <widget class="QLabel" name="label_6">
-                 <property name="text">
-                  <string>Colonna chiave:</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QSpinBox" name="genConfKey"/>
-               </item>
-               <item>
-                <widget class="QLabel" name="label_7">
-                 <property name="text">
-                  <string>Colonna valore:</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QSpinBox" name="genConfVal">
-                 <property name="value">
-                  <number>1</number>
-                 </property>
-                </widget>
+                <layout class="QGridLayout" name="gridLayout_5">
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="label_6">
+                   <property name="text">
+                    <string>Colonna chiave:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QSpinBox" name="genConfKey"/>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QLabel" name="label_7">
+                   <property name="text">
+                    <string>Colonna valore:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="1">
+                  <widget class="QSpinBox" name="genConfVal">
+                   <property name="value">
+                    <number>1</number>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
                </item>
               </layout>
              </item>
@@ -276,7 +295,7 @@
              <item>
               <widget class="QRadioButton" name="gen_diff">
                <property name="text">
-                <string>Trova le differenze</string>
+                <string>Tro&amp;va le differenze</string>
                </property>
                <property name="checked">
                 <bool>true</bool>
@@ -286,7 +305,7 @@
              <item>
               <widget class="QRadioButton" name="gen_ds">
                <property name="text">
-                <string>De&amp;viazione standard</string>
+                <string>Scarto standardizzato</string>
                </property>
               </widget>
              </item>
