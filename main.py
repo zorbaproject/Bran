@@ -1549,17 +1549,17 @@ def mergetables():
                         with open(recovery, "a", encoding='utf-8') as rowfile:
                             rowfile.write(str(row)+"\n")
                 row = row + 1
-            if "mean" in opers and firstfile > 0 and row == totallines and startatrow < totallines:
-                for mrow in range(len(table)):
-                    for valind in range(len(opers)):
-                        if opers[valind] == "mean":
-                            try:
-                                table[mrow][valind+1] = float(table[mrow][valind+1])/2
-                            except:
-                                err = True
-                savetable(table, output)
-    print("Done")
+    if "mean" in opers and firstfile > 0 and row == totallines and startatrow < totallines:
+        for mrow in range(len(table)):
+            for valind in range(len(opers)):
+                if opers[valind] == "mean":
+                    try:
+                        table[mrow][valind+1] = float(table[mrow][valind+1])/len(fileNames)
+                    except:
+                        err = True
     savetable(table, output)
+    print("Done")
+    
 
 def splitbigfile():
     separator = '\t'
