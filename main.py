@@ -144,7 +144,7 @@ class MainWindow(QMainWindow):
             'feat': 5,
             'IDword': 6
         }
-        self.legendaPos = {"A":["aggettivo", "aggettivi", "piene"],"AP":["agg. poss", "aggettivi", "piene"],"B":["avverbio", "avverbi", "piene"],"B+PC":["avverbio+pron. clit. ", "avverbi", "piene"],"BN":["avv, negazione", "avverbi", "piene"],"CC":["cong. coord", "congiunzioni", "vuote"],"CS":["cong. sub.", "congiunzioni", "vuote"],"DD":["det. dim.", "aggettivi", "piene"],"DE":["det. esclam.", "aggettivi", "piene"],"DI":["det. indefinito", "aggettivi", "piene"],"DQ":["det. interr.", "aggettivi", "piene"],"DR":["det. Rel", "aggettivi", "piene"],"E":["preposizione", "preposizioni", "vuote"],"E+RD":["prep. art. ", "preposizioni", "vuote"],"FB":["punteggiatura - \"\" () «» - - ", "punteggiatura", "none"],"FC":["punteggiatura - : ;", "punteggiatura", "none"],"FF":["punteggiatura - ,", "punteggiatura", "none"],"FS":["punteggiatura - .?!", "punteggiatura", "none"],"I":["interiezione", "interiezioni", "vuote"],"N":["numero", "altro", "none"],"NO":["numerale", "aggettivi", "piene"],"PC":["pron. Clitico", "pronomi", "vuote"],"PC+PC":["pron. clitico+clitico", "pronomi", "vuote"],"PD":["pron. dimostrativo", "pronomi","vuote"],"PE":["pron. pers. ", "pronomi", "vuote"],"PI":["pron. indef.", "pronomi", "vuote"],"PP":["pron. poss.", "pronomi", "vuote"],"PQ":["pron. interr.", "pronomi", "vuote"],"PR":["pron. rel.", "pronomi", "vuote"],"RD":["art. Det.", "articoli", "vuote"],"RI":["art. ind.", "articoli", "vuote"],"S":["sost.", "sostantivi", "piene"],"SP":["nome proprio", "sostantivi", "piene"],"SW":["forestierismo", "altro", "none"],"T":["det. coll.)", "aggettivi", "piene"],"V":["verbo", "verbi", "piene"],"V+PC":["verbo + pron. clitico", "verbi", "piene"],"V+PC+PC":["verbo + pron. clitico + pron clitico", "verbi", "piene"],"VA":["verbo ausiliare", "verbi", "piene"],"VA+PC":["verbo ausiliare + pron.clitico", "verbi", "piene"],"VM":["verbo mod", "verbi", "piene"],"VM+PC":["verbo mod + pron. clitico", "verbi", "piene"],"X":["altro", "altro", "none"]}
+        self.legendaPos = [] #{"A":["aggettivo", "aggettivi", "piene"],"AP":["agg. poss", "aggettivi", "piene"],"B":["avverbio", "avverbi", "piene"],"B+PC":["avverbio+pron. clit. ", "avverbi", "piene"],"BN":["avv, negazione", "avverbi", "piene"],"CC":["cong. coord", "congiunzioni", "vuote"],"CS":["cong. sub.", "congiunzioni", "vuote"],"DD":["det. dim.", "aggettivi", "piene"],"DE":["det. esclam.", "aggettivi", "piene"],"DI":["det. indefinito", "aggettivi", "piene"],"DQ":["det. interr.", "aggettivi", "piene"],"DR":["det. Rel", "aggettivi", "piene"],"E":["preposizione", "preposizioni", "vuote"],"E+RD":["prep. art. ", "preposizioni", "vuote"],"FB":["punteggiatura - \"\" () «» - - ", "punteggiatura", "none"],"FC":["punteggiatura - : ;", "punteggiatura", "none"],"FF":["punteggiatura - ,", "punteggiatura", "none"],"FS":["punteggiatura - .?!", "punteggiatura", "none"],"I":["interiezione", "interiezioni", "vuote"],"N":["numero", "altro", "none"],"NO":["numerale", "aggettivi", "piene"],"PC":["pron. Clitico", "pronomi", "vuote"],"PC+PC":["pron. clitico+clitico", "pronomi", "vuote"],"PD":["pron. dimostrativo", "pronomi","vuote"],"PE":["pron. pers. ", "pronomi", "vuote"],"PI":["pron. indef.", "pronomi", "vuote"],"PP":["pron. poss.", "pronomi", "vuote"],"PQ":["pron. interr.", "pronomi", "vuote"],"PR":["pron. rel.", "pronomi", "vuote"],"RD":["art. Det.", "articoli", "vuote"],"RI":["art. ind.", "articoli", "vuote"],"S":["sost.", "sostantivi", "piene"],"SP":["nome proprio", "sostantivi", "piene"],"SW":["forestierismo", "altro", "none"],"T":["det. coll.)", "aggettivi", "piene"],"V":["verbo", "verbi", "piene"],"V+PC":["verbo + pron. clitico", "verbi", "piene"],"V+PC+PC":["verbo + pron. clitico + pron clitico", "verbi", "piene"],"VA":["verbo ausiliare", "verbi", "piene"],"VA+PC":["verbo ausiliare + pron.clitico", "verbi", "piene"],"VM":["verbo mod", "verbi", "piene"],"VM+PC":["verbo mod + pron. clitico", "verbi", "piene"],"X":["altro", "altro", "none"]}
         self.ignorepos = ["punteggiatura - \"\" () «» - - ", "punteggiatura - : ;", "punteggiatura - ,", "punteggiatura - .?!", "altro"]
         self.separator = "\t"
         self.enumeratecolumns(self.w.ccolumn)
@@ -1261,7 +1261,148 @@ def calcola_occorrenze():
                         with open(recovery, "a", encoding='utf-8') as rowfile:
                             rowfile.write(str(row)+"\n")
                 row = row + 1
+            savetable(table, output)
+            with open(recovery, "a", encoding='utf-8') as rowfile:
+                rowfile.write(str(row)+"\n")
 
+
+def contaverbi(corpuscols, legendaPos):
+    poscol = corpuscols["pos"] #thisname.index(column[0])
+    morfcol = corpuscols["feat"]
+    separator = '\t'
+    fileNames = []
+    if os.path.isfile(sys.argv[2]):
+        fileNames = [sys.argv[2]]
+    if os.path.isdir(sys.argv[2]):
+        for tfile in os.listdir(sys.argv[2]):
+            if tfile[-4:] == ".csv":
+                fileNames.append(os.path.join(sys.argv[2],tfile))
+    for fileName in fileNames:
+        #totallines = self.w.corpus.rowCount()
+        table = []
+        output = fileName + "-contaverbi.csv"
+        recovery = output + ".tmp"
+        startatrow = -1
+        print(fileName + " -> " + output)
+        try:
+            if os.path.isfile(recovery):
+                ch = "Y"
+                try:
+                    if sys.argv[4] == "y" or sys.argv[4] == "Y":
+                        ch = "Y"
+                except:
+                    print("Ho trovato un file di ripristino, lo devo usare? [Y/N]")
+                    ch = input()
+                if ch == "Y" or ch == "y":
+                    with open(recovery, "r", encoding='utf-8') as tempfile:
+                       lastline = (list(tempfile)[-1])
+                    startatrow = int(lastline)
+                    print("Carico la tabella")
+                    with open(output, "r", encoding='utf-8') as ins:
+                        for line in ins:
+                            table.append(line.replace("\n","").split(separator))
+                    print("Comincio dalla riga " + str(startatrow))
+                else:
+                    table.append(["Modo+Tempo", "Occorrenze", "Percentuali"])
+            else:
+                table.append(["Modo+Tempo", "Occorrenze", "Percentuali"])
+        except:
+            startatrow = -1
+            table.append(["Modo+Tempo", "Occorrenze", "Percentuali"])
+        corpus = []
+        with open(fileName, "r", encoding='utf-8') as ins:
+            for line in ins:
+                corpus.append(line.split(separator))
+        for row in range(len(corpus)):
+            if row > startatrow:
+                try:
+                    thispos = legendaPos[corpus[row][poscol]][0]
+                except:
+                    thispos = ""
+                thistext = ""
+                thistext2 = ""
+                if thispos.split(" ")[0] == "verbo":
+                    try:
+                        thistext = corpus[row][morfcol]
+                    except:
+                        thistext = ""
+                if "ausiliare" in thispos:
+                    for ind in range(1,4):
+                        try:
+                            tmpos = legendaPos[corpus[row+ind][poscol]][0]
+                        except:
+                            tmpos = ""
+                        if "verbo" in tmpos:
+                            thistext = ""
+                            break
+                elif thispos.split(" ")[0] == "verbo":
+                    for ind in range(1,4):
+                        try:
+                            tmpos = legendaPos[corpus[row-ind][poscol]][0]
+                        except:
+                            tmpos = ""
+                        if "ausiliare" in tmpos and "v+part+pass" in thistext:
+                            thistext2 = thistext2 + "/" + corpus[row-ind][morfcol]
+                        if "verbo" in tmpos and not "ausiliare" in tmpos:
+                            break
+                if len(thistext2)>0:
+                    if thistext2[0]=="/":
+                        thistext2=thistext2[1:]
+                if bool(re.match('^v\+.*?$', thistext))==False:
+                    thistext = ""
+                if bool(re.match('^v\+.*?$', thistext2))==False:
+                    thistext2 = ""
+                if len(thistext.split("+")) >= 3:
+                    tmptext = thistext.split("+")[0] + "+" +thistext.split("+")[1] + "+" +thistext.split("+")[2]
+                    thistext = tmptext
+                thistext3 = ""
+                if len(thistext2.split("/"))>1:
+                    thistext3 = thistext2.split("/")[1]
+                    thistext2 = thistext2.split("/")[0]
+                if bool(re.match('^v\+.*?$', thistext3))==False:
+                    thistext3 = ""
+                if len(thistext2.split("+")) >= 3:
+                    tmptext = thistext2.split("+")[0] + "+" +thistext2.split("+")[1] + "+" +thistext2.split("+")[2]
+                    thistext2 = tmptext + "/"
+                if len(thistext3.split("+")) >= 3:
+                    tmptext = thistext3.split("+")[0] + "+" +thistext3.split("+")[1] + "+" +thistext3.split("+")[2]
+                    thistext3 = tmptext + "/"
+                if thistext != "":
+                    thistext = thistext3 + thistext2 + thistext
+                if thistext != "":
+                    #tbitem = TBdialog.w.tableWidget.findItems(thistext,Qt.MatchExactly)
+                    tbrow = findintable(table, thistext, 0)
+                    if tbrow>=0:
+                        tbval = int(table[tbrow][1])+1
+                        table[tbrow][1] = tbval
+                    else:
+                        newrow = [thistext, "1"]
+                        table.append(newrow)
+            if row % 500 == 0 or row == len(corpus)-1:
+                savetable(table, output)
+                with open(recovery, "a", encoding='utf-8') as rowfile:
+                    rowfile.write(str(row)+"\n")
+        #calcolo le percentuali
+        print("Calcolo le percentuali")
+        totallines = len(table)
+        verbitotali = 0
+        for row in range(len(table)):
+            try:
+                tval = int(table[row][1])
+            except:
+                tval = 0
+            verbitotali = verbitotali + tval
+        for row in range(len(table)):
+            try:
+                ratio = (float(table[row][1])/float(verbitotali)*100)
+                ratios = f'{ratio:.3f}'
+            except:
+                ratios = table[row][1]
+            if len(table[row])>2:
+                table[row][2] = ratios
+            else:
+                table[row].append(ratios)
+        savetable(table, output)
 
 def estrai_colonna():
     separator = '\t'
@@ -1543,16 +1684,17 @@ def samplebigfile():
 
 
 if __name__ == "__main__":
+    corpuscols = {
+                'IDcorpus': 0,
+                'Orig': 1,
+                'Lemma': 2,
+                'pos': 3,
+                'ner': 4,
+                'feat': 5,
+                'IDword': 6
+    }
+    legendaPos = {"A":["aggettivo", "aggettivi", "piene"],"AP":["agg. poss", "aggettivi", "piene"],"B":["avverbio", "avverbi", "piene"],"B+PC":["avverbio+pron. clit. ", "avverbi", "piene"],"BN":["avv, negazione", "avverbi", "piene"],"CC":["cong. coord", "congiunzioni", "vuote"],"CS":["cong. sub.", "congiunzioni", "vuote"],"DD":["det. dim.", "aggettivi", "piene"],"DE":["det. esclam.", "aggettivi", "piene"],"DI":["det. indefinito", "aggettivi", "piene"],"DQ":["det. interr.", "aggettivi", "piene"],"DR":["det. Rel", "aggettivi", "piene"],"E":["preposizione", "preposizioni", "vuote"],"E+RD":["prep. art. ", "preposizioni", "vuote"],"FB":["punteggiatura - \"\" () «» - - ", "punteggiatura", "none"],"FC":["punteggiatura - : ;", "punteggiatura", "none"],"FF":["punteggiatura - ,", "punteggiatura", "none"],"FS":["punteggiatura - .?!", "punteggiatura", "none"],"I":["interiezione", "interiezioni", "vuote"],"N":["numero", "altro", "none"],"NO":["numerale", "aggettivi", "piene"],"PC":["pron. Clitico", "pronomi", "vuote"],"PC+PC":["pron. clitico+clitico", "pronomi", "vuote"],"PD":["pron. dimostrativo", "pronomi","vuote"],"PE":["pron. pers. ", "pronomi", "vuote"],"PI":["pron. indef.", "pronomi", "vuote"],"PP":["pron. poss.", "pronomi", "vuote"],"PQ":["pron. interr.", "pronomi", "vuote"],"PR":["pron. rel.", "pronomi", "vuote"],"RD":["art. Det.", "articoli", "vuote"],"RI":["art. ind.", "articoli", "vuote"],"S":["sost.", "sostantivi", "piene"],"SP":["nome proprio", "sostantivi", "piene"],"SW":["forestierismo", "altro", "none"],"T":["det. coll.)", "aggettivi", "piene"],"V":["verbo", "verbi", "piene"],"V+PC":["verbo + pron. clitico", "verbi", "piene"],"V+PC+PC":["verbo + pron. clitico + pron clitico", "verbi", "piene"],"VA":["verbo ausiliare", "verbi", "piene"],"VA+PC":["verbo ausiliare + pron.clitico", "verbi", "piene"],"VM":["verbo mod", "verbi", "piene"],"VM+PC":["verbo mod + pron. clitico", "verbi", "piene"],"X":["altro", "altro", "none"]}
     if len(sys.argv)>1:
-        corpuscols = {
-                    'IDcorpus': 0,
-                    'Orig': 1,
-                    'Lemma': 2,
-                    'pos': 3,
-                    'ner': 4,
-                    'feat': 5,
-                    'IDword': 6
-        }
         w = "cli"
         app = QApplication(sys.argv)
         if sys.argv[1] == "help" or sys.argv[1] == "aiuto":
@@ -1566,6 +1708,7 @@ if __name__ == "__main__":
             print("python3 main.py samplebigfile file.txt [maxnumberoflines] [.]\n")
             print("python3 main.py occorrenze file.csv|cartella [colonna] [y]\n")
             print("python3 main.py extractcolumn file.csv|cartella colonna\n")
+            print("python3 main.py contaverbi file.csv|cartella\n")
             print("* python3 main.py mergetables cartella colonnaChiave [sum|mean|diff,sum|mean|diff] [1] [y]\n")
             print("Gli argomenti tra parentesi [] sono facoltativi.")
             print("\nI comandi preceduti da * sono sperimentali o non ancora implementati.")
@@ -1616,6 +1759,8 @@ if __name__ == "__main__":
             te.exec()
         if sys.argv[1] == "occorrenze":
             calcola_occorrenze()
+        if sys.argv[1] == "contaverbi":
+            contaverbi(corpuscols, legendaPos)
         if sys.argv[1] == "extractcolumn":
             estrai_colonna()
         if sys.argv[1] == "splitbigfile":
@@ -1627,6 +1772,8 @@ if __name__ == "__main__":
     else:
         app = QApplication(sys.argv)
         w = MainWindow()
+        w.corpuscols = corpuscols
+        w.legendaPos = legendaPos
         w.show()
         sys.exit(app.exec_())
 
