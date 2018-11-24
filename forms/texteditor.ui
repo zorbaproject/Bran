@@ -71,6 +71,7 @@
     <addaction name="actionConta_occorrenze"/>
     <addaction name="actionRimuovi_frasi_ripetute"/>
     <addaction name="actionEstrai_con_RegEx"/>
+    <addaction name="actionEstrai_testo_da_file_PDF"/>
    </widget>
    <widget class="QMenu" name="menuAbout">
     <property name="title">
@@ -84,7 +85,7 @@
     </property>
     <widget class="QMenu" name="menuMaiuscole_Minuscole">
      <property name="title">
-      <string>Maiuscole/Minuscole</string>
+      <string>&amp;Maiuscole/Minuscole</string>
      </property>
      <addaction name="actionTutto_maiuscolo"/>
      <addaction name="actionTutto_minuscolo"/>
@@ -155,47 +156,47 @@
   </action>
   <action name="actionCerca_e_sostituisci">
    <property name="text">
-    <string>Cerca e sostituisci</string>
+    <string>Cerca &amp;e sostituisci</string>
    </property>
   </action>
   <action name="actionCopia">
    <property name="text">
-    <string>Copia</string>
+    <string>&amp;Copia</string>
    </property>
   </action>
   <action name="actionIncolla">
    <property name="text">
-    <string>Incolla</string>
+    <string>&amp;Incolla</string>
    </property>
   </action>
   <action name="actionTaglia">
    <property name="text">
-    <string>Taglia</string>
+    <string>&amp;Taglia</string>
    </property>
   </action>
   <action name="actionTutto_maiuscolo">
    <property name="text">
-    <string>Tutto maiuscolo</string>
+    <string>&amp;Tutto maiuscolo</string>
    </property>
   </action>
   <action name="actionTutto_minuscolo">
    <property name="text">
-    <string>Tutto minuscolo</string>
+    <string>Tutto &amp;minuscolo</string>
    </property>
   </action>
   <action name="actionIniziali_sempre_minuscole">
    <property name="text">
-    <string>Iniziali sempre minuscole</string>
+    <string>&amp;Iniziali sempre minuscole</string>
    </property>
   </action>
   <action name="actionElimina_parole_con_numeri">
    <property name="text">
-    <string>Elimina parole con numeri</string>
+    <string>&amp;Elimina parole con numeri</string>
    </property>
   </action>
   <action name="actionElimina_invii_a_capo_multipli">
    <property name="text">
-    <string>Elimina invii a capo multipli</string>
+    <string>Elimina &amp;invii a capo multipli</string>
    </property>
   </action>
   <action name="actionBatch_mode">
@@ -203,7 +204,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Modalità batch</string>
+    <string>&amp;Modalità batch</string>
    </property>
   </action>
   <action name="actionPreview_mode">
@@ -211,12 +212,17 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Mostra solo anteprima</string>
+    <string>&amp;Mostra solo anteprima</string>
    </property>
   </action>
   <action name="actionEstrai_con_RegEx">
    <property name="text">
-    <string>Estrai con RegEx</string>
+    <string>&amp;Estrai con RegEx</string>
+   </property>
+  </action>
+  <action name="actionEstrai_testo_da_file_PDF">
+   <property name="text">
+    <string>Estrai testo da altro file</string>
    </property>
   </action>
  </widget>

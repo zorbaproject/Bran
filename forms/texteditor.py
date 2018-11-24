@@ -4,6 +4,8 @@
 from os import path
 import sys
 import os
+import subprocess
+import platform
 import csv
 import re
 import mmap
@@ -49,6 +51,7 @@ class TextEditor(QDialog):
         self.w.actionBatch_mode.triggered.connect(self.batchmodeshift)
         self.w.actionPreview_mode.triggered.connect(self.previewmodeshift)
         self.w.actionElimina_invii_a_capo_multipli.triggered.connect(self.delmultiplecrlf)
+        self.w.actionEstrai_testo_da_file_PDF.triggered.connect(self.do_textract)
         self.w.filelist.currentRowChanged.connect(self.switchfile)
         self.w.plainTextEdit.cursorPositionChanged.connect(self.showcurpos)
         self.w.plainTextEdit.textChanged.connect(self.textchanged)
@@ -511,4 +514,66 @@ class TextEditor(QDialog):
         nth_split = [left_join.join(groups[:n]), right_join.join(groups[n:])]
         return new.join(nth_split)
 
+    def install_textract(self):
+        try:
+            import pip
+            import sys
+            import os
+            debcmd = "sudo apt-get install python-dev libxml2-dev libxslt1-dev antiword unrtf poppler-utils pstotext tesseract-ocr flac ffmpeg lame libmad0 libsox-fmt-mp3 sox libjpeg-dev swig libpulse-dev"
+            rpmcmd = "sudo yum install python-devel libxml2-devel libxslt1-devel antiword unrtf poppler-utils pstotext tesseract-ocr flac ffmpeg lame libmad0 libsox-fmt-mp3 sox libjpeg-devel swig libpulse-devel"
+            try:
+                import textract
+            except:
+                if platform.system() == "Linux":
+                    if os.path.isfile("/usr/bin/apt-get"):
+                        os.system("xterm -e "+debcmd)
+                     else:
+                         os.system("xterm -e "+rpmcmd)
+                try:
+                    pip.main(["install", "textract"])
+                except:
+                    from pip._internal import main as pipmain
+                    pipmain(["install", "textract"])
+            if platform.system() == "OS X":
+                maccmd = "brew install caskroom/cask/brew-cask \nbrew cask install xquartz \nbrew install poppler antiword unrtf tesseract swig"
+                QMessageBox.information(self, "Ottimo", "Ricordati che sarà necessario installare una serie di pacchetti affinché Textract possa funzionare. Su un sistema di tipo MacOSX dovrai dare un comando di questo tipo: "+maccmd)
+        except:
+            QMessageBox.critical(self, "Peccato...", "Non sono riuscito a installare Textract. Potrebbe essere un problema temporaneo, riprova tra qualche giorno. Altrimenti, consulta la pagina https://textract.readthedocs.io/en/latest/installation.html")
+            return
 
+    def do_textract(self):
+        if platform.system() == "Windows":
+            QMessageBox.warning(self, "Peccato...", "L'utilizzo della libreria Textract su Windows è sperimentale: puoi provare a installarlo, ma molti tipi di file potrebbero non essere supportati. Se vuoi essere sicuro che funzioni tutto, prova a usare Bran da GNU/Linux o MacOSX.")
+        try:
+            import textract
+        except:
+            ret = QMessageBox.question(self,'Suggerimento', "Pare che la libreria Textract non sia installata sul tuo sistema. Vuoi provare a installarla adesso?\nSe la procedura si interrompe, basta ripeterla più volte fino al corretto completamento.", QMessageBox.Yes | QMessageBox.No)
+            if ret == QMessageBox.Yes:
+                self.install_textract()
+            return
+        oldcurfile = self.currentFilename
+        if self.modified == 1:
+            ret = QMessageBox.question(self,'Domanda', "Il file attuale è stato modificato, se passi a un altro file le modifiche verranno perse. Vuoi salvare il file attuale?", QMessageBox.Yes | QMessageBox.No)
+            if ret == QMessageBox.Yes:
+                self.salva()
+        try:
+            exts = "*.csv *.doc *.docx *.eml *.epub *.gif *.jpg *.jpeg *.json *.html *.htm *.mp3 *.msg *.odt *.ogg *.pdf *.png via tesseract-ocr *.pptx *.ps *.rtf *.tiff *.tif *.txt *.wav *.xlsx *.xls"
+            fileNames = QFileDialog.getOpenFileNames(self, "Apri file", self.sessionDir, "Text files ("+exts+")")[0]
+            if len(fileNames)>0:
+                self.nuovo()
+            for fileName in fileNames:
+                mybytes = b''
+                if ".gif" in fileName or ".jpg" in fileName or ".jpeg" in fileName or ".png" in fileName:
+                    predefLang = "ita"
+                    mylang = QInputDialog.getText(self.w, "Scegli la lingua", "Sembra che tu abbia selezionato un file immagine. Per estrarre il testo, verrà usato l'OCR: per favore, specifica la lingua del testo (es: ita, eng, deu)", QLineEdit.Normal, predefLang)[0]
+                    mybytes = textract.process(fileName, language=mylang, method='tesseract', encoding='utf-8')
+                else:
+                    mybytes = textract.process(fileName, encoding='utf-8')
+                mytext = mybytes.decode('utf-8')
+                self.w.plainTextEdit.appendPlainText(str(mytext))
+        except:
+            fileName = oldcurfile
+            self.setWindowTitle("Bran Text Editor - "+fileName)
+            if fileName != "" and os.path.isfile(fileName):
+                self.loadfile(fileName)
+                self.currentFilename = fileName
