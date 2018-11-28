@@ -524,19 +524,24 @@ class TextEditor(QDialog):
             try:
                 import textract
             except:
+                pkgname = "textract"
                 if platform.system() == "Linux":
                     if os.path.isfile("/usr/bin/apt-get"):
                         os.system("xterm -e "+debcmd)
-                     else:
+                    else:
                          os.system("xterm -e "+rpmcmd)
+                elif platform.system() == "Windows":
+                    #http://prdownloads.sourceforge.net/swig/swigwin-3.0.12.zip 
+                    QMessageBox.information(self, "Attenzione", "Prima di installare Textract devi installare SWIG, seguendo le istruzioni della pagina https://stackoverflow.com/questions/44504899/installing-pocketsphinx-python-module-command-swig-exe-failed")
+                    pkgname = "https://github.com/deanmalmgren/textract/archive/master.zip"
+                elif platform.system() == "OS X":
+                    maccmd = "brew install caskroom/cask/brew-cask \nbrew cask install xquartz \nbrew install poppler antiword unrtf tesseract swig"
+                    QMessageBox.information(self, "Ottimo", "Ricordati che sarà necessario installare una serie di pacchetti affinché Textract possa funzionare. Su un sistema di tipo MacOSX dovrai dare un comando di questo tipo: "+maccmd)
                 try:
-                    pip.main(["install", "textract"])
+                    pip.main(["install", pkgname])
                 except:
                     from pip._internal import main as pipmain
-                    pipmain(["install", "textract"])
-            if platform.system() == "OS X":
-                maccmd = "brew install caskroom/cask/brew-cask \nbrew cask install xquartz \nbrew install poppler antiword unrtf tesseract swig"
-                QMessageBox.information(self, "Ottimo", "Ricordati che sarà necessario installare una serie di pacchetti affinché Textract possa funzionare. Su un sistema di tipo MacOSX dovrai dare un comando di questo tipo: "+maccmd)
+                    pipmain(["install", pkgname])
         except:
             QMessageBox.critical(self, "Peccato...", "Non sono riuscito a installare Textract. Potrebbe essere un problema temporaneo, riprova tra qualche giorno. Altrimenti, consulta la pagina https://textract.readthedocs.io/en/latest/installation.html")
             return
