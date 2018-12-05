@@ -92,7 +92,7 @@ class TintRunner(QThread):
                 if self.iscli:
                     print(msg)
                 else:
-                    QMessageBox.warning(self, "Poca memoria", msg)
+                    QMessageBox.warning(self.w, "Poca memoria", msg)
             args = [self.Java,"-Xmx1800m", "-classpath", CLASSPATH, "eu.fbk.dh.tint.runner.TintServer", "-p ",self.TintPort]
         print(self.Java)
         try:
