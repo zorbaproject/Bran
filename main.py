@@ -23,10 +23,6 @@ import random
 import math
 
 arch = platform.architecture()[0]
-if arch != '64bit':
-    from tkinter import messagebox
-    messagebox.showinfo("Pericolo", "Sembra che tu stia utilizzando Python a 32bit. La maggioranza delle librerie moderne (come PySide2) utilizza codice a 64bit, per poter sfruttare appieno la RAM. Per favore, installa Python a 64bit.")
-    sys.exit(1)
 
 try:
     from PySide2.QtWidgets import QApplication

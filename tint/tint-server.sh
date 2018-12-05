@@ -35,4 +35,4 @@ done
 #echo $_CLASSPATH
 
 # Execute the program
-echo $_JAVA $JAVA_OPTS -classpath $_CLASSPATH eu.fbk.dh.tint.runner.TintServer "$@"
+$_JAVA $JAVA_OPTS -classpath $_CLASSPATH eu.fbk.dh.tint.runner.TintServer "$@"
