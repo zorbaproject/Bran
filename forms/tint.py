@@ -63,6 +63,37 @@ class TintRunner(QThread):
         readystring = "TintServer - Pipeline loaded"  #"[HttpServer] Started"
         CLASSPATH = self.TintDir+"/*"
         args = [self.Java,"-classpath", CLASSPATH, "eu.fbk.dh.tint.runner.TintServer", "-p ",self.TintPort]
+        lowram = False
+        try:
+            import psutil
+            mymem = dict(psutil.virtual_memory()._asdict())
+            if mymem["total"]/1000000 < 2048:
+                lowram = True
+        except:
+            lowram = True
+        if lowram:
+            swapinfo = "/etc/dphys-swapfile"
+            lines = ""
+            if os.path.isfile(swapinfo):
+                text_file = open(swapinfo, "r", encoding='utf-8')
+                lines = text_file.read()
+                text_file.close()
+            badswap = True
+            for line in lines.split("\n"):
+                if "CONF_SWAPSIZE" in line:
+                    try:
+                        swsize = int(line.split("=")[1])
+                    except:
+                        swsize = 0
+                    if swsize >= 2048:
+                        badswap = False
+            if badswap:
+                msg = "Sembra che tua abbia poca memoria e uno swap piccolo. Per favore, apri il file " + swapinfo + " con privilegi di amministrazione e imposta la riga:\nCONF_SWAPSIZE=2048\nDovrai riavviare il computer perché le modifiche siano effettive."
+                if self.iscli:
+                    print(msg)
+                else:
+                    QMessageBox.warning(self, "Poca memoria", msg)
+            args = [self.Java,"-Xmx1800m", "-classpath", CLASSPATH, "eu.fbk.dh.tint.runner.TintServer", "-p ",self.TintPort]
         print(self.Java)
         try:
             p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)

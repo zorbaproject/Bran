@@ -43,6 +43,25 @@ except:
         except:
             sys.exit(1)
 
+#
+try:
+    import psutil
+except:
+    try:
+        from tkinter import messagebox
+        thispkg = "la libreria psutil"
+        messagebox.showinfo("Installazione, attendi prego", "Sto per installare "+ thispkg +" e ci vorrà del tempo. Premi Ok e vai a prenderti un caffè.")
+        pip.main(["install", "psutil"])
+        #pip install --index-url=http://download.qt.io/snapshots/ci/pyside/5.9/latest/ pyside2 --trusted-host download.qt.io
+        import psutil
+    except:
+        try:
+            from pip._internal import main as pipmain
+            pipmain(["install", "psutil"])
+            import psutil
+        except:
+            sys.exit(1)
+
 try:
     from pyquery import PyQuery as pqtest
     from lxml import etree
