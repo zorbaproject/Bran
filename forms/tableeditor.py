@@ -8,6 +8,7 @@ from PySide2.QtWidgets import QLabel
 from PySide2.QtWidgets import QFileDialog
 from PySide2.QtWidgets import QInputDialog
 from PySide2.QtWidgets import QMessageBox
+from PySide2.QtWidgets import QPushButton
 from PySide2.QtCore import QFile
 from PySide2.QtWidgets import QTableWidget
 from PySide2.QtWidgets import QTableWidgetItem
@@ -32,10 +33,14 @@ class Form(QDialog):
         self.w.apricsv.clicked.connect(self.apriCSV)
         self.w.salvacsv.clicked.connect(self.salvaCSV)
         self.w.tableWidget.itemSelectionChanged.connect(self.selOps)
+        self.w.dofiltra.clicked.connect(self.dofiltra)
+        self.w.cancelfiltro.clicked.connect(self.cancelfiltro)
+        self.w.filterGroup.clicked.connect(self.filtersh)
         self.w.apricsv.hide()
         self.setWindowTitle("Visualizzazione tabella")
         self.sessionDir = "."
         self.separator = "\t"
+        self.w.filterWidget.hide()
 
     def isaccepted(self):
         self.accept()
@@ -48,6 +53,7 @@ class Form(QDialog):
         titem = QTableWidgetItem()
         titem.setText(text)
         self.w.tableWidget.setHorizontalHeaderItem(cols, titem)
+        self.enumeratecolumns(self.w.ccolumn)
 
     def addlinetotable(self, text, column):
         row = self.w.tableWidget.rowCount()
@@ -64,6 +70,18 @@ class Form(QDialog):
         self.w.tableWidget.setItem(row, column, titem)
 
     def salvaCSV(self):
+        checkfilter = False
+        for row in range(self.w.tableWidget.rowCount()):
+            if self.w.tableWidget.isRowHidden(row):
+                msgBox = QMessageBox(self)
+                msgBox.setWindowTitle("Domanda")
+                msgBox.setText("Cosa vuoi salvare?")
+                msgBox.addButton(QPushButton("Solo le righe filtrate", self.w), QMessageBox.YesRole)
+                msgBox.addButton(QPushButton('Salva tutte le righe', self.w), QMessageBox.NoRole)
+                msgBox.exec_()
+                if msgBox.clickedButton().text() == "Solo le righe filtrate":
+                    checkfilter = True
+                break
         fileName = QFileDialog.getSaveFileName(self, "Salva file CSV", self.sessionDir, "Text files (*.csv *.txt)")[0]
         if fileName != "":
             if fileName[-4:] != ".csv":
@@ -74,14 +92,15 @@ class Form(QDialog):
                     csv = csv + self.separator
                 csv = csv + self.w.tableWidget.horizontalHeaderItem(col).text()
             for row in range(self.w.tableWidget.rowCount()):
-                csv = csv + "\n"
-                for col in range(self.w.tableWidget.columnCount()):
-                    if col > 0:
-                        csv = csv + self.separator
-                    try:
-                        csv = csv + self.w.tableWidget.item(row,col).text()
-                    except:
-                        csv = csv + ""
+                if self.w.tableWidget.isRowHidden(row) == False or checkfilter == False:
+                    csv = csv + "\n"
+                    for col in range(self.w.tableWidget.columnCount()):
+                        if col > 0:
+                            csv = csv + self.separator
+                        try:
+                            csv = csv + self.w.tableWidget.item(row,col).text()
+                        except:
+                            csv = csv + ""
             text_file = open(fileName, "w", encoding='utf-8')
             text_file.write(csv)
             text_file.close()
@@ -101,3 +120,33 @@ class Form(QDialog):
         except:
             if (self.w.statusbar.text() != ""):
                 self.w.statusbar.setText("")
+
+
+    def enumeratecolumns(self, combo):
+        combo.clear()
+        for col in range(self.w.tableWidget.columnCount()):
+            thisname = self.w.tableWidget.horizontalHeaderItem(col).text()
+            combo.addItem(thisname)
+
+    def dofiltra(self):
+        tcount = 0
+        for row in range(self.w.tableWidget.rowCount()):
+            col = self.w.ccolumn.currentIndex()
+            ctext = self.w.tableWidget.item(row,col).text()
+            ftext = self.w.cfilter.text()
+            if bool(re.match(ftext, ctext)):
+                self.w.tableWidget.setRowHidden(row, False)
+                tcount = tcount +1
+            else:
+                self.w.tableWidget.setRowHidden(row, True)
+        self.w.statusbar.setText("Risultati totali: " +str(tcount))
+
+    def cancelfiltro(self):
+        for row in range(self.w.tableWidget.rowCount()):
+            self.w.tableWidget.setRowHidden(row, False)
+
+    def filtersh(self):
+        if self.w.filterWidget.isVisible() == True:
+            self.w.filterWidget.hide()
+        else:
+            self.w.filterWidget.show()
