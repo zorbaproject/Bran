@@ -54,6 +54,13 @@
          </property>
         </widget>
        </item>
+       <item>
+        <widget class="QPushButton" name="findNext">
+         <property name="text">
+          <string>Trova prossimo</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
     </item>
@@ -319,7 +326,7 @@
   </action>
   <action name="actionConfronta_corpora">
    <property name="text">
-    <string>Confronta corpora</string>
+    <string>C&amp;onfronta corpora</string>
    </property>
   </action>
  </widget>

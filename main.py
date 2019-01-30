@@ -127,6 +127,7 @@ class MainWindow(QMainWindow):
         self.w.actionSostituisci_nel_corpus_con_RegEx.triggered.connect(self.replaceCorpus)
         self.w.dofiltra.clicked.connect(self.dofiltra)
         self.w.cancelfiltro.clicked.connect(self.cancelfiltro)
+        self.w.findNext.clicked.connect(self.findNext)
         self.w.delselected.clicked.connect(self.delselected)
         self.w.actionRimuovi_righe_selezionate.triggered.connect(self.delselected)
         self.w.actionScarica_corpus_da_sito_web.triggered.connect(self.web2corpus)
@@ -805,9 +806,9 @@ class MainWindow(QMainWindow):
         tcount = 0
         for row in range(self.w.corpus.rowCount()):
             col = self.w.ccolumn.currentIndex()
-            ctext = self.w.corpus.item(row,col).text()
+            #ctext = self.w.corpus.item(row,col).text()
             ftext = self.w.cfilter.text()
-            if bool(re.match(ftext, ctext)):
+            if self.applicaFiltro(self.w.corpus, row, col, ftext): #if bool(re.match(ftext, ctext)):
                 self.w.corpus.setRowHidden(row, False)
                 tcount = tcount +1
             else:
@@ -836,6 +837,28 @@ class MainWindow(QMainWindow):
                 self.w.corpus.setRowHidden(row, True)
         self.w.statusbar.showMessage("Risultati totali: " +str(tcount))
         self.Progrdialog.accept()
+
+    def findNext(self):
+        irow = 0
+        if len(self.w.corpus.selectedItems())>0:
+            irow = self.w.corpus.selectedItems()[len(self.w.corpus.selectedItems())-1].row()+1
+        if irow < self.w.corpus.rowCount():
+            col = self.w.ccolumn.currentIndex()
+            for row in range(irow, self.w.corpus.rowCount()):
+                ftext = self.w.cfilter.text()
+                if self.applicaFiltro(self.w.corpus, row, col, ftext):
+                    self.w.corpus.setCurrentCell(row,0)
+                    break
+
+    def applicaFiltro(self, table, row, col, filtro):
+        res = False
+        ctext = table.item(row,col).text()
+        ftext = filtro
+        if bool(re.match(ftext, ctext)):
+            res = True
+        else:
+            res = False
+        return res
 
     def removevisiblerows(self):
         self.Progrdialog = progress.Form()
