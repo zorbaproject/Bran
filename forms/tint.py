@@ -183,7 +183,12 @@ class TintCorpus(QThread):
                     if self.iscli:
                         self.outputcsv = fileName + ".csv"
                     print(fileName + " -> " + self.outputcsv)
-                    self.text2corpusTINT(lines, str(fileID)+"_"+os.path.basename(fileName))
+                    try:
+                        corpusID = str(fileID)+"_"+os.path.basename(fileName)
+                        corpusID = QInputDialog.getText(self.w, "Scegli l'ID", "Indica l'ID di questo file nel corpus:", QLineEdit.Normal, corpusID)
+                    except:
+                        corpusID = str(fileID)+"_"+os.path.basename(fileName)
+                    self.text2corpusTINT(lines, corpusID)
         if self.fileNames == []:
             testline = "Il gatto è sopra al tetto."
             myres = self.getJson(testline)

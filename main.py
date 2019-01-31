@@ -124,7 +124,9 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.w)
         self.setWindowTitle("Bran")
         self.w.replace_in_corpus.clicked.connect(self.replaceCorpus)
+        self.w.replace_in_cells.clicked.connect(self.replaceCells)
         self.w.actionSostituisci_nel_corpus_con_RegEx.triggered.connect(self.replaceCorpus)
+        self.w.actionSostituisci_solo_nelle_celle_selezionate.triggered.connect(self.replaceCells)
         self.w.dofiltra.clicked.connect(self.dofiltra)
         self.w.cancelfiltro.clicked.connect(self.cancelfiltro)
         self.w.findNext.clicked.connect(self.findNext)
@@ -151,6 +153,7 @@ class MainWindow(QMainWindow):
         self.w.actionStatistiche_con_VdB.triggered.connect(self.statisticheconvdb)
         self.w.actionTrova_ripetizioni.triggered.connect(self.trovaripetizioni)
         self.w.actionConta_verbi.triggered.connect(self.contaverbi)
+        self.w.actionItaliano.triggered.connect(lambda: self.changeLang("it-IT"))
         self.corpuscols = {
             'IDcorpus': 0,
             'Orig': 1,
@@ -163,6 +166,7 @@ class MainWindow(QMainWindow):
         self.legendaPos = [] #{"A":["aggettivo", "aggettivi", "piene"],"AP":["agg. poss", "aggettivi", "piene"],"B":["avverbio", "avverbi", "piene"],"B+PC":["avverbio+pron. clit. ", "avverbi", "piene"],"BN":["avv, negazione", "avverbi", "piene"],"CC":["cong. coord", "congiunzioni", "vuote"],"CS":["cong. sub.", "congiunzioni", "vuote"],"DD":["det. dim.", "aggettivi", "piene"],"DE":["det. esclam.", "aggettivi", "piene"],"DI":["det. indefinito", "aggettivi", "piene"],"DQ":["det. interr.", "aggettivi", "piene"],"DR":["det. Rel", "aggettivi", "piene"],"E":["preposizione", "preposizioni", "vuote"],"E+RD":["prep. art. ", "preposizioni", "vuote"],"FB":["punteggiatura - \"\" () «» - - ", "punteggiatura", "none"],"FC":["punteggiatura - : ;", "punteggiatura", "none"],"FF":["punteggiatura - ,", "punteggiatura", "none"],"FS":["punteggiatura - .?!", "punteggiatura", "none"],"I":["interiezione", "interiezioni", "vuote"],"N":["numero", "altro", "none"],"NO":["numerale", "aggettivi", "piene"],"PC":["pron. Clitico", "pronomi", "vuote"],"PC+PC":["pron. clitico+clitico", "pronomi", "vuote"],"PD":["pron. dimostrativo", "pronomi","vuote"],"PE":["pron. pers. ", "pronomi", "vuote"],"PI":["pron. indef.", "pronomi", "vuote"],"PP":["pron. poss.", "pronomi", "vuote"],"PQ":["pron. interr.", "pronomi", "vuote"],"PR":["pron. rel.", "pronomi", "vuote"],"RD":["art. Det.", "articoli", "vuote"],"RI":["art. ind.", "articoli", "vuote"],"S":["sost.", "sostantivi", "piene"],"SP":["nome proprio", "sostantivi", "piene"],"SW":["forestierismo", "altro", "none"],"T":["det. coll.)", "aggettivi", "piene"],"V":["verbo", "verbi", "piene"],"V+PC":["verbo + pron. clitico", "verbi", "piene"],"V+PC+PC":["verbo + pron. clitico + pron clitico", "verbi", "piene"],"VA":["verbo ausiliare", "verbi", "piene"],"VA+PC":["verbo ausiliare + pron.clitico", "verbi", "piene"],"VM":["verbo mod", "verbi", "piene"],"VM+PC":["verbo mod + pron. clitico", "verbi", "piene"],"X":["altro", "altro", "none"]}
         self.ignorepos = ["punteggiatura - \"\" () «» - - ", "punteggiatura - : ;", "punteggiatura - ,", "punteggiatura - .?!", "altro"]
         self.separator = "\t"
+        self.language = "it-IT"
         self.enumeratecolumns(self.w.ccolumn)
         QApplication.processEvents()
         self.alreadyChecked = False
@@ -175,6 +179,10 @@ class MainWindow(QMainWindow):
         self.loadSession()
         self.loadConfig()
         self.txtloadingstopped()
+
+    def changeLang(self, lang):
+        self.language = lang
+        print("Set language "+self.language)
 
     def loadConfig(self):
         self.TintSetdialog = tint.Form(self, self.mycfg)
@@ -268,6 +276,33 @@ class MainWindow(QMainWindow):
                         self.setcelltocorpus(newstr, row, col)
             self.Progrdialog.accept()
 
+    def replaceCells(self):
+        repCdialog = regex_replace.Form(self)
+        repCdialog.setModal(False)
+        self.enumeratecolumns(repCdialog.w.colcombo)
+        repCdialog.exec()
+        if repCdialog.result():
+            self.Progrdialog = progress.Form()
+            self.Progrdialog.show()
+            totallines = len(self.w.corpus.selectedItems())
+            for i in range(len(self.w.corpus.selectedItems())):
+                row = self.w.corpus.selectedItems()[i].row()
+                col = self.w.corpus.selectedItems()[i].column()
+                self.Progrdialog.w.testo.setText("Sto cercando nella cella numero "+str(row))
+                self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+                QApplication.processEvents()
+                if self.Progrdialog.w.annulla.isChecked():
+                    return
+                if repCdialog.w.colcheck.isChecked() or (not repCdialog.w.colcheck.isChecked() and col == repCdialog.w.colcombo.currentIndex()):
+                    origstr = self.w.corpus.item(row,col).text()
+                    newstr = ""
+                    if repCdialog.w.ignorecase.isChecked():
+                        newstr = re.sub(repCdialog.w.orig.text(), repCdialog.w.dest.text(), origstr, flags=re.IGNORECASE|re.DOTALL)
+                    else:
+                        newstr = re.sub(repCdialog.w.orig.text(), repCdialog.w.dest.text(), origstr, flags=re.DOTALL)
+                    self.setcelltocorpus(newstr, row, col)
+            self.Progrdialog.accept()
+
     def contaoccorrenze(self):
         thisname = []
         for col in range(self.w.corpus.columnCount()):
@@ -282,6 +317,8 @@ class MainWindow(QMainWindow):
         self.Progrdialog.show()
         totallines = self.w.corpus.rowCount()
         for row in range(self.w.corpus.rowCount()):
+            if self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked() and self.w.corpus.isRowHidden(row):
+                continue
             self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
             self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
             QApplication.processEvents()
@@ -317,6 +354,8 @@ class MainWindow(QMainWindow):
         self.Progrdialog.show()
         totallines = self.w.corpus.rowCount()
         for row in range(self.w.corpus.rowCount()):
+            if self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked() and self.w.corpus.isRowHidden(row):
+                continue
             self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
             self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
             QApplication.processEvents()
@@ -481,6 +520,8 @@ class MainWindow(QMainWindow):
             col = self.corpuscols['Orig']
         totallines = self.w.corpus.rowCount()
         for row in range(self.w.corpus.rowCount()):
+            if self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked() and self.w.corpus.isRowHidden(row):
+                continue
             Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
             Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
             QApplication.processEvents()
@@ -596,6 +637,8 @@ class MainWindow(QMainWindow):
         totallines = self.w.corpus.rowCount()
         mytypes = {}
         for row in range(self.w.corpus.rowCount()):
+            if self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked() and self.w.corpus.isRowHidden(row):
+                continue
             self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
             self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
             QApplication.processEvents()
@@ -845,6 +888,8 @@ class MainWindow(QMainWindow):
         if irow < self.w.corpus.rowCount():
             col = self.w.ccolumn.currentIndex()
             for row in range(irow, self.w.corpus.rowCount()):
+                if self.w.corpus.isRowHidden(row):
+                    continue
                 ftext = self.w.cfilter.text()
                 if self.applicaFiltro(self.w.corpus, row, col, ftext):
                     self.w.corpus.setCurrentCell(row,0)
@@ -892,10 +937,11 @@ class MainWindow(QMainWindow):
         if len(fileNames)<1:
             return
         #self.w.statusbar.showMessage("ATTENDI: Sto importando i file txt nel corpus...")
-        self.TCThread = tint.TintCorpus(self.w, fileNames, self.corpuscols, self.TintAddr)
-        self.TCThread.outputcsv = self.sessionFile
-        self.TCThread.finished.connect(self.txtloadingstopped)
-        self.TCThread.start()
+        if self.language == "it-IT":
+            self.TCThread = tint.TintCorpus(self.w, fileNames, self.corpuscols, self.TintAddr)
+            self.TCThread.outputcsv = self.sessionFile
+            self.TCThread.finished.connect(self.txtloadingstopped)
+            self.TCThread.start()
 
     def loadjson(self):
         QMessageBox.information(self, "Attenzione", "Caricare un file JSON prodotto manualmente può essere pericoloso: se i singoli paragrafi sono troppo grandi, il programma può andare in crash. Utilizza questa funzione solo se sai esattamente cosa stai facendo.")
@@ -1091,6 +1137,8 @@ class MainWindow(QMainWindow):
         totaltypes = 0
         mytypes = {}
         for row in range(self.w.corpus.rowCount()):
+            if self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked() and self.w.corpus.isRowHidden(row):
+                continue
             self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
             self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
             QApplication.processEvents()

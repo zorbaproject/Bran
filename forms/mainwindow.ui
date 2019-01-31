@@ -116,6 +116,13 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="replace_in_cells">
+        <property name="text">
+         <string>Sostituisci nelle celle selezionate</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="delselected">
         <property name="text">
          <string>Elimina righe selezionate</string>
@@ -155,8 +162,15 @@
      <addaction name="actionEsporta_vista_attuale_in_CSV"/>
      <addaction name="actionEsporta_corpus_in_un_CSV_per_ogni_ID"/>
     </widget>
+    <widget class="QMenu" name="menuImposta_lingua">
+     <property name="title">
+      <string>Lingua</string>
+     </property>
+     <addaction name="actionItaliano"/>
+    </widget>
     <addaction name="actionApri"/>
     <addaction name="actionSalva"/>
+    <addaction name="menuImposta_lingua"/>
     <addaction name="menuImporta_corpus"/>
     <addaction name="menuEsporta"/>
     <addaction name="separator"/>
@@ -191,6 +205,7 @@
     <property name="title">
      <string>A&amp;nalisi</string>
     </property>
+    <addaction name="actionEsegui_calcoli_solo_su_righe_visibili"/>
     <addaction name="actionConta_occorrenze"/>
     <addaction name="actionStatistiche_con_VdB"/>
     <addaction name="actionCalcola_densit_lessicale"/>
@@ -327,6 +342,19 @@
   <action name="actionConfronta_corpora">
    <property name="text">
     <string>C&amp;onfronta corpora</string>
+   </property>
+  </action>
+  <action name="actionEsegui_calcoli_solo_su_righe_visibili">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Esegui calcoli solo su righe visibili</string>
+   </property>
+  </action>
+  <action name="actionItaliano">
+   <property name="text">
+    <string>Italiano</string>
    </property>
   </action>
  </widget>
