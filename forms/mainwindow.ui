@@ -184,6 +184,10 @@
     <addaction name="actionRimuovi_vista_attuale_dal_corpus"/>
     <addaction name="actionRimuovi_righe_selezionate"/>
     <addaction name="actionSostituisci_nel_corpus_con_RegEx"/>
+    <addaction name="actionSostituisci_solo_nelle_celle_selezionate"/>
+    <addaction name="separator"/>
+    <addaction name="actionSeleziona_tutte_le_celle_visibili"/>
+    <addaction name="actionDeseleziona_tutte_le_celle"/>
    </widget>
    <widget class="QMenu" name="menuStrumenti">
     <property name="title">
@@ -355,6 +359,21 @@
   <action name="actionItaliano">
    <property name="text">
     <string>Italiano</string>
+   </property>
+  </action>
+  <action name="actionSostituisci_solo_nelle_celle_selezionate">
+   <property name="text">
+    <string>Sostituisci solo nelle celle selezionate</string>
+   </property>
+  </action>
+  <action name="actionSeleziona_tutte_le_celle_visibili">
+   <property name="text">
+    <string>Seleziona tutte le celle visibili</string>
+   </property>
+  </action>
+  <action name="actionDeseleziona_tutte_le_celle">
+   <property name="text">
+    <string>Deseleziona tutte le celle</string>
    </property>
   </action>
  </widget>

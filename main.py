@@ -96,6 +96,7 @@ from PySide2.QtWidgets import QMessageBox
 from PySide2.QtWidgets import QMainWindow
 from PySide2.QtWidgets import QTableWidget
 from PySide2.QtWidgets import QTableWidgetItem
+from PySide2.QtWidgets import QTableWidgetSelectionRange
 from PySide2.QtCore import QThread
 
 
@@ -127,6 +128,8 @@ class MainWindow(QMainWindow):
         self.w.replace_in_cells.clicked.connect(self.replaceCells)
         self.w.actionSostituisci_nel_corpus_con_RegEx.triggered.connect(self.replaceCorpus)
         self.w.actionSostituisci_solo_nelle_celle_selezionate.triggered.connect(self.replaceCells)
+        self.w.actionSeleziona_tutte_le_celle_visibili.triggered.connect(self.selectVisibleCells)
+        self.w.actionDeseleziona_tutte_le_celle.triggered.connect(self.deselectAllCells)
         self.w.dofiltra.clicked.connect(self.dofiltra)
         self.w.cancelfiltro.clicked.connect(self.cancelfiltro)
         self.w.findNext.clicked.connect(self.findNext)
@@ -302,6 +305,27 @@ class MainWindow(QMainWindow):
                         newstr = re.sub(repCdialog.w.orig.text(), repCdialog.w.dest.text(), origstr, flags=re.DOTALL)
                     self.setcelltocorpus(newstr, row, col)
             self.Progrdialog.accept()
+
+    def selectVisibleCells(self):
+        self.deselectAllCells()
+        self.Progrdialog = progress.Form()
+        self.Progrdialog.show()
+        totallines = self.w.corpus.rowCount()
+        for row in range(self.w.corpus.rowCount()):
+            if self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked() and self.w.corpus.isRowHidden(row):
+                continue
+            if row<100 or row%100==0:
+                self.Progrdialog.w.testo.setText("Sto selezionando la riga numero "+str(row))
+                self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+                QApplication.processEvents()
+            if self.Progrdialog.w.annulla.isChecked():
+                return
+            thisrow = QTableWidgetSelectionRange(row,0,row,self.w.corpus.columnCount()-1)
+            self.w.corpus.setRangeSelected(thisrow, True)
+        self.Progrdialog.accept()
+
+    def deselectAllCells(self):
+        self.w.corpus.clearSelection()
 
     def contaoccorrenze(self):
         thisname = []
