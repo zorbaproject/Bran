@@ -1,5 +1,7 @@
 forms/confronto.py
 forms/confronto.ui
+forms/creafiltro.py
+forms/creafiltro.ui
 testfb.py
 forms/about.py
 forms/about.ui

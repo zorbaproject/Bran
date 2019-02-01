@@ -111,6 +111,7 @@ from forms import progress
 from forms import sessione
 from forms import ripetizioni
 from forms import about
+from forms import creafiltro
 
 
 
@@ -133,6 +134,7 @@ class MainWindow(QMainWindow):
         self.w.dofiltra.clicked.connect(self.dofiltra)
         self.w.cancelfiltro.clicked.connect(self.cancelfiltro)
         self.w.findNext.clicked.connect(self.findNext)
+        self.w.filtriMultipli.clicked.connect(self.filtriMultipli)
         self.w.delselected.clicked.connect(self.delselected)
         self.w.actionRimuovi_righe_selezionate.triggered.connect(self.delselected)
         self.w.actionScarica_corpus_da_sito_web.triggered.connect(self.web2corpus)
@@ -171,6 +173,8 @@ class MainWindow(QMainWindow):
         self.separator = "\t"
         self.language = "it-IT"
         self.enumeratecolumns(self.w.ccolumn)
+        self.filtrimultiplienabled = "Filtro multiplo"
+        self.w.ccolumn.addItem(self.filtrimultiplienabled)
         QApplication.processEvents()
         self.alreadyChecked = False
         self.ImportingFile = False
@@ -921,13 +925,48 @@ class MainWindow(QMainWindow):
 
     def applicaFiltro(self, table, row, col, filtro):
         res = False
-        ctext = table.item(row,col).text()
-        ftext = filtro
-        if bool(re.match(ftext, ctext)):
-            res = True
+        if self.w.ccolumn.currentText() != self.filtrimultiplienabled:
+            ctext = table.item(row,col).text()
+            ftext = filtro
+            if bool(re.match(ftext, ctext)):
+                res = True
+            else:
+                res = False
         else:
-            res = False
+            for option in filtro.split("||"):
+                for andcond in option.split("&&"):
+                    res = False
+                    cellname = andcond.split("=")[0]
+                    ftext = andcond.split("=")[1]
+                    colname = cellname.split("[")[0]
+                    col = self.corpuscols[colname]
+                    if "[" in cellname.replace("]",""):
+                        rowlist = cellname.replace("]","").split("[")[1].split(",")
+                    else:
+                        rowlist = [0]
+                    for rowp in rowlist:
+                        tmprow = row + int(rowp)
+                        try:
+                            ctext = table.item(tmprow,col).text()
+                        except:
+                            ctext = ""
+                        if bool(re.match(ftext, ctext)):
+                            res = True
+                            break
+                    if res == False:
+                        break
+                if res == True:
+                    break
         return res
+
+    def filtriMultipli(self):
+        self.w.ccolumn.setCurrentText(self.filtrimultiplienabled)
+        Fildialog = creafiltro.Form(self)
+        Fildialog.w.filter.setText("Lemma=essere&&pos[1,-1]=SP||Lemma[-1]=essere&&pos=S")
+        Fildialog.updateTable()
+        Fildialog.exec()
+        if Fildialog.w.filter.text() != "":
+            self.w.cfilter.setText(Fildialog.w.filter.text())
 
     def removevisiblerows(self):
         self.Progrdialog = progress.Form()
@@ -966,6 +1005,8 @@ class MainWindow(QMainWindow):
             self.TCThread.outputcsv = self.sessionFile
             self.TCThread.finished.connect(self.txtloadingstopped)
             self.TCThread.start()
+        #else if self.language == "en-US":
+        #https://www.datacamp.com/community/tutorials/stemming-lemmatization-python
 
     def loadjson(self):
         QMessageBox.information(self, "Attenzione", "Caricare un file JSON prodotto manualmente può essere pericoloso: se i singoli paragrafi sono troppo grandi, il programma può andare in crash. Utilizza questa funzione solo se sai esattamente cosa stai facendo.")

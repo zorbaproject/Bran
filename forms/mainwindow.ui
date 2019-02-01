@@ -41,6 +41,13 @@
         <widget class="QComboBox" name="ccolumn"/>
        </item>
        <item>
+        <widget class="QPushButton" name="filtriMultipli">
+         <property name="text">
+          <string>Filtri multipli</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="dofiltra">
          <property name="text">
           <string>Filtra</string>
