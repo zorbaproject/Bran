@@ -185,7 +185,7 @@ class TintCorpus(QThread):
                     print(fileName + " -> " + self.outputcsv)
                     try:
                         corpusID = str(fileID)+"_"+os.path.basename(fileName)
-                        corpusID = QInputDialog.getText(self.w, "Scegli l'ID", "Indica l'ID di questo file nel corpus:", QLineEdit.Normal, corpusID)
+                        corpusID = QInputDialog.getText(self.w, "Scegli l'ID", "Indica l'ID di questo file nel corpus:", QLineEdit.Normal, corpusID)[0]
                     except:
                         corpusID = str(fileID)+"_"+os.path.basename(fileName)
                     self.text2corpusTINT(lines, corpusID)
@@ -332,7 +332,7 @@ class TintCorpus(QThread):
                             self.setcelltocorpus(str(token["ner"]), rowN, self.corpuscols["ner"])
                             self.setcelltocorpus(morf, rowN, self.corpuscols["feat"])
                         else:
-                            fullline = IDcorpus + "\t" + str(token["originalText"]) + "\t" + str(token["lemma"]) + "\t" + str(token["pos"]) + "\t" + str(token["ner"]) + "\t" + morf + "\t" + str(token["index"])
+                            fullline = str(IDcorpus) + "\t" + str(token["originalText"]) + "\t" + str(token["lemma"]) + "\t" + str(token["pos"]) + "\t" + str(token["ner"]) + "\t" + str(morf) + "\t" + str(token["index"])
                             fdatefile = self.outputcsv
                             with open(fdatefile, "a", encoding='utf-8') as myfile:
                                 myfile.write(fullline+"\n")
