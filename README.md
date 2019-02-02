@@ -1,5 +1,5 @@
 # Bran
-Bran è un programma per la linguistica dei corpora. Nato come sostituto dell'ormai obsoleto TalTaC, include altre funzioni utili a chi studi linguistica italiana.
+Bran è un programma per la linguistica dei corpora. Nasce come soluzione completa per chi studia linguistica italiana creando e analizzando corpora di testi.
 Il nome "bran" in lingua inglese indica la crusca, ed è un riferimento all'Accademia della Crusca.
 ![Logo di Bran](https://raw.githubusercontent.com/zorbaproject/VdB-Hacking/master/bran-logo-small.png)
 
@@ -11,6 +11,9 @@ sudo apt-get install python3-pip
 sudo apt-get install python3-tk
 sudo apt-get install libxml2-dev libxslt1-dev python-dev
 ```
+
+Su Windows è necessario installare Python3 (https://www.python.org/ftp/python/3.7.2/python-3.7.2-amd64.exe) e OpenJRE 10 (https://download.java.net/java/GA/jdk11/9/GPL/openjdk-11.0.2_windows-x64_bin.zip). È utile aggiungere Python alla PATH di Windows durante l'installazione.
+
 Il classico workflow è il seguente: 
 - Si avvia Bran, non si crea alcuna sessione di lavoro, si avvia Tint. Si chiude l'interfaccia grafica lasciando attivo solo il terminale. 
 - Si avvia di nuovo Bran, stavolta creando una nuova sessione di lavoro (o aprendo una esistente).
