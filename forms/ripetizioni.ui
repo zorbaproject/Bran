@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>452</width>
-    <height>580</height>
+    <height>623</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -65,6 +65,13 @@
     </layout>
    </item>
    <item>
+    <widget class="QCheckBox" name="charNotWord">
+     <property name="text">
+      <string>Conteggia per carattere invece che per parola</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QCheckBox" name="ignorecase">
      <property name="text">
       <string>Ignora differenze tra maiuscole e minuscole</string>
@@ -81,7 +88,7 @@
    <item>
     <widget class="QCheckBox" name="sigindex">
      <property name="text">
-      <string>Calcola indice di significatività</string>
+      <string>Calcola indice di Morrone</string>
      </property>
     </widget>
    </item>

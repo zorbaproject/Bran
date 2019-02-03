@@ -491,6 +491,7 @@ class MainWindow(QMainWindow):
             if Repetdialog.w.ignoreF.isChecked():
                 for i in range(Repetdialog.w.vuoteF.count()):
                     vuoteF.append(Repetdialog.w.vuoteF.item(i).text())
+            charNotWord = Repetdialog.w.charNotWord.isChecked()
             TBdialog = tableeditor.Form(self)
             TBdialog.sessionDir = self.sessionDir
             TBdialog.addcolumn("nGram", 0)
@@ -499,7 +500,7 @@ class MainWindow(QMainWindow):
             self.Progrdialog = progress.Form()
             self.Progrdialog.show()
             for tokens in range(tokenda, tokena+1):
-                self.findngrams(tokens, minoccur, TBdialog, self.Progrdialog, ignorecase, remspaces, ipunct, col, vuoteI, vuoteF)
+                self.findngrams(tokens, minoccur, TBdialog, self.Progrdialog, ignorecase, remspaces, ipunct, col, vuoteI, vuoteF, charNotWord)
             if Repetdialog.w.sigindex.isChecked():
                 TBdialog.addcolumn("Significatività assoluta", 3)
                 TBdialog.addcolumn("Significatività relativa", 4)
@@ -519,7 +520,8 @@ class MainWindow(QMainWindow):
                     for tmpword in tmplist:
                         crpitems = self.w.corpus.findItems(tmpword,Qt.MatchFixedString)
                         Fw = len(crpitems)*1.0
-                        sommatoria = sommatoria + (Fseg/Fw)
+                        if Fw!=0:
+                            sommatoria = sommatoria + (Fseg/Fw)
                     sigass = sommatoria * int(TBdialog.w.tableWidget.item(row,2).text())*1.0
                     ampiezza = len(tmplist) + 1
                     sigrel = (sigass*1.0)/(ampiezza*ampiezza)
@@ -534,30 +536,38 @@ class MainWindow(QMainWindow):
                     if self.Progrdialog.w.annulla.isChecked():
                         return
                     tmpstring = TBdialog.w.tableWidget.item(row,0).text()
-                    punt = "( ["+re.escape(".,;!?")+ "])"
-                    tmpstring = re.sub(punt, "\1", tmpstring, flags=re.IGNORECASE|re.DOTALL)
-                    punt = "(["+re.escape("'’")+ "]) "
-                    tmpstring = re.sub(punt, "\1", tmpstring, flags=re.IGNORECASE|re.DOTALL)
+                    tmpstring = self.remUselessSpaces(tmpstring)
                     TBdialog.setcelltotable(tmpstring, row, 0)
             self.Progrdialog.accept()
             TBdialog.exec()
 
-    def findngrams(self, tokens, minoccur, TBdialog, Progrdialog, ignorecase, remspaces, ipunct, col, vuoteI, vuoteF):
+    def rebuildText(self, table, Progrdialog, col = "", ipunct = []):
         mycorpus = ""
         if col == "":
             col = self.corpuscols['Orig']
-        totallines = self.w.corpus.rowCount()
-        for row in range(self.w.corpus.rowCount()):
-            if self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked() and self.w.corpus.isRowHidden(row):
+        totallines = table.rowCount()
+        for row in range(table.rowCount()):
+            if self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked() and table.isRowHidden(row):
                 continue
             Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
             Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
             QApplication.processEvents()
             if Progrdialog.w.annulla.isChecked():
                 return
-            thispos = self.legendaPos[self.w.corpus.item(row,self.corpuscols['pos']).text()][0]
+            thispos = self.legendaPos[table.item(row,self.corpuscols['pos']).text()][0]
             if not thispos in ipunct:
-                mycorpus = mycorpus + self.w.corpus.item(row,col).text() + " "
+                mycorpus = mycorpus + table.item(row,col).text() + " "
+        return mycorpus
+
+    def remUselessSpaces(self, tmpstring):
+        punt = "( ["+re.escape(".,;!?")+ "])"
+        tmpstring = re.sub(punt, "\g<1>", tmpstring, flags=re.IGNORECASE|re.DOTALL)
+        punt = "(["+re.escape("'’")+ "]) "
+        tmpstring = re.sub(punt, "\g<1>", tmpstring, flags=re.IGNORECASE|re.DOTALL)
+        return tmpstring
+
+    def findngrams(self, tokens, minoccur, TBdialog, Progrdialog, ignorecase, remspaces, ipunct, col, vuoteI, vuoteF, charNotWord= False):
+        mycorpus = self.rebuildText(self.w.corpus, Progrdialog, col, ipunct)
         if ignorecase:
             mycorpus = mycorpus.lower()
         searchthis = " "
@@ -572,11 +582,14 @@ class MainWindow(QMainWindow):
             QApplication.processEvents()
             if Progrdialog.w.annulla.isChecked():
                 return
-            #read a specific number of words
-            for i in range(tokens):
-                wpos = mycorpus.find(searchthis, npos+1)
-                if wpos > 0:
-                    npos = wpos
+            if not charNotWord:
+                #read a specific number of words
+                for i in range(tokens):
+                    wpos = mycorpus.find(searchthis, npos+1)
+                    if wpos > 0:
+                        npos = wpos
+            else:
+                npos = pos+tokens
             #check if we reached someway the end of text
             if npos > len(mycorpus)-1:
                 if pos > len(mycorpus)-1:
@@ -588,14 +601,13 @@ class MainWindow(QMainWindow):
             parolai = re.sub(" .*", "", tmpstring, flags=re.IGNORECASE|re.DOTALL)
             parolaf = re.sub(".* ", "", tmpstring, flags=re.IGNORECASE|re.DOTALL)
             #look for all occurrences of this phrase
-            if tmpstring != "" and tmpstring.count(searchthis)==tokens-1 and bool(not parolai in vuoteI) and bool(not parolaf in vuoteF):
+            if not charNotWord:
+                wnIsRight = bool(tmpstring.count(searchthis)==tokens-1)
+            else:
+                wnIsRight = bool(len(tmpstring)==tokens)
+            if tmpstring != "" and wnIsRight and bool(not parolai in vuoteI) and bool(not parolaf in vuoteF):
                 tcount = mycorpus.count(tmpstring)
                 if tcount >= minoccur:
-                    #if remspaces:
-                    #    punt = "( ["+re.escape(".,;!?")+ "])"
-                    #    tmpstring = re.sub(punt, "\1", tmpstring, flags=re.IGNORECASE|re.DOTALL)
-                    #    punt = "(["+re.escape("'’")+ "]) "
-                    #    tmpstring = re.sub(punt, "\1", tmpstring, flags=re.IGNORECASE|re.DOTALL)
                     tbitem = TBdialog.w.tableWidget.findItems(tmpstring,Qt.MatchExactly)
                     if len(tbitem)<=0:
                         TBdialog.addlinetotable(tmpstring, 0)
@@ -609,7 +621,7 @@ class MainWindow(QMainWindow):
                             else:
                                 crpitem = self.w.corpus.findItems(tmpword,Qt.MatchExactly)
                             if len(crpitem)<=0:
-                                print("Parola non riconosciuta: "+tmpword)
+                                #print("Parola non riconosciuta: "+tmpword)
                                 ppcount = ppcount + 1
                             else:
                                 tmprow = crpitem[0].row()
@@ -624,7 +636,10 @@ class MainWindow(QMainWindow):
                         TBdialog.setcelltotable(str(ppcount), tbrow, 2)
                 #newtext = nth_replace(mycorpus, tmpstring, "", 2, "all right")
                 #text = newtext
-            pos = mycorpus.find(searchthis, pos+1)+1 #continue from next word
+            if not charNotWord:
+                pos = mycorpus.find(searchthis, pos+1)+1 #continue from next word
+            else:
+                pos = pos+1
             if pos <= 0:
                 pos = len(mycorpus)
 

@@ -78,7 +78,7 @@
       </attribute>
       <column>
        <property name="text">
-        <string>ID corpus</string>
+        <string>Tag corpus</string>
        </property>
       </column>
       <column>
@@ -222,9 +222,17 @@
     <addaction name="actionCalcola_densit_lessicale"/>
     <addaction name="actionTrova_ripetizioni"/>
     <addaction name="actionConta_verbi"/>
+    <addaction name="separator"/>
+    <addaction name="actionRicostruisci_testo"/>
+   </widget>
+   <widget class="QMenu" name="menuFiltri">
+    <property name="title">
+     <string>Filtri</string>
+    </property>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuModifica"/>
+   <addaction name="menuFiltri"/>
    <addaction name="menuAnalisi"/>
    <addaction name="menuStrumenti"/>
    <addaction name="menuAbout"/>
@@ -332,7 +340,7 @@
   </action>
   <action name="actionTrova_ripetizioni">
    <property name="text">
-    <string>&amp;Trova segmenti ripetuti</string>
+    <string>&amp;Trova nGrams (segmenti ripetuti)</string>
    </property>
   </action>
   <action name="actionConta_verbi">
@@ -381,6 +389,11 @@
   <action name="actionDeseleziona_tutte_le_celle">
    <property name="text">
     <string>Deseleziona tutte le celle</string>
+   </property>
+  </action>
+  <action name="actionRicostruisci_testo">
+   <property name="text">
+    <string>Ricostruisci testo</string>
    </property>
   </action>
  </widget>
