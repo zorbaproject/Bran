@@ -216,9 +216,17 @@
     <property name="title">
      <string>A&amp;nalisi</string>
     </property>
+    <widget class="QMenu" name="menuOccorrenze">
+     <property name="title">
+      <string>Occorrenze</string>
+     </property>
+     <addaction name="actionConta_occorrenze"/>
+     <addaction name="actionConta_occorrenze_filtrate"/>
+     <addaction name="actionCo_occorrenze"/>
+    </widget>
     <addaction name="actionEsegui_calcoli_solo_su_righe_visibili"/>
-    <addaction name="actionConta_occorrenze"/>
-    <addaction name="actionStatistiche_con_VdB"/>
+    <addaction name="menuOccorrenze"/>
+    <addaction name="actionEstrai_dizionario"/>
     <addaction name="actionCalcola_densit_lessicale"/>
     <addaction name="actionTrova_ripetizioni"/>
     <addaction name="actionConta_verbi"/>
@@ -310,9 +318,9 @@
     <string>&amp;Rimuovi vista attuale dal corpus</string>
    </property>
   </action>
-  <action name="actionStatistiche_con_VdB">
+  <action name="actionEstrai_dizionario">
    <property name="text">
-    <string>&amp;Statistiche con VdB</string>
+    <string>Estrai dizionario</string>
    </property>
   </action>
   <action name="actionDa_file_JSON">
@@ -406,6 +414,16 @@
   <action name="actionFiltri_multipli">
    <property name="text">
     <string>Filtri multipli</string>
+   </property>
+  </action>
+  <action name="actionConta_occorrenze_filtrate">
+   <property name="text">
+    <string>Conta occorrenze filtrate</string>
+   </property>
+  </action>
+  <action name="actionCo_occorrenze">
+   <property name="text">
+    <string>Conta co-occorrenze</string>
    </property>
   </action>
  </widget>

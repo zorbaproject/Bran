@@ -159,7 +159,7 @@ class MainWindow(QMainWindow):
         self.w.actionEditor_di_testo.triggered.connect(self.texteditor)
         self.w.actionConfronta_corpora.triggered.connect(self.confronto)
         self.w.actionAbout_Bran.triggered.connect(self.aboutbran)
-        self.w.actionStatistiche_con_VdB.triggered.connect(self.statisticheconvdb)
+        self.w.actionEstrai_dizionario.triggered.connect(self.estrai_dizionario)
         self.w.actionTrova_ripetizioni.triggered.connect(self.trovaripetizioni)
         self.w.actionConta_verbi.triggered.connect(self.contaverbi)
         self.w.actionItaliano.triggered.connect(lambda: self.changeLang("it-IT"))
@@ -1268,16 +1268,18 @@ class MainWindow(QMainWindow):
         aw = about.Form(self)
         aw.exec()
 
-    def statisticheconvdb(self):
+    def estrai_dizionario(self):
+        thisname = []
+        for col in range(self.w.corpus.columnCount()):
+            thisname.append(self.w.corpus.horizontalHeaderItem(col).text())
+        column = QInputDialog.getItem(self, "Scegli la colonna", "Se vuoi estrarre il dizionario devi cercare nella colonna dei lemmi. Ma puoi anche scegliere di ottenere le statistiche su altre colonne, come la Forma grafica.",thisname,current=self.corpuscols['Lemma'],editable=False)
+        col = thisname.index(column[0])
         ret = QMessageBox.question(self,'Domanda', "Vuoi ignorare la punteggiatura?", QMessageBox.Yes | QMessageBox.No)
-        #TODO: aggiungere forestierismi presenti (occorrenze per ogni parola, percentuale su parole totali)
-        col = self.corpuscols['Lemma']
+        dimList = [100,1000,5000,10000,50000,100000,150000,200000,250000,300000,350000,400000,450000,500000]
         TBdialog = tableeditor.Form(self)
         TBdialog.sessionDir = self.sessionDir
         TBdialog.addcolumn("Lemma", 0)
         TBdialog.addcolumn("Occorrenze", 1)
-        TBdialog.addcolumn("Presente in VdB 1980", 2)
-        TBdialog.addcolumn("Presente in VdB 2016", 3)
         #calcolo le occorrenze del pos
         self.Progrdialog = progress.Form()
         self.Progrdialog.show()
@@ -1323,63 +1325,38 @@ class MainWindow(QMainWindow):
             QApplication.processEvents()
             if int(TBdialog.w.tableWidget.item(row,1).text()) == 1:
                 hapax = hapax + 1
-        #carico i vdb
-        self.vdb2016 = []
-        self.vdbfile16 = os.path.abspath(os.path.dirname(sys.argv[0]))+"/dizionario/vdb2016.txt"
-        if os.path.isfile(self.vdbfile16):
-            self.vdb2016 = [line.rstrip('\n') for line in open(self.vdbfile16, "r", encoding='utf-8')]
-        self.vdb1980 = []
-        self.vdbfile80 = os.path.abspath(os.path.dirname(sys.argv[0]))+"/dizionario/vdb1980.txt"
-        if os.path.isfile(self.vdbfile80):
-            self.vdb1980 = [line.rstrip('\n') for line in open(self.vdbfile80, "r", encoding='utf-8')]
-        #controllo per ogni parola se appartiene a un VdB
         totallines = TBdialog.w.tableWidget.rowCount()
         paroletotali = 0
-        parole2016 = 0
-        parole1980 = 0
-        for row in range(TBdialog.w.tableWidget.rowCount()):
-            self.Progrdialog.w.testo.setText("Sto controllando la riga numero "+str(row))
-            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
-            QApplication.processEvents()
-            thistext = TBdialog.w.tableWidget.item(row,0).text()
-            if thistext in self.vdb1980:
-                TBdialog.setcelltotable("1", row, 2)
-            else:
-                TBdialog.setcelltotable("0", row, 2)
-            if thistext in self.vdb2016:
-                TBdialog.setcelltotable("1", row, 3)
-            else:
-                TBdialog.setcelltotable("0", row, 3)
-        #calcolo le percentuali
         for row in range(TBdialog.w.tableWidget.rowCount()):
             self.Progrdialog.w.testo.setText("Sto calcolando le somme su "+str(row))
             self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
             QApplication.processEvents()
             paroletotali = paroletotali + int(TBdialog.w.tableWidget.item(row,1).text())
-            parole1980 = parole1980 + int(TBdialog.w.tableWidget.item(row,2).text())*int(TBdialog.w.tableWidget.item(row,1).text())
-            parole2016 = parole2016 + int(TBdialog.w.tableWidget.item(row,3).text())*int(TBdialog.w.tableWidget.item(row,1).text())
-        TBdialog.addlinetotable("Totale", 0)
+        dimCorpus = dimList[0]
+        for i in range(len(dimList)-1):
+            if dimList[i] <= paroletotali and dimList[i+1] >= paroletotali:
+                lower = paroletotali - dimList[i]
+                upper = dimList[i+1] - paroletotali
+                if lower < upper:
+                    dimCorpus = dimList[i]
+                else:
+                    dimCorpus = dimList[i+1]
+        TBdialog.addcolumn("Frequenza in " + str(dimCorpus) + " parole", 2)
+        TBdialog.addcolumn("Ordine di grandezza (log10)", 3)
+        for row in range(TBdialog.w.tableWidget.rowCount()):
+            self.Progrdialog.w.testo.setText("Sto controllando la riga numero "+str(row))
+            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            QApplication.processEvents()
+            thistext = TBdialog.w.tableWidget.item(row,0).text()
+            ratio = (float(TBdialog.w.tableWidget.item(row,1).text())/float(paroletotali)*dimCorpus)
+            ratios = f'{ratio:.3f}'
+            TBdialog.setcelltotable(str(ratios), row, 2)
+            ratio = math.log10(float(TBdialog.w.tableWidget.item(row,1).text())/float(paroletotali))
+            ratios = f'{ratio:.3f}'
+            TBdialog.setcelltotable(str(ratios), row, 3)
+        TBdialog.addlinetotable("Tokens", 0)
         tbrow = TBdialog.w.tableWidget.rowCount()-1
         TBdialog.setcelltotable(str(paroletotali), tbrow, 1)
-        TBdialog.setcelltotable(str(parole1980), tbrow, 2)
-        TBdialog.setcelltotable(str(parole2016), tbrow, 3)
-        TBdialog.addlinetotable("Percentuale", 0)
-        tbrow = TBdialog.w.tableWidget.rowCount()-1
-        ratio = (float(paroletotali)/float(paroletotali)*100)
-        ratios = f'{ratio:.3f}'
-        TBdialog.setcelltotable(str(ratios), tbrow, 1)
-        ratio = (float(parole1980)/float(paroletotali)*100)
-        ratios = f'{ratio:.3f}'
-        TBdialog.setcelltotable(str(ratios), tbrow, 2)
-        ratio = (float(parole2016)/float(paroletotali)*100)
-        ratios = f'{ratio:.3f}'
-        TBdialog.setcelltotable(str(ratios), tbrow, 3)
-        #presento le macrocategorie
-        #for key in mytypes:
-        #    if not key in myignore:
-        #        TBdialog.addlinetotable(key, 0)
-        #        tbrow = TBdialog.w.tableWidget.rowCount()-1
-        #        TBdialog.setcelltotable(str(mytypes[key]), tbrow, 1)
         TBdialog.addlinetotable("Types", 0)
         tbrow = TBdialog.w.tableWidget.rowCount()-1
         TBdialog.setcelltotable(str(totaltypes), tbrow, 1)
