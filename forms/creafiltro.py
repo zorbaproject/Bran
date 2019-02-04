@@ -63,24 +63,27 @@ class Form(QDialog):
 
     def updateTable(self):
         iopt = 0
-        for option in self.w.filter.text().split("||"):
-            if iopt >0:
-                self.addlinetotable("OR", 0)
-            for andcond in option.split("&&"):
-                tmpcol = ""
-                tmprows = ""
-                tmpregex = ""
-                cellname = andcond.split("=")[0]
-                tmpregex = andcond.split("=")[1]
-                tmpcol = cellname.split("[")[0]
-                if "[" in cellname.replace("]",""):
-                    tmprows = cellname.replace("]","").split("[")[1]
-                else:
+        try:
+            for option in self.w.filter.text().split("||"):
+                if iopt >0:
+                    self.addlinetotable("OR", 0)
+                for andcond in option.split("&&"):
+                    tmpcol = ""
                     tmprows = ""
-                tbrow = self.addlinetotable(tmpcol, 0)
-                self.setcelltocorpus(tmprows, tbrow, 1)
-                self.setcelltocorpus(tmpregex, tbrow, 2)
-            iopt = iopt +1
+                    tmpregex = ""
+                    cellname = andcond.split("=")[0]
+                    tmpregex = andcond.split("=")[1]
+                    tmpcol = cellname.split("[")[0]
+                    if "[" in cellname.replace("]",""):
+                        tmprows = cellname.replace("]","").split("[")[1]
+                    else:
+                        tmprows = ""
+                    tbrow = self.addlinetotable(tmpcol, 0)
+                    self.setcelltocorpus(tmprows, tbrow, 1)
+                    self.setcelltocorpus(tmpregex, tbrow, 2)
+                iopt = iopt +1
+        except:
+            print("Filtro non valido")
 
     def addlinetotable(self, text, column):
         row = self.w.tableWidget.rowCount()

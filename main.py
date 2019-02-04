@@ -90,6 +90,7 @@ from PySide2.QtCore import QDir
 from PySide2.QtCore import Qt
 from PySide2.QtCore import Signal
 from PySide2.QtWidgets import QLabel
+from PySide2.QtWidgets import QLineEdit
 from PySide2.QtWidgets import QFileDialog
 from PySide2.QtWidgets import QInputDialog
 from PySide2.QtWidgets import QMessageBox
@@ -135,6 +136,7 @@ class MainWindow(QMainWindow):
         self.w.cancelfiltro.clicked.connect(self.cancelfiltro)
         self.w.findNext.clicked.connect(self.findNext)
         self.w.filtriMultipli.clicked.connect(self.filtriMultipli)
+        self.w.actionFiltri_multipli.triggered.connect(self.filtriMultipli)
         self.w.delselected.clicked.connect(self.delselected)
         self.w.actionRimuovi_righe_selezionate.triggered.connect(self.delselected)
         self.w.actionScarica_corpus_da_sito_web.triggered.connect(self.web2corpus)
@@ -144,6 +146,8 @@ class MainWindow(QMainWindow):
         self.w.actionEsporta_vista_attuale_in_CSV.triggered.connect(self.esportavistaCSV)
         self.w.actionRimuovi_vista_attuale_dal_corpus.triggered.connect(self.removevisiblerows)
         self.w.actionCalcola_densit_lessicale.triggered.connect(self.densitalessico)
+        self.w.actionRicostruisci_testo.triggered.connect(self.ricostruisciTesto)
+        self.w.actionConcordanze.triggered.connect(self.concordanze)
         self.w.actionDa_file_txt.triggered.connect(self.loadtxt)
         #self.w.actionTraduci_i_tag_PoS_in_forma_leggibile.triggered.connect(self.translatePos)
         self.w.actionDa_file_JSON.triggered.connect(self.loadjson)
@@ -169,7 +173,7 @@ class MainWindow(QMainWindow):
             'IDword': 6
         }
         self.legendaPos = [] #{"A":["aggettivo", "aggettivi", "piene"],"AP":["agg. poss", "aggettivi", "piene"],"B":["avverbio", "avverbi", "piene"],"B+PC":["avverbio+pron. clit. ", "avverbi", "piene"],"BN":["avv, negazione", "avverbi", "piene"],"CC":["cong. coord", "congiunzioni", "vuote"],"CS":["cong. sub.", "congiunzioni", "vuote"],"DD":["det. dim.", "aggettivi", "piene"],"DE":["det. esclam.", "aggettivi", "piene"],"DI":["det. indefinito", "aggettivi", "piene"],"DQ":["det. interr.", "aggettivi", "piene"],"DR":["det. Rel", "aggettivi", "piene"],"E":["preposizione", "preposizioni", "vuote"],"E+RD":["prep. art. ", "preposizioni", "vuote"],"FB":["punteggiatura - \"\" () «» - - ", "punteggiatura", "none"],"FC":["punteggiatura - : ;", "punteggiatura", "none"],"FF":["punteggiatura - ,", "punteggiatura", "none"],"FS":["punteggiatura - .?!", "punteggiatura", "none"],"I":["interiezione", "interiezioni", "vuote"],"N":["numero", "altro", "none"],"NO":["numerale", "aggettivi", "piene"],"PC":["pron. Clitico", "pronomi", "vuote"],"PC+PC":["pron. clitico+clitico", "pronomi", "vuote"],"PD":["pron. dimostrativo", "pronomi","vuote"],"PE":["pron. pers. ", "pronomi", "vuote"],"PI":["pron. indef.", "pronomi", "vuote"],"PP":["pron. poss.", "pronomi", "vuote"],"PQ":["pron. interr.", "pronomi", "vuote"],"PR":["pron. rel.", "pronomi", "vuote"],"RD":["art. Det.", "articoli", "vuote"],"RI":["art. ind.", "articoli", "vuote"],"S":["sost.", "sostantivi", "piene"],"SP":["nome proprio", "sostantivi", "piene"],"SW":["forestierismo", "altro", "none"],"T":["det. coll.)", "aggettivi", "piene"],"V":["verbo", "verbi", "piene"],"V+PC":["verbo + pron. clitico", "verbi", "piene"],"V+PC+PC":["verbo + pron. clitico + pron clitico", "verbi", "piene"],"VA":["verbo ausiliare", "verbi", "piene"],"VA+PC":["verbo ausiliare + pron.clitico", "verbi", "piene"],"VM":["verbo mod", "verbi", "piene"],"VM+PC":["verbo mod + pron. clitico", "verbi", "piene"],"X":["altro", "altro", "none"]}
-        self.ignorepos = ["punteggiatura - \"\" () «» - - ", "punteggiatura - : ;", "punteggiatura - ,", "punteggiatura - .?!", "altro"]
+        self.ignorepos = ["punteggiatura - \"\" () «» - - ", "punteggiatura - : ;", "punteggiatura - ,", "altro"] # "punteggiatura - .?!"
         self.separator = "\t"
         self.language = "it-IT"
         self.enumeratecolumns(self.w.ccolumn)
@@ -466,9 +470,8 @@ class MainWindow(QMainWindow):
         TBdialog.exec()
 
     def trovaripetizioni(self):
-        ipunct = ["punteggiatura - \"\" () «» - - ", "punteggiatura - : ;", "punteggiatura - ,", "punteggiatura - .?!", "altro"]
         Repetdialog = ripetizioni.Form(self)
-        Repetdialog.loadipos(ipunct)
+        Repetdialog.loadipos(self.ignorepos)
         Repetdialog.loadallpos(self.legendaPos)
         self.enumeratecolumns(Repetdialog.w.colonna)
         Repetdialog.w.colonna.setCurrentIndex(self.corpuscols['Orig'])
@@ -541,28 +544,46 @@ class MainWindow(QMainWindow):
             self.Progrdialog.accept()
             TBdialog.exec()
 
-    def rebuildText(self, table, Progrdialog, col = "", ipunct = []):
+    def ricostruisciTesto(self):
+        thisname = []
+        for col in range(self.w.corpus.columnCount()):
+            thisname.append(self.w.corpus.horizontalHeaderItem(col).text())
+        column = QInputDialog.getItem(self, "Scegli la colonna", "Su quale colonna devo ricostruire il testo?",thisname,current=1,editable=False)
+        col = thisname.index(column[0])
+        self.Progrdialog = progress.Form()
+        self.Progrdialog.show()
+        mycorpus = self.rebuildText(self.w.corpus, self.Progrdialog, col)
+        mycorpus = self.remUselessSpaces(mycorpus)
+        self.Progrdialog.accept()
+        te = texteditor.TextEditor()
+        te.w.plainTextEdit.setPlainText(mycorpus)
+        te.exec()
+
+    def rebuildText(self, table, Progrdialog, col = "", ipunct = [], startrow = 0, endrow = 0, usefilter = True):
         mycorpus = ""
         if col == "":
             col = self.corpuscols['Orig']
         totallines = table.rowCount()
-        for row in range(table.rowCount()):
-            if self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked() and table.isRowHidden(row):
+        if endrow == 0:
+            endrow = totallines
+        for row in range(startrow, endrow):
+            if self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked() and table.isRowHidden(row) and usefilter:
                 continue
             Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
             Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
             QApplication.processEvents()
             if Progrdialog.w.annulla.isChecked():
                 return
-            thispos = self.legendaPos[table.item(row,self.corpuscols['pos']).text()][0]
-            if not thispos in ipunct:
-                mycorpus = mycorpus + table.item(row,col).text() + " "
+            if row >= 0 and row < table.rowCount():
+                thispos = self.legendaPos[table.item(row,self.corpuscols['pos']).text()][0]
+                if not thispos in ipunct:
+                    mycorpus = mycorpus + table.item(row,col).text() + " "
         return mycorpus
 
-    def remUselessSpaces(self, tmpstring):
-        punt = "( ["+re.escape(".,;!?")+ "])"
-        tmpstring = re.sub(punt, "\g<1>", tmpstring, flags=re.IGNORECASE|re.DOTALL)
-        punt = "(["+re.escape("'’")+ "]) "
+    def remUselessSpaces(self, tempstring):
+        punt = " (["+re.escape(".,;!?)")+ "])"
+        tmpstring = re.sub(punt, "\g<1>", tempstring, flags=re.IGNORECASE)
+        punt = "(["+re.escape("'’(")+ "]) "
         tmpstring = re.sub(punt, "\g<1>", tmpstring, flags=re.IGNORECASE|re.DOTALL)
         return tmpstring
 
@@ -977,11 +998,58 @@ class MainWindow(QMainWindow):
     def filtriMultipli(self):
         self.w.ccolumn.setCurrentText(self.filtrimultiplienabled)
         Fildialog = creafiltro.Form(self)
-        Fildialog.w.filter.setText("Lemma=essere&&pos[1,-1]=SP||Lemma[-1]=essere&&pos=S")
+        Fildialog.w.filter.setText(self.w.cfilter.text())
         Fildialog.updateTable()
         Fildialog.exec()
         if Fildialog.w.filter.text() != "":
             self.w.cfilter.setText(Fildialog.w.filter.text())
+
+    def concordanze(self):
+        parola = QInputDialog.getText(self.w, "Scegli la parola", "Indica la parola che vuoi cercare:", QLineEdit.Normal, "")[0]
+        thisname = []
+        for col in range(self.w.corpus.columnCount()):
+            thisname.append(self.w.corpus.horizontalHeaderItem(col).text())
+        column = QInputDialog.getItem(self, "Scegli la colonna", "In quale colonna devo cercare il testo?",thisname,current=1,editable=False)
+        col = thisname.index(column[0])
+        myrange = int(QInputDialog.getInt(self.w, "Indica il range", "Quante parole, prima e dopo, vuoi leggere?")[0])
+        rangestr = str(myrange)
+        #myfilter = str(list(self.corpuscols)[col]) + "[" + rangestr + "]" +"="+parola
+        myfilter = str(list(self.corpuscols)[col]) +"="+parola
+        self.w.ccolumn.setCurrentText(self.filtrimultiplienabled)
+        Fildialog = creafiltro.Form(self)
+        Fildialog.w.filter.setText(myfilter) #"Lemma=essere&&pos[1,-1]=SP||Lemma[-1]=essere&&pos=S"
+        Fildialog.updateTable()
+        Fildialog.exec()
+        if Fildialog.w.filter.text() != "":
+            self.w.cfilter.setText(Fildialog.w.filter.text())
+        self.dofiltra()
+        TBdialog = tableeditor.Form(self)
+        TBdialog.sessionDir = self.sessionDir
+        TBdialog.addcolumn("Segmento", 0)
+        TBdialog.addcolumn("Occorrenze", 1)
+        ret = QMessageBox.question(self,'Domanda', "Vuoi ignorare la punteggiatura?", QMessageBox.Yes | QMessageBox.No)
+        if ret == QMessageBox.Yes:
+            myignore = self.ignorepos
+        else:
+            myignore = []
+        self.Progrdialog = progress.Form()
+        self.Progrdialog.show()
+        for row in range(self.w.corpus.rowCount()):
+            if self.w.corpus.isRowHidden(row):
+                continue
+            thistext = self.rebuildText(self.w.corpus, self.Progrdialog, col, myignore, row-myrange, row+myrange+1, False)
+            thistext = self.remUselessSpaces(thistext)
+            tbitem = TBdialog.w.tableWidget.findItems(thistext,Qt.MatchExactly)
+            if len(tbitem)>0:
+                tbrow = tbitem[0].row()
+                tbval = int(TBdialog.w.tableWidget.item(tbrow,1).text())+1
+                TBdialog.setcelltotable(str(tbval), tbrow, 1)
+            else:
+                TBdialog.addlinetotable(thistext, 0)
+                tbrow = TBdialog.w.tableWidget.rowCount()-1
+                TBdialog.setcelltotable("1", tbrow, 1)
+        self.Progrdialog.accept()
+        TBdialog.exec()
 
     def removevisiblerows(self):
         self.Progrdialog = progress.Form()

@@ -222,6 +222,7 @@
     <addaction name="actionCalcola_densit_lessicale"/>
     <addaction name="actionTrova_ripetizioni"/>
     <addaction name="actionConta_verbi"/>
+    <addaction name="actionConcordanze"/>
     <addaction name="separator"/>
     <addaction name="actionRicostruisci_testo"/>
    </widget>
@@ -229,6 +230,7 @@
     <property name="title">
      <string>Filtri</string>
     </property>
+    <addaction name="actionFiltri_multipli"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuModifica"/>
@@ -394,6 +396,16 @@
   <action name="actionRicostruisci_testo">
    <property name="text">
     <string>Ricostruisci testo</string>
+   </property>
+  </action>
+  <action name="actionConcordanze">
+   <property name="text">
+    <string>Concordanze</string>
+   </property>
+  </action>
+  <action name="actionFiltri_multipli">
+   <property name="text">
+    <string>Filtri multipli</string>
    </property>
   </action>
  </widget>
