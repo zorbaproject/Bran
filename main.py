@@ -142,6 +142,7 @@ class MainWindow(QMainWindow):
         self.w.actionScarica_corpus_da_sito_web.triggered.connect(self.web2corpus)
         self.w.actionEsporta_corpus_in_un_CSV_per_ogni_ID.triggered.connect(self.esportaCSVperID)
         self.w.actionConta_occorrenze.triggered.connect(self.contaoccorrenze)
+        self.w.actionConta_occorrenze_filtrate.triggered.connect(self.contaoccorrenzefiltrate)
         self.w.actionEsporta_corpus_in_CSV_unico.triggered.connect(self.salvaCSV)
         self.w.actionEsporta_vista_attuale_in_CSV.triggered.connect(self.esportavistaCSV)
         self.w.actionRimuovi_vista_attuale_dal_corpus.triggered.connect(self.removevisiblerows)
@@ -371,6 +372,58 @@ class MainWindow(QMainWindow):
                 TBdialog.addlinetotable(thistext, 0)
                 tbrow = TBdialog.w.tableWidget.rowCount()-1
                 TBdialog.setcelltotable("1", tbrow, 1)
+        self.Progrdialog.accept()
+        TBdialog.exec()
+
+    def contaoccorrenzefiltrate(self):
+        thisname = []
+        for col in range(self.w.corpus.columnCount()):
+            thisname.append(self.w.corpus.horizontalHeaderItem(col).text())
+        column = QInputDialog.getItem(self, "Scegli la colonna", "Su quale colonna devo contare le occorrenze?",thisname,current=0,editable=False)
+        col = thisname.index(column[0])
+        QMessageBox.information(self, "Filtro", "Ora devi impostare i filtri con cui dividere i risultati. I vari filtri devono essere separati da condizioni OR, per ciascuno di essi verrà creata una colonna a parte nella tabella dei risultati.")
+        self.w.ccolumn.setCurrentText(self.filtrimultiplienabled)
+        Fildialog = creafiltro.Form(self)
+        Fildialog.w.filter.setText("pos=A.*||pos=S.*")
+        Fildialog.updateTable()
+        Fildialog.exec()
+        if Fildialog.w.filter.text() == "":
+            return
+        allfilters = Fildialog.w.filter.text().split("||")
+        TBdialog = tableeditor.Form(self)
+        TBdialog.sessionDir = self.sessionDir
+        TBdialog.addcolumn(column[0], 0)
+        self.Progrdialog = progress.Form()
+        self.Progrdialog.show()
+        for myfilter in allfilters:
+            TBdialog.addcolumn(myfilter, 1)
+        totallines = self.w.corpus.rowCount()
+        for row in range(self.w.corpus.rowCount()):
+            self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
+            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            QApplication.processEvents()
+            if self.Progrdialog.w.annulla.isChecked():
+                return
+            try:
+                thistext = self.w.corpus.item(row,col).text()
+                if col == self.corpuscols["pos"]:
+                    thistext = self.legendaPos[thistext][0]
+            except:
+                thistext = ""
+            for ifilter in range(len(allfilters)):
+                if self.applicaFiltro(self.w.corpus, row, col, allfilters[ifilter]):
+                    tbitem = TBdialog.w.tableWidget.findItems(thistext,Qt.MatchExactly)
+                    if len(tbitem)>0:
+                        tbrow = tbitem[0].row()
+                        try:
+                            tbval = int(TBdialog.w.tableWidget.item(tbrow,ifilter+1).text())+1
+                        except:
+                            tbval = 1
+                        TBdialog.setcelltotable(str(tbval), tbrow, ifilter+1)
+                    else:
+                        TBdialog.addlinetotable(thistext, 0)
+                        tbrow = TBdialog.w.tableWidget.rowCount()-1
+                        TBdialog.setcelltotable("1", tbrow, ifilter+1)
         self.Progrdialog.accept()
         TBdialog.exec()
 
