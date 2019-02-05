@@ -36,6 +36,7 @@ class Form(QDialog):
         self.w.dofiltra.clicked.connect(self.dofiltra)
         self.w.cancelfiltro.clicked.connect(self.cancelfiltro)
         self.w.filterGroup.clicked.connect(self.filtersh)
+        self.w.tableWidget.horizontalHeader().sectionDoubleClicked.connect(self.sortbycolumn)
         self.w.apricsv.hide()
         self.setWindowTitle("Visualizzazione tabella")
         self.sessionDir = "."
@@ -150,3 +151,26 @@ class Form(QDialog):
             self.w.filterWidget.hide()
         else:
             self.w.filterWidget.show()
+
+    def sortbycolumn(self, col):
+        self.w.tableWidget.setSortingEnabled(False)
+        for row in range(self.w.tableWidget.rowCount()):
+            try:
+                tbval = float(self.w.tableWidget.item(row,col).text()) #Se la cella contiene testo, questa riga provoca except
+                titem = QTableNumberItem()
+                titem.setText(self.w.tableWidget.item(row,col).text())
+                self.w.tableWidget.setItem(row, col, titem)
+            except:
+                continue
+        self.w.tableWidget.setSortingEnabled(True)
+        self.w.tableWidget.sortItems(col)
+
+
+class QTableNumberItem(QTableWidgetItem):
+    def __lt__(self, other):
+        try:
+            myvalue = float(self.text())
+            othervalue = float(other.text())
+            return myvalue < othervalue
+        except:
+            return False
