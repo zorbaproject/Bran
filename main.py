@@ -149,6 +149,7 @@ class MainWindow(QMainWindow):
         self.w.actionCalcola_densit_lessicale.triggered.connect(self.densitalessico)
         self.w.actionRicostruisci_testo.triggered.connect(self.ricostruisciTesto)
         self.w.actionConcordanze.triggered.connect(self.concordanze)
+        self.w.actionCo_occorrenze.triggered.connect(self.coOccorrenze)
         self.w.actionDa_file_txt.triggered.connect(self.loadtxt)
         #self.w.actionTraduci_i_tag_PoS_in_forma_leggibile.triggered.connect(self.translatePos)
         self.w.actionDa_file_JSON.triggered.connect(self.loadjson)
@@ -1101,6 +1102,76 @@ class MainWindow(QMainWindow):
                 TBdialog.addlinetotable(thistext, 0)
                 tbrow = TBdialog.w.tableWidget.rowCount()-1
                 TBdialog.setcelltotable("1", tbrow, 1)
+        self.Progrdialog.accept()
+        TBdialog.exec()
+
+    def coOccorrenze(self):
+        parola = QInputDialog.getText(self.w, "Scegli la parola", "Indica la parola che vuoi cercare:", QLineEdit.Normal, "")[0]
+        thisname = []
+        for col in range(self.w.corpus.columnCount()):
+            thisname.append(self.w.corpus.horizontalHeaderItem(col).text())
+        column = QInputDialog.getItem(self, "Scegli la colonna", "In quale colonna devo cercare il testo?",thisname,current=1,editable=False)
+        col = thisname.index(column[0])
+        myrange = int(QInputDialog.getInt(self.w, "Indica il range", "Quante parole, prima e dopo, vuoi leggere?")[0])
+        rangestr = str(myrange)
+        myfilter = str(list(self.corpuscols)[col]) +"="+parola
+        self.w.ccolumn.setCurrentText(self.filtrimultiplienabled)
+        Fildialog = creafiltro.Form(self)
+        Fildialog.w.filter.setText(myfilter) #"Lemma=essere&&pos[1,-1]=SP||Lemma[-1]=essere&&pos=S"
+        Fildialog.updateTable()
+        Fildialog.exec()
+        if Fildialog.w.filter.text() != "":
+            self.w.cfilter.setText(Fildialog.w.filter.text())
+        self.dofiltra()
+        TBdialog = tableeditor.Form(self)
+        TBdialog.sessionDir = self.sessionDir
+        TBdialog.addcolumn("Segmento", 0)
+        TBdialog.addcolumn("Occorrenze", 1)
+        ret = QMessageBox.question(self,'Domanda', "Vuoi ignorare la punteggiatura?", QMessageBox.Yes | QMessageBox.No)
+        if ret == QMessageBox.Yes:
+            myignore = self.ignorepos
+        else:
+            myignore = []
+        self.Progrdialog = progress.Form()
+        self.Progrdialog.show()
+        concordanze = []
+        for row in range(self.w.corpus.rowCount()):
+            if self.w.corpus.isRowHidden(row):
+                continue
+            thistext = self.rebuildText(self.w.corpus, self.Progrdialog, col, myignore, row-myrange, row+myrange+1, False)
+            #thistext = self.remUselessSpaces(thistext)
+            regex = re.escape('.?!')
+            if bool(re.match(".*["+regex+"].*", thistext)):
+                punctindex = [m.start(1) for m in re.finditer("(["+regex+"])", thistext, flags=re.DOTALL)]
+                if punctindex[0] < thistext.index(parola):
+                    thistext = thistext[punctindex[0]+1:]
+                else:
+                    thistext = thistext[0:punctindex[0]]
+            concordanze.append(thistext)
+        totallines = len(concordanze)
+        for row in range(len(concordanze)):
+            self.Progrdialog.w.testo.setText("Sto controllando l'occorrenza numero "+str(row))
+            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            QApplication.processEvents()
+            if self.Progrdialog.w.annulla.isChecked():
+                return
+            thisrow = concordanze[row].split(" ")
+            for word in thisrow:
+                thistext = ""
+                if thisrow.index(word) < thisrow.index(parola):
+                    thistext = str(word) + "..." + str(parola)
+                if thisrow.index(word) > thisrow.index(parola):
+                    thistext = str(parola) + "..." + str(word)
+                if thistext != "":
+                    tbitem = TBdialog.w.tableWidget.findItems(thistext,Qt.MatchExactly)
+                    if len(tbitem)>0:
+                        tbrow = tbitem[0].row()
+                        tbval = int(TBdialog.w.tableWidget.item(tbrow,1).text())+1
+                        TBdialog.setcelltotable(str(tbval), tbrow, 1)
+                    else:
+                        TBdialog.addlinetotable(thistext, 0)
+                        tbrow = TBdialog.w.tableWidget.rowCount()-1
+                        TBdialog.setcelltotable("1", tbrow, 1)
         self.Progrdialog.accept()
         TBdialog.exec()
 
