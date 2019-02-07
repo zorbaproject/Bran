@@ -851,13 +851,13 @@ class MainWindow(QMainWindow):
                 from tkinter import messagebox
                 thispkg = "la liberia dulwich per Git"
                 messagebox.showinfo("Installazione, attendi prego", "Sto per installare "+ thispkg +" e ci vorrà del tempo. Premi Ok e vai a prenderti un caffè.")
-                pip.main(["install", "dulwich"])
+                pip.main(["install", "dulwich", "--global-option=--pure"])
                 import dulwich.porcelain as git
             except:
                 try:
                     from pip._internal import main as pipmain
                     from tkinter import messagebox
-                    pipmain(["install", "dulwich"])
+                    pipmain(["install", "dulwich", "--global-option=--pure"])
                     import dulwich.porcelain as git
                 except:
                     return
