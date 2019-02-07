@@ -50,6 +50,9 @@ class TextEditor(QDialog):
         self.w.actionIncolla.triggered.connect(self.incolla)
         self.w.actionBatch_mode.triggered.connect(self.batchmodeshift)
         self.w.actionPreview_mode.triggered.connect(self.previewmodeshift)
+        self.w.actionIniziali_sempre_minuscole.triggered.connect(self.normalizzainiziali)
+        self.w.actionTutto_maiuscolo.triggered.connect(self.tuttomaiuscolo)
+        self.w.actionTutto_minuscolo.triggered.connect(self.tuttominuscolo)
         self.w.actionElimina_invii_a_capo_multipli.triggered.connect(self.delmultiplecrlf)
         self.w.actionEstrai_testo_da_file_PDF.triggered.connect(self.do_textract)
         self.w.filelist.currentRowChanged.connect(self.switchfile)
@@ -276,11 +279,14 @@ class TextEditor(QDialog):
         #ripeti finché non ce ne sono più
         self.do_searchreplace(self.w.plainTextEdit.toPlainText(), "\\n\\n","\\n", False)
 
-    def do_searchreplace(self, mytext, searchstr = "", replstr = "", oneline = True):
+    def do_searchreplace(self, mytext, searchstr = "", replstr = "", oneline = True, dolower = False, doupper = False):
         repCdialog = regex_replace.Form(self)
         repCdialog.setModal(False)
         repCdialog.w.lbl_in.hide()
         repCdialog.w.colcombo.hide()
+        repCdialog.w.changeCase.show()
+        repCdialog.w.dolower.setChecked(dolower)
+        repCdialog.w.doupper.setChecked(doupper)
         repCdialog.w.orig.setText(searchstr)
         repCdialog.w.dest.setText(replstr)
         repCdialog.w.colcheck.setText("Considera una riga alla volta")
@@ -325,7 +331,21 @@ class TextEditor(QDialog):
                         if Progrdialog.w.annulla.isChecked():
                             return
                         origstr = textlist[row]
-                        newstr = re.sub(repCdialog.w.orig.text(), repCdialog.w.dest.text(), origstr, flags=myflags)
+                        try:
+                            newstr = re.sub(repCdialog.w.orig.text(), repCdialog.w.dest.text(), origstr, flags=myflags)
+                        except:
+                            self.w.plainTextEdit.setPlainText(mytext)
+                            Progrdialog.accept()
+                            QMessageBox.critical(self, "Attenzione", "Sembra ci sia un errore nell'espressione regolare. Controlla la sintassi.")
+                            return
+                        if repCdialog.w.dolower.isChecked():
+                            indexes = [(m.start(0), m.end(0)) for m in re.finditer(repCdialog.w.orig.text(), newstr, flags=myflags)]
+                            for f in indexes:
+                                newstr = newstr[0:f[0]] + newstr[f[0]:f[1]].lower() + newstr[f[1]:]
+                        if repCdialog.w.doupper.isChecked():
+                            indexes = [(m.start(0), m.end(0)) for m in re.finditer(repCdialog.w.orig.text(), newstr, flags=myflags)]
+                            for f in indexes:
+                                newstr = newstr[0:f[0]] + newstr[f[0]:f[1]].upper() + newstr[f[1]:]
                         newtext = newstr
                         if not self.batchmode:
                             self.w.plainTextEdit.appendPlainText(newtext)
@@ -344,7 +364,21 @@ class TextEditor(QDialog):
                     QApplication.processEvents()
                     if Progrdialog.w.annulla.isChecked():
                         return
-                    newtext = re.sub(repCdialog.w.orig.text(), repCdialog.w.dest.text(), mytext, flags=myflags)
+                    try:
+                        newtext = re.sub(repCdialog.w.orig.text(), repCdialog.w.dest.text(), mytext, flags=myflags)
+                    except:
+                        self.w.plainTextEdit.setPlainText(mytext)
+                        Progrdialog.accept()
+                        QMessageBox.critical(self, "Attenzione", "Sembra ci sia un errore nell'espressione regolare. Controlla la sintassi.")
+                        return
+                    if repCdialog.w.dolower.isChecked():
+                        indexes = [(m.start(0), m.end(0)) for m in re.finditer(repCdialog.w.orig.text(), newtext, flags=myflags)]
+                        for f in indexes:
+                            newtext = newtext[0:f[0]] + newtext[f[0]:f[1]].lower() + newtext[f[1]:]
+                    if repCdialog.w.doupper.isChecked():
+                        indexes = [(m.start(0), m.end(0)) for m in re.finditer(repCdialog.w.orig.text(), newtext, flags=myflags)]
+                        for f in indexes:
+                            newtext = newtext[0:f[0]] + newtext[f[0]:f[1]].upper() + newtext[f[1]:]
                     if fileName != "":
                         text_file = open(fileName, "w", encoding='utf-8')
                         text_file.write(newtext)
@@ -432,6 +466,15 @@ class TextEditor(QDialog):
             if (arr[i][col]) == string:
                 return i
         return -1
+
+    def normalizzainiziali(self):
+        self.do_searchreplace(self.w.plainTextEdit.toPlainText(), "([" + re.escape(".?!") + "]) *([A-Z])","\\g<1> \\g<2>", False, True, False)
+
+    def tuttominuscolo(self):
+        self.do_searchreplace(self.w.plainTextEdit.toPlainText(), "(.*)","\\g<1>", False, True, False)
+
+    def tuttomaiuscolo(self):
+        self.do_searchreplace(self.w.plainTextEdit.toPlainText(), "(.*)","\\g<1>", False, False, True)
 
     def contaoccorrenze(self):
         #conta occorrenze: https://pastebin.com/0tPNVACe

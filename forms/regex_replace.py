@@ -29,6 +29,7 @@ class Form(QDialog):
         self.w.dotest.clicked.connect(self.dotest)
         self.w.cheat.clicked.connect(self.docheat)
         self.setWindowTitle("Sostituisci con RegEx")
+        self.w.changeCase.hide()
 
     def isaccepted(self):
         self.accept()

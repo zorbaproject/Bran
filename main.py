@@ -270,8 +270,13 @@ class MainWindow(QMainWindow):
         repCdialog = regex_replace.Form(self)
         repCdialog.setModal(False)
         self.enumeratecolumns(repCdialog.w.colcombo)
+        repCdialog.w.changeCase.show()
         repCdialog.exec()
         if repCdialog.result():
+            if repCdialog.w.ignorecase.isChecked():
+                myflags=re.IGNORECASE|re.DOTALL
+            else:
+                myflags=re.DOTALL
             self.Progrdialog = progress.Form()
             self.Progrdialog.show()
             totallines = self.w.corpus.rowCount()
@@ -284,11 +289,15 @@ class MainWindow(QMainWindow):
                 for col in range(self.w.corpus.columnCount()):
                     if repCdialog.w.colcheck.isChecked() or (not repCdialog.w.colcheck.isChecked() and col == repCdialog.w.colcombo.currentIndex()):
                         origstr = self.w.corpus.item(row,col).text()
-                        newstr = ""
-                        if repCdialog.w.ignorecase.isChecked():
-                            newstr = re.sub(repCdialog.w.orig.text(), repCdialog.w.dest.text(), origstr, flags=re.IGNORECASE|re.DOTALL)
-                        else:
-                            newstr = re.sub(repCdialog.w.orig.text(), repCdialog.w.dest.text(), origstr, flags=re.DOTALL)
+                        newstr = re.sub(repCdialog.w.orig.text(), repCdialog.w.dest.text(), origstr, flags=myflags)
+                        if repCdialog.w.dolower.isChecked():
+                            indexes = [(m.start(0), m.end(0)) for m in re.finditer(repCdialog.w.orig.text(), newstr, flags=myflags)]
+                            for f in indexes:
+                                newstr = newstr[0:f[0]] + newstr[f[0]:f[1]].lower() + newstr[f[1]:]
+                        if repCdialog.w.doupper.isChecked():
+                            indexes = [(m.start(0), m.end(0)) for m in re.finditer(repCdialog.w.orig.text(), newstr, flags=myflags)]
+                            for f in indexes:
+                                newstr = newstr[0:f[0]] + newstr[f[0]:f[1]].upper() + newstr[f[1]:]
                         self.setcelltocorpus(newstr, row, col)
             self.Progrdialog.accept()
 
@@ -296,8 +305,13 @@ class MainWindow(QMainWindow):
         repCdialog = regex_replace.Form(self)
         repCdialog.setModal(False)
         self.enumeratecolumns(repCdialog.w.colcombo)
+        repCdialog.w.changeCase.show()
         repCdialog.exec()
         if repCdialog.result():
+            if repCdialog.w.ignorecase.isChecked():
+                myflags=re.IGNORECASE|re.DOTALL
+            else:
+                myflags=re.DOTALL
             self.Progrdialog = progress.Form()
             self.Progrdialog.show()
             totallines = len(self.w.corpus.selectedItems())
@@ -311,11 +325,15 @@ class MainWindow(QMainWindow):
                     return
                 if repCdialog.w.colcheck.isChecked() or (not repCdialog.w.colcheck.isChecked() and col == repCdialog.w.colcombo.currentIndex()):
                     origstr = self.w.corpus.item(row,col).text()
-                    newstr = ""
-                    if repCdialog.w.ignorecase.isChecked():
-                        newstr = re.sub(repCdialog.w.orig.text(), repCdialog.w.dest.text(), origstr, flags=re.IGNORECASE|re.DOTALL)
-                    else:
-                        newstr = re.sub(repCdialog.w.orig.text(), repCdialog.w.dest.text(), origstr, flags=re.DOTALL)
+                    newstr = re.sub(repCdialog.w.orig.text(), repCdialog.w.dest.text(), origstr, flags=myflags)
+                    if repCdialog.w.dolower.isChecked():
+                        indexes = [(m.start(0), m.end(0)) for m in re.finditer(repCdialog.w.orig.text(), newstr, flags=myflags)]
+                        for f in indexes:
+                            newstr = newstr[0:f[0]] + newstr[f[0]:f[1]].lower() + newstr[f[1]:]
+                    if repCdialog.w.doupper.isChecked():
+                        indexes = [(m.start(0), m.end(0)) for m in re.finditer(repCdialog.w.orig.text(), newstr, flags=myflags)]
+                        for f in indexes:
+                            newstr = newstr[0:f[0]] + newstr[f[0]:f[1]].upper() + newstr[f[1]:]
                     self.setcelltocorpus(newstr, row, col)
             self.Progrdialog.accept()
 
@@ -879,6 +897,9 @@ class MainWindow(QMainWindow):
             QMessageBox.information(self, "Aggiornamento", "Sto per procedere con l'aggiornamento, potrebbe essere necessario qualche minuto. Per favore, attendi il completamento.")
             doupdate = True
         if doupdate:
+            print("Su Windows, se si presenta un errore relativo ai file di lock è necessario instalalre GitBash e dare il comando 'git gc', per attivare il Garbage Collector e ripulire il repository.")
+            #https://stackoverflow.com/questions/28720151/git-gc-aggressive-vs-git-repack
+            #git.repack(brandir)
             git.pull(brandir, "https://github.com/zorbaproject/Bran.git")
             self.Progrdialog.w.testo.setText("Aggiornamento completo")
             self.Progrdialog.w.progressBar.setValue(int((1)*100))
