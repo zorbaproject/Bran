@@ -211,6 +211,7 @@
      <string>&amp;About</string>
     </property>
     <addaction name="actionAbout_Bran"/>
+    <addaction name="actionAggiornamenti"/>
    </widget>
    <widget class="QMenu" name="menuAnalisi">
     <property name="title">
@@ -424,6 +425,11 @@
   <action name="actionCo_occorrenze">
    <property name="text">
     <string>Conta co-occorrenze</string>
+   </property>
+  </action>
+  <action name="actionAggiornamenti">
+   <property name="text">
+    <string>Aggiornamenti</string>
    </property>
   </action>
  </widget>

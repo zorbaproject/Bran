@@ -132,6 +132,7 @@ class MainWindow(QMainWindow):
         self.w.actionSostituisci_solo_nelle_celle_selezionate.triggered.connect(self.replaceCells)
         self.w.actionSeleziona_tutte_le_celle_visibili.triggered.connect(self.selectVisibleCells)
         self.w.actionDeseleziona_tutte_le_celle.triggered.connect(self.deselectAllCells)
+        self.w.actionAggiornamenti.triggered.connect(self.aggiornamenti)
         self.w.dofiltra.clicked.connect(self.dofiltra)
         self.w.cancelfiltro.clicked.connect(self.cancelfiltro)
         self.w.findNext.clicked.connect(self.findNext)
@@ -837,6 +838,50 @@ class MainWindow(QMainWindow):
         #mostro i risultati
         self.Progrdialog.accept()
         TBdialog.exec()
+
+    def aggiornamenti(self):
+        try:
+            import dulwich.porcelain as git
+        except:
+            try:
+                from tkinter import messagebox
+                thispkg = "la liberia dulwich per Git"
+                messagebox.showinfo("Installazione, attendi prego", "Sto per installare "+ thispkg +" e ci vorrà del tempo. Premi Ok e vai a prenderti un caffè.")
+                pip.main(["install", "dulwich"])
+                import dulwich.porcelain as git
+            except:
+                try:
+                    from pip._internal import main as pipmain
+                    from tkinter import messagebox
+                    pipmain(["install", "dulwich"])
+                    import dulwich.porcelain as git
+                except:
+                    return
+        self.Progrdialog = progress.Form()
+        self.Progrdialog.show()
+        self.Progrdialog.w.testo.setText("Sto cercando gli aggiornamenti")
+        self.Progrdialog.w.progressBar.setValue(int((0.1)*100))
+        QApplication.processEvents()
+        time.sleep(1)
+        brandir = os.path.abspath(os.path.dirname(sys.argv[0]))
+        gstatus = git.status(repo=brandir, ignored=False)
+        print(gstatus)
+        doupdate = False
+        if len(getattr(gstatus, "unstaged")) >0 or int(len(getattr(gstatus, "staged")["add"])+len(getattr(gstatus, "staged")["delete"])+len(getattr(gstatus, "staged")["modify"]))>0:
+            ret = QMessageBox.question(self,'Domanda', "Sembra che tu abbia modificato alcuni file del codice sorgente di Bran, se procedi con l'aggiornamento le tue modifiche verranno perse. Vuoi continuare?", QMessageBox.Yes | QMessageBox.No)
+            if ret == QMessageBox.Yes:
+                doupdate = True
+        else:
+            QMessageBox.information(self, "Aggiornamento", "Sto per procedere con l'aggiornamento, potrebbe essere necessario qualche minuto. Per favore, attendi il completamento.")
+            doupdate = True
+        if doupdate:
+            git.pull(brandir, "https://github.com/zorbaproject/Bran.git")
+            self.Progrdialog.w.testo.setText("Aggiornamento completo")
+            self.Progrdialog.w.progressBar.setValue(int((1)*100))
+            QApplication.processEvents()
+            #time.sleep(1)
+            QMessageBox.information(self, "Aggiornamento", "Aggiornamento completato, adesso è necessario chiudere Bran e avviarlo di nuovo per utilizzare la nuova versione.")
+        self.Progrdialog.accept()
 
     def salvaProgetto(self):
         if self.sessionFile == "":

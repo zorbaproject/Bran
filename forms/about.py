@@ -41,7 +41,7 @@ class Form(QDialog):
         mytext = "<html>Bran è un programma per la linguistica dei corpora<br><br>"
         mytext = mytext + "Bran è stato sviluppato da Floriana Sciumbata(email) e Luca Tringali(TRINGALINVENT@libero.it)<br>"
         mytext = mytext + "Se utilizzi Bran per una pubblicazione accademica, ti chiediamo gentilmente di citarlo così:<br>"
-        mytext = mytext + "<pre>{Bran, Floriana Sciumbata, Università di Udine}</pre>"
+        mytext = mytext + "<pre>{Bran, Floriana Sciumbata, Università di Trieste}</pre>"
         mytext = mytext + "<pre>{Italy goes to Stanford: a collection of CoreNLP modules for Italian},\n {{Palmero Aprosio}, A. and {Moretti}, G.,\n Fondazione Bruno Kessler Trento}</pre><br>"
         mytext = mytext + "Bran è basato su Tint, un fork italiano di StanfordCore NLP, e fornisce una interfaccia grafica<br>"
         mytext = mytext + "per l'analisi dei corpora. Utilizza anche il vocabolario di base di Tullio De Mauro.<br>"
