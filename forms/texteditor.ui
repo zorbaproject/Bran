@@ -69,6 +69,7 @@
      <string>Str&amp;umenti</string>
     </property>
     <addaction name="actionConta_occorrenze"/>
+    <addaction name="actionTrova_co_occorrenze"/>
     <addaction name="actionRimuovi_frasi_ripetute"/>
     <addaction name="actionEstrai_con_RegEx"/>
     <addaction name="actionEstrai_testo_da_file_PDF"/>
@@ -222,7 +223,12 @@
   </action>
   <action name="actionEstrai_testo_da_file_PDF">
    <property name="text">
-    <string>Estrai testo da altro file</string>
+    <string>Estrai testo &amp;da altro file</string>
+   </property>
+  </action>
+  <action name="actionTrova_co_occorrenze">
+   <property name="text">
+    <string>Trova co occorrenze</string>
    </property>
   </action>
  </widget>

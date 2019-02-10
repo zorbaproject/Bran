@@ -25,6 +25,7 @@ from PySide2.QtCore import Qt
 from forms import regex_replace
 from forms import progress
 from forms import about
+from forms import tableeditor
 
 class TextEditor(QDialog):
 
@@ -54,6 +55,7 @@ class TextEditor(QDialog):
         self.w.actionTutto_maiuscolo.triggered.connect(self.tuttomaiuscolo)
         self.w.actionTutto_minuscolo.triggered.connect(self.tuttominuscolo)
         self.w.actionElimina_invii_a_capo_multipli.triggered.connect(self.delmultiplecrlf)
+        self.w.actionTrova_co_occorrenze.triggered.connect(self.coOccorrenze)
         self.w.actionEstrai_testo_da_file_PDF.triggered.connect(self.do_textract)
         self.w.filelist.currentRowChanged.connect(self.switchfile)
         self.w.plainTextEdit.cursorPositionChanged.connect(self.showcurpos)
@@ -121,6 +123,70 @@ class TextEditor(QDialog):
         except:
             lines = 0
         return lines
+
+    def coOccorrenze(self):
+        parola = QInputDialog.getText(self.w, "Scegli la parola", "Indica la parola che vuoi cercare (come RegEx):", QLineEdit.Normal, "")[0]
+        myrange = int(QInputDialog.getInt(self.w, "Indica il range", "Quante parole, prima e dopo, vuoi leggere?")[0])
+        rangestr = str(myrange)
+        TBdialog = tableeditor.Form(self)
+        TBdialog.sessionDir = self.sessionDir
+        TBdialog.addcolumn("Segmento", 0)
+        TBdialog.addcolumn("Occorrenze", 1)
+        ret = QMessageBox.question(self,'Domanda', "Vuoi ignorare la punteggiatura?", QMessageBox.Yes | QMessageBox.No)
+        if ret == QMessageBox.Yes:
+            myignore = "[" + re.escape(",;:-'\"^°`") + "]"
+        else:
+            myignore = ""
+        self.Progrdialog = progress.Form()
+        self.Progrdialog.show()
+        concordanze = []
+        tmptxt = self.w.plainTextEdit.toPlainText().replace("'", "' ")
+        corpus = tmptxt.split(" ")
+        for row in range(len(corpus)):
+            if bool(re.match(parola, corpus[row]))==False:
+                continue
+            thistext = ""
+            for i in range(row-myrange, row+myrange+1):
+                thistext = thistext + corpus[i] + " "
+            punt = " (["+re.escape(".,;!?)")+ "])"
+            thistext = re.sub(punt, "\g<1>", thistext, flags=re.IGNORECASE)
+            punt = "(["+re.escape("'’(")+ "]) "
+            thistext = re.sub(punt, "\g<1>", thistext, flags=re.IGNORECASE|re.DOTALL)
+            thistext = re.sub(myignore, "", thistext)
+            regex = re.escape('.?!')
+            if bool(re.match(".*["+regex+"].*", thistext)):
+                punctindex = [m.start(1) for m in re.finditer("(["+regex+"])", thistext, flags=re.DOTALL)]
+                if punctindex[0] < thistext.index(parola):
+                    thistext = thistext[punctindex[0]+1:]
+                else:
+                    thistext = thistext[0:punctindex[0]]
+            concordanze.append(thistext)
+        totallines = len(concordanze)
+        for row in range(len(concordanze)):
+            self.Progrdialog.w.testo.setText("Sto controllando l'occorrenza numero "+str(row))
+            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            QApplication.processEvents()
+            if self.Progrdialog.w.annulla.isChecked():
+                return
+            thisrow = concordanze[row].split(" ")
+            for word in thisrow:
+                thistext = ""
+                if thisrow.index(word) < thisrow.index(parola):
+                    thistext = str(word) + "..." + str(parola)
+                if thisrow.index(word) > thisrow.index(parola):
+                    thistext = str(parola) + "..." + str(word)
+                if thistext != "":
+                    tbitem = TBdialog.w.tableWidget.findItems(thistext,Qt.MatchExactly)
+                    if len(tbitem)>0:
+                        tbrow = tbitem[0].row()
+                        tbval = int(TBdialog.w.tableWidget.item(tbrow,1).text())+1
+                        TBdialog.setcelltotable(str(tbval), tbrow, 1)
+                    else:
+                        TBdialog.addlinetotable(thistext, 0)
+                        tbrow = TBdialog.w.tableWidget.rowCount()-1
+                        TBdialog.setcelltotable("1", tbrow, 1)
+        self.Progrdialog.accept()
+        TBdialog.exec()
 
     def salva(self, onlycurrent = ""):
         if self.currentFilename == "":
