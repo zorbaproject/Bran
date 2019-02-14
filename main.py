@@ -1496,17 +1496,20 @@ class MainWindow(QMainWindow):
                 return
             thisposc = "False"
             myignore = []
+            if ret == QMessageBox.Yes:
+                myignore = ["punteggiatura"]
             try:
                 thistext = self.w.corpus.item(row,col).text()
+            except:
+                thistext = ""
+            try:
                 thisposc = self.legendaPos[self.w.corpus.item(row,self.corpuscols['pos']).text()][1]
-                if ret == QMessageBox.Yes:
-                    myignore = ["punteggiatura"]
                 try:
                     mytypes[thisposc] = mytypes[thisposc] +1
                 except:
                     mytypes[thisposc] = 1
             except:
-                thistext = ""
+                thisposc = "ERRORE"
             if not thisposc in myignore and thistext != "":
                 tbitem = TBdialog.w.tableWidget.findItems(thistext,Qt.MatchExactly)
                 if len(tbitem)>0:
@@ -1568,9 +1571,9 @@ class MainWindow(QMainWindow):
         TBdialog.addlinetotable("Types", 0)
         tbrow = TBdialog.w.tableWidget.rowCount()-1
         TBdialog.setcelltotable(str(totaltypes), tbrow, 1)
-        TBdialog.addlinetotable("Types/Tokens", 0)
+        TBdialog.addlinetotable("(Types/Tokens)*100", 0)
         tbrow = TBdialog.w.tableWidget.rowCount()-1
-        ratio = (float(totaltypes)/float(paroletotali))
+        ratio = (float(totaltypes)/float(paroletotali))*100.0
         ratios = f'{ratio:.3f}'
         TBdialog.setcelltotable(str(ratios), tbrow, 1)
         TBdialog.addlinetotable("Tokens/Types", 0)
@@ -1581,9 +1584,9 @@ class MainWindow(QMainWindow):
         TBdialog.addlinetotable("Hapax", 0)
         tbrow = TBdialog.w.tableWidget.rowCount()-1
         TBdialog.setcelltotable(str(hapax), tbrow, 1)
-        TBdialog.addlinetotable("Hapax/Tokens", 0)
+        TBdialog.addlinetotable("(Hapax/Tokens)*100", 0)
         tbrow = TBdialog.w.tableWidget.rowCount()-1
-        ratio = (float(hapax)/float(paroletotali))
+        ratio = (float(hapax)/float(paroletotali))*100.0
         ratios = f'{ratio:.3f}'
         TBdialog.setcelltotable(str(ratios), tbrow, 1)
         TBdialog.addlinetotable("Types/sqrt(Tokens)", 0)
