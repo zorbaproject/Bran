@@ -171,7 +171,7 @@
     </widget>
     <widget class="QMenu" name="menuImposta_lingua">
      <property name="title">
-      <string>Lingua</string>
+      <string>&amp;Lingua</string>
      </property>
      <addaction name="actionItaliano"/>
     </widget>
@@ -219,7 +219,7 @@
     </property>
     <widget class="QMenu" name="menuOccorrenze">
      <property name="title">
-      <string>Occorrenze</string>
+      <string>&amp;Occorrenze</string>
      </property>
      <addaction name="actionConta_occorrenze"/>
      <addaction name="actionConta_occorrenze_filtrate"/>
@@ -321,7 +321,7 @@
   </action>
   <action name="actionEstrai_dizionario">
    <property name="text">
-    <string>Estrai dizionario</string>
+    <string>Misure lessicometriche</string>
    </property>
   </action>
   <action name="actionDa_file_JSON">
@@ -379,57 +379,57 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Esegui calcoli solo su righe visibili</string>
+    <string>&amp;Esegui calcoli solo su righe visibili</string>
    </property>
   </action>
   <action name="actionItaliano">
    <property name="text">
-    <string>Italiano</string>
+    <string>&amp;Italiano</string>
    </property>
   </action>
   <action name="actionSostituisci_solo_nelle_celle_selezionate">
    <property name="text">
-    <string>Sostituisci solo nelle celle selezionate</string>
+    <string>Sostituisci solo &amp;nelle celle selezionate</string>
    </property>
   </action>
   <action name="actionSeleziona_tutte_le_celle_visibili">
    <property name="text">
-    <string>Seleziona tutte le celle visibili</string>
+    <string>Seleziona tutte &amp;le celle visibili</string>
    </property>
   </action>
   <action name="actionDeseleziona_tutte_le_celle">
    <property name="text">
-    <string>Deseleziona tutte le celle</string>
+    <string>&amp;Deseleziona tutte le celle</string>
    </property>
   </action>
   <action name="actionRicostruisci_testo">
    <property name="text">
-    <string>Ricostruisci testo</string>
+    <string>&amp;Ricostruisci testo</string>
    </property>
   </action>
   <action name="actionConcordanze">
    <property name="text">
-    <string>Concordanze</string>
+    <string>&amp;Concordanze</string>
    </property>
   </action>
   <action name="actionFiltri_multipli">
    <property name="text">
-    <string>Filtri multipli</string>
+    <string>&amp;Filtri multipli</string>
    </property>
   </action>
   <action name="actionConta_occorrenze_filtrate">
    <property name="text">
-    <string>Conta occorrenze filtrate</string>
+    <string>Conta &amp;occorrenze filtrate</string>
    </property>
   </action>
   <action name="actionCo_occorrenze">
    <property name="text">
-    <string>Conta co-occorrenze</string>
+    <string>Co&amp;nta co-occorrenze</string>
    </property>
   </action>
   <action name="actionAggiornamenti">
    <property name="text">
-    <string>Aggiornamenti</string>
+    <string>A&amp;ggiornamenti</string>
    </property>
   </action>
  </widget>

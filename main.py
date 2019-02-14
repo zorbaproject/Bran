@@ -1472,7 +1472,7 @@ class MainWindow(QMainWindow):
         thisname = []
         for col in range(self.w.corpus.columnCount()):
             thisname.append(self.w.corpus.horizontalHeaderItem(col).text())
-        column = QInputDialog.getItem(self, "Scegli la colonna", "Se vuoi estrarre il dizionario devi cercare nella colonna dei lemmi. Ma puoi anche scegliere di ottenere le statistiche su altre colonne, come la Forma grafica.",thisname,current=self.corpuscols['Lemma'],editable=False)
+        column = QInputDialog.getItem(self, "Scegli la colonna", "Se vuoi estrarre il dizionario devi cercare nella colonna dei lemmi. Ma puoi anche scegliere di ottenere le statistiche su altre colonne, come la Forma grafica.",thisname,current=self.corpuscols['Orig'],editable=False)
         col = thisname.index(column[0])
         ret = QMessageBox.question(self,'Domanda', "Vuoi ignorare la punteggiatura?", QMessageBox.Yes | QMessageBox.No)
         dimList = [100,1000,5000,10000,50000,100000,150000,200000,250000,300000,350000,400000,450000,500000]
@@ -1519,12 +1519,20 @@ class MainWindow(QMainWindow):
                     TBdialog.setcelltotable("1", tbrow, 1)
                     totaltypes = totaltypes + 1
         hapax = 0
+        classifrequenza = []
+        occClassifrequenza = []
         for row in range(TBdialog.w.tableWidget.rowCount()):
             self.Progrdialog.w.testo.setText("Sto cercando gli hapax su "+str(row))
             self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
             QApplication.processEvents()
             if int(TBdialog.w.tableWidget.item(row,1).text()) == 1:
                 hapax = hapax + 1
+            if TBdialog.w.tableWidget.item(row,1).text() in classifrequenza:
+                ind = classifrequenza.index(TBdialog.w.tableWidget.item(row,1).text())
+                occClassifrequenza[ind] = occClassifrequenza[ind] + 1
+            else:
+                classifrequenza.append(TBdialog.w.tableWidget.item(row,1).text())
+                occClassifrequenza.append(1)
         totallines = TBdialog.w.tableWidget.rowCount()
         paroletotali = 0
         for row in range(TBdialog.w.tableWidget.rowCount()):
@@ -1565,12 +1573,50 @@ class MainWindow(QMainWindow):
         ratio = (float(totaltypes)/float(paroletotali))
         ratios = f'{ratio:.3f}'
         TBdialog.setcelltotable(str(ratios), tbrow, 1)
+        TBdialog.addlinetotable("Tokens/Types", 0)
+        tbrow = TBdialog.w.tableWidget.rowCount()-1
+        ratio = (float(paroletotali)/float(totaltypes))
+        ratios = f'{ratio:.3f}'
+        TBdialog.setcelltotable(str(ratios), tbrow, 1)
         TBdialog.addlinetotable("Hapax", 0)
         tbrow = TBdialog.w.tableWidget.rowCount()-1
         TBdialog.setcelltotable(str(hapax), tbrow, 1)
         TBdialog.addlinetotable("Hapax/Tokens", 0)
         tbrow = TBdialog.w.tableWidget.rowCount()-1
         ratio = (float(hapax)/float(paroletotali))
+        ratios = f'{ratio:.3f}'
+        TBdialog.setcelltotable(str(ratios), tbrow, 1)
+        TBdialog.addlinetotable("Types/sqrt(Tokens)", 0)
+        tbrow = TBdialog.w.tableWidget.rowCount()-1
+        ratio = float(totaltypes)/float(math.sqrt(paroletotali))
+        ratios = f'{ratio:.3f}'
+        TBdialog.setcelltotable(str(ratios), tbrow, 1)
+        TBdialog.addlinetotable("log(Types)/log(Tokens)", 0)
+        tbrow = TBdialog.w.tableWidget.rowCount()-1
+        ratio = (float(math.log10(totaltypes))/float(math.log10(paroletotali)))
+        ratios = f'{ratio:.3f}'
+        TBdialog.setcelltotable(str(ratios), tbrow, 1)
+        YuleSum = 0
+        for cfi in range(len(classifrequenza)):
+            YuleSum = YuleSum + ( math.pow(int(classifrequenza[cfi]),2) * occClassifrequenza[cfi] )
+        TBdialog.addlinetotable("Caratteristica di Yule (K)", 0)
+        tbrow = TBdialog.w.tableWidget.rowCount()-1
+        ratio = float(math.pow(10,4)) * ((float(YuleSum) - float(paroletotali))/ float(math.pow(paroletotali, 2)) )
+        ratios = f'{ratio:.3f}'
+        TBdialog.setcelltotable(str(ratios), tbrow, 1)
+        TBdialog.addlinetotable("Vm", 0)
+        tbrow = TBdialog.w.tableWidget.rowCount()-1
+        ratio = 0.0
+        ratios = f'{ratio:.3f}'
+        TBdialog.setcelltotable(str(ratios), tbrow, 1)
+        TBdialog.addlinetotable("W", 0)
+        tbrow = TBdialog.w.tableWidget.rowCount()-1
+        ratio = math.pow(float(paroletotali), (1.0/math.pow(float(totaltypes), 0.172)))
+        ratios = f'{ratio:.3f}'
+        TBdialog.setcelltotable(str(ratios), tbrow, 1)
+        TBdialog.addlinetotable("U", 0)
+        tbrow = TBdialog.w.tableWidget.rowCount()-1
+        ratio =  math.pow(float(math.log10(paroletotali)), 2.0)/(float(math.log10(paroletotali)) - float(math.log10(totaltypes)) )
         ratios = f'{ratio:.3f}'
         TBdialog.setcelltotable(str(ratios), tbrow, 1)
         #mostro i risultati
