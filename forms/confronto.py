@@ -140,6 +140,7 @@ class Confronto(QDialog):
         self.do_confronta(context)
 
     def do_confronta(self, context):
+        ignorethis = QInputDialog.getText(self.w, "Devo ignorare qualcosa?", "Se devo ignorare delle parole, scrivi qui l'espressione regolare. Altrimenti, lascia la casella vuota.", QLineEdit.Normal, "("+re.escape(".")+ "|"+re.escape(":")+"|"+re.escape(",")+"|"+re.escape(";")+"|"+re.escape("?")+"|"+re.escape("!")+"|"+re.escape("\"")+"|"+re.escape("'")+")")[0]
         thisname = []
         if context != "generico":
             riferimentoName = self.getRiferimento(context)
@@ -197,6 +198,8 @@ class Confronto(QDialog):
                         thisvalue = corpus[row][corpValueCol]
                     except:
                         thisvalue = "0"
+                        if i == 0:
+                            thisvalue = "1"
                     thistotal = thistotal + float(thisvalue) #vogliamo considerare solo il valore assoluto?
             for row in range(startrow, len(corpus)):
                 self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
@@ -206,19 +209,21 @@ class Confronto(QDialog):
                     return
                 try:
                     thistext = corpus[row][corpKeyCol]
+                    if ignorethis != "":
+                        thistext = re.sub(ignorethis, "", thistext)
+                    if thistext == "":
+                        continue
+                    thisvalue = 0
                     if context == "Occorrenze PoS":
                         try:
                             thistext = self.legendaPos[corpus[row][corpKeyCol]][0]
                         except:
                             thistext = corpus[row][corpKeyCol]
-                    if self.w.occ_ds.isChecked() or self.w.occ_rms.isChecked():
-                        try:
-                            thisvalue = corpus[row][corpValueCol]
-                            if self.w.dopercent.isChecked() and not self.w.occ_diff.isChecked():
-                                thisvalue = str(float((float(thisvalue)/thistotal)*100))
-                        except:
-                            thisvalue = "1"
-                    if self.w.occ_diff.isChecked():
+                    try:
+                        thisvalue = corpus[row][corpValueCol]
+                        if self.w.dopercent.isChecked():
+                            thisvalue = str(float((float(thisvalue)/thistotal)*100.0))
+                    except:
                         thisvalue = "1"
                     tbitem = TBdialog.w.tableWidget.findItems(thistext,Qt.MatchExactly)
                     if len(tbitem)>0:
