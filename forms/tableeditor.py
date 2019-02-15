@@ -109,6 +109,21 @@ class Form(QDialog):
     def apriCSV(self):
         print("Niente")
 
+    def finditemincolumn(self, mytext, col=0, matchexactly = True, escape = True):
+        myregex = mytext
+        if escape:
+            myregex = re.escape(myregex)
+        if matchexactly:
+            myregex = "^" + myregex + "$"
+        for row in range(self.w.tableWidget.rowCount()):
+            try:
+                if bool(re.match(myregex, self.w.tableWidget.item(row,col).text())):
+                    return row
+            except:
+                continue
+        return -1
+
+
     def selOps(self):
         somma = 0.0
         try:

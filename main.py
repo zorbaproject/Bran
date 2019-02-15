@@ -118,7 +118,7 @@ from forms import creafiltro
 
 class MainWindow(QMainWindow):
 
-    def __init__(self, corpcol, legPos, parent=None):
+    def __init__(self, corpcol, legPos, ignthis, parent=None):
         super(MainWindow, self).__init__(parent)
         file = QFile(os.path.abspath(os.path.dirname(sys.argv[0]))+"/forms/mainwindow.ui")
         file.open(QFile.ReadOnly)
@@ -128,6 +128,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Bran")
         self.corpuscols = corpcol
         self.legendaPos = legPos
+        self.ignorethis = ignthis
         self.w.replace_in_corpus.clicked.connect(self.replaceCorpus)
         self.w.replace_in_cells.clicked.connect(self.replaceCells)
         self.w.actionSostituisci_nel_corpus_con_RegEx.triggered.connect(self.replaceCorpus)
@@ -164,7 +165,7 @@ class MainWindow(QMainWindow):
         self.w.actionEditor_di_testo.triggered.connect(self.texteditor)
         self.w.actionConfronta_corpora.triggered.connect(self.confronto)
         self.w.actionAbout_Bran.triggered.connect(self.aboutbran)
-        self.w.actionEstrai_dizionario.triggered.connect(self.estrai_dizionario)
+        self.w.actionEstrai_dizionario.triggered.connect(self.misure_lessicometriche)
         self.w.actionTrova_ripetizioni.triggered.connect(self.trovaripetizioni)
         self.w.actionConta_verbi.triggered.connect(self.contaverbi)
         self.w.actionItaliano.triggered.connect(lambda: self.changeLang("it-IT"))
@@ -1468,17 +1469,17 @@ class MainWindow(QMainWindow):
         aw = about.Form(self)
         aw.exec()
 
-    def estrai_dizionario(self):
+    def misure_lessicometriche(self):
         thisname = []
         for col in range(self.w.corpus.columnCount()):
             thisname.append(self.w.corpus.horizontalHeaderItem(col).text())
-        column = QInputDialog.getItem(self, "Scegli la colonna", "Se vuoi estrarre il dizionario devi cercare nella colonna dei lemmi. Ma puoi anche scegliere di ottenere le statistiche su altre colonne, come la Forma grafica.",thisname,current=self.corpuscols['Orig'],editable=False)
+        column = QInputDialog.getItem(self, "Scegli la colonna", "Se vuoi estrarre il dizionario devi cercare nella colonna dei lemmi o delle forme grafiche. Ma puoi anche scegliere di ottenere le statistiche su altre colonne, come la Forma grafica.",thisname,current=self.corpuscols['Orig'],editable=False)
         col = thisname.index(column[0])
         ret = QMessageBox.question(self,'Domanda', "Vuoi ignorare la punteggiatura?", QMessageBox.Yes | QMessageBox.No)
         dimList = [100,1000,5000,10000,50000,100000,150000,200000,250000,300000,350000,400000,450000,500000]
         TBdialog = tableeditor.Form(self)
         TBdialog.sessionDir = self.sessionDir
-        TBdialog.addcolumn("Lemma", 0)
+        TBdialog.addcolumn("Token", 0)
         TBdialog.addcolumn("Occorrenze", 1)
         #calcolo le occorrenze del pos
         self.Progrdialog = progress.Form()
@@ -1495,25 +1496,16 @@ class MainWindow(QMainWindow):
             if self.Progrdialog.w.annulla.isChecked():
                 return
             thisposc = "False"
-            myignore = []
-            if ret == QMessageBox.Yes:
-                myignore = ["punteggiatura"]
             try:
                 thistext = self.w.corpus.item(row,col).text()
             except:
                 thistext = ""
-            try:
-                thisposc = self.legendaPos[self.w.corpus.item(row,self.corpuscols['pos']).text()][1]
-                try:
-                    mytypes[thisposc] = mytypes[thisposc] +1
-                except:
-                    mytypes[thisposc] = 1
-            except:
-                thisposc = "ERRORE"
-            if not thisposc in myignore and thistext != "":
-                tbitem = TBdialog.w.tableWidget.findItems(thistext,Qt.MatchExactly)
-                if len(tbitem)>0:
-                    tbrow = tbitem[0].row()
+            if ret == QMessageBox.Yes:
+                thistext = re.sub(self.ignorethis, "", thistext)
+            if thistext != "":
+                #tbitem = TBdialog.w.tableWidget.findItems(thistext,Qt.MatchExactly)
+                tbrow = TBdialog.finditemincolumn(thistext, col=0, matchexactly = True, escape = True)
+                if tbrow>=0:
                     tbval = int(TBdialog.w.tableWidget.item(tbrow,1).text())+1
                     TBdialog.setcelltotable(str(tbval), tbrow, 1)
                 else:
@@ -1607,11 +1599,6 @@ class MainWindow(QMainWindow):
         ratio = float(math.pow(10,4)) * ((float(YuleSum) - float(paroletotali))/ float(math.pow(paroletotali, 2)) )
         ratios = f'{ratio:.3f}'
         TBdialog.setcelltotable(str(ratios), tbrow, 1)
-        TBdialog.addlinetotable("Vm", 0)
-        tbrow = TBdialog.w.tableWidget.rowCount()-1
-        ratio = 0.0
-        ratios = f'{ratio:.3f}'
-        TBdialog.setcelltotable(str(ratios), tbrow, 1)
         TBdialog.addlinetotable("W", 0)
         tbrow = TBdialog.w.tableWidget.rowCount()-1
         ratio = math.pow(float(paroletotali), (1.0/math.pow(float(totaltypes), 0.172)))
@@ -1693,7 +1680,7 @@ def calcola_occorrenze():
                     print("Carico la tabella")
                     with open(output, "r", encoding='utf-8') as ins:
                         for line in ins:
-                            table.append(line.replace("\n","").split(separator))
+                            table.append(line.replace("\n","").replace("\r","").split(separator))
                     print("Comincio dalla riga " + str(startatrow))
                 else:
                     table.append([os.path.basename(fileName)+"-"+str(col),"Occorrenze"])
@@ -1760,7 +1747,7 @@ def contaverbi(corpuscols, legendaPos):
                     print("Carico la tabella")
                     with open(output, "r", encoding='utf-8') as ins:
                         for line in ins:
-                            table.append(line.replace("\n","").split(separator))
+                            table.append(line.replace("\n","").replace("\r","").split(separator))
                     print("Comincio dalla riga " + str(startatrow))
                 else:
                     table.append(["Modo+Tempo", "Occorrenze", "Percentuali"])
@@ -1864,6 +1851,145 @@ def contaverbi(corpuscols, legendaPos):
                 table[row].append(ratios)
         savetable(table, output)
 
+def misure_lessicometriche(ignorethis):
+    #ignorethis = "("+re.escape(".")+ "|"+re.escape(":")+"|"+re.escape(",")+"|"+re.escape(";")+"|"+re.escape("?")+"|"+re.escape("!")+"|"+re.escape("\"")+"|"+re.escape("'")+")"
+    dimList = [100,1000,5000,10000,50000,100000,150000,200000,250000,300000,350000,400000,450000,500000]
+    separator = '\t'
+    fileNames = []
+    if os.path.isfile(sys.argv[2]):
+        fileNames = [sys.argv[2]]
+    if os.path.isdir(sys.argv[2]):
+        for tfile in os.listdir(sys.argv[2]):
+            if tfile[-4:] == ".csv":
+                fileNames.append(os.path.join(sys.argv[2],tfile))
+    try:
+        col = int(sys.argv[3])
+    except:
+        col = 0
+    for fileName in fileNames:
+        #totallines = self.w.corpus.rowCount()
+        table = []
+        output = fileName + "-" + str(col)+ "-misure_lessicometriche.csv"
+        recovery = output + ".tmp"
+        startatrow = -1
+        print(fileName + " -> " + output)
+        try:
+            if os.path.isfile(recovery):
+                ch = "Y"
+                try:
+                    if sys.argv[4] == "y" or sys.argv[4] == "Y":
+                        ch = "Y"
+                except:
+                    print("Ho trovato un file di ripristino, lo devo usare? [Y/N]")
+                    ch = input()
+                if ch == "Y" or ch == "y":
+                    with open(recovery, "r", encoding='utf-8') as tempfile:
+                       lastline = (list(tempfile)[-1])
+                    startatrow = int(lastline)
+                    print("Carico la tabella")
+                    with open(output, "r", encoding='utf-8') as ins:
+                        for line in ins:
+                            table.append(line.replace("\n","").replace("\r","").split(separator))
+                    print("Comincio dalla riga " + str(startatrow))
+        except:
+            startatrow = -1
+        corpus = []
+        with open(fileName, "r", encoding='utf-8') as ins:
+            for line in ins:
+                corpus.append(line.split(separator))
+        totallines = len(corpus)
+        totaltypes = 0
+        mytypes = {}
+        if startatrow >= (len(corpus)-1):
+            continue
+        for row in range(len(corpus)):
+            if row > startatrow:
+                thisposc = "False"
+                try:
+                    thistext = corpus[row][col]
+                    if ignorethis != "":
+                        thistext = re.sub(ignorethis, "", thistext)
+                except:
+                    thistext = ""
+                if thistext != "":
+                    tbrow = findintable(table, thistext, 0)
+                    if tbrow>=0:
+                        tbval = int(table[tbrow][1])+1
+                        table[tbrow][1] = tbval
+                    else:
+                        newrow = [thistext, "1"]
+                        table.append(newrow)
+                        totaltypes = totaltypes + 1
+                    if row % 500 == 0:
+                        savetable(table, output)
+                        with open(recovery, "a", encoding='utf-8') as rowfile:
+                            rowfile.write(str(row)+"\n")
+        hapax = 0
+        classifrequenza = []
+        occClassifrequenza = []
+        totallines = len(table)
+        paroletotali = 0
+        for row in range(len(table)):
+            if int(table[row][1]) == 1:
+                hapax = hapax + 1
+            if table[row][1] in classifrequenza:
+                ind = classifrequenza.index(table[row][1])
+                occClassifrequenza[ind] = occClassifrequenza[ind] + 1
+            else:
+                classifrequenza.append(table[row][1])
+                occClassifrequenza.append(1)
+            paroletotali = paroletotali + int(table[row][1])
+        dimCorpus = dimList[0]
+        for i in range(len(dimList)-1):
+            if dimList[i] <= paroletotali and dimList[i+1] >= paroletotali:
+                lower = paroletotali - dimList[i]
+                upper = dimList[i+1] - paroletotali
+                if lower < upper:
+                    dimCorpus = dimList[i]
+                else:
+                    dimCorpus = dimList[i+1]
+        for row in range(len(table)):
+            thistext = table[row][0]
+            ratio = (float(table[row][1])/float(paroletotali)*dimCorpus)
+            ratios = f'{ratio:.3f}'
+            table[row].append(str(ratios))
+            ratio = math.log10(float(table[row][1])/float(paroletotali))
+            ratios = f'{ratio:.3f}'
+            table[row].append(str(ratios))
+        table.append(["Tokens", str(paroletotali)])
+        table.append(["Types", str(totaltypes)])
+        ratio = (float(totaltypes)/float(paroletotali))*100.0
+        ratios = f'{ratio:.3f}'
+        table.append(["(Types/Tokens)*100", str(ratios)])
+        ratio = (float(paroletotali)/float(totaltypes))
+        ratios = f'{ratio:.3f}'
+        table.append(["Tokens/Types", str(ratios)])
+        table.append(["Hapax", str(hapax)])
+        ratio = (float(hapax)/float(paroletotali))*100.0
+        ratios = f'{ratio:.3f}'
+        table.append(["(Hapax/Tokens)*100", str(ratios)])
+        ratio = float(totaltypes)/float(math.sqrt(paroletotali))
+        ratios = f'{ratio:.3f}'
+        table.append(["Types/sqrt(Tokens)", str(ratios)])
+        ratio = (float(math.log10(totaltypes))/float(math.log10(paroletotali)))
+        ratios = f'{ratio:.3f}'
+        table.append(["log(Types)/log(Tokens)", str(ratios)])
+        YuleSum = 0
+        for cfi in range(len(classifrequenza)):
+            YuleSum = YuleSum + ( math.pow(int(classifrequenza[cfi]),2) * occClassifrequenza[cfi] )
+        ratio = float(math.pow(10,4)) * ((float(YuleSum) - float(paroletotali))/ float(math.pow(paroletotali, 2)) )
+        ratios = f'{ratio:.3f}'
+        table.append(["Caratteristica di Yule (K)", str(ratios)])
+        ratio = math.pow(float(paroletotali), (1.0/math.pow(float(totaltypes), 0.172)))
+        ratios = f'{ratio:.3f}'
+        table.append(["W", str(ratios)])
+        ratio =  math.pow(float(math.log10(paroletotali)), 2.0)/(float(math.log10(paroletotali)) - float(math.log10(totaltypes)) )
+        ratios = f'{ratio:.3f}'
+        table.append(["U", str(ratios)])
+        table.insert(0,["Token", "Occorrenze", "Frequenza in " + str(dimCorpus) + " parole", "Ordine di grandezza (log10)"])
+        savetable(table, output)
+
+
 def estrai_colonna():
     separator = '\t'
     fileNames = []
@@ -1923,7 +2049,7 @@ def mergetables():
         col = 0
     output = os.path.join(sys.argv[2],dirName + "-merged.csv")
     with open(fileNames[0], "r", encoding='utf-8') as f:
-        first_line = f.readline().replace("\n","")
+        first_line = f.readline().replace("\n","").replace("\r","")
     try:
         opstr = str(sys.argv[4])
         opers = opstr.split(",")
@@ -2154,6 +2280,7 @@ if __name__ == "__main__":
                 'IDword': 6
     }
     legendaPos = {"A":["aggettivo", "aggettivi", "piene"],"AP":["agg. poss", "aggettivi", "piene"],"B":["avverbio", "avverbi", "piene"],"B+PC":["avverbio+pron. clit. ", "avverbi", "piene"],"BN":["avv, negazione", "avverbi", "piene"],"CC":["cong. coord", "congiunzioni", "vuote"],"CS":["cong. sub.", "congiunzioni", "vuote"],"DD":["det. dim.", "aggettivi", "piene"],"DE":["det. esclam.", "aggettivi", "piene"],"DI":["det. indefinito", "aggettivi", "piene"],"DQ":["det. interr.", "aggettivi", "piene"],"DR":["det. Rel", "aggettivi", "piene"],"E":["preposizione", "preposizioni", "vuote"],"E+RD":["prep. art. ", "preposizioni", "vuote"],"FB":["punteggiatura - \"\" () «» - - ", "punteggiatura", "none"],"FC":["punteggiatura - : ;", "punteggiatura", "none"],"FF":["punteggiatura - ,", "punteggiatura", "none"],"FS":["punteggiatura - .?!", "punteggiatura", "none"],"I":["interiezione", "interiezioni", "vuote"],"N":["numero", "altro", "none"],"NO":["numerale", "aggettivi", "piene"],"PC":["pron. Clitico", "pronomi", "vuote"],"PC+PC":["pron. clitico+clitico", "pronomi", "vuote"],"PD":["pron. dimostrativo", "pronomi","vuote"],"PE":["pron. pers. ", "pronomi", "vuote"],"PI":["pron. indef.", "pronomi", "vuote"],"PP":["pron. poss.", "pronomi", "vuote"],"PQ":["pron. interr.", "pronomi", "vuote"],"PR":["pron. rel.", "pronomi", "vuote"],"RD":["art. Det.", "articoli", "vuote"],"RI":["art. ind.", "articoli", "vuote"],"S":["sost.", "sostantivi", "piene"],"SP":["nome proprio", "sostantivi", "piene"],"SW":["forestierismo", "altro", "none"],"T":["det. coll.)", "aggettivi", "piene"],"V":["verbo", "verbi", "piene"],"V+PC":["verbo + pron. clitico", "verbi", "piene"],"V+PC+PC":["verbo + pron. clitico + pron clitico", "verbi", "piene"],"VA":["verbo ausiliare", "verbi", "piene"],"VA+PC":["verbo ausiliare + pron.clitico", "verbi", "piene"],"VM":["verbo mod", "verbi", "piene"],"VM+PC":["verbo mod + pron. clitico", "verbi", "piene"],"X":["altro", "altro", "none"]}
+    ignorethis = "((?<=[^0-9])"+ re.escape(".")+ "|^" + re.escape(".")+ "|(?<= )"+ re.escape("-")+ "|^"+re.escape("-")+ "|"+re.escape(":")+"|(?<=[^0-9])"+re.escape(",")+"|^"+re.escape(",")+"|"+re.escape(";")+"|"+re.escape("?")+"|"+re.escape("!")+"|"+re.escape("«")+"|"+re.escape("»")+"|"+re.escape("\"")+"|"+re.escape("(")+"|"+re.escape(")")+"|^"+re.escape("'")+ "|" + re.escape("[PUNCT]") + ")"
     if len(sys.argv)>1:
         w = "cli"
         app = QApplication(sys.argv)
@@ -2169,6 +2296,7 @@ if __name__ == "__main__":
             print("python3 main.py occorrenze file.csv|cartella [colonna] [y]\n")
             print("python3 main.py extractcolumn file.csv|cartella colonna\n")
             print("python3 main.py contaverbi file.csv|cartella\n")
+            print("python3 main.py misurelessico file.csv|cartella [colonna] [y]\n")
             print("* python3 main.py mergetables cartella colonnaChiave [sum|mean|diff,sum|mean|diff] [1] [y]\n")
             print("Gli argomenti tra parentesi [] sono facoltativi.")
             print("\nI comandi preceduti da * sono sperimentali o non ancora implementati.")
@@ -2229,9 +2357,11 @@ if __name__ == "__main__":
             samplebigfile()
         if sys.argv[1] == "mergetables":
             mergetables()
+        if sys.argv[1] == "misurelessico":
+            misure_lessicometriche(ignorethis)
     else:
         app = QApplication(sys.argv)
-        w = MainWindow(corpuscols, legendaPos)
+        w = MainWindow(corpuscols, legendaPos, ignorethis)
         w.show()
         sys.exit(app.exec_())
 
