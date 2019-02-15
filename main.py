@@ -1693,7 +1693,7 @@ def calcola_occorrenze():
             for line in ins:
                 if row > startatrow:
                     try:
-                        thistext = line.split(separator)[col]
+                        thistext = line.replace("\n","").replace("\r","").split(separator)[col]
                     except:
                         thistext = ""
                     tbrow = findintable(table, thistext, 0)
@@ -1759,7 +1759,7 @@ def contaverbi(corpuscols, legendaPos):
         corpus = []
         with open(fileName, "r", encoding='utf-8') as ins:
             for line in ins:
-                corpus.append(line.split(separator))
+                corpus.append(line.replace("\n","").replace("\r","").split(separator))
         for row in range(len(corpus)):
             if row > startatrow:
                 try:
@@ -1896,7 +1896,7 @@ def misure_lessicometriche(ignoretext):
         corpus = []
         with open(fileName, "r", encoding='utf-8') as ins:
             for line in ins:
-                corpus.append(line.split(separator))
+                corpus.append(line.replace("\n","").replace("\r","").split(separator))
         totallines = len(corpus)
         totaltypes = 0
         mytypes = {}
@@ -2023,7 +2023,7 @@ def estrai_colonna():
             for line in ins:
                 if row > startatrow:
                     try:
-                        thistext = line.split(separator)[col]
+                        thistext = line.replace("\n","").replace("\r","").split(separator)[col]
                     except:
                         thistext = ""
                     with open(output, "a", encoding='utf-8') as outfile:
@@ -2085,7 +2085,7 @@ def mergetables():
                     print("Carico la tabella")
                     with open(output, "r", encoding='utf-8') as ins:
                         for line in ins:
-                            table.append(line.replace("\n","").split(separator))
+                            table.append(line.replace("\n","").replace("\r","").split(separator))
                     print("Comincio dalla riga " + str(startatrow))
                     useheader = False
             else:
@@ -2101,7 +2101,7 @@ def mergetables():
                 if row > startatrow:
                     try:
                         thislist = line.split(separator)
-                        thistext = thislist[col].replace("\n", "")
+                        thistext = thislist[col].replace("\n","").replace("\r","")
                     except:
                         thislist = []
                         thistext = ""

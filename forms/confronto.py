@@ -195,6 +195,11 @@ class Confronto(QDialog):
             if self.w.dopercent.isChecked():
                 for row in range(startrow, len(corpus)):
                     try:
+                        thistext = corpus[row][corpKeyCol]
+                        if ignorethis != "":
+                            thistext = re.sub(ignorethis, "", thistext)
+                        if thistext == "":
+                            continue
                         thisvalue = corpus[row][corpValueCol]
                     except:
                         thisvalue = "0"
@@ -225,9 +230,11 @@ class Confronto(QDialog):
                             thisvalue = str(float((float(thisvalue)/thistotal)*100.0))
                     except:
                         thisvalue = "1"
-                    tbitem = TBdialog.w.tableWidget.findItems(thistext,Qt.MatchExactly)
-                    if len(tbitem)>0:
-                        tbrow = tbitem[0].row()
+                    #tbitem = TBdialog.w.tableWidget.findItems(thistext,Qt.MatchExactly)
+                    #if len(tbitem)>0:
+                    tbrow = TBdialog.finditemincolumn(thistext, col=0, matchexactly = True, escape = True)
+                    if tbrow>=0:
+                        #tbrow = tbitem[0].row()
                         tbval = thisvalue
                         if self.w.occ_ds.isChecked() and i>0:
                             N = 2
