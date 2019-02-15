@@ -128,7 +128,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Bran")
         self.corpuscols = corpcol
         self.legendaPos = legPos
-        self.ignorethis = ignthis
+        self.ignoretext = ignthis
         self.w.replace_in_corpus.clicked.connect(self.replaceCorpus)
         self.w.replace_in_cells.clicked.connect(self.replaceCells)
         self.w.actionSostituisci_nel_corpus_con_RegEx.triggered.connect(self.replaceCorpus)
@@ -1501,7 +1501,7 @@ class MainWindow(QMainWindow):
             except:
                 thistext = ""
             if ret == QMessageBox.Yes:
-                thistext = re.sub(self.ignorethis, "", thistext)
+                thistext = re.sub(self.ignoretext, "", thistext)
             if thistext != "":
                 #tbitem = TBdialog.w.tableWidget.findItems(thistext,Qt.MatchExactly)
                 tbrow = TBdialog.finditemincolumn(thistext, col=0, matchexactly = True, escape = True)
@@ -1851,8 +1851,8 @@ def contaverbi(corpuscols, legendaPos):
                 table[row].append(ratios)
         savetable(table, output)
 
-def misure_lessicometriche(ignorethis):
-    #ignorethis = "("+re.escape(".")+ "|"+re.escape(":")+"|"+re.escape(",")+"|"+re.escape(";")+"|"+re.escape("?")+"|"+re.escape("!")+"|"+re.escape("\"")+"|"+re.escape("'")+")"
+def misure_lessicometriche(ignoretext):
+    #ignoretext = "("+re.escape(".")+ "|"+re.escape(":")+"|"+re.escape(",")+"|"+re.escape(";")+"|"+re.escape("?")+"|"+re.escape("!")+"|"+re.escape("\"")+"|"+re.escape("'")+")"
     dimList = [100,1000,5000,10000,50000,100000,150000,200000,250000,300000,350000,400000,450000,500000]
     separator = '\t'
     fileNames = []
@@ -1907,8 +1907,8 @@ def misure_lessicometriche(ignorethis):
                 thisposc = "False"
                 try:
                     thistext = corpus[row][col]
-                    if ignorethis != "":
-                        thistext = re.sub(ignorethis, "", thistext)
+                    if ignoretext != "":
+                        thistext = re.sub(ignoretext, "", thistext)
                 except:
                     thistext = ""
                 if thistext != "":
@@ -2280,7 +2280,7 @@ if __name__ == "__main__":
                 'IDword': 6
     }
     legendaPos = {"A":["aggettivo", "aggettivi", "piene"],"AP":["agg. poss", "aggettivi", "piene"],"B":["avverbio", "avverbi", "piene"],"B+PC":["avverbio+pron. clit. ", "avverbi", "piene"],"BN":["avv, negazione", "avverbi", "piene"],"CC":["cong. coord", "congiunzioni", "vuote"],"CS":["cong. sub.", "congiunzioni", "vuote"],"DD":["det. dim.", "aggettivi", "piene"],"DE":["det. esclam.", "aggettivi", "piene"],"DI":["det. indefinito", "aggettivi", "piene"],"DQ":["det. interr.", "aggettivi", "piene"],"DR":["det. Rel", "aggettivi", "piene"],"E":["preposizione", "preposizioni", "vuote"],"E+RD":["prep. art. ", "preposizioni", "vuote"],"FB":["punteggiatura - \"\" () «» - - ", "punteggiatura", "none"],"FC":["punteggiatura - : ;", "punteggiatura", "none"],"FF":["punteggiatura - ,", "punteggiatura", "none"],"FS":["punteggiatura - .?!", "punteggiatura", "none"],"I":["interiezione", "interiezioni", "vuote"],"N":["numero", "altro", "none"],"NO":["numerale", "aggettivi", "piene"],"PC":["pron. Clitico", "pronomi", "vuote"],"PC+PC":["pron. clitico+clitico", "pronomi", "vuote"],"PD":["pron. dimostrativo", "pronomi","vuote"],"PE":["pron. pers. ", "pronomi", "vuote"],"PI":["pron. indef.", "pronomi", "vuote"],"PP":["pron. poss.", "pronomi", "vuote"],"PQ":["pron. interr.", "pronomi", "vuote"],"PR":["pron. rel.", "pronomi", "vuote"],"RD":["art. Det.", "articoli", "vuote"],"RI":["art. ind.", "articoli", "vuote"],"S":["sost.", "sostantivi", "piene"],"SP":["nome proprio", "sostantivi", "piene"],"SW":["forestierismo", "altro", "none"],"T":["det. coll.)", "aggettivi", "piene"],"V":["verbo", "verbi", "piene"],"V+PC":["verbo + pron. clitico", "verbi", "piene"],"V+PC+PC":["verbo + pron. clitico + pron clitico", "verbi", "piene"],"VA":["verbo ausiliare", "verbi", "piene"],"VA+PC":["verbo ausiliare + pron.clitico", "verbi", "piene"],"VM":["verbo mod", "verbi", "piene"],"VM+PC":["verbo mod + pron. clitico", "verbi", "piene"],"X":["altro", "altro", "none"]}
-    ignorethis = "((?<=[^0-9])"+ re.escape(".")+ "|^" + re.escape(".")+ "|(?<= )"+ re.escape("-")+ "|^"+re.escape("-")+ "|"+re.escape(":")+"|(?<=[^0-9])"+re.escape(",")+"|^"+re.escape(",")+"|"+re.escape(";")+"|"+re.escape("?")+"|"+re.escape("!")+"|"+re.escape("«")+"|"+re.escape("»")+"|"+re.escape("\"")+"|"+re.escape("(")+"|"+re.escape(")")+"|^"+re.escape("'")+ "|" + re.escape("[PUNCT]") + ")"
+    ignoretext = "((?<=[^0-9])"+ re.escape(".")+ "|^" + re.escape(".")+ "|(?<= )"+ re.escape("-")+ "|^"+re.escape("-")+ "|"+re.escape(":")+"|(?<=[^0-9])"+re.escape(",")+"|^"+re.escape(",")+"|"+re.escape(";")+"|"+re.escape("?")+"|"+re.escape("!")+"|"+re.escape("«")+"|"+re.escape("»")+"|"+re.escape("\"")+"|"+re.escape("(")+"|"+re.escape(")")+"|^"+re.escape("'")+ "|" + re.escape("[PUNCT]") + ")"
     if len(sys.argv)>1:
         w = "cli"
         app = QApplication(sys.argv)
@@ -2297,9 +2297,10 @@ if __name__ == "__main__":
             print("python3 main.py extractcolumn file.csv|cartella colonna\n")
             print("python3 main.py contaverbi file.csv|cartella\n")
             print("python3 main.py misurelessico file.csv|cartella [colonna] [y]\n")
-            print("* python3 main.py mergetables cartella colonnaChiave [sum|mean|diff,sum|mean|diff] [1] [y]\n")
+            print("python3 main.py mergetables cartella colonnaChiave [sum|mean|diff,sum|mean|diff] [1] [y]\n")
             print("Gli argomenti tra parentesi [] sono facoltativi.")
             print("\nI comandi preceduti da * sono sperimentali o non ancora implementati.")
+            sys.exit(0)
         if sys.argv[1] == "txt2corpus":
             fileNames = []
             if os.path.isfile(sys.argv[2]):
@@ -2358,10 +2359,12 @@ if __name__ == "__main__":
         if sys.argv[1] == "mergetables":
             mergetables()
         if sys.argv[1] == "misurelessico":
-            misure_lessicometriche(ignorethis)
+            misure_lessicometriche(ignoretext)
+        print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
+        sys.exit(0)
     else:
         app = QApplication(sys.argv)
-        w = MainWindow(corpuscols, legendaPos, ignorethis)
+        w = MainWindow(corpuscols, legendaPos, ignoretext)
         w.show()
         sys.exit(app.exec_())
 
