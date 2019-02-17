@@ -242,6 +242,20 @@ class TintCorpus(QThread):
                         print("Comincio dalla riga " + str(startatrow))
         except:
             startatrow = -1
+        #
+        try:
+            IDphrase = -1
+            if self.outputcsv == "":
+                for crow in range(self.w.corpus.rowCount()):
+                    if int(self.w.corpus.item(crow, self.corpuscols["IDphrase"]).text()) > IDphrase:
+                        IDphrase = int(self.w.corpus.item(crow, self.corpuscols["IDphrase"]).text())
+            else:
+                with open(self.rowfilename, "r", encoding='utf-8') as ins:
+                    for line in ins:
+                        if int(line.split("\t")[self.corpuscols["IDphrase"]]) > IDphrase:
+                            IDphrase = int(line.split("\t")[self.corpuscols["IDphrase"]])
+        except:
+            IDphrase = -1
         row = 0
         for line in itext:
             row = row + 1
@@ -265,6 +279,7 @@ class TintCorpus(QThread):
                 indoltk = 0
                 legenda = {'A': ['adj'], 'AP': ['adj'], 'B': ['adv','prep'], 'BN': ['adv'], 'I': ['adv'], 'S': ['n'], 'T': ['pron'], 'RI': ['art'], 'RD': ['art','pron'], 'V': ['v'], 'E': ['prep'], 'VA': ['v'], 'CC': ['conj'], 'PC': ['art','pron'], 'PR': ['conj', 'pron'], 'VM': ['v'], 'CS': ['conj'], 'PE': ['pron'], 'DD': ['adj'], 'DI': ['pron', 'adj'], 'PI': ['pron'], 'SW': ['n']}
                 for sentence in myarray["sentences"]:
+                    IDphrase = IDphrase +1
                     for token in sentence["tokens"]:
                         morfL = str(token["full_morpho"]).split(' ')
                         posL = str(token["pos"]).split('+')
@@ -331,8 +346,26 @@ class TintCorpus(QThread):
                             self.setcelltocorpus(str(token["pos"]), rowN, self.corpuscols["pos"])
                             self.setcelltocorpus(str(token["ner"]), rowN, self.corpuscols["ner"])
                             self.setcelltocorpus(morf, rowN, self.corpuscols["feat"])
+                            self.setcelltocorpus(str(IDphrase), rowN, self.corpuscols["IDphrase"])
+                            for mydep in sentence["basic-dependencies"]:
+                                if mydep["dependent"] == token["index"]:
+                                    self.setcelltocorpus(str(mydep["dep"]), rowN, self.corpuscols["dep"])
+                                    self.setcelltocorpus(str(mydep["governor"]), rowN, self.corpuscols["governor"])
+                                    break
                         else:
-                            fullline = str(IDcorpus) + "\t" + str(token["originalText"]) + "\t" + str(token["lemma"]) + "\t" + str(token["pos"]) + "\t" + str(token["ner"]) + "\t" + str(morf) + "\t" + str(token["index"])
+                            fullline = str(IDcorpus) + "\t"
+                            fullline = fullline + str(token["originalText"]) + "\t"
+                            fullline = fullline + str(token["lemma"]) + "\t"
+                            fullline = fullline + str(token["pos"]) + "\t"
+                            fullline = fullline + str(token["ner"]) + "\t"
+                            fullline = fullline + str(morf) + "\t"
+                            fullline = fullline + str(token["index"]) + "\t"
+                            fullline = fullline + str(IDphrase)
+                            for mydep in sentence["basic-dependencies"]:
+                                if mydep["dependent"] == token["index"]:
+                                    fullline = fullline + "\t" + str(mydep["dep"]) + "\t"
+                                    fullline = fullline + str(mydep["governor"])
+                                    break
                             fdatefile = self.outputcsv
                             with open(fdatefile, "a", encoding='utf-8') as myfile:
                                 myfile.write(fullline+"\n")

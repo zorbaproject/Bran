@@ -111,6 +111,21 @@
         <string>ID parola</string>
        </property>
       </column>
+      <column>
+       <property name="text">
+        <string>ID frase</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Dep</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Governor</string>
+       </property>
+      </column>
      </widget>
     </item>
     <item>
