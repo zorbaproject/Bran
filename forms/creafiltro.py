@@ -95,6 +95,40 @@ class Form(QDialog):
         except:
             print("Filtro non valido")
 
+    def filterColElements(self, col):
+        self.Progrdialog = progress.Form(self.w)
+        self.Progrdialog.show()
+        totallines = self.mycorpus.rowCount()
+        myvalues = []
+        for row in range(self.mycorpus.rowCount()):
+            self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
+            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            QApplication.processEvents()
+            if self.Progrdialog.w.annulla.isChecked():
+                return
+            try:
+                thistext = self.mycorpus.item(row,col).text()
+                if not thistext in myvalues:
+                    myvalues.append(thistext)
+            except:
+                thistext = ""
+        mycol = ""
+        for key in self.corpuscols:
+            if self.corpuscols[key] == col:
+                mycol = key
+        totallines = len(myvalues)
+        for row in range(len(myvalues)):
+            self.Progrdialog.w.testo.setText("Sto aggiungendo la riga numero "+str(row))
+            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            QApplication.processEvents()
+            if self.Progrdialog.w.annulla.isChecked():
+                return
+            self.orbtn()
+            tbrow = self.addlinetotable(mycol, 0)
+            self.setcelltocorpus("0", tbrow, 2)
+            self.setcelltocorpus("^"+re.escape(myvalues[row])+"$", tbrow, 2)
+        self.Progrdialog.accept()
+
     def filtroautomatico(self):
         if self.w.autofiltercombo.currentIndex() == 0:
             thisname = []
@@ -102,38 +136,7 @@ class Form(QDialog):
                 thisname.append(self.mycorpus.horizontalHeaderItem(col).text())
             column = QInputDialog.getItem(self, "Scegli la colonna", "Da quale colonna del corpus devo estrarre i valori del filtro?",thisname,current=0,editable=False)
             col = thisname.index(column[0])
-            self.Progrdialog = progress.Form(self.w)
-            self.Progrdialog.show()
-            totallines = self.mycorpus.rowCount()
-            myvalues = []
-            for row in range(self.mycorpus.rowCount()):
-                self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
-                self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
-                QApplication.processEvents()
-                if self.Progrdialog.w.annulla.isChecked():
-                    return
-                try:
-                    thistext = self.mycorpus.item(row,col).text()
-                    if not thistext in myvalues:
-                        myvalues.append(thistext)
-                except:
-                    thistext = ""
-            mycol = ""
-            for key in self.corpuscols:
-                if self.corpuscols[key] == col:
-                    mycol = key
-            totallines = len(myvalues)
-            for row in range(len(myvalues)):
-                self.Progrdialog.w.testo.setText("Sto aggiungendo la riga numero "+str(row))
-                self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
-                QApplication.processEvents()
-                if self.Progrdialog.w.annulla.isChecked():
-                    return
-                self.orbtn()
-                tbrow = self.addlinetotable(mycol, 0)
-                self.setcelltocorpus("0", tbrow, 2)
-                self.setcelltocorpus("^"+re.escape(myvalues[row])+"$", tbrow, 2)
-            self.Progrdialog.accept()
+            self.filterColElements(col)
         self.updateFilter()
 
     def addlinetotable(self, text, column):

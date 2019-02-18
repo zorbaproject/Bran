@@ -151,6 +151,7 @@ class MainWindow(QMainWindow):
         self.w.actionEsporta_vista_attuale_in_CSV.triggered.connect(self.esportavistaCSV)
         self.w.actionRimuovi_vista_attuale_dal_corpus.triggered.connect(self.removevisiblerows)
         self.w.actionCalcola_densit_lessicale.triggered.connect(self.densitalessico)
+        self.w.actionNumero_dipendenze_per_frase.triggered.connect(self.actionNumero_dipendenze_per_frase)
         self.w.actionRicostruisci_testo.triggered.connect(self.ricostruisciTesto)
         self.w.actionConcordanze.triggered.connect(self.concordanze)
         self.w.actionCo_occorrenze.triggered.connect(self.coOccorrenze)
@@ -1128,6 +1129,53 @@ class MainWindow(QMainWindow):
         Fildialog.exec()
         if Fildialog.w.filter.text() != "":
             self.w.cfilter.setText(Fildialog.w.filter.text())
+
+    def actionNumero_dipendenze_per_frase(self):
+        self.w.ccolumn.setCurrentText(self.filtrimultiplienabled)
+        Fildialog = creafiltro.Form(self.w.corpus, self.corpuscols, self)
+        col = self.corpuscols["dep"]
+        Fildialog.filterColElements(self.corpuscols["IDphrase"])
+        Fildialog.updateFilter()
+        Fildialog.exec()
+        if Fildialog.w.filter.text() != "":
+            self.w.cfilter.setText(Fildialog.w.filter.text())
+        allfilters = Fildialog.w.filter.text().split("||")
+        TBdialog = tableeditor.Form(self)
+        TBdialog.sessionDir = self.sessionDir
+        TBdialog.addcolumn("Dependency", 0)
+        self.Progrdialog = progress.Form()
+        self.Progrdialog.show()
+        for myfilter in allfilters:
+            TBdialog.addcolumn(myfilter, 1)
+        totallines = self.w.corpus.rowCount()
+        for row in range(self.w.corpus.rowCount()):
+            self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
+            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            QApplication.processEvents()
+            if self.Progrdialog.w.annulla.isChecked():
+                return
+            try:
+                thistext = self.w.corpus.item(row,col).text()
+                if col == self.corpuscols["pos"]:
+                    thistext = self.legendaPos[thistext][0]
+            except:
+                thistext = ""
+            for ifilter in range(len(allfilters)):
+                if self.applicaFiltro(self.w.corpus, row, col, allfilters[ifilter]):
+                    tbitem = TBdialog.w.tableWidget.findItems(thistext,Qt.MatchExactly)
+                    if len(tbitem)>0:
+                        tbrow = tbitem[0].row()
+                        try:
+                            tbval = int(TBdialog.w.tableWidget.item(tbrow,ifilter+1).text())+1
+                        except:
+                            tbval = 1
+                        TBdialog.setcelltotable(str(tbval), tbrow, ifilter+1)
+                    else:
+                        TBdialog.addlinetotable(thistext, 0)
+                        tbrow = TBdialog.w.tableWidget.rowCount()-1
+                        TBdialog.setcelltotable("1", tbrow, ifilter+1)
+        self.Progrdialog.accept()
+        TBdialog.exec()
 
     def concordanze(self):
         parola = QInputDialog.getText(self.w, "Scegli la parola", "Indica la parola che vuoi cercare:", QLineEdit.Normal, "")[0]

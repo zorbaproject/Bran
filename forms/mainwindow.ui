@@ -240,8 +240,15 @@
      <addaction name="actionConta_occorrenze_filtrate"/>
      <addaction name="actionCo_occorrenze"/>
     </widget>
+    <widget class="QMenu" name="menuDipendenze">
+     <property name="title">
+      <string>Dipendenze</string>
+     </property>
+     <addaction name="actionNumero_dipendenze_per_frase"/>
+    </widget>
     <addaction name="actionEsegui_calcoli_solo_su_righe_visibili"/>
     <addaction name="menuOccorrenze"/>
+    <addaction name="menuDipendenze"/>
     <addaction name="actionEstrai_dizionario"/>
     <addaction name="actionCalcola_densit_lessicale"/>
     <addaction name="actionTrova_ripetizioni"/>
@@ -445,6 +452,11 @@
   <action name="actionAggiornamenti">
    <property name="text">
     <string>A&amp;ggiornamenti</string>
+   </property>
+  </action>
+  <action name="actionNumero_dipendenze_per_frase">
+   <property name="text">
+    <string>Numero dipendenze per frase</string>
    </property>
   </action>
  </widget>
