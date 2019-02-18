@@ -407,7 +407,7 @@ class MainWindow(QMainWindow):
         col = thisname.index(column[0])
         QMessageBox.information(self, "Filtro", "Ora devi impostare i filtri con cui dividere i risultati. I vari filtri devono essere separati da condizioni OR, per ciascuno di essi verrà creata una colonna a parte nella tabella dei risultati.")
         self.w.ccolumn.setCurrentText(self.filtrimultiplienabled)
-        Fildialog = creafiltro.Form(self)
+        Fildialog = creafiltro.Form(self.w.corpus, self.corpuscols, self)
         Fildialog.w.filter.setText("pos=A.*||pos=S.*")
         Fildialog.updateTable()
         Fildialog.exec()
@@ -1122,7 +1122,7 @@ class MainWindow(QMainWindow):
 
     def filtriMultipli(self):
         self.w.ccolumn.setCurrentText(self.filtrimultiplienabled)
-        Fildialog = creafiltro.Form(self)
+        Fildialog = creafiltro.Form(self.w.corpus, self.corpuscols, self)
         Fildialog.w.filter.setText(self.w.cfilter.text())
         Fildialog.updateTable()
         Fildialog.exec()
@@ -1141,7 +1141,7 @@ class MainWindow(QMainWindow):
         #myfilter = str(list(self.corpuscols)[col]) + "[" + rangestr + "]" +"="+parola
         myfilter = str(list(self.corpuscols)[col]) +"="+parola
         self.w.ccolumn.setCurrentText(self.filtrimultiplienabled)
-        Fildialog = creafiltro.Form(self)
+        Fildialog = creafiltro.Form(self.w.corpus, self.corpuscols, self)
         Fildialog.w.filter.setText(myfilter) #"Lemma=essere&&pos[1,-1]=SP||Lemma[-1]=essere&&pos=S"
         Fildialog.updateTable()
         Fildialog.exec()
@@ -1187,7 +1187,7 @@ class MainWindow(QMainWindow):
         rangestr = str(myrange)
         myfilter = str(list(self.corpuscols)[col]) +"="+parola
         self.w.ccolumn.setCurrentText(self.filtrimultiplienabled)
-        Fildialog = creafiltro.Form(self)
+        Fildialog = creafiltro.Form(self.w.corpus, self.corpuscols, self)
         Fildialog.w.filter.setText(myfilter) #"Lemma=essere&&pos[1,-1]=SP||Lemma[-1]=essere&&pos=S"
         Fildialog.updateTable()
         Fildialog.exec()

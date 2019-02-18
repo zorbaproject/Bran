@@ -11,14 +11,17 @@ from PySide2.QtCore import QFile
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import QTableWidget
 from PySide2.QtWidgets import QTableWidgetItem
+from PySide2.QtWidgets import QInputDialog
 
 import re
 import sys
 import os
 
+from forms import progress
+
 
 class Form(QDialog):
-    def __init__(self, parent=None):
+    def __init__(self, corpus, cpcols, parent=None):
         super(Form, self).__init__(parent)
         file = QFile(os.path.abspath(os.path.dirname(sys.argv[0]))+"/forms/creafiltro.ui")
         file.open(QFile.ReadOnly)
@@ -30,17 +33,24 @@ class Form(QDialog):
         self.w.accepted.connect(self.isaccepted)
         self.w.rejected.connect(self.isrejected)
         self.w.updateFilter.clicked.connect(self.updateFilter)
+        self.w.filtroautomatico.clicked.connect(self.filtroautomatico)
         self.w.andbtn.clicked.connect(self.andbtn)
         self.w.orbtn.clicked.connect(self.orbtn)
         self.w.delbtn.clicked.connect(self.delbtn)
         self.w.help.clicked.connect(self.help)
         self.setWindowTitle("Crea filtro multiplo")
+        self.mycorpus = corpus
+        self.corpuscols = cpcols
+        self.fillautocombo()
 
     def isaccepted(self):
         self.accept()
     def isrejected(self):
         self.reject()
         self.w.filter.setText("")
+
+    def fillautocombo(self):
+        self.w.autofiltercombo.addItem("Ogni elemento di una colonna")
 
     def updateFilter(self):
         self.sanitizeTable()
@@ -85,6 +95,47 @@ class Form(QDialog):
         except:
             print("Filtro non valido")
 
+    def filtroautomatico(self):
+        if self.w.autofiltercombo.currentIndex() == 0:
+            thisname = []
+            for col in range(self.mycorpus.columnCount()):
+                thisname.append(self.mycorpus.horizontalHeaderItem(col).text())
+            column = QInputDialog.getItem(self, "Scegli la colonna", "Da quale colonna del corpus devo estrarre i valori del filtro?",thisname,current=0,editable=False)
+            col = thisname.index(column[0])
+            self.Progrdialog = progress.Form(self.w)
+            self.Progrdialog.show()
+            totallines = self.mycorpus.rowCount()
+            myvalues = []
+            for row in range(self.mycorpus.rowCount()):
+                self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
+                self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+                QApplication.processEvents()
+                if self.Progrdialog.w.annulla.isChecked():
+                    return
+                try:
+                    thistext = self.mycorpus.item(row,col).text()
+                    if not thistext in myvalues:
+                        myvalues.append(thistext)
+                except:
+                    thistext = ""
+            mycol = ""
+            for key in self.corpuscols:
+                if self.corpuscols[key] == col:
+                    mycol = key
+            totallines = len(myvalues)
+            for row in range(len(myvalues)):
+                self.Progrdialog.w.testo.setText("Sto aggiungendo la riga numero "+str(row))
+                self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+                QApplication.processEvents()
+                if self.Progrdialog.w.annulla.isChecked():
+                    return
+                self.orbtn()
+                tbrow = self.addlinetotable(mycol, 0)
+                self.setcelltocorpus("0", tbrow, 2)
+                self.setcelltocorpus("^"+re.escape(myvalues[row])+"$", tbrow, 2)
+            self.Progrdialog.accept()
+        self.updateFilter()
+
     def addlinetotable(self, text, column):
         row = self.w.tableWidget.rowCount()
         self.w.tableWidget.insertRow(row)
@@ -103,9 +154,11 @@ class Form(QDialog):
         tbrow = self.addlinetotable("", 0)
 
     def orbtn(self):
-        tbrow = self.addlinetotable("OR", 0)
+        if self.w.tableWidget.rowCount() > 0:
+            tbrow = self.addlinetotable("OR", 0)
 
     def delbtn(self):
+        self.sanitizeTable()
         totallines = len(self.w.tableWidget.selectedItems())
         toselect = []
         for i in range(len(self.w.tableWidget.selectedItems())):
