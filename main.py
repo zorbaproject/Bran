@@ -1010,7 +1010,7 @@ class MainWindow(QMainWindow):
         w2Cdialog.exec()
 
     def visualizzafrasi(self):
-        alberofrasidialog = alberofrasi.Form(self.w.corpus, self.corpuscols, self)
+        alberofrasidialog = alberofrasi.Form(self, self)
         alberofrasidialog.exec()
 
     def delselected(self):
@@ -1040,6 +1040,20 @@ class MainWindow(QMainWindow):
         for col in range(self.w.corpus.columnCount()):
             thisname = self.w.corpus.horizontalHeaderItem(col).text()
             combo.addItem(thisname)
+
+    def finditemincolumn(self, mytext, col=0, matchexactly = True, escape = True):
+        myregex = mytext
+        if escape:
+            myregex = re.escape(myregex)
+        if matchexactly:
+            myregex = "^" + myregex + "$"
+        for row in range(self.w.corpus.rowCount()):
+            try:
+                if bool(re.match(myregex, self.w.corpus.item(row,col).text())):
+                    return row
+            except:
+                continue
+        return -1
 
     def dofiltra(self):
         tcount = 0
