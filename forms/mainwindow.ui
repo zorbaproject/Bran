@@ -245,6 +245,7 @@
       <string>Dipendenze</string>
      </property>
      <addaction name="actionNumero_dipendenze_per_frase"/>
+     <addaction name="actionVisualizza_frasi"/>
     </widget>
     <addaction name="actionEsegui_calcoli_solo_su_righe_visibili"/>
     <addaction name="menuOccorrenze"/>
@@ -457,6 +458,11 @@
   <action name="actionNumero_dipendenze_per_frase">
    <property name="text">
     <string>Numero dipendenze per frase</string>
+   </property>
+  </action>
+  <action name="actionVisualizza_frasi">
+   <property name="text">
+    <string>Visualizza frasi</string>
    </property>
   </action>
  </widget>

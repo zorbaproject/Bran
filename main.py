@@ -113,6 +113,7 @@ from forms import sessione
 from forms import ripetizioni
 from forms import about
 from forms import creafiltro
+from forms import alberofrasi
 
 
 
@@ -152,6 +153,7 @@ class MainWindow(QMainWindow):
         self.w.actionRimuovi_vista_attuale_dal_corpus.triggered.connect(self.removevisiblerows)
         self.w.actionCalcola_densit_lessicale.triggered.connect(self.densitalessico)
         self.w.actionNumero_dipendenze_per_frase.triggered.connect(self.actionNumero_dipendenze_per_frase)
+        self.w.actionVisualizza_frasi.triggered.connect(self.visualizzafrasi)
         self.w.actionRicostruisci_testo.triggered.connect(self.ricostruisciTesto)
         self.w.actionConcordanze.triggered.connect(self.concordanze)
         self.w.actionCo_occorrenze.triggered.connect(self.coOccorrenze)
@@ -1006,6 +1008,10 @@ class MainWindow(QMainWindow):
         w2Cdialog = url2corpus.Form(self)
         w2Cdialog.setmycfgfile(self.mycfgfile)
         w2Cdialog.exec()
+
+    def visualizzafrasi(self):
+        alberofrasidialog = alberofrasi.Form(self.w.corpus, self.corpuscols, self)
+        alberofrasidialog.exec()
 
     def delselected(self):
         self.Progrdialog = progress.Form()

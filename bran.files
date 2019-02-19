@@ -1,3 +1,5 @@
+forms/alberofrasi.py
+forms/alberofrasi.ui
 forms/confronto.py
 forms/confronto.ui
 forms/creafiltro.py
