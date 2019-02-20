@@ -173,8 +173,8 @@
       <string>&amp;Importa corpus</string>
      </property>
      <addaction name="actionDa_file_txt"/>
-     <addaction name="actionDa_file_JSON"/>
      <addaction name="actionDa_file_CSV"/>
+     <addaction name="actionEstrai_testo_da_CSV"/>
     </widget>
     <widget class="QMenu" name="menuEsporta">
      <property name="title">
@@ -284,7 +284,7 @@
   </action>
   <action name="actionDa_file_txt">
    <property name="text">
-    <string>&amp;Da file TXT</string>
+    <string>&amp;Da file di testo (TXT)</string>
    </property>
   </action>
   <action name="actionDa_file_zip">
@@ -354,7 +354,7 @@
   </action>
   <action name="actionDa_file_CSV">
    <property name="text">
-    <string>Da file &amp;CSV</string>
+    <string>Aggiungi corpus esistente</string>
    </property>
   </action>
   <action name="actionConfigurazione_Tint">
@@ -463,6 +463,11 @@
   <action name="actionVisualizza_frasi">
    <property name="text">
     <string>Visualizza frasi</string>
+   </property>
+  </action>
+  <action name="actionEstrai_testo_da_CSV">
+   <property name="text">
+    <string>Estrai testo da tabella (CSV)</string>
    </property>
   </action>
  </widget>

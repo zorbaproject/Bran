@@ -159,7 +159,8 @@ class MainWindow(QMainWindow):
         self.w.actionCo_occorrenze.triggered.connect(self.coOccorrenze)
         self.w.actionDa_file_txt.triggered.connect(self.loadtxt)
         #self.w.actionTraduci_i_tag_PoS_in_forma_leggibile.triggered.connect(self.translatePos)
-        self.w.actionDa_file_JSON.triggered.connect(self.loadjson)
+        #self.w.actionDa_file_JSON.triggered.connect(self.loadjson)
+        self.w.actionEstrai_testo_da_CSV.triggered.connect(self.loadTextFromCSV)
         self.w.actionDa_file_CSV.triggered.connect(self.loadCSV)
         self.w.actionConfigurazione_Tint.triggered.connect(self.loadConfig)
         self.w.actionSalva.triggered.connect(self.salvaProgetto)
@@ -929,6 +930,7 @@ class MainWindow(QMainWindow):
         self.CSVsaver(fileName, self.Progrdialog, True)
 
     def CSVsaver(self, fileName, Progrdialog, addheader = False, onlyrows = []):
+        self.sanitizeTable(self.w.corpus)
         if fileName != "":
             if fileName[-4:] != ".csv":
                 fileName = fileName + ".csv"
@@ -1354,6 +1356,21 @@ class MainWindow(QMainWindow):
         #else if self.language == "en-US":
         #https://www.datacamp.com/community/tutorials/stemming-lemmatization-python
 
+    def loadTextFromCSV(self):
+        fileNames = QFileDialog.getOpenFileNames(self, "Apri file CSV", self.sessionDir, "CSV files (*.csv)")[0]
+        if len(fileNames)<1:
+            return
+        #self.w.statusbar.showMessage("ATTENDI: Sto importando i file txt nel corpus...")
+        if self.language == "it-IT":
+            self.TCThread = tint.TintCorpus(self.w, fileNames, self.corpuscols, self.TintAddr)
+            self.TCThread.outputcsv = self.sessionFile
+            self.TCThread.csvIDcolumn = 0
+            self.TCThread.csvTextcolumn = 0
+            self.TCThread.finished.connect(self.txtloadingstopped)
+            self.TCThread.start()
+        #else if self.language == "en-US":
+        #https://www.datacamp.com/community/tutorials/stemming-lemmatization-python
+
     def loadjson(self):
         QMessageBox.information(self, "Attenzione", "Caricare un file JSON prodotto manualmente può essere pericoloso: se i singoli paragrafi sono troppo grandi, il programma può andare in crash. Utilizza questa funzione solo se sai esattamente cosa stai facendo.")
         fileNames = QFileDialog.getOpenFileNames(self, "Apri file JSON", self.sessionDir, "Json files (*.txt *.json)")[0]
@@ -1453,6 +1470,7 @@ class MainWindow(QMainWindow):
                 self.ImportingFile = True
                 fileNames = ['']
                 fileNames[0] = self.sessionFile
+                self.w.corpus.setRowCount(0)
                 self.CSVloader(fileNames, self.Progrdialog)
             except:
                 try:
@@ -1523,6 +1541,12 @@ class MainWindow(QMainWindow):
             except:
                 newtext = text
         self.w.corpus.setItem(row, column, titem)
+
+    def sanitizeTable(self, table):
+        for row in range(table.rowCount()):
+            for col in range(table.columnCount()):
+                if not table.item(row,col):
+                    self.setcelltocorpus("", row, col)
 
     def texteditor(self):
         te = texteditor.TextEditor()
