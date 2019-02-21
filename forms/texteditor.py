@@ -671,7 +671,7 @@ class TextEditor(QDialog):
             if ret == QMessageBox.Yes:
                 self.salva()
         try:
-            exts = "*.csv *.doc *.docx *.eml *.epub *.gif *.jpg *.jpeg *.json *.html *.htm *.mp3 *.msg *.odt *.ogg *.pdf *.png via tesseract-ocr *.pptx *.ps *.rtf *.tiff *.tif *.txt *.wav *.xlsx *.xls"
+            exts = "*.tsv *.csv *.doc *.docx *.eml *.epub *.gif *.jpg *.jpeg *.json *.html *.htm *.mp3 *.msg *.odt *.ogg *.pdf *.png via tesseract-ocr *.pptx *.ps *.rtf *.tiff *.tif *.txt *.wav *.xlsx *.xls"
             fileNames = QFileDialog.getOpenFileNames(self, "Apri file", self.sessionDir, "Text files ("+exts+")")[0]
             if len(fileNames)>0:
                 self.nuovo()

@@ -190,7 +190,7 @@ class TintCorpus(QThread):
                                gotEncoding = False
                     self.rowfilename = fileName + ".tmp"
                     if self.iscli:
-                        self.outputcsv = fileName + ".csv"
+                        self.outputcsv = fileName + ".tsv"
                     print(fileName + " -> " + self.outputcsv)
                     if self.csvIDcolumn <0 or self.csvTextcolumn <0:
                         try:

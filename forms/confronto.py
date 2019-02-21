@@ -54,7 +54,7 @@ class Confronto(QDialog):
         self.legendaPos = []
 
     def addfile(self):
-        fileNames = QFileDialog.getOpenFileNames(self, "Apri file CSV", self.sessionDir, "CSV files (*.csv *.txt)")[0]
+        fileNames = QFileDialog.getOpenFileNames(self, "Apri file CSV", self.sessionDir, "CSV files (*.tsv *.csv *.txt)")[0]
         for fileName in fileNames:
             self.w.corpora.addItem(fileName)
 
@@ -63,7 +63,7 @@ class Confronto(QDialog):
             self.w.corpora.takeItem(self.w.corpora.row(i))
 
     def altrofileselect(self):
-        fileNames = QFileDialog.getOpenFileNames(self, "Apri file CSV", self.sessionDir, "CSV files (*.csv *.txt)")[0]
+        fileNames = QFileDialog.getOpenFileNames(self, "Apri file CSV", self.sessionDir, "CSV files (*.tsv *.csv *.txt)")[0]
         for fileName in fileNames:
             self.w.altrofilename.setText(fileName)
             self.w.altrofile.setChecked(True)
@@ -114,19 +114,19 @@ class Confronto(QDialog):
         if self.w.sel_corpora.isChecked():
             fileName = self.corpora[self.w.with_corpora.currentText()]
             if action == "Occorrenze Lemma":
-                fileName = fileName + "-occorrenze-lemma.csv"
+                fileName = fileName + "-occorrenze-lemma.tsv"
             if action == "Occorrenze PoS":
-                fileName = fileName + "-occorrenze-pos.csv"
+                fileName = fileName + "-occorrenze-pos.tsv"
             if action == "Occorrenze forma grafica":
-                fileName = fileName + "-occorrenze-token.csv"
+                fileName = fileName + "-occorrenze-token.tsv"
             if action == "Statistiche VdB":
-                fileName = fileName + "-vdb.csv"
+                fileName = fileName + "-vdb.tsv"
             if action == "Contaverbi":
-                fileName = fileName + "-contaverbi.csv"
+                fileName = fileName + "-contaverbi.tsv"
             if action == "Densità lessicale":
-                fileName = fileName + "-densita.csv"
+                fileName = fileName + "-densita.tsv"
             if action == "Segmenti ripetuti":
-                fileName = fileName + "-ngrams.csv"
+                fileName = fileName + "-ngrams.tsv"
         if self.w.altrofile.isChecked():
             fileName = self.w.altrofilename.text()
         return fileName

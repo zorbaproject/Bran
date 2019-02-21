@@ -915,7 +915,7 @@ class MainWindow(QMainWindow):
 
     def salvaProgetto(self):
         if self.sessionFile == "":
-            fileName = QFileDialog.getSaveFileName(self, "Salva file CSV", self.sessionDir, "Text files (*.csv *.txt)")[0]
+            fileName = QFileDialog.getSaveFileName(self, "Salva file CSV", self.sessionDir, "Text files (*.tsv *.csv *.txt)")[0]
             if fileName != "":
                 self.sessionFile = fileName
         if self.sessionFile != "":
@@ -924,7 +924,7 @@ class MainWindow(QMainWindow):
             self.CSVsaver(self.sessionFile, self.Progrdialog, False)
 
     def salvaCSV(self):
-        fileName = QFileDialog.getSaveFileName(self, "Salva file CSV", self.sessionDir, "Text files (*.csv *.txt)")[0]
+        fileName = QFileDialog.getSaveFileName(self, "Salva file CSV", self.sessionDir, "Text files (*.tsv *.csv *.txt)")[0]
         self.Progrdialog = progress.Form()
         self.Progrdialog.show()
         self.CSVsaver(fileName, self.Progrdialog, True)
@@ -932,8 +932,8 @@ class MainWindow(QMainWindow):
     def CSVsaver(self, fileName, Progrdialog, addheader = False, onlyrows = []):
         self.sanitizeTable(self.w.corpus)
         if fileName != "":
-            if fileName[-4:] != ".csv":
-                fileName = fileName + ".csv"
+            if fileName[-4:] != ".csv" or fileName[-4:] != ".tsv":
+                fileName = fileName + ".tsv"
             csv = ""
             if addheader:
                 for col in range(self.w.corpus.columnCount()):
@@ -963,7 +963,7 @@ class MainWindow(QMainWindow):
             Progrdialog.accept()
 
     def esportavistaCSV(self):
-        fileName = QFileDialog.getSaveFileName(self, "Salva file CSV", self.sessionDir, "Text files (*.csv *.txt)")[0]
+        fileName = QFileDialog.getSaveFileName(self, "Salva file CSV", self.sessionDir, "Text files (*.tsv *.csv *.txt)")[0]
         self.Progrdialog = progress.Form()
         self.Progrdialog.show()
         totallines = self.w.corpus.rowCount()
@@ -979,7 +979,7 @@ class MainWindow(QMainWindow):
         self.CSVsaver(fileName, self.Progrdialog, True, toselect)
 
     def esportaCSVperID(self):
-        fileName = QFileDialog.getSaveFileName(self, "Salva file CSV", self.sessionDir, "Text files (*.csv *.txt)")[0]
+        fileName = QFileDialog.getSaveFileName(self, "Salva file CSV", self.sessionDir, "Text files (*.tsv *.csv *.txt)")[0]
         self.Progrdialog = progress.Form()
         self.Progrdialog.show()
         totallines = self.w.corpus.rowCount()
@@ -1003,7 +1003,7 @@ class MainWindow(QMainWindow):
                 if IDs[i] == self.w.corpus.item(row,col).text():
                     toselect.append(row)
                     QApplication.processEvents()
-            fileNameT = fileName + str(i).zfill(6) + ".csv"
+            fileNameT = fileName + str(i).zfill(6) + ".tsv"
             self.CSVsaver(fileNameT, self.Progrdialog, True, toselect)
 
     def web2corpus(self):
@@ -1354,7 +1354,7 @@ class MainWindow(QMainWindow):
         #https://www.datacamp.com/community/tutorials/stemming-lemmatization-python
 
     def loadTextFromCSV(self):
-        fileNames = QFileDialog.getOpenFileNames(self, "Apri file CSV", self.sessionDir, "CSV files (*.csv)")[0]
+        fileNames = QFileDialog.getOpenFileNames(self, "Apri file CSV", self.sessionDir, "CSV files (*.tsv *.csv)")[0]
         if len(fileNames)<1:
             return
         #self.w.statusbar.showMessage("ATTENDI: Sto importando i file txt nel corpus...")
@@ -1399,7 +1399,7 @@ class MainWindow(QMainWindow):
 
     def loadCSV(self):
         if self.ImportingFile == False:
-            fileNames = QFileDialog.getOpenFileNames(self, "Apri file CSV", self.sessionDir, "File CSV (*.txt *.csv)")[0]
+            fileNames = QFileDialog.getOpenFileNames(self, "Apri file CSV", self.sessionDir, "File CSV (*.tsv *.txt *.csv)")[0]
             self.Progrdialog = progress.Form() #self.Progrdialog = progress.Form()
             self.Progrdialog.show() #self.Progrdialog.show()
             self.ImportingFile = True
@@ -1739,7 +1739,7 @@ def calcola_occorrenze():
         fileNames = [sys.argv[2]]
     if os.path.isdir(sys.argv[2]):
         for tfile in os.listdir(sys.argv[2]):
-            if tfile[-4:] == ".csv":
+            if tfile[-4:] == ".csv" or tfile[-4:] == ".tsv":
                 fileNames.append(os.path.join(sys.argv[2],tfile))
     try:
         col = int(sys.argv[3])
@@ -1748,7 +1748,7 @@ def calcola_occorrenze():
     for fileName in fileNames:
         table = []
         row = 0
-        output = fileName + "-occorrenze-" + str(col) + ".csv"
+        output = fileName + "-occorrenze-" + str(col) + ".tsv"
         recovery = output + ".tmp"
         startatrow = -1
         print(fileName + " -> " + output)
@@ -1810,12 +1810,12 @@ def contaverbi(corpuscols, legendaPos):
         fileNames = [sys.argv[2]]
     if os.path.isdir(sys.argv[2]):
         for tfile in os.listdir(sys.argv[2]):
-            if tfile[-4:] == ".csv":
+            if tfile[-4:] == ".csv" or tfile[-4:] == ".tsv":
                 fileNames.append(os.path.join(sys.argv[2],tfile))
     for fileName in fileNames:
         #totallines = self.w.corpus.rowCount()
         table = []
-        output = fileName + "-contaverbi.csv"
+        output = fileName + "-contaverbi.tsv"
         recovery = output + ".tmp"
         startatrow = -1
         print(fileName + " -> " + output)
@@ -1947,7 +1947,7 @@ def misure_lessicometriche(ignoretext):
         fileNames = [sys.argv[2]]
     if os.path.isdir(sys.argv[2]):
         for tfile in os.listdir(sys.argv[2]):
-            if tfile[-4:] == ".csv":
+            if tfile[-4:] == ".csv" or tfile[-4:] == ".tsv":
                 fileNames.append(os.path.join(sys.argv[2],tfile))
     try:
         col = int(sys.argv[3])
@@ -1956,7 +1956,7 @@ def misure_lessicometriche(ignoretext):
     for fileName in fileNames:
         #totallines = self.w.corpus.rowCount()
         table = []
-        output = fileName + "-" + str(col)+ "-misure_lessicometriche.csv"
+        output = fileName + "-" + str(col)+ "-misure_lessicometriche.tsv"
         recovery = output + ".tmp"
         startatrow = -1
         print(fileName + " -> " + output)
@@ -2091,7 +2091,7 @@ def estrai_colonna():
         col = 0
     for fileName in fileNames:
         row = 0
-        output = fileName + "-colonna-" + str(col) + ".csv"
+        output = fileName + "-colonna-" + str(col) + ".tsv"
         recovery = output + ".tmp"
         startatrow = -1
         try:
@@ -2125,7 +2125,7 @@ def mergetables():
     fileNames = []
     if os.path.isdir(sys.argv[2]):
         for tfile in os.listdir(sys.argv[2]):
-            if tfile[-4:] == ".csv" and tfile[-11:] != "-merged.csv":
+            if tfile[-4:] == ".tsv" and tfile[-11:] != "-merged.tsv":
                 fileNames.append(os.path.join(sys.argv[2],tfile))
     else:
         return
@@ -2134,7 +2134,7 @@ def mergetables():
         col = int(sys.argv[3])
     except:
         col = 0
-    output = os.path.join(sys.argv[2],dirName + "-merged.csv")
+    output = os.path.join(sys.argv[2],dirName + "-merged.tsv")
     with open(fileNames[0], "r", encoding='utf-8') as f:
         first_line = f.readline().replace("\n","").replace("\r","")
     try:
@@ -2383,10 +2383,10 @@ if __name__ == "__main__":
             print("python3 main.py txt2corpus file.txt|cartella [indirizzoServerTint] [y]\n")
             print("python3 main.py splitbigfile file.txt [maxnumberoflines] [.]\n")
             print("python3 main.py samplebigfile file.txt [maxnumberoflines] [.]\n")
-            print("python3 main.py occorrenze file.csv|cartella [colonna] [y]\n")
-            print("python3 main.py extractcolumn file.csv|cartella colonna\n")
-            print("python3 main.py contaverbi file.csv|cartella\n")
-            print("python3 main.py misurelessico file.csv|cartella [colonna] [y]\n")
+            print("python3 main.py occorrenze file.tsv|cartella [colonna] [y]\n")
+            print("python3 main.py extractcolumn file.tsv|cartella colonna\n")
+            print("python3 main.py contaverbi file.tsv|cartella\n")
+            print("python3 main.py misurelessico file.tsv|cartella [colonna] [y]\n")
             print("python3 main.py mergetables cartella colonnaChiave [sum|mean|diff,sum|mean|diff] [1] [y]\n")
             print("Gli argomenti tra parentesi [] sono facoltativi.")
             print("\nI comandi preceduti da * sono sperimentali o non ancora implementati.")
@@ -2405,7 +2405,7 @@ if __name__ == "__main__":
                 tmpurl = "localhost"
             tinturl = "http://" + tmpurl + ":8012/tint"
             TCThread = tint.TintCorpus(w, fileNames, corpuscols, tinturl)
-            TCThread.outputcsv = fileNames[0] + ".csv"
+            TCThread.outputcsv = fileNames[0] + ".tsv"
             try:
                 if sys.argv[4] == "y" or sys.argv[4] == "Y":
                     TCThread.alwaysyes = True

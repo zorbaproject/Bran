@@ -507,7 +507,7 @@ class TXTdownloader(QThread):
             pagename = re.sub(r'[^A-Za-z0-9_]',"",pagename)
             fname = output + "twitter_" + pagename + ".txt"
             if self.w.twcsv.isChecked():
-                fname = output + "twitter_" + pagename + ".csv"
+                fname = output + "twitter_" + pagename + ".tsv"
             if fname != "" and pagename != "":
                 timelineiter = 0
                 for i in range(len(tweets)):
@@ -566,7 +566,7 @@ class TXTdownloader(QThread):
             pageid = ""
         fname = output + "fb_" + pagename + ".txt"
         if self.w.fbcsv.isChecked():
-            fname = output + "fb_" + pagename + ".csv"
+            fname = output + "fb_" + pagename + ".tsv"
         alllinks = []
         linksfile = output + "fb_" + pagename + ".tmp"
         if os.path.isfile(linksfile):

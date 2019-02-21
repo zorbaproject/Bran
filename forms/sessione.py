@@ -45,7 +45,7 @@ class Form(QDialog):
             if lastchar == "/" or lastchar == "\\":
                 self.w.aprisessione.setText(self.w.aprisessione.text()[0:-1])
             folder = os.path.basename(self.w.aprisessione.text())
-            fileName = self.w.aprisessione.text() + "/" + folder + "-bran.csv"
+            fileName = self.w.aprisessione.text() + "/" + folder + "-bran.tsv"
             #print(fileName)
             self.filesessione = self.filesessione + fileName
             if os.path.isfile(self.filesessione):
@@ -61,7 +61,7 @@ class Form(QDialog):
             sname = sname.replace("/", "")
             sname = sname.replace("\\", "")
             folder = self.w.creafolder.text() + "/" + sname
-            tempfile = folder + "/" + sname +"-bran.csv"
+            tempfile = folder + "/" + sname +"-bran.tsv"
             try:
                 os.makedirs(folder)
                 text_file = open(tempfile, "w")

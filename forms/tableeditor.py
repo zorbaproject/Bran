@@ -83,10 +83,10 @@ class Form(QDialog):
                 if msgBox.clickedButton().text() == "Solo le righe filtrate":
                     checkfilter = True
                 break
-        fileName = QFileDialog.getSaveFileName(self, "Salva file CSV", self.sessionDir, "Text files (*.csv *.txt)")[0]
+        fileName = QFileDialog.getSaveFileName(self, "Salva file CSV", self.sessionDir, "Text files (*.tsv *.csv *.txt)")[0]
         if fileName != "":
-            if fileName[-4:] != ".csv":
-                fileName = fileName + ".csv"
+            if fileName[-4:] != ".csv" or fileName[-4:] != ".tsv":
+                fileName = fileName + ".tsv"
             csv = ""
             for col in range(self.w.tableWidget.columnCount()):
                 if col > 0:
