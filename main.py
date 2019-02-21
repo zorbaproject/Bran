@@ -391,9 +391,8 @@ class MainWindow(QMainWindow):
                     print(self.legendaPos)
             except:
                 thistext = ""
-            tbitem = TBdialog.w.tableWidget.findItems(thistext,Qt.MatchExactly)
-            if len(tbitem)>0:
-                tbrow = tbitem[0].row()
+            tbrow = TBdialog.finditemincolumn(thistext, col=0, matchexactly = True, escape = True)
+            if tbrow>=0:
                 tbval = int(TBdialog.w.tableWidget.item(tbrow,1).text())+1
                 TBdialog.setcelltotable(str(tbval), tbrow, 1)
             else:
@@ -440,9 +439,8 @@ class MainWindow(QMainWindow):
                 thistext = ""
             for ifilter in range(len(allfilters)):
                 if self.applicaFiltro(self.w.corpus, row, col, allfilters[ifilter]):
-                    tbitem = TBdialog.w.tableWidget.findItems(thistext,Qt.MatchExactly)
-                    if len(tbitem)>0:
-                        tbrow = tbitem[0].row()
+                    tbrow = TBdialog.finditemincolumn(thistext, col=0, matchexactly = True, escape = True)
+                    if tbrow>=0:
                         try:
                             tbval = int(TBdialog.w.tableWidget.item(tbrow,ifilter+1).text())+1
                         except:
@@ -526,9 +524,8 @@ class MainWindow(QMainWindow):
             if thistext != "":
                 thistext = thistext3 + thistext2 + thistext
             if thistext != "":
-                tbitem = TBdialog.w.tableWidget.findItems(thistext,Qt.MatchExactly)
-                if len(tbitem)>0:
-                    tbrow = tbitem[0].row()
+                tbrow = TBdialog.finditemincolumn(thistext, col=0, matchexactly = True, escape = True)
+                if tbrow>=0:
                     tbval = int(TBdialog.w.tableWidget.item(tbrow,1).text())+1
                     TBdialog.setcelltotable(str(tbval), tbrow, 1)
                 else:
@@ -603,6 +600,10 @@ class MainWindow(QMainWindow):
                     tmplist = tmpstring.split(" ")
                     for tmpword in tmplist:
                         crpitems = self.w.corpus.findItems(tmpword,Qt.MatchFixedString)
+                        lencrpitems = 0
+                        for crpitem in crpitems:
+                            if crpitem.column() == col:
+                                lencrpitems = lencrpitems +1
                         Fw = len(crpitems)*1.0
                         if Fw!=0:
                             sommatoria = sommatoria + (Fseg/Fw)
@@ -710,23 +711,23 @@ class MainWindow(QMainWindow):
             if tmpstring != "" and wnIsRight and bool(not parolai in vuoteI) and bool(not parolaf in vuoteF):
                 tcount = mycorpus.count(tmpstring)
                 if tcount >= minoccur:
-                    tbitem = TBdialog.w.tableWidget.findItems(tmpstring,Qt.MatchExactly)
-                    if len(tbitem)<=0:
+                    tbrow = TBdialog.finditemincolumn(tmpstring, col=0, matchexactly = True, escape = True)
+                    if tbrow<=0:
                         TBdialog.addlinetotable(tmpstring, 0)
                         tbrow = TBdialog.w.tableWidget.rowCount()-1
                         TBdialog.setcelltotable(str(tcount), tbrow, 1)
                         ppcount = 0
                         tmplist = tmpstring.split(" ")
                         for tmpword in tmplist:
+                            mycol = col
                             if ignorecase:
-                                crpitem = self.w.corpus.findItems(tmpword,Qt.MatchFixedString)
+                                tmprow = self.finditemincolumn(tmpword, col=mycol, matchexactly = True, escape = True, myflags=re.IGNORECASE|re.DOTALL)
                             else:
-                                crpitem = self.w.corpus.findItems(tmpword,Qt.MatchExactly)
-                            if len(crpitem)<=0:
+                                tmprow = self.finditemincolumn(tmpword, col=mycol, matchexactly = True, escape = True, myflags=re.DOTALL)
+                            if tmprow<0:
                                 #print("Parola non riconosciuta: "+tmpword)
                                 ppcount = ppcount + 1
                             else:
-                                tmprow = crpitem[0].row()
                                 posword = self.w.corpus.item(tmprow,self.corpuscols['pos']).text()
                                 for key in self.legendaPos:
                                     if posword == self.legendaPos[key][0] or posword == key:
@@ -802,9 +803,8 @@ class MainWindow(QMainWindow):
                 thistext = ""
                 thistextO = ""
             if thistext != "":
-                tbitem = TBdialog.w.tableWidget.findItems(thistext,Qt.MatchExactly)
-                if len(tbitem)>0:
-                    tbrow = tbitem[0].row()
+                tbrow = TBdialog.finditemincolumn(thistext, col=0, matchexactly = True, escape = True)
+                if tbrow>=0:
                     tbval = int(TBdialog.w.tableWidget.item(tbrow,2).text())+1
                     TBdialog.setcelltotable(str(tbval), tbrow, 2)
                 else:
@@ -1043,7 +1043,7 @@ class MainWindow(QMainWindow):
             thisname = self.w.corpus.horizontalHeaderItem(col).text()
             combo.addItem(thisname)
 
-    def finditemincolumn(self, mytext, col=0, matchexactly = True, escape = True):
+    def finditemincolumn(self, mytext, col=0, matchexactly = True, escape = True, myflags=0):
         myregex = mytext
         if escape:
             myregex = re.escape(myregex)
@@ -1051,7 +1051,7 @@ class MainWindow(QMainWindow):
             myregex = "^" + myregex + "$"
         for row in range(self.w.corpus.rowCount()):
             try:
-                if bool(re.match(myregex, self.w.corpus.item(row,col).text())):
+                if bool(re.match(myregex, self.w.corpus.item(row,col).text(), flags=myflags)):
                     return row
             except:
                 continue
@@ -1184,9 +1184,8 @@ class MainWindow(QMainWindow):
                 thistext = ""
             for ifilter in range(len(allfilters)):
                 if self.applicaFiltro(self.w.corpus, row, col, allfilters[ifilter]):
-                    tbitem = TBdialog.w.tableWidget.findItems(thistext,Qt.MatchExactly)
-                    if len(tbitem)>0:
-                        tbrow = tbitem[0].row()
+                    tbrow = TBdialog.finditemincolumn(thistext, col=0, matchexactly = True, escape = True)
+                    if tbrow>=0:
                         try:
                             tbval = int(TBdialog.w.tableWidget.item(tbrow,ifilter+1).text())+1
                         except:
@@ -1234,9 +1233,8 @@ class MainWindow(QMainWindow):
                 continue
             thistext = self.rebuildText(self.w.corpus, self.Progrdialog, col, myignore, row-myrange, row+myrange+1, False)
             thistext = self.remUselessSpaces(thistext)
-            tbitem = TBdialog.w.tableWidget.findItems(thistext,Qt.MatchExactly)
-            if len(tbitem)>0:
-                tbrow = tbitem[0].row()
+            tbrow = TBdialog.finditemincolumn(thistext, col=0, matchexactly = True, escape = True)
+            if tbrow>=0:
                 tbval = int(TBdialog.w.tableWidget.item(tbrow,1).text())+1
                 TBdialog.setcelltotable(str(tbval), tbrow, 1)
             else:
@@ -1304,9 +1302,8 @@ class MainWindow(QMainWindow):
                 if thisrow.index(word) > thisrow.index(parola):
                     thistext = str(parola) + "..." + str(word)
                 if thistext != "":
-                    tbitem = TBdialog.w.tableWidget.findItems(thistext,Qt.MatchExactly)
-                    if len(tbitem)>0:
-                        tbrow = tbitem[0].row()
+                    tbrow = TBdialog.finditemincolumn(thistext, col=0, matchexactly = True, escape = True)
+                    if tbrow>=0:
                         tbval = int(TBdialog.w.tableWidget.item(tbrow,1).text())+1
                         TBdialog.setcelltotable(str(tbval), tbrow, 1)
                     else:
@@ -1595,7 +1592,6 @@ class MainWindow(QMainWindow):
             if ret == QMessageBox.Yes:
                 thistext = re.sub(self.ignoretext, "", thistext)
             if thistext != "":
-                #tbitem = TBdialog.w.tableWidget.findItems(thistext,Qt.MatchExactly)
                 tbrow = TBdialog.finditemincolumn(thistext, col=0, matchexactly = True, escape = True)
                 if tbrow>=0:
                     tbval = int(TBdialog.w.tableWidget.item(tbrow,1).text())+1
@@ -1909,7 +1905,6 @@ def contaverbi(corpuscols, legendaPos):
                 if thistext != "":
                     thistext = thistext3 + thistext2 + thistext
                 if thistext != "":
-                    #tbitem = TBdialog.w.tableWidget.findItems(thistext,Qt.MatchExactly)
                     tbrow = findintable(table, thistext, 0)
                     if tbrow>=0:
                         tbval = int(table[tbrow][1])+1
