@@ -194,6 +194,8 @@ class MainWindow(QMainWindow):
         self.ImportingFile = False
         self.sessionFile = ""
         self.sessionDir = "."
+        #self.w.cfilter.setMaxLength(sys.maxsize-1)
+        self.w.cfilter.setMaxLength(2147483647)
         self.mycfgfile = QDir.homePath() + "/.brancfg"
         self.mycfg = json.loads('{"javapath": "", "tintpath": "", "tintaddr": "", "tintport": "", "sessions" : []}')
         self.loadPersonalCFG()
@@ -411,6 +413,7 @@ class MainWindow(QMainWindow):
         QMessageBox.information(self, "Filtro", "Ora devi impostare i filtri con cui dividere i risultati. I vari filtri devono essere separati da condizioni OR, per ciascuno di essi verrà creata una colonna a parte nella tabella dei risultati.")
         self.w.ccolumn.setCurrentText(self.filtrimultiplienabled)
         Fildialog = creafiltro.Form(self.w.corpus, self.corpuscols, self)
+        Fildialog.sessionDir = self.sessionDir
         Fildialog.w.filter.setText("pos=A.*||pos=S.*")
         Fildialog.updateTable()
         Fildialog.exec()
@@ -1058,7 +1061,13 @@ class MainWindow(QMainWindow):
         return -1
 
     def dofiltra(self):
+        if self.w.ccolumn.currentText() == self.filtrimultiplienabled and len(self.w.cfilter.text().split("||"))>10:
+            ret = QMessageBox.question(self,'Domanda', "Sembra che tu voglia applicare un filtro multiplo, l'operazione può essere lenta. Vuoi vedere la percentuale di progresso?", QMessageBox.Yes | QMessageBox.No)
+            if ret == QMessageBox.Yes:
+                self.dofiltra2()
+                return
         tcount = 0
+        totallines = self.w.corpus.rowCount()
         for row in range(self.w.corpus.rowCount()):
             col = self.w.ccolumn.currentIndex()
             #ctext = self.w.corpus.item(row,col).text()
@@ -1069,23 +1078,24 @@ class MainWindow(QMainWindow):
             else:
                 self.w.corpus.setRowHidden(row, True)
         self.w.statusbar.showMessage("Risultati totali: " +str(tcount))
+        self.Progrdialog.accept()
 
     def dofiltra2(self):
-        tcount = 0
         self.Progrdialog = progress.Form()
         self.Progrdialog.show()
+        tcount = 0
         totallines = self.w.corpus.rowCount()
         for row in range(self.w.corpus.rowCount()):
-            self.Progrdialog.w.testo.setText("Sto filtrando la riga numero "+str(row))
-            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
-            if row<100 or row%100==0:
+            if row<100 or row%200==0:
+                self.Progrdialog.w.testo.setText("Sto filtrando la riga numero "+str(row))
+                self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
                 QApplication.processEvents()
             if self.Progrdialog.w.annulla.isChecked():
                 return
             col = self.w.ccolumn.currentIndex()
-            ctext = self.w.corpus.item(row,col).text()
+            #ctext = self.w.corpus.item(row,col).text()
             ftext = self.w.cfilter.text()
-            if bool(re.match(ftext, ctext)):
+            if self.applicaFiltro(self.w.corpus, row, col, ftext): #if bool(re.match(ftext, ctext)):
                 self.w.corpus.setRowHidden(row, False)
                 tcount = tcount +1
             else:
@@ -1121,7 +1131,10 @@ class MainWindow(QMainWindow):
                 for andcond in option.split("&&"):
                     res = False
                     cellname = andcond.split("=")[0]
-                    ftext = andcond.split("=")[1]
+                    try:
+                        ftext = andcond.split("=")[1]
+                    except:
+                        continue
                     colname = cellname.split("[")[0]
                     col = self.corpuscols[colname]
                     if "[" in cellname.replace("]",""):
@@ -1146,6 +1159,7 @@ class MainWindow(QMainWindow):
     def filtriMultipli(self):
         self.w.ccolumn.setCurrentText(self.filtrimultiplienabled)
         Fildialog = creafiltro.Form(self.w.corpus, self.corpuscols, self)
+        Fildialog.sessionDir = self.sessionDir
         Fildialog.w.filter.setText(self.w.cfilter.text())
         Fildialog.updateTable()
         Fildialog.exec()
@@ -1155,6 +1169,7 @@ class MainWindow(QMainWindow):
     def actionNumero_dipendenze_per_frase(self):
         self.w.ccolumn.setCurrentText(self.filtrimultiplienabled)
         Fildialog = creafiltro.Form(self.w.corpus, self.corpuscols, self)
+        Fildialog.sessionDir = self.sessionDir
         col = self.corpuscols["dep"]
         Fildialog.filterColElements(self.corpuscols["IDphrase"])
         Fildialog.updateFilter()
@@ -1211,6 +1226,7 @@ class MainWindow(QMainWindow):
         myfilter = str(list(self.corpuscols)[col]) +"="+parola
         self.w.ccolumn.setCurrentText(self.filtrimultiplienabled)
         Fildialog = creafiltro.Form(self.w.corpus, self.corpuscols, self)
+        Fildialog.sessionDir = self.sessionDir
         Fildialog.w.filter.setText(myfilter) #"Lemma=essere&&pos[1,-1]=SP||Lemma[-1]=essere&&pos=S"
         Fildialog.updateTable()
         Fildialog.exec()
@@ -1256,6 +1272,7 @@ class MainWindow(QMainWindow):
         myfilter = str(list(self.corpuscols)[col]) +"="+parola
         self.w.ccolumn.setCurrentText(self.filtrimultiplienabled)
         Fildialog = creafiltro.Form(self.w.corpus, self.corpuscols, self)
+        Fildialog.sessionDir = self.sessionDir
         Fildialog.w.filter.setText(myfilter) #"Lemma=essere&&pos[1,-1]=SP||Lemma[-1]=essere&&pos=S"
         Fildialog.updateTable()
         Fildialog.exec()

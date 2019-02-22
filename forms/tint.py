@@ -187,7 +187,7 @@ class TintCorpus(QThread):
                                 text_file.close()
                                 gotEncoding = True
                             except:
-                               gotEncoding = False
+                                gotEncoding = False
                     self.rowfilename = fileName + ".tmp"
                     if self.iscli:
                         self.outputcsv = fileName + ".tsv"
