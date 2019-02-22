@@ -1,0 +1,11 @@
+cd %~dp0
+mkdir jdk
+cd jdk
+wget.exe https://download.java.net/java/GA/jdk11/9/GPL/openjdk-11.0.2_windows-x64_bin.zip
+unzip.exe openjdk-11.0.2_windows-x64_bin.zip
+cd ..
+mkdir python
+cd python
+wget.exe https://www.python.org/ftp/python/3.7.2/python-3.7.2.post1-embed-amd64.zip
+unzip.exe python-3.7.2.post1-embed-amd64.zip
+cd ..
