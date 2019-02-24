@@ -1569,6 +1569,7 @@ class MainWindow(QMainWindow):
     def confronto(self):
         cf = confronto.Confronto(self.sessionDir)
         cf.legendaPos = self.legendaPos
+        cf.ignoretext = self.ignoretext
         cf.exec()
 
     def aboutbran(self):

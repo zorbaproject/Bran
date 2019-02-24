@@ -52,6 +52,7 @@ class Confronto(QDialog):
         self.w.with_corpora.currentIndexChanged.connect(self.corporaselect)
         self.fillcombos()
         self.legendaPos = []
+        self.ignoretext = ""
 
     def addfile(self):
         fileNames = QFileDialog.getOpenFileNames(self, "Apri file CSV", self.sessionDir, "CSV files (*.tsv *.csv *.txt)")[0]
@@ -140,7 +141,7 @@ class Confronto(QDialog):
         self.do_confronta(context)
 
     def do_confronta(self, context):
-        ignorethis = QInputDialog.getText(self.w, "Devo ignorare qualcosa?", "Se devo ignorare delle parole, scrivi qui l'espressione regolare. Altrimenti, lascia la casella vuota.", QLineEdit.Normal, "("+re.escape(".")+ "|"+re.escape(":")+"|"+re.escape(",")+"|"+re.escape(";")+"|"+re.escape("?")+"|"+re.escape("!")+"|"+re.escape("\"")+"|"+re.escape("'")+")")[0]
+        ignorethis = QInputDialog.getText(self.w, "Devo ignorare qualcosa?", "Se devo ignorare delle parole, scrivi qui l'espressione regolare. Altrimenti, lascia la casella vuota.", QLineEdit.Normal, self.ignoretext)[0]
         thisname = []
         if context != "generico":
             riferimentoName = self.getRiferimento(context)
