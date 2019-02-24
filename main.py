@@ -935,7 +935,7 @@ class MainWindow(QMainWindow):
     def CSVsaver(self, fileName, Progrdialog, addheader = False, onlyrows = []):
         self.sanitizeTable(self.w.corpus)
         if fileName != "":
-            if fileName[-4:] != ".csv" or fileName[-4:] != ".tsv":
+            if fileName[-4:] != ".csv" and fileName[-4:] != ".tsv":
                 fileName = fileName + ".tsv"
             csv = ""
             if addheader:
@@ -2143,7 +2143,7 @@ def mergetables():
     fileNames = []
     if os.path.isdir(sys.argv[2]):
         for tfile in os.listdir(sys.argv[2]):
-            if tfile[-4:] == ".tsv" and tfile[-11:] != "-merged.tsv":
+            if bool(tfile[-4:] == ".tsv" or tfile[-4:] == ".tsv") and tfile[-11:] != "-merged.tsv" and tfile[-11:] != "-merged.csv":
                 fileNames.append(os.path.join(sys.argv[2],tfile))
     else:
         return

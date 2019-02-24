@@ -193,20 +193,6 @@ class Confronto(QDialog):
             if self.w.ignorefirstrow.isChecked():
                 startrow = 1
             thistotal = 0.0
-            if self.w.dopercent.isChecked():
-                for row in range(startrow, len(corpus)):
-                    try:
-                        thistext = corpus[row][corpKeyCol]
-                        if ignorethis != "":
-                            thistext = re.sub(ignorethis, "", thistext)
-                        if thistext == "":
-                            continue
-                        thisvalue = corpus[row][corpValueCol]
-                    except:
-                        thisvalue = "0"
-                        if i == 0:
-                            thisvalue = "1"
-                    thistotal = thistotal + float(thisvalue) #vogliamo considerare solo il valore assoluto?
             for row in range(startrow, len(corpus)):
                 self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
                 self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
@@ -227,15 +213,10 @@ class Confronto(QDialog):
                             thistext = corpus[row][corpKeyCol]
                     try:
                         thisvalue = corpus[row][corpValueCol]
-                        if self.w.dopercent.isChecked():
-                            thisvalue = str(float((float(thisvalue)/thistotal)*100.0))
                     except:
                         thisvalue = "1"
-                    #tbitem = TBdialog.w.tableWidget.findItems(thistext,Qt.MatchExactly)
-                    #if len(tbitem)>0:
                     tbrow = TBdialog.finditemincolumn(thistext, col=0, matchexactly = True, escape = True)
                     if tbrow>=0:
-                        #tbrow = tbitem[0].row()
                         tbval = thisvalue
                         if self.w.occ_ds.isChecked() and i>0:
                             N = 2
@@ -273,6 +254,22 @@ class Confronto(QDialog):
             else:
                 outputcol = outputcol + 1
         totallines = TBdialog.w.tableWidget.rowCount()
+        coltotal = []
+        if self.w.dopercent.isChecked():
+            for col in range(1,TBdialog.w.tableWidget.columnCount()):
+                thistotal = 0.0
+                for row in range(totallines):
+                    self.Progrdialog.w.testo.setText("Sto sommando la riga numero "+str(row))
+                    self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+                    QApplication.processEvents()
+                    if self.Progrdialog.w.annulla.isChecked():
+                        return
+                    try:
+                        teststring = TBdialog.w.tableWidget.item(row,col).text()
+                        thistotal = thistotal + float(teststring)
+                    except:
+                        teststring = ""
+                coltotal.append(thistotal)
         for col in range(TBdialog.w.tableWidget.columnCount()):
             for row in range(totallines):
                 self.Progrdialog.w.testo.setText("Sto controllando la riga numero "+str(row))
@@ -284,6 +281,9 @@ class Confronto(QDialog):
                     teststring = TBdialog.w.tableWidget.item(row,col).text()
                     if col > 0 and float(teststring) == 0:
                         TBdialog.setcelltotable("0", row, col)
+                    if col >0 and self.w.dopercent.isChecked():
+                        thisvalue = str(float((float(teststring)/coltotal[col-1])*100.0))
+                        TBdialog.setcelltotable(thisvalue, row, col)
                 except:
                     TBdialog.setcelltotable("0", row, col)
         self.Progrdialog.accept()

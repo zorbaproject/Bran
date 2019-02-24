@@ -85,7 +85,7 @@ class Form(QDialog):
                 break
         fileName = QFileDialog.getSaveFileName(self, "Salva file CSV", self.sessionDir, "Text files (*.tsv *.csv *.txt)")[0]
         if fileName != "":
-            if fileName[-4:] != ".csv" or fileName[-4:] != ".tsv":
+            if fileName[-4:] != ".csv" and fileName[-4:] != ".tsv":
                 fileName = fileName + ".tsv"
             csv = ""
             for col in range(self.w.tableWidget.columnCount()):
