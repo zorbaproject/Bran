@@ -205,14 +205,21 @@ class TintCorpus(QThread):
                             if sep == "\\t":
                                 sep = "\t"
                             textID = QInputDialog.getInt(self.w, "Scegli il testo", "Indica la colonna della tabella che contiene il testo di questo sottocorpus:")[0]
-                            colID = QInputDialog.getInt(self.w, "Scegli il tag", "Indica la colonna della tabella che contiene i tag di questo sottocorpus.\nSe non vuoi estrarre i tag, imposta la stessa colonna che hai indicato per il testo.", int(textID))[0]
+                            corpusIDtext = QInputDialog.getText(self.w, "Scegli il tag", "Indica il tag di questo file nel corpus. Puoi usare [filename] per indicare il nome del file e [numeroColonna] per indicare la colonna da cui estrarre un tag.", QLineEdit.Normal, "[filename], [0]")[0]
                             textID = int(textID)
-                            colID = int(colID)
                             for line in lines.split("\n"):
-                                if colID != textID:
-                                    corpusID = line.split(sep)[colID]
-                                else:
-                                    corpusID = str(fileID)+"_"+os.path.basename(fileName)
+                                corpusID = corpusIDtext.replace("[filename]", os.path.basename(fileName))
+                                indexes = [(m.start(0), m.end(0)) for m in re.finditer('\[[0-9]*\]', corpusID)]
+                                for n in range(len(indexes)):
+                                    start = indexes[n][0]
+                                    end = indexes[n][1]
+                                    try:
+                                        strCol = corpusID[start:end]
+                                        intCol = int(corpusID[start+1:end-1])
+                                        corpusID = corpusID.replace(strCol, line.split(sep)[intCol])
+                                    except:
+                                        print("Impossiible trovare la colonna nel CSV")
+                                print(corpusID)
                                 self.text2corpusTINT(line.split(sep)[textID], corpusID)
                         except:
                             try:

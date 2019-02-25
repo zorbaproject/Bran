@@ -150,6 +150,7 @@ class MainWindow(QMainWindow):
         self.w.actionConta_occorrenze_filtrate.triggered.connect(self.contaoccorrenzefiltrate)
         self.w.actionEsporta_corpus_in_CSV_unico.triggered.connect(self.salvaCSV)
         self.w.actionEsporta_vista_attuale_in_CSV.triggered.connect(self.esportavistaCSV)
+        self.w.actionAggiungi_tag_in_corpus_in_base_a_RegEx.triggered.connect(self.addTagFromFilter)
         self.w.actionRimuovi_vista_attuale_dal_corpus.triggered.connect(self.removevisiblerows)
         self.w.actionCalcola_densit_lessicale.triggered.connect(self.densitalessico)
         self.w.actionNumero_dipendenze_per_frase.triggered.connect(self.actionNumero_dipendenze_per_frase)
@@ -1212,6 +1213,55 @@ class MainWindow(QMainWindow):
                         TBdialog.setcelltotable("1", tbrow, ifilter+1)
         self.Progrdialog.accept()
         TBdialog.exec()
+
+    def addTagFromFilter(self):
+        QMessageBox.information(self, "Istruzioni", "Crea il filtro per selezionare gli elementi a cui vuoi aggiungere un tag.")
+        self.w.ccolumn.setCurrentText(self.filtrimultiplienabled)
+        Fildialog = creafiltro.Form(self.w.corpus, self.corpuscols, self)
+        Fildialog.sessionDir = self.sessionDir
+        Fildialog.exec()
+        if Fildialog.w.filter.text() != "":
+            self.w.cfilter.setText(Fildialog.w.filter.text())
+        nuovotag = QInputDialog.getText(self.w, "Scegli il tag", "Indica il tag che vuoi aggiungere alle parole che rispettano il filtro:", QLineEdit.Normal, "")[0]
+        repCdialog = regex_replace.Form(self)
+        repCdialog.setModal(False)
+        repCdialog.w.orig.setText("(.*)")
+        repCdialog.w.dest.setText("\g<1>, "+nuovotag)
+        repCdialog.w.changeCase.show()
+        repCdialog.w.colcheck.hide()
+        repCdialog.w.colcombo.hide()
+        repCdialog.w.lbl_in.hide()
+        repCdialog.exec()
+        if repCdialog.result():
+            if repCdialog.w.ignorecase.isChecked():
+                myflags=re.IGNORECASE|re.DOTALL
+            else:
+                myflags=re.DOTALL
+        else:
+            return
+        col = self.corpuscols['IDcorpus']
+        self.Progrdialog = progress.Form()
+        self.Progrdialog.show()
+        totallines = self.w.corpus.rowCount()
+        for row in range(self.w.corpus.rowCount()):
+            self.Progrdialog.w.testo.setText("Sto modificando la riga numero "+str(row))
+            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            QApplication.processEvents()
+            if self.Progrdialog.w.annulla.isChecked():
+                return
+            if self.applicaFiltro(self.w.corpus, row, col, self.w.cfilter.text()):
+                origstr = self.w.corpus.item(row,col).text()
+                newstr = re.sub(repCdialog.w.orig.text(), repCdialog.w.dest.text(), origstr, flags=myflags)
+                if repCdialog.w.dolower.isChecked():
+                    indexes = [(m.start(0), m.end(0)) for m in re.finditer(repCdialog.w.orig.text(), newstr, flags=myflags)]
+                    for f in indexes:
+                        newstr = newstr[0:f[0]] + newstr[f[0]:f[1]].lower() + newstr[f[1]:]
+                if repCdialog.w.doupper.isChecked():
+                    indexes = [(m.start(0), m.end(0)) for m in re.finditer(repCdialog.w.orig.text(), newstr, flags=myflags)]
+                    for f in indexes:
+                        newstr = newstr[0:f[0]] + newstr[f[0]:f[1]].upper() + newstr[f[1]:]
+                self.setcelltocorpus(newstr, row, col)
+        self.Progrdialog.accept()
 
     def concordanze(self):
         parola = QInputDialog.getText(self.w, "Scegli la parola", "Indica la parola che vuoi cercare:", QLineEdit.Normal, "")[0]

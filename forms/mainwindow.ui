@@ -173,8 +173,8 @@
       <string>&amp;Importa corpus</string>
      </property>
      <addaction name="actionDa_file_txt"/>
-     <addaction name="actionDa_file_CSV"/>
      <addaction name="actionEstrai_testo_da_CSV"/>
+     <addaction name="actionDa_file_CSV"/>
     </widget>
     <widget class="QMenu" name="menuEsporta">
      <property name="title">
@@ -207,6 +207,7 @@
     <addaction name="actionRimuovi_righe_selezionate"/>
     <addaction name="actionSostituisci_nel_corpus_con_RegEx"/>
     <addaction name="actionSostituisci_solo_nelle_celle_selezionate"/>
+    <addaction name="actionAggiungi_tag_in_corpus_in_base_a_RegEx"/>
     <addaction name="separator"/>
     <addaction name="actionSeleziona_tutte_le_celle_visibili"/>
     <addaction name="actionDeseleziona_tutte_le_celle"/>
@@ -242,7 +243,7 @@
     </widget>
     <widget class="QMenu" name="menuDipendenze">
      <property name="title">
-      <string>Dipendenze</string>
+      <string>D&amp;ipendenze</string>
      </property>
      <addaction name="actionNumero_dipendenze_per_frase"/>
      <addaction name="actionVisualizza_frasi"/>
@@ -344,7 +345,7 @@
   </action>
   <action name="actionEstrai_dizionario">
    <property name="text">
-    <string>Misure lessicometriche</string>
+    <string>&amp;Misure lessicometriche</string>
    </property>
   </action>
   <action name="actionDa_file_JSON">
@@ -354,7 +355,7 @@
   </action>
   <action name="actionDa_file_CSV">
    <property name="text">
-    <string>Aggiungi corpus esistente</string>
+    <string>&amp;Aggiungi corpus esistente</string>
    </property>
   </action>
   <action name="actionConfigurazione_Tint">
@@ -457,17 +458,22 @@
   </action>
   <action name="actionNumero_dipendenze_per_frase">
    <property name="text">
-    <string>Numero dipendenze per frase</string>
+    <string>&amp;Numero dipendenze per frase</string>
    </property>
   </action>
   <action name="actionVisualizza_frasi">
    <property name="text">
-    <string>Visualizza frasi</string>
+    <string>&amp;Visualizza frasi</string>
    </property>
   </action>
   <action name="actionEstrai_testo_da_CSV">
    <property name="text">
-    <string>Estrai testo da tabella (CSV)</string>
+    <string>&amp;Estrai testo da tabella (CSV)</string>
+   </property>
+  </action>
+  <action name="actionAggiungi_tag_in_corpus_in_base_a_RegEx">
+   <property name="text">
+    <string>Aggiungi tag in corpus in base a filtro</string>
    </property>
   </action>
  </widget>

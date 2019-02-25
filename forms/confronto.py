@@ -192,7 +192,6 @@ class Confronto(QDialog):
             startrow = 0
             if self.w.ignorefirstrow.isChecked():
                 startrow = 1
-            thistotal = 0.0
             for row in range(startrow, len(corpus)):
                 self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
                 self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
