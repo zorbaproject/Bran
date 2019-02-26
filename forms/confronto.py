@@ -217,23 +217,8 @@ class Confronto(QDialog):
                     tbrow = TBdialog.finditemincolumn(thistext, col=0, matchexactly = True, escape = True)
                     if tbrow>=0:
                         tbval = thisvalue
-                        if self.w.occ_ds.isChecked() and i>0:
-                            N = 2
-                            try:
-                                rifval = float(TBdialog.w.tableWidget.item(tbrow,1).text())
-                            except:
-                                rifval = 0.0
-                            tbval = float((float(thisvalue)-rifval)/math.sqrt(rifval))
-                        if self.w.occ_rms.isChecked() and i>0:
-                            N = 2
-                            try:
-                                rifval = float(TBdialog.w.tableWidget.item(tbrow,1).text())
-                            except:
-                                rifval = 0.0
-                            tbval = math.sqrt((math.pow(rifval,2)+ math.pow(float(thisvalue),2))/N)
                         if self.w.occ_ds.isChecked() or self.w.occ_rms.isChecked():
                             TBdialog.setcelltotable(str(thisvalue), tbrow, outputcol)
-                            TBdialog.setcelltotable(str(tbval), tbrow, outputcol+1)
                         else:
                             TBdialog.setcelltotable(str(tbval), tbrow, i+1)
                     else:
@@ -269,7 +254,8 @@ class Confronto(QDialog):
                     except:
                         teststring = ""
                 coltotal.append(thistotal)
-        for col in range(TBdialog.w.tableWidget.columnCount()):
+        col = 0
+        while col < TBdialog.w.tableWidget.columnCount():
             for row in range(totallines):
                 self.Progrdialog.w.testo.setText("Sto controllando la riga numero "+str(row))
                 self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
@@ -278,12 +264,33 @@ class Confronto(QDialog):
                     return
                 try:
                     teststring = TBdialog.w.tableWidget.item(row,col).text()
-                    if col > 0 and float(teststring) == 0:
-                        TBdialog.setcelltotable("0", row, col)
-                    if col >0 and self.w.dopercent.isChecked():
-                        thisvalue = str(float((float(teststring)/coltotal[col-1])*100.0))
-                        TBdialog.setcelltotable(thisvalue, row, col)
+                    if col > 0:
+                        if self.w.dopercent.isChecked():
+                            thisvalue = str(float((float(teststring)/coltotal[col-1])*100.0))
+                            TBdialog.setcelltotable(thisvalue, row, col)
+                            teststring = thisvalue
+                        if self.w.occ_ds.isChecked() and i>0:
+                            try:
+                                rifval = float(TBdialog.w.tableWidget.item(row,1).text())
+                            except:
+                                rifval = 0.0
+                            tbval = float((float(teststring)-rifval)/math.sqrt(rifval))
+                            TBdialog.setcelltotable(str(tbval), row, col+1)
+                        if self.w.occ_rms.isChecked() and i>0:
+                            N = 2
+                            try:
+                                rifval = float(TBdialog.w.tableWidget.item(row,1).text())
+                            except:
+                                rifval = 0.0
+                            tbval = math.sqrt((math.pow(rifval,2)+ math.pow(float(teststring),2))/N)
+                            TBdialog.setcelltotable(str(tbval), row, col+1)
+                        if float(teststring) == 0:
+                            TBdialog.setcelltotable("0", row, col)
                 except:
                     TBdialog.setcelltotable("0", row, col)
+            if bool(self.w.occ_ds.isChecked() or self.w.occ_rms.isChecked()) and col >0:
+                col = col + 2
+            else:
+                col = col + 1
         self.Progrdialog.accept()
         TBdialog.exec()
