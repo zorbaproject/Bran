@@ -161,7 +161,7 @@ class Confronto(QDialog):
         thistext = ""
         thisvalue = ""
         indexes = 1 + self.w.corpora.count()
-        outputcol = 1;
+        outputcol = 1
         for i in range(indexes):
             corpKeyCol = 0
             corpValueCol = 1
@@ -177,6 +177,8 @@ class Confronto(QDialog):
                     self.w.occ_ds.setChecked(True)
                 if self.w.gen_rms.isChecked():
                     self.w.occ_rms.setChecked(True)
+                if self.w.gen_tfidf.isChecked():
+                    self.w.tfidf.setChecked(True)
             if i == 0:
                 corpus = riferimento
                 colname = os.path.basename(riferimentoName)
@@ -188,6 +190,8 @@ class Confronto(QDialog):
                 TBdialog.addcolumn(colname+" SCARTO", outputcol+1)
             if self.w.occ_rms.isChecked():
                 TBdialog.addcolumn(colname+" RMS", outputcol+1)
+            if self.w.tfidf.isChecked():
+                TBdialog.addcolumn(colname+" TF-IDF", outputcol+1)
             totallines = len(corpus)
             startrow = 0
             if self.w.ignorefirstrow.isChecked():
@@ -217,14 +221,14 @@ class Confronto(QDialog):
                     tbrow = TBdialog.finditemincolumn(thistext, col=0, matchexactly = True, escape = True)
                     if tbrow>=0:
                         tbval = thisvalue
-                        if self.w.occ_ds.isChecked() or self.w.occ_rms.isChecked():
+                        if self.w.occ_ds.isChecked() or self.w.occ_rms.isChecked() or self.w.tfidf.isChecked():
                             TBdialog.setcelltotable(str(thisvalue), tbrow, outputcol)
                         else:
                             TBdialog.setcelltotable(str(tbval), tbrow, i+1)
                     else:
                         TBdialog.addlinetotable(thistext, 0)
                         tbrow = TBdialog.w.tableWidget.rowCount()-1
-                        if bool(self.w.occ_ds.isChecked() or self.w.occ_rms.isChecked()) and i>0:
+                        if bool(self.w.occ_ds.isChecked() or self.w.occ_rms.isChecked() or self.w.tfidf.isChecked()) and i>0:
                             TBdialog.setcelltotable(str(thisvalue), tbrow, outputcol)
                             TBdialog.setcelltotable("0", tbrow, outputcol+1)
                         else:
@@ -233,13 +237,13 @@ class Confronto(QDialog):
                             TBdialog.setcelltotable("0", tbrow, itemp)
                 except:
                     thistext = ""
-            if self.w.occ_ds.isChecked() or self.w.occ_rms.isChecked():
+            if self.w.occ_ds.isChecked() or self.w.occ_rms.isChecked() or self.w.tfidf.isChecked():
                 outputcol = outputcol + 2
             else:
                 outputcol = outputcol + 1
         totallines = TBdialog.w.tableWidget.rowCount()
         coltotal = []
-        if self.w.dopercent.isChecked():
+        if self.w.dopercent.isChecked() or self.w.tfidf.isChecked():
             for col in range(1,TBdialog.w.tableWidget.columnCount()):
                 thistotal = 0.0
                 for row in range(totallines):
@@ -265,7 +269,7 @@ class Confronto(QDialog):
                 try:
                     teststring = TBdialog.w.tableWidget.item(row,col).text()
                     if col > 0:
-                        if self.w.dopercent.isChecked():
+                        if self.w.dopercent.isChecked() or self.w.tfidf.isChecked():
                             thisvalue = str(float((float(teststring)/coltotal[col-1])*100.0))
                             TBdialog.setcelltotable(thisvalue, row, col)
                             teststring = thisvalue
@@ -284,11 +288,27 @@ class Confronto(QDialog):
                                 rifval = 0.0
                             tbval = math.sqrt((math.pow(rifval,2)+ math.pow(float(teststring),2))/N)
                             TBdialog.setcelltotable(str(tbval), row, col+1)
+                        if self.w.tfidf.isChecked() and i>0:
+                            N = float(TBdialog.w.tableWidget.columnCount()-1)/2
+                            #tfval = float(float(teststring)/coltotal[col-1])
+                            tfval = float(float(teststring)/100.0)
+                            wINd = 0
+                            wdcol = 1
+                            while wdcol < TBdialog.w.tableWidget.columnCount():
+                                try:
+                                    tmptest = 1/float(TBdialog.w.tableWidget.item(row,wdcol).text()) #should fail if content of the cell is zero
+                                    wINd = wINd +1
+                                    wdcol = wdcol +2
+                                except:
+                                    wdcol = wdcol +2
+                            idfval = math.log10(N/float(wINd))
+                            tfidfval = tfval * idfval
+                            TBdialog.setcelltotable(str(tfidfval), row, col+1)
                         if float(teststring) == 0:
                             TBdialog.setcelltotable("0", row, col)
                 except:
                     TBdialog.setcelltotable("0", row, col)
-            if bool(self.w.occ_ds.isChecked() or self.w.occ_rms.isChecked()) and col >0:
+            if bool(self.w.occ_ds.isChecked() or self.w.occ_rms.isChecked() or self.w.tfidf.isChecked()) and col >0:
                 col = col + 2
             else:
                 col = col + 1

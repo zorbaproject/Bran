@@ -136,7 +136,7 @@
        <item row="1" column="0">
         <widget class="QTabWidget" name="tabWidget">
          <property name="currentIndex">
-          <number>0</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="tab_3">
           <attribute name="title">
@@ -164,28 +164,39 @@
             </layout>
            </item>
            <item>
-            <widget class="QRadioButton" name="occ_diff">
-             <property name="text">
-              <string>Tro&amp;va le differenze</string>
-             </property>
-             <property name="checked">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QRadioButton" name="occ_ds">
-             <property name="text">
-              <string>Calcola scarto standardizzato</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QRadioButton" name="occ_rms">
-             <property name="text">
-              <string>Calcola Root Mean S&amp;quare</string>
-             </property>
-            </widget>
+            <layout class="QGridLayout" name="gridLayout_6">
+             <item row="0" column="1">
+              <widget class="QRadioButton" name="occ_rms">
+               <property name="text">
+                <string>Calcola Root Mean S&amp;quare</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0">
+              <widget class="QRadioButton" name="occ_diff">
+               <property name="text">
+                <string>Tro&amp;va le differenze</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QRadioButton" name="occ_ds">
+               <property name="text">
+                <string>Calcola scarto standardizzato</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QRadioButton" name="tfidf">
+               <property name="text">
+                <string>Calcola TF-IDF</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
            <item>
             <widget class="QPushButton" name="do_occ">
@@ -313,6 +324,13 @@
               <widget class="QRadioButton" name="gen_rms">
                <property name="text">
                 <string>Root Mean S&amp;quare</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="gen_tfidf">
+               <property name="text">
+                <string>TF-IDF</string>
                </property>
               </widget>
              </item>
