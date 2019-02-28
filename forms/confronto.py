@@ -43,6 +43,7 @@ class Confronto(QDialog):
         self.setWindowTitle("Confronta dati estratti dai corpora")
         self.w.do_occ.clicked.connect(self.do_occ)
         self.w.do_gen.clicked.connect(self.do_gen)
+        self.w.do_multi.clicked.connect(self.do_multi)
         #self.w.actionConta_occorrenze.triggered.connect(self.contaoccorrenze)
         self.sessionDir = sessionDir
         self.w.addfile.clicked.connect(self.addfile)
@@ -140,10 +141,14 @@ class Confronto(QDialog):
         context = "generico"
         self.do_confronta(context)
 
+    def do_multi(self):
+        context = "multicolonna"
+        self.do_confronta(context)
+
     def do_confronta(self, context):
         ignorethis = QInputDialog.getText(self.w, "Devo ignorare qualcosa?", "Se devo ignorare delle parole, scrivi qui l'espressione regolare. Altrimenti, lascia la casella vuota.", QLineEdit.Normal, self.ignoretext)[0]
         thisname = []
-        if context != "generico":
+        if context != "generico" and context != "multicolonna":
             riferimentoName = self.getRiferimento(context)
         else:
             riferimentoName = self.w.altrofilename.text()
@@ -152,7 +157,13 @@ class Confronto(QDialog):
             riferimento = self.readcsv(riferimentoName)
         except:
             print("Impossibile leggere la tabella di riferimento")
-            return
+            if context == "multicolonna":
+                try:
+                    riferimento = self.readcsv(self.w.corpora.item(0).text())
+                except:
+                  return
+            else:
+                return
         TBdialog = tableeditor.Form(self)
         TBdialog.sessionDir = self.sessionDir
         TBdialog.addcolumn(context, 0)
@@ -161,6 +172,19 @@ class Confronto(QDialog):
         thistext = ""
         thisvalue = ""
         indexes = 1 + self.w.corpora.count()
+        multivalcols = []
+        if context == "multicolonna":
+            if self.w.multi_all.isChecked():
+                if self.w.corpora.count() == 0:
+                    multivalcols = list(range(len(riferimento[0])))
+                else:
+                    corpus = self.readcsv(self.w.corpora.item(0).text())
+                    multivalcols = list(range(len(corpus[0])))
+                multivalcols.remove(self.w.multiRifValue.value())
+                multivalcols.remove(self.w.multiConfKey.value())
+            else:
+                multivalcols = self.w.multiConfValue.text().split(",")
+            indexes = 1+ len(multivalcols)
         outputcol = 1
         for i in range(indexes):
             corpKeyCol = 0
@@ -179,12 +203,46 @@ class Confronto(QDialog):
                     self.w.occ_rms.setChecked(True)
                 if self.w.gen_tfidf.isChecked():
                     self.w.tfidf.setChecked(True)
+            startrow = 0
+            if self.w.ignorefirstrow.isChecked():
+                startrow = 1
             if i == 0:
                 corpus = riferimento
                 colname = os.path.basename(riferimentoName)
-            else:
+            elif context != "multicolonna":
                 corpus = self.readcsv(self.w.corpora.item(i-1).text())
                 colname = os.path.basename(self.w.corpora.item(i-1).text())
+            if context == "multicolonna":
+                if self.w.multi_diff.isChecked():
+                    self.w.occ_diff.setChecked(True)
+                if self.w.multi_ds.isChecked():
+                    self.w.occ_ds.setChecked(True)
+                if self.w.multi_rms.isChecked():
+                    self.w.occ_rms.setChecked(True)
+                if self.w.multi_tfidf.isChecked():
+                    self.w.tfidf.setChecked(True)
+                corpKeyCol = self.w.multiConfKey.value()
+                if i == 0:
+                    corpus = riferimento
+                    corpValueCol = self.w.multiRifValue.value()
+                else:
+                    if self.w.corpora.count() == 0:
+                        corpus = riferimento
+                    else:
+                        corpus = self.readcsv(self.w.corpora.item(0).text())
+                    corpValueCol = int(multivalcols[i-1])
+                tempcrp = []
+                for row in range(len(corpus)):
+                    try:
+                        tempcrp.append([corpus[row][corpKeyCol], corpus[row][corpValueCol]])
+                    except:
+                        continue
+                corpus = tempcrp
+                corpKeyCol = 0
+                corpValueCol = 1
+                colname = str(i-1)
+                if self.w.ignorefirstrow.isChecked():
+                    colname = corpus[0][corpValueCol]
             TBdialog.addcolumn(colname, i+1)
             if self.w.occ_ds.isChecked():
                 TBdialog.addcolumn(colname+" SCARTO", outputcol+1)
@@ -193,9 +251,6 @@ class Confronto(QDialog):
             if self.w.tfidf.isChecked():
                 TBdialog.addcolumn(colname+" TF-IDF", outputcol+1)
             totallines = len(corpus)
-            startrow = 0
-            if self.w.ignorefirstrow.isChecked():
-                startrow = 1
             for row in range(startrow, len(corpus)):
                 self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
                 self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
@@ -267,8 +322,13 @@ class Confronto(QDialog):
                 if self.Progrdialog.w.annulla.isChecked():
                     return
                 try:
-                    teststring = TBdialog.w.tableWidget.item(row,col).text()
                     if col > 0:
+                        try:
+                            if float(TBdialog.w.tableWidget.item(row,col).text()) == 0:
+                                TBdialog.setcelltotable("0", row, col)
+                        except:
+                            TBdialog.setcelltotable("0", row, col)
+                        teststring = TBdialog.w.tableWidget.item(row,col).text()
                         if self.w.dopercent.isChecked() or self.w.tfidf.isChecked():
                             thisvalue = str(float((float(teststring)/coltotal[col-1])*100.0))
                             TBdialog.setcelltotable(thisvalue, row, col)
@@ -276,9 +336,10 @@ class Confronto(QDialog):
                         if self.w.occ_ds.isChecked() and i>0:
                             try:
                                 rifval = float(TBdialog.w.tableWidget.item(row,1).text())
+                                tbval = float((float(teststring)-rifval)/math.sqrt(rifval))
                             except:
                                 rifval = 0.0
-                            tbval = float((float(teststring)-rifval)/math.sqrt(rifval))
+                                tbval = 0.0
                             TBdialog.setcelltotable(str(tbval), row, col+1)
                         if self.w.occ_rms.isChecked() and i>0:
                             N = 2
@@ -301,13 +362,14 @@ class Confronto(QDialog):
                                     wdcol = wdcol +2
                                 except:
                                     wdcol = wdcol +2
-                            idfval = math.log10(N/float(wINd))
+                            try:
+                                idfval = math.log10(N/float(wINd))
+                            except:
+                                idfval = 0.0
                             tfidfval = tfval * idfval
                             TBdialog.setcelltotable(str(tfidfval), row, col+1)
-                        if float(teststring) == 0:
-                            TBdialog.setcelltotable("0", row, col)
-                except:
-                    TBdialog.setcelltotable("0", row, col)
+                except Exception as e:
+                    print(str(e))
             if bool(self.w.occ_ds.isChecked() or self.w.occ_rms.isChecked() or self.w.tfidf.isChecked()) and col >0:
                 col = col + 2
             else:
