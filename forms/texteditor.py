@@ -20,6 +20,7 @@ from PySide2.QtWidgets import QFileDialog
 from PySide2.QtWidgets import QMainWindow
 from PySide2.QtWidgets import QDialog
 from PySide2.QtCore import Qt
+from PySide2.QtGui import QTextCursor
 
 
 from forms import regex_replace
@@ -57,6 +58,8 @@ class TextEditor(QDialog):
         self.w.actionElimina_invii_a_capo_multipli.triggered.connect(self.delmultiplecrlf)
         self.w.actionTrova_co_occorrenze.triggered.connect(self.coOccorrenze)
         self.w.actionEstrai_testo_da_file_PDF.triggered.connect(self.do_textract)
+        self.w.findprev.clicked.connect(self.findprev)
+        self.w.findnext.clicked.connect(self.findnext)
         self.w.filelist.currentRowChanged.connect(self.switchfile)
         self.w.plainTextEdit.cursorPositionChanged.connect(self.showcurpos)
         self.w.plainTextEdit.textChanged.connect(self.textchanged)
@@ -344,6 +347,38 @@ class TextEditor(QDialog):
     def delmultiplecrlf(self):
         #ripeti finché non ce ne sono più
         self.do_searchreplace(self.w.plainTextEdit.toPlainText(), "\\n\\n","\\n", False)
+
+    def findnext(self):
+        self.findgeneric(1)
+
+    def findprev(self):
+        self.findgeneric(-1)
+
+    def findgeneric(self, dir = 0):
+        mytext = self.w.plainTextEdit.toPlainText()
+        escape = bool(self.w.findregex.isChecked() == False)
+        myregex = self.w.findtext.text()
+        mypos = self.w.plainTextEdit.textCursor().position()
+        if escape:
+            myregex = re.escape(myregex)
+        indexes = [(m.start(0), m.end(0)) for m in re.finditer(myregex, mytext)]
+        if dir > 0:
+            n = 0
+        else:
+            n = len(indexes)-1
+        while n > -1 and n < len(indexes):
+            start = indexes[n][0]
+            end = indexes[n][1]
+            if bool(dir > 0 and start > mypos) or bool(dir < 0 and end < mypos):
+                cursor = QTextCursor(self.w.plainTextEdit.textCursor())
+                cursor.setPosition(start, QTextCursor.MoveAnchor)
+                cursor.setPosition(end, QTextCursor.KeepAnchor)
+                self.w.plainTextEdit.setTextCursor(cursor)
+                break
+            if dir > 0:
+                n = n + 1
+            else:
+                n = n - 1
 
     def do_searchreplace(self, mytext, searchstr = "", replstr = "", oneline = True, dolower = False, doupper = False):
         repCdialog = regex_replace.Form(self)
