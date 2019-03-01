@@ -9,6 +9,7 @@ import platform
 import csv
 import re
 import mmap
+import json
 
 from PySide2.QtWidgets import QApplication, QDialog, QLineEdit, QPushButton, QVBoxLayout
 from PySide2.QtUiTools import QUiLoader
@@ -56,6 +57,7 @@ class TextEditor(QDialog):
         self.w.actionTutto_maiuscolo.triggered.connect(self.tuttomaiuscolo)
         self.w.actionTutto_minuscolo.triggered.connect(self.tuttominuscolo)
         self.w.actionElimina_invii_a_capo_multipli.triggered.connect(self.delmultiplecrlf)
+        self.w.actionNormalizza_parole_note.triggered.connect(self.normalizza_parolenote)
         self.w.actionTrova_co_occorrenze.triggered.connect(self.coOccorrenze)
         self.w.actionEstrai_testo_da_file_PDF.triggered.connect(self.do_textract)
         self.w.findprev.clicked.connect(self.findprev)
@@ -380,6 +382,23 @@ class TextEditor(QDialog):
             else:
                 n = n - 1
 
+    def normalizza_parolenote(self):
+        filein = os.path.abspath(os.path.dirname(sys.argv[0]))+"/dizionario/normalizzazione.json"
+        text_file = open(filein, "r")
+        #myjson = text_file.read().replace("\n", "")
+        myjson = text_file.read()
+        text_file.close()
+        normalizzazione = json.loads(myjson)
+        for regola in normalizzazione:
+            searchstr = regola["search"]
+            replstr = regola["replace"]
+            if not regola["regex"]:
+                searchstr = re.escape(searchstr)
+            ignorecase = regola["caseinsensitive"]
+            dolower = regola["lower"]
+            doupper = regola["upper"]
+            self.perform_searchreplace(self.w.plainTextEdit.toPlainText(), searchstr, replstr, True, dolower, doupper, ignorecase)
+
     def do_searchreplace(self, mytext, searchstr = "", replstr = "", oneline = True, dolower = False, doupper = False):
         repCdialog = regex_replace.Form(self)
         repCdialog.setModal(False)
@@ -394,102 +413,105 @@ class TextEditor(QDialog):
         repCdialog.w.colcheck.setChecked(oneline)
         repCdialog.exec()
         if repCdialog.result():
-            if repCdialog.w.ignorecase.isChecked():
-                myflags=re.IGNORECASE|re.DOTALL
-            else:
-                myflags=re.DOTALL
-            newtext = ""
-            fileNames = []
-            if self.batchmode:
-                for i in range(self.w.filelist.count()):
-                    fileNames.append(self.w.filelist.item(i).text())
-            else:
-                fileNames.append("")
-            totfiles = len(fileNames)
-            filen = 0
-            Progrdialog = progress.Form(self)
-            Progrdialog.show()
-            for fileName in fileNames:
-                if fileName != "" and os.path.isfile(fileName) and self.batchmode:
-                    mytext = self.batchopenwithencoding(fileName, 'utf-8')
+            self.perform_searchreplace(mytext, repCdialog.w.orig.text(), repCdialog.w.dest.text(), repCdialog.w.colcheck.isChecked(), repCdialog.w.dolower.isChecked(), repCdialog.w.doupper.isChecked(), repCdialog.w.ignorecase.isChecked())
+
+    def perform_searchreplace(self, mytext, searchstr = "", replstr = "", oneline = True, dolower = False, doupper = False, ignorecase = True):
+        if ignorecase:
+            myflags=re.IGNORECASE|re.DOTALL
+        else:
+            myflags=re.DOTALL
+        newtext = ""
+        fileNames = []
+        if self.batchmode:
+            for i in range(self.w.filelist.count()):
+                fileNames.append(self.w.filelist.item(i).text())
+        else:
+            fileNames.append("")
+        totfiles = len(fileNames)
+        filen = 0
+        Progrdialog = progress.Form(self)
+        Progrdialog.show()
+        for fileName in fileNames:
+            if fileName != "" and os.path.isfile(fileName) and self.batchmode:
+                mytext = self.batchopenwithencoding(fileName, 'utf-8')
+                if mytext == "ERRORE BRAN: Codifica errata":
+                    predefEncode = "ISO-8859-15"
+                    #https://pypi.org/project/chardet/
+                    myencoding = QInputDialog.getText(self, "Scegli la codifica", "Sembra che questo file non sia codificato in UTF-8. Vuoi provare a specificare una codifica diversa? (Es: cp1252 oppure ISO-8859-15)", QLineEdit.Normal, predefEncode)
+                    self.nuovo()
+                    mytext = self.openwithencoding(fileName, myencoding[0])
                     if mytext == "ERRORE BRAN: Codifica errata":
-                        predefEncode = "ISO-8859-15"
-                        #https://pypi.org/project/chardet/
-                        myencoding = QInputDialog.getText(self, "Scegli la codifica", "Sembra che questo file non sia codificato in UTF-8. Vuoi provare a specificare una codifica diversa? (Es: cp1252 oppure ISO-8859-15)", QLineEdit.Normal, predefEncode)
-                        self.nuovo()
-                        mytext = self.openwithencoding(fileName, myencoding[0])
-                        if mytext == "ERRORE BRAN: Codifica errata":
-                           return
-                else:
-                    self.w.plainTextEdit.setPlainText("")
-                if repCdialog.w.colcheck.isChecked():
-                    textlist = mytext.split("\n")
-                    totallines = len(textlist)
-                    for row in range(totallines):
-                        Progrdialog.w.testo.setText("Sto cercando nella riga numero "+str(row))
-                        Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
-                        QApplication.processEvents()
-                        if Progrdialog.w.annulla.isChecked():
-                            return
-                        origstr = textlist[row]
-                        try:
-                            newstr = re.sub(repCdialog.w.orig.text(), repCdialog.w.dest.text(), origstr, flags=myflags)
-                        except:
-                            self.w.plainTextEdit.setPlainText(mytext)
-                            Progrdialog.accept()
-                            QMessageBox.critical(self, "Attenzione", "Sembra ci sia un errore nell'espressione regolare. Controlla la sintassi.")
-                            return
-                        if repCdialog.w.dolower.isChecked():
-                            indexes = [(m.start(0), m.end(0)) for m in re.finditer(repCdialog.w.orig.text(), newstr, flags=myflags)]
-                            for f in indexes:
-                                newstr = newstr[0:f[0]] + newstr[f[0]:f[1]].lower() + newstr[f[1]:]
-                        if repCdialog.w.doupper.isChecked():
-                            indexes = [(m.start(0), m.end(0)) for m in re.finditer(repCdialog.w.orig.text(), newstr, flags=myflags)]
-                            for f in indexes:
-                                newstr = newstr[0:f[0]] + newstr[f[0]:f[1]].upper() + newstr[f[1]:]
-                        newtext = newstr
-                        if not self.batchmode:
-                            self.w.plainTextEdit.appendPlainText(newtext)
-                        else:
-                            if row == 0:
-                                text_file = open(fileName, "w", encoding='utf-8')
-                                text_file.write("")
-                                text_file.close()
-                            with open(fileName, "a", encoding='utf-8') as myfile:
-                                if row > 0:
-                                    newtext = "\n" + newtext
-                                myfile.write(newtext)
-                else:
-                    Progrdialog.w.testo.setText("Sto cercando nel file numero "+str(filen))
-                    Progrdialog.w.progressBar.setValue(int((filen/totfiles)*100))
+                       return
+            else:
+                self.w.plainTextEdit.setPlainText("")
+            if oneline:
+                textlist = mytext.split("\n")
+                totallines = len(textlist)
+                for row in range(totallines):
+                    Progrdialog.w.testo.setText("Sto cercando nella riga numero "+str(row))
+                    Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
                     QApplication.processEvents()
                     if Progrdialog.w.annulla.isChecked():
                         return
+                    origstr = textlist[row]
                     try:
-                        newtext = re.sub(repCdialog.w.orig.text(), repCdialog.w.dest.text(), mytext, flags=myflags)
+                        newstr = re.sub(searchstr, replstr, origstr, flags=myflags)
                     except:
                         self.w.plainTextEdit.setPlainText(mytext)
                         Progrdialog.accept()
-                        QMessageBox.critical(self, "Attenzione", "Sembra ci sia un errore nell'espressione regolare. Controlla la sintassi.")
+                        QMessageBox.critical(self, "Attenzione", "Sembra ci sia un errore nell'espressione regolare" + searchstr + " -> " + replstr + " \nControlla la sintassi.")
                         return
-                    if repCdialog.w.dolower.isChecked():
-                        indexes = [(m.start(0), m.end(0)) for m in re.finditer(repCdialog.w.orig.text(), newtext, flags=myflags)]
+                    if dolower:
+                        indexes = [(m.start(0), m.end(0)) for m in re.finditer(searchstr, newstr, flags=myflags)]
                         for f in indexes:
-                            newtext = newtext[0:f[0]] + newtext[f[0]:f[1]].lower() + newtext[f[1]:]
-                    if repCdialog.w.doupper.isChecked():
-                        indexes = [(m.start(0), m.end(0)) for m in re.finditer(repCdialog.w.orig.text(), newtext, flags=myflags)]
+                            newstr = newstr[0:f[0]] + newstr[f[0]:f[1]].lower() + newstr[f[1]:]
+                    if doupper:
+                        indexes = [(m.start(0), m.end(0)) for m in re.finditer(searchstr, newstr, flags=myflags)]
                         for f in indexes:
-                            newtext = newtext[0:f[0]] + newtext[f[0]:f[1]].upper() + newtext[f[1]:]
-                    if fileName != "":
-                        text_file = open(fileName, "w", encoding='utf-8')
-                        text_file.write(newtext)
-                        text_file.close()
+                            newstr = newstr[0:f[0]] + newstr[f[0]:f[1]].upper() + newstr[f[1]:]
+                    newtext = newstr
+                    if not self.batchmode:
+                        self.w.plainTextEdit.appendPlainText(newtext)
                     else:
-                        self.w.plainTextEdit.setPlainText(newtext)
-                    filen = filen + 1
-            Progrdialog.accept()
-            if self.batchmode:
-                self.switchfile()
+                        if row == 0:
+                            text_file = open(fileName, "w", encoding='utf-8')
+                            text_file.write("")
+                            text_file.close()
+                        with open(fileName, "a", encoding='utf-8') as myfile:
+                            if row > 0:
+                                newtext = "\n" + newtext
+                            myfile.write(newtext)
+            else:
+                Progrdialog.w.testo.setText("Sto cercando nel file numero "+str(filen))
+                Progrdialog.w.progressBar.setValue(int((filen/totfiles)*100))
+                QApplication.processEvents()
+                if Progrdialog.w.annulla.isChecked():
+                    return
+                try:
+                    newtext = re.sub(searchstr, replstr, mytext, flags=myflags)
+                except:
+                    self.w.plainTextEdit.setPlainText(mytext)
+                    Progrdialog.accept()
+                    QMessageBox.critical(self, "Attenzione", "Sembra ci sia un errore nell'espressione regolare. Controlla la sintassi.")
+                    return
+                if dolower:
+                    indexes = [(m.start(0), m.end(0)) for m in re.finditer(searchstr, newtext, flags=myflags)]
+                    for f in indexes:
+                        newtext = newtext[0:f[0]] + newtext[f[0]:f[1]].lower() + newtext[f[1]:]
+                if doupper:
+                    indexes = [(m.start(0), m.end(0)) for m in re.finditer(searchstr, newtext, flags=myflags)]
+                    for f in indexes:
+                        newtext = newtext[0:f[0]] + newtext[f[0]:f[1]].upper() + newtext[f[1]:]
+                if fileName != "":
+                    text_file = open(fileName, "w", encoding='utf-8')
+                    text_file.write(newtext)
+                    text_file.close()
+                else:
+                    self.w.plainTextEdit.setPlainText(newtext)
+                filen = filen + 1
+        Progrdialog.accept()
+        if self.batchmode:
+            self.switchfile()
 
     def rm_doublephrases(self):
         #dele phrases repeated: https://pastebin.com/7Krbii0d

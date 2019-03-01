@@ -1,0 +1,18 @@
+[
+{
+"search": "Corriere della Sera",
+"replace": "Corriere_della_sera",
+"regex": false,
+"caseinsensitive": true,
+"lower": false,
+"upper": false
+},
+{
+"search": "\r",
+"replace": "",
+"regex": true,
+"caseinsensitive": true,
+"lower": false,
+"upper": false
+}
+]

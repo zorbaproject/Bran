@@ -136,6 +136,7 @@
     <addaction name="menuMaiuscole_Minuscole"/>
     <addaction name="actionElimina_parole_con_numeri"/>
     <addaction name="actionElimina_invii_a_capo_multipli"/>
+    <addaction name="actionNormalizza_parole_note"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuModifica"/>
@@ -270,6 +271,11 @@
   <action name="actionTrova_co_occorrenze">
    <property name="text">
     <string>&amp;Trova co occorrenze</string>
+   </property>
+  </action>
+  <action name="actionNormalizza_parole_note">
+   <property name="text">
+    <string>Normalizza parole note</string>
    </property>
   </action>
  </widget>
