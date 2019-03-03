@@ -174,6 +174,7 @@
      </property>
      <addaction name="actionDa_file_txt"/>
      <addaction name="actionEstrai_testo_da_CSV"/>
+     <addaction name="actionDa_file_di_TreeTagger"/>
      <addaction name="actionDa_file_CSV"/>
     </widget>
     <widget class="QMenu" name="menuEsporta">
@@ -355,7 +356,7 @@
   </action>
   <action name="actionDa_file_CSV">
    <property name="text">
-    <string>&amp;Aggiungi corpus esistente</string>
+    <string>&amp;Aggiungi corpus creato con Bran</string>
    </property>
   </action>
   <action name="actionConfigurazione_Tint">
@@ -474,6 +475,11 @@
   <action name="actionAggiungi_tag_in_corpus_in_base_a_RegEx">
    <property name="text">
     <string>Aggiungi tag in corpus in base a filtro</string>
+   </property>
+  </action>
+  <action name="actionDa_file_di_TreeTagger">
+   <property name="text">
+    <string>Da file di TreeTagger</string>
    </property>
   </action>
  </widget>

@@ -163,6 +163,7 @@ class MainWindow(QMainWindow):
         #self.w.actionDa_file_JSON.triggered.connect(self.loadjson)
         self.w.actionEstrai_testo_da_CSV.triggered.connect(self.loadTextFromCSV)
         self.w.actionDa_file_CSV.triggered.connect(self.loadCSV)
+        self.w.actionDa_file_di_TreeTagger.triggered.connect(self.importfromTreeTagger)
         self.w.actionConfigurazione_Tint.triggered.connect(self.loadConfig)
         self.w.actionSalva.triggered.connect(self.salvaProgetto)
         self.w.actionApri.triggered.connect(self.apriProgetto)
@@ -174,16 +175,6 @@ class MainWindow(QMainWindow):
         self.w.actionTrova_ripetizioni.triggered.connect(self.trovaripetizioni)
         self.w.actionConta_verbi.triggered.connect(self.contaverbi)
         self.w.actionItaliano.triggered.connect(lambda: self.changeLang("it-IT"))
-        #self.corpuscols = {
-        #    'IDcorpus': 0,
-        #    'Orig': 1,
-        #    'Lemma': 2,
-        #    'pos': 3,
-        #    'ner': 4,
-        #    'feat': 5,
-        #    'IDword': 6
-        #}
-        #self.legendaPos = [] #{"A":["aggettivo", "aggettivi", "piene"],"AP":["agg. poss", "aggettivi", "piene"],"B":["avverbio", "avverbi", "piene"],"B+PC":["avverbio+pron. clit. ", "avverbi", "piene"],"BN":["avv, negazione", "avverbi", "piene"],"CC":["cong. coord", "congiunzioni", "vuote"],"CS":["cong. sub.", "congiunzioni", "vuote"],"DD":["det. dim.", "aggettivi", "piene"],"DE":["det. esclam.", "aggettivi", "piene"],"DI":["det. indefinito", "aggettivi", "piene"],"DQ":["det. interr.", "aggettivi", "piene"],"DR":["det. Rel", "aggettivi", "piene"],"E":["preposizione", "preposizioni", "vuote"],"E+RD":["prep. art. ", "preposizioni", "vuote"],"FB":["punteggiatura - \"\" () «» - - ", "punteggiatura", "none"],"FC":["punteggiatura - : ;", "punteggiatura", "none"],"FF":["punteggiatura - ,", "punteggiatura", "none"],"FS":["punteggiatura - .?!", "punteggiatura", "none"],"I":["interiezione", "interiezioni", "vuote"],"N":["numero", "altro", "none"],"NO":["numerale", "aggettivi", "piene"],"PC":["pron. Clitico", "pronomi", "vuote"],"PC+PC":["pron. clitico+clitico", "pronomi", "vuote"],"PD":["pron. dimostrativo", "pronomi","vuote"],"PE":["pron. pers. ", "pronomi", "vuote"],"PI":["pron. indef.", "pronomi", "vuote"],"PP":["pron. poss.", "pronomi", "vuote"],"PQ":["pron. interr.", "pronomi", "vuote"],"PR":["pron. rel.", "pronomi", "vuote"],"RD":["art. Det.", "articoli", "vuote"],"RI":["art. ind.", "articoli", "vuote"],"S":["sost.", "sostantivi", "piene"],"SP":["nome proprio", "sostantivi", "piene"],"SW":["forestierismo", "altro", "none"],"T":["det. coll.)", "aggettivi", "piene"],"V":["verbo", "verbi", "piene"],"V+PC":["verbo + pron. clitico", "verbi", "piene"],"V+PC+PC":["verbo + pron. clitico + pron clitico", "verbi", "piene"],"VA":["verbo ausiliare", "verbi", "piene"],"VA+PC":["verbo ausiliare + pron.clitico", "verbi", "piene"],"VM":["verbo mod", "verbi", "piene"],"VM+PC":["verbo mod + pron. clitico", "verbi", "piene"],"X":["altro", "altro", "none"]}
         self.ignorepos = ["punteggiatura - \"\" () «» - - ", "punteggiatura - : ;", "punteggiatura - ,", "altro"] # "punteggiatura - .?!"
         self.separator = "\t"
         self.language = "it-IT"
@@ -1464,6 +1455,81 @@ class MainWindow(QMainWindow):
                             self.setcelltocorpus(str(token["ner"]), rowN, self.corpuscols["ner"])
                             self.setcelltocorpus(str(token["full_morpho"]), rowN, self.corpuscols["feat"])
 
+    def opentextfile(self, fileName):
+        lines = ""
+        try:
+            text_file = open(fileName, "r", encoding='utf-8')
+            lines = text_file.read()
+            text_file.close()
+        except:
+            myencoding = "ISO-8859-15"
+            #https://pypi.org/project/chardet/
+            gotEncoding = False
+            while gotEncoding:
+                try:
+                    myencoding = QInputDialog.getText(self.w, "Scegli la codifica", "Sembra che questo file non sia codificato in UTF-8. Vuoi provare a specificare una codifica diversa? (Es: cp1252 oppure ISO-8859-15)", QLineEdit.Normal, myencoding)
+                except:
+                    print("Sembra che questo file non sia codificato in UTF-8. Vuoi provare a specificare una codifica diversa? (Es: cp1252 oppure ISO-8859-15)")
+                    myencoding = [input()]
+                try:
+                    # TODO: prevediamo la codifica "FORCE", che permette di leggere il file come binario ignorando caratteri strani
+                    text_file = open(fileName, "r", encoding=myencoding[0])
+                    lines = text_file.read()
+                    text_file.close()
+                    gotEncoding = True
+                except:
+                    gotEncoding = False
+        return lines
+
+    def importfromTreeTagger(self):
+        fileNames = QFileDialog.getOpenFileNames(self, "Apri file CSV", self.sessionDir, "CSV files (*.tsv *.csv *.txt)")[0]
+        filein = os.path.abspath(os.path.dirname(sys.argv[0]))+"/dizionario/legenda/treetagger-"+self.language+".json"
+        try:
+            text_file = open(filein, "r")
+            myjson = text_file.read().replace("\n", "").replace("\r", "").split("####")[0]
+            text_file.close()
+            legendaTT = json.loads(myjson)
+        except:
+            QMessageBox.warning(self, "Errore", "Non riesco a leggere il dizionario di traduzione per TreeTagger.")
+            return
+        self.Progrdialog = progress.Form()
+        self.Progrdialog.show()
+        self.ImportingFile = True
+        for fileName in fileNames:
+            totallines = 0
+            try:
+                if not os.path.getsize(fileName) > 0:
+                    continue
+                totallines = self.linescount(fileName)
+            except:
+                continue
+            lines = self.opentextfile(fileName)
+            trowN = 0
+            for line in lines.split("\n"):
+                self.Progrdialog.w.testo.setText("Sto importando la riga numero "+str(trowN))
+                self.Progrdialog.w.progressBar.setValue(int((trowN/totallines)*100))
+                if trowN<100 or trowN%100==0:
+                    QApplication.processEvents()
+                trowN = trowN + 1
+                colN = 0
+                if self.Progrdialog.w.annulla.isChecked():
+                    self.Progrdialog.reject()
+                    self.ImportingFile = False
+                    return
+                try:
+                    cols = line.replace("\r", "").split("\t")
+                    if cols[0] == "":
+                        continue
+                    rowN = self.addlinetocorpus(str(cols[0]), self.corpuscols["IDcorpus"])
+                    self.setcelltocorpus(str(cols[2]), rowN, self.corpuscols["Lemma"])
+                    try:
+                        self.setcelltocorpus(legendaTT[str(cols[1])], rowN, self.corpuscols["pos"])
+                    except:
+                        self.setcelltocorpus(str(cols[1]), rowN, self.corpuscols["pos"])
+                except:
+                    continue
+        self.Progrdialog.accept()
+
     def loadCSV(self):
         if self.ImportingFile == False:
             fileNames = QFileDialog.getOpenFileNames(self, "Apri file CSV", self.sessionDir, "File CSV (*.tsv *.txt *.csv)")[0]
@@ -2437,7 +2503,14 @@ if __name__ == "__main__":
                 'dep': 8,
                 'governor': 9
     }
-    legendaPos = {"A":["aggettivo", "aggettivi", "piene"],"AP":["agg. poss", "aggettivi", "piene"],"B":["avverbio", "avverbi", "piene"],"B+PC":["avverbio+pron. clit. ", "avverbi", "piene"],"BN":["avv, negazione", "avverbi", "piene"],"CC":["cong. coord", "congiunzioni", "vuote"],"CS":["cong. sub.", "congiunzioni", "vuote"],"DD":["det. dim.", "aggettivi", "piene"],"DE":["det. esclam.", "aggettivi", "piene"],"DI":["det. indefinito", "aggettivi", "piene"],"DQ":["det. interr.", "aggettivi", "piene"],"DR":["det. Rel", "aggettivi", "piene"],"E":["preposizione", "preposizioni", "vuote"],"E+RD":["prep. art. ", "preposizioni", "vuote"],"FB":["punteggiatura - \"\" () «» - - ", "punteggiatura", "none"],"FC":["punteggiatura - : ;", "punteggiatura", "none"],"FF":["punteggiatura - ,", "punteggiatura", "none"],"FS":["punteggiatura - .?!", "punteggiatura", "none"],"I":["interiezione", "interiezioni", "vuote"],"N":["numero", "altro", "none"],"NO":["numerale", "aggettivi", "piene"],"PC":["pron. Clitico", "pronomi", "vuote"],"PC+PC":["pron. clitico+clitico", "pronomi", "vuote"],"PD":["pron. dimostrativo", "pronomi","vuote"],"PE":["pron. pers. ", "pronomi", "vuote"],"PI":["pron. indef.", "pronomi", "vuote"],"PP":["pron. poss.", "pronomi", "vuote"],"PQ":["pron. interr.", "pronomi", "vuote"],"PR":["pron. rel.", "pronomi", "vuote"],"RD":["art. Det.", "articoli", "vuote"],"RI":["art. ind.", "articoli", "vuote"],"S":["sost.", "sostantivi", "piene"],"SP":["nome proprio", "sostantivi", "piene"],"SW":["forestierismo", "altro", "none"],"T":["det. coll.)", "aggettivi", "piene"],"V":["verbo", "verbi", "piene"],"V+PC":["verbo + pron. clitico", "verbi", "piene"],"V+PC+PC":["verbo + pron. clitico + pron clitico", "verbi", "piene"],"VA":["verbo ausiliare", "verbi", "piene"],"VA+PC":["verbo ausiliare + pron.clitico", "verbi", "piene"],"VM":["verbo mod", "verbi", "piene"],"VM+PC":["verbo mod + pron. clitico", "verbi", "piene"],"X":["altro", "altro", "none"]}
+    try:
+        filein = os.path.abspath(os.path.dirname(sys.argv[0]))+"/dizionario/legenda/isdt.json"
+        text_file = open(filein, "r")
+        myjson = text_file.read().replace("\n", "").replace("\r", "").split("####")[0]
+        text_file.close()
+        legendaPos = json.loads(myjson)
+    except:
+        legendaPos = {"A":["aggettivo", "aggettivi", "piene"],"AP":["agg. poss", "aggettivi", "piene"],"B":["avverbio", "avverbi", "piene"],"B+PC":["avverbio+pron. clit. ", "avverbi", "piene"],"BN":["avv, negazione", "avverbi", "piene"],"CC":["cong. coord", "congiunzioni", "vuote"],"CS":["cong. sub.", "congiunzioni", "vuote"],"DD":["det. dim.", "aggettivi", "piene"],"DE":["det. esclam.", "aggettivi", "piene"],"DI":["det. indefinito", "aggettivi", "piene"],"DQ":["det. interr.", "aggettivi", "piene"],"DR":["det. Rel", "aggettivi", "piene"],"E":["preposizione", "preposizioni", "vuote"],"E+RD":["prep. art. ", "preposizioni", "vuote"],"FB":["punteggiatura - \"\" () «» - - ", "punteggiatura", "none"],"FC":["punteggiatura - : ;", "punteggiatura", "none"],"FF":["punteggiatura - ,", "punteggiatura", "none"],"FS":["punteggiatura - .?!", "punteggiatura", "none"],"I":["interiezione", "interiezioni", "vuote"],"N":["numero", "altro", "none"],"NO":["numerale", "aggettivi", "piene"],"PC":["pron. Clitico", "pronomi", "vuote"],"PC+PC":["pron. clitico+clitico", "pronomi", "vuote"],"PD":["pron. dimostrativo", "pronomi","vuote"],"PE":["pron. pers. ", "pronomi", "vuote"],"PI":["pron. indef.", "pronomi", "vuote"],"PP":["pron. poss.", "pronomi", "vuote"],"PQ":["pron. interr.", "pronomi", "vuote"],"PR":["pron. rel.", "pronomi", "vuote"],"RD":["art. Det.", "articoli", "vuote"],"RI":["art. ind.", "articoli", "vuote"],"S":["sost.", "sostantivi", "piene"],"SP":["nome proprio", "sostantivi", "piene"],"SW":["forestierismo", "altro", "none"],"T":["det. coll.)", "aggettivi", "piene"],"V":["verbo", "verbi", "piene"],"V+PC":["verbo + pron. clitico", "verbi", "piene"],"V+PC+PC":["verbo + pron. clitico + pron clitico", "verbi", "piene"],"VA":["verbo ausiliare", "verbi", "piene"],"VA+PC":["verbo ausiliare + pron.clitico", "verbi", "piene"],"VM":["verbo mod", "verbi", "piene"],"VM+PC":["verbo mod + pron. clitico", "verbi", "piene"],"X":["altro", "altro", "none"]}
     ignoretext = "((?<=[^0-9])"+ re.escape(".")+ "|^" + re.escape(".")+ "|(?<= )"+ re.escape("-")+ "|^"+re.escape("-")+ "|"+re.escape(":")+"|(?<=[^0-9])"+re.escape(",")+"|^"+re.escape(",")+"|"+re.escape(";")+"|"+re.escape("?")+"|"+re.escape("!")+"|"+re.escape("«")+"|"+re.escape("»")+"|"+re.escape("\"")+"|"+re.escape("(")+"|"+re.escape(")")+"|^"+re.escape("'")+ "|" + re.escape("[PUNCT]") + ")"
     if len(sys.argv)>1:
         w = "cli"

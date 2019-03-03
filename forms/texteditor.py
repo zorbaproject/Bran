@@ -385,8 +385,7 @@ class TextEditor(QDialog):
     def normalizza_parolenote(self):
         filein = os.path.abspath(os.path.dirname(sys.argv[0]))+"/dizionario/normalizzazione.json"
         text_file = open(filein, "r")
-        #myjson = text_file.read().replace("\n", "")
-        myjson = text_file.read()
+        myjson = text_file.read().replace("\n", "").replace("\r", "").split("####")[0]
         text_file.close()
         normalizzazione = json.loads(myjson)
         for regola in normalizzazione:
