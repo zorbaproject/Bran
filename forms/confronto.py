@@ -54,6 +54,7 @@ class Confronto(QDialog):
         self.fillcombos()
         self.legendaPos = []
         self.ignoretext = ""
+        self.dimList = []
 
     def addfile(self):
         fileNames = QFileDialog.getOpenFileNames(self, "Apri file CSV", self.sessionDir, "CSV files (*.tsv *.csv *.txt)")[0]
@@ -144,6 +145,18 @@ class Confronto(QDialog):
     def do_multi(self):
         context = "multicolonna"
         self.do_confronta(context)
+
+    def getCorpusDim(self, thistotal):
+        dimCorpus = self.dimList[0]
+        for i in range(len(self.dimList)-1):
+            if self.dimList[i] <= thistotal and self.dimList[i+1] >= thistotal:
+                lower = thistotal - self.dimList[i]
+                upper = self.dimList[i+1] - thistotal
+                if lower < upper:
+                    dimCorpus = self.dimList[i]
+                else:
+                    dimCorpus = self.dimList[i+1]
+        return dimCorpus
 
     def do_confronta(self, context):
         ignorethis = QInputDialog.getText(self.w, "Devo ignorare qualcosa?", "Se devo ignorare delle parole, scrivi qui l'espressione regolare. Altrimenti, lascia la casella vuota.", QLineEdit.Normal, self.ignoretext)[0]
@@ -243,6 +256,8 @@ class Confronto(QDialog):
                 colname = str(i-1)
                 if self.w.ignorefirstrow.isChecked():
                     colname = corpus[0][corpValueCol]
+            if self.w.occ_ds.isChecked():
+                self.w.dopercent.setChecked(True)
             TBdialog.addcolumn(colname, i+1)
             if self.w.occ_ds.isChecked():
                 TBdialog.addcolumn(colname+" SCARTO", outputcol+1)
@@ -298,7 +313,8 @@ class Confronto(QDialog):
                 outputcol = outputcol + 1
         totallines = TBdialog.w.tableWidget.rowCount()
         coltotal = []
-        if self.w.dopercent.isChecked() or self.w.tfidf.isChecked():
+        dimcorp = []
+        if self.w.dopercent.isChecked():
             for col in range(1,TBdialog.w.tableWidget.columnCount()):
                 thistotal = 0.0
                 for row in range(totallines):
@@ -313,6 +329,8 @@ class Confronto(QDialog):
                     except:
                         teststring = ""
                 coltotal.append(thistotal)
+                dimCorpus = self.getCorpusDim(thistotal)
+                dimcorp.append(dimCorpus)
         col = 0
         while col < TBdialog.w.tableWidget.columnCount():
             for row in range(totallines):
@@ -329,14 +347,15 @@ class Confronto(QDialog):
                         except:
                             TBdialog.setcelltotable("0", row, col)
                         teststring = TBdialog.w.tableWidget.item(row,col).text()
-                        if self.w.dopercent.isChecked() or self.w.tfidf.isChecked():
+                        if self.w.dopercent.isChecked():
                             thisvalue = str(float((float(teststring)/coltotal[col-1])*100.0))
                             TBdialog.setcelltotable(thisvalue, row, col)
                             teststring = thisvalue
                         if self.w.occ_ds.isChecked() and i>0:
                             try:
-                                rifval = float(TBdialog.w.tableWidget.item(row,1).text())
-                                tbval = float((float(teststring)-rifval)/math.sqrt(rifval))
+                                rifval = float(TBdialog.w.tableWidget.item(row,1).text())/100.0
+                                myval = float(teststring)/100.0
+                                tbval = float((float(myval*dimcorp[col-1])-(rifval*dimcorp[col-1]))/math.sqrt(rifval*dimcorp[col-1]))
                             except:
                                 rifval = 0.0
                                 tbval = 0.0
@@ -351,7 +370,6 @@ class Confronto(QDialog):
                             TBdialog.setcelltotable(str(tbval), row, col+1)
                         if self.w.tfidf.isChecked() and i>0:
                             N = float(TBdialog.w.tableWidget.columnCount()-1)/2
-                            #tfval = float(float(teststring)/coltotal[col-1])
                             tfval = float(float(teststring)/100.0)
                             wINd = 0
                             wdcol = 1

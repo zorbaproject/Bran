@@ -119,7 +119,7 @@ from forms import alberofrasi
 
 class MainWindow(QMainWindow):
 
-    def __init__(self, corpcol, legPos, ignthis, parent=None):
+    def __init__(self, corpcol, legPos, ignthis, dimlst, parent=None):
         super(MainWindow, self).__init__(parent)
         file = QFile(os.path.abspath(os.path.dirname(sys.argv[0]))+"/forms/mainwindow.ui")
         file.open(QFile.ReadOnly)
@@ -130,6 +130,7 @@ class MainWindow(QMainWindow):
         self.corpuscols = corpcol
         self.legendaPos = legPos
         self.ignoretext = ignthis
+        self.dimList = dimlst
         self.w.replace_in_corpus.clicked.connect(self.replaceCorpus)
         self.w.replace_in_cells.clicked.connect(self.replaceCells)
         self.w.actionSostituisci_nel_corpus_con_RegEx.triggered.connect(self.replaceCorpus)
@@ -1686,11 +1687,24 @@ class MainWindow(QMainWindow):
         cf = confronto.Confronto(self.sessionDir)
         cf.legendaPos = self.legendaPos
         cf.ignoretext = self.ignoretext
+        cf.dimList = self.dimList
         cf.exec()
 
     def aboutbran(self):
         aw = about.Form(self)
         aw.exec()
+
+    def getCorpusDim(self, thistotal):
+        dimCorpus = self.dimList[0]
+        for i in range(len(self.dimList)-1):
+            if self.dimList[i] <= thistotal and self.dimList[i+1] >= thistotal:
+                lower = thistotal - self.dimList[i]
+                upper = self.dimList[i+1] - thistotal
+                if lower < upper:
+                    dimCorpus = self.dimList[i]
+                else:
+                    dimCorpus = self.dimList[i+1]
+        return dimCorpus
 
     def misure_lessicometriche(self):
         thisname = []
@@ -1699,7 +1713,6 @@ class MainWindow(QMainWindow):
         column = QInputDialog.getItem(self, "Scegli la colonna", "Se vuoi estrarre il dizionario devi cercare nella colonna dei lemmi o delle forme grafiche. Ma puoi anche scegliere di ottenere le statistiche su altre colonne, come la Forma grafica.",thisname,current=self.corpuscols['Orig'],editable=False)
         col = thisname.index(column[0])
         ret = QMessageBox.question(self,'Domanda', "Vuoi ignorare la punteggiatura?", QMessageBox.Yes | QMessageBox.No)
-        dimList = [100,1000,5000,10000,50000,100000,150000,200000,250000,300000,350000,400000,450000,500000]
         TBdialog = tableeditor.Form(self)
         TBdialog.sessionDir = self.sessionDir
         TBdialog.addcolumn("Token", 0)
@@ -1757,15 +1770,7 @@ class MainWindow(QMainWindow):
             self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
             QApplication.processEvents()
             paroletotali = paroletotali + int(TBdialog.w.tableWidget.item(row,1).text())
-        dimCorpus = dimList[0]
-        for i in range(len(dimList)-1):
-            if dimList[i] <= paroletotali and dimList[i+1] >= paroletotali:
-                lower = paroletotali - dimList[i]
-                upper = dimList[i+1] - paroletotali
-                if lower < upper:
-                    dimCorpus = dimList[i]
-                else:
-                    dimCorpus = dimList[i+1]
+        dimCorpus = self.getCorpusDim(paroletotali)
         TBdialog.addcolumn("Frequenza in " + str(dimCorpus) + " parole", 2)
         TBdialog.addcolumn("Ordine di grandezza (log10)", 3)
         for row in range(TBdialog.w.tableWidget.rowCount()):
@@ -2072,9 +2077,7 @@ def contaverbi(corpuscols, legendaPos):
                 table[row].append(ratios)
         savetable(table, output)
 
-def misure_lessicometriche(ignoretext):
-    #ignoretext = "("+re.escape(".")+ "|"+re.escape(":")+"|"+re.escape(",")+"|"+re.escape(";")+"|"+re.escape("?")+"|"+re.escape("!")+"|"+re.escape("\"")+"|"+re.escape("'")+")"
-    dimList = [100,1000,5000,10000,50000,100000,150000,200000,250000,300000,350000,400000,450000,500000]
+def misure_lessicometriche(ignoretext, dimList):
     separator = '\t'
     fileNames = []
     if os.path.isfile(sys.argv[2]):
@@ -2503,6 +2506,8 @@ if __name__ == "__main__":
                 'dep': 8,
                 'governor': 9
     }
+    ignoretext = "((?<=[^0-9])"+ re.escape(".")+ "|^" + re.escape(".")+ "|(?<= )"+ re.escape("-")+ "|^"+re.escape("-")+ "|"+re.escape(":")+"|(?<=[^0-9])"+re.escape(",")+"|^"+re.escape(",")+"|"+re.escape(";")+"|"+re.escape("?")+"|"+re.escape("!")+"|"+re.escape("«")+"|"+re.escape("»")+"|"+re.escape("\"")+"|"+re.escape("(")+"|"+re.escape(")")+"|^"+re.escape("'")+ "|" + re.escape("[PUNCT]") + ")"
+    dimList = [100,1000,5000,10000,50000,100000,150000,200000,250000,300000,350000,400000,450000,500000,1000000]
     try:
         filein = os.path.abspath(os.path.dirname(sys.argv[0]))+"/dizionario/legenda/isdt.json"
         text_file = open(filein, "r")
@@ -2511,7 +2516,6 @@ if __name__ == "__main__":
         legendaPos = json.loads(myjson)
     except:
         legendaPos = {"A":["aggettivo", "aggettivi", "piene"],"AP":["agg. poss", "aggettivi", "piene"],"B":["avverbio", "avverbi", "piene"],"B+PC":["avverbio+pron. clit. ", "avverbi", "piene"],"BN":["avv, negazione", "avverbi", "piene"],"CC":["cong. coord", "congiunzioni", "vuote"],"CS":["cong. sub.", "congiunzioni", "vuote"],"DD":["det. dim.", "aggettivi", "piene"],"DE":["det. esclam.", "aggettivi", "piene"],"DI":["det. indefinito", "aggettivi", "piene"],"DQ":["det. interr.", "aggettivi", "piene"],"DR":["det. Rel", "aggettivi", "piene"],"E":["preposizione", "preposizioni", "vuote"],"E+RD":["prep. art. ", "preposizioni", "vuote"],"FB":["punteggiatura - \"\" () «» - - ", "punteggiatura", "none"],"FC":["punteggiatura - : ;", "punteggiatura", "none"],"FF":["punteggiatura - ,", "punteggiatura", "none"],"FS":["punteggiatura - .?!", "punteggiatura", "none"],"I":["interiezione", "interiezioni", "vuote"],"N":["numero", "altro", "none"],"NO":["numerale", "aggettivi", "piene"],"PC":["pron. Clitico", "pronomi", "vuote"],"PC+PC":["pron. clitico+clitico", "pronomi", "vuote"],"PD":["pron. dimostrativo", "pronomi","vuote"],"PE":["pron. pers. ", "pronomi", "vuote"],"PI":["pron. indef.", "pronomi", "vuote"],"PP":["pron. poss.", "pronomi", "vuote"],"PQ":["pron. interr.", "pronomi", "vuote"],"PR":["pron. rel.", "pronomi", "vuote"],"RD":["art. Det.", "articoli", "vuote"],"RI":["art. ind.", "articoli", "vuote"],"S":["sost.", "sostantivi", "piene"],"SP":["nome proprio", "sostantivi", "piene"],"SW":["forestierismo", "altro", "none"],"T":["det. coll.)", "aggettivi", "piene"],"V":["verbo", "verbi", "piene"],"V+PC":["verbo + pron. clitico", "verbi", "piene"],"V+PC+PC":["verbo + pron. clitico + pron clitico", "verbi", "piene"],"VA":["verbo ausiliare", "verbi", "piene"],"VA+PC":["verbo ausiliare + pron.clitico", "verbi", "piene"],"VM":["verbo mod", "verbi", "piene"],"VM+PC":["verbo mod + pron. clitico", "verbi", "piene"],"X":["altro", "altro", "none"]}
-    ignoretext = "((?<=[^0-9])"+ re.escape(".")+ "|^" + re.escape(".")+ "|(?<= )"+ re.escape("-")+ "|^"+re.escape("-")+ "|"+re.escape(":")+"|(?<=[^0-9])"+re.escape(",")+"|^"+re.escape(",")+"|"+re.escape(";")+"|"+re.escape("?")+"|"+re.escape("!")+"|"+re.escape("«")+"|"+re.escape("»")+"|"+re.escape("\"")+"|"+re.escape("(")+"|"+re.escape(")")+"|^"+re.escape("'")+ "|" + re.escape("[PUNCT]") + ")"
     if len(sys.argv)>1:
         w = "cli"
         app = QApplication(sys.argv)
@@ -2577,6 +2581,20 @@ if __name__ == "__main__":
                                 fileNames.append(os.path.join(sys.argv[i],tfile))
                     te.aprilista(fileNames)
             te.exec()
+        if sys.argv[1] == "confronto":
+            cf = confronto.Confronto(os.path.abspath(os.path.dirname(sys.argv[0])))
+            cf.legendaPos = legendaPos
+            cf.ignoretext = ignoretext
+            cf.dimList = dimList
+            if len(sys.argv)>2:
+                for i in range(2, len(sys.argv)):
+                    if os.path.isfile(sys.argv[i]):
+                        cf.w.corpora.addItem(sys.argv[i])
+                    if os.path.isdir(sys.argv[i]):
+                        for tfile in os.listdir(sys.argv[i]):
+                            if tfile[-4:] == ".txt":
+                                cf.w.corpora.addItem(os.path.join(sys.argv[i],tfile))
+            cf.exec()
         if sys.argv[1] == "occorrenze":
             calcola_occorrenze()
         if sys.argv[1] == "contaverbi":
@@ -2590,12 +2608,12 @@ if __name__ == "__main__":
         if sys.argv[1] == "mergetables":
             mergetables()
         if sys.argv[1] == "misurelessico":
-            misure_lessicometriche(ignoretext)
+            misure_lessicometriche(ignoretext, dimList)
         print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
         sys.exit(0)
     else:
         app = QApplication(sys.argv)
-        w = MainWindow(corpuscols, legendaPos, ignoretext)
+        w = MainWindow(corpuscols, legendaPos, ignoretext, dimList)
         w.show()
         sys.exit(app.exec_())
 
