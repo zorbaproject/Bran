@@ -381,9 +381,11 @@ class MainWindow(QMainWindow):
                 return
             try:
                 thistext = self.w.corpus.item(row,col).text()
-                if col == self.corpuscols["pos"]:
-                    thistext = self.legendaPos[thistext][0]
-                    print(self.legendaPos)
+                try:
+                    if col == self.corpuscols["pos"]:
+                        thistext = self.legendaPos[thistext][0]
+                except:
+                    thistext = self.w.corpus.item(row,col).text()
             except:
                 thistext = ""
             tbrow = TBdialog.finditemincolumn(thistext, col=0, matchexactly = True, escape = True)
@@ -429,8 +431,11 @@ class MainWindow(QMainWindow):
                 return
             try:
                 thistext = self.w.corpus.item(row,col).text()
-                if col == self.corpuscols["pos"]:
-                    thistext = self.legendaPos[thistext][0]
+                try:
+                    if col == self.corpuscols["pos"]:
+                        thistext = self.legendaPos[thistext][0]
+                except:
+                    thistext = self.w.corpus.item(row,col).text()
             except:
                 thistext = ""
             for ifilter in range(len(allfilters)):
@@ -1186,8 +1191,11 @@ class MainWindow(QMainWindow):
                 return
             try:
                 thistext = self.w.corpus.item(row,col).text()
-                if col == self.corpuscols["pos"]:
-                    thistext = self.legendaPos[thistext][0]
+                try:
+                    if col == self.corpuscols["pos"]:
+                        thistext = self.legendaPos[thistext][0]
+                except:
+                    thistext = self.w.corpus.item(row,col).text()
             except:
                 thistext = ""
             for ifilter in range(len(allfilters)):
@@ -1521,7 +1529,7 @@ class MainWindow(QMainWindow):
                     cols = line.replace("\r", "").split("\t")
                     if cols[0] == "":
                         continue
-                    rowN = self.addlinetocorpus(str(cols[0]), self.corpuscols["IDcorpus"])
+                    rowN = self.addlinetocorpus(str(cols[0]), self.corpuscols["Orig"])
                     self.setcelltocorpus(str(cols[2]), rowN, self.corpuscols["Lemma"])
                     try:
                         self.setcelltocorpus(legendaTT[str(cols[1])], rowN, self.corpuscols["pos"])
