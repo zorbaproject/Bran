@@ -256,8 +256,6 @@ class Confronto(QDialog):
                 colname = str(i-1)
                 if self.w.ignorefirstrow.isChecked():
                     colname = corpus[0][corpValueCol]
-            if self.w.occ_ds.isChecked():
-                self.w.dopercent.setChecked(True)
             TBdialog.addcolumn(colname, i+1)
             if self.w.occ_ds.isChecked():
                 TBdialog.addcolumn(colname+" SCARTO", outputcol+1)
@@ -314,7 +312,7 @@ class Confronto(QDialog):
         totallines = TBdialog.w.tableWidget.rowCount()
         coltotal = []
         dimcorp = []
-        if self.w.dopercent.isChecked():
+        if self.w.dopercent.isChecked() or self.w.occ_ds.isChecked() or self.w.tfidf.isChecked():
             for col in range(1,TBdialog.w.tableWidget.columnCount()):
                 thistotal = 0.0
                 for row in range(totallines):
@@ -353,7 +351,11 @@ class Confronto(QDialog):
                             teststring = thisvalue
                         if self.w.occ_ds.isChecked() and i>0:
                             try:
-                                rifval = float(TBdialog.w.tableWidget.item(row,1).text())/100.0
+                                rifval = float(TBdialog.w.tableWidget.item(row,1).text())
+                                if not self.w.dopercent.isChecked():
+                                    teststring = str(float((float(teststring)/coltotal[col-1])*100.0))
+                                    rifval = str(float((float(rifval)/coltotal[0])*100.0))
+                                rifval = float(rifval)/100.0
                                 myval = float(teststring)/100.0
                                 tbval = float((float(myval*dimcorp[col-1])-(rifval*dimcorp[col-1]))/math.sqrt(rifval*dimcorp[col-1]))
                             except:
@@ -370,6 +372,8 @@ class Confronto(QDialog):
                             TBdialog.setcelltotable(str(tbval), row, col+1)
                         if self.w.tfidf.isChecked() and i>0:
                             N = float(TBdialog.w.tableWidget.columnCount()-1)/2
+                            if not self.w.dopercent.isChecked():
+                                teststring = str(float((float(teststring)/coltotal[col-1])*100.0))
                             tfval = float(float(teststring)/100.0)
                             wINd = 0
                             wdcol = 1
