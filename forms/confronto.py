@@ -160,6 +160,9 @@ class Confronto(QDialog):
 
     def do_confronta(self, context):
         ignorethis = QInputDialog.getText(self.w, "Devo ignorare qualcosa?", "Se devo ignorare delle parole, scrivi qui l'espressione regolare. Altrimenti, lascia la casella vuota.", QLineEdit.Normal, self.ignoretext)[0]
+        normalizzazionecorpus = 0
+        if self.w.occ_ds.isChecked():
+            normalizzazionecorpus = int(QInputDialog.getInt(self.w, "Normalizzazione", "Puoi indicare il numero di token in base al quale standardizzare i corpora. Se lasci questo valore a zero, Bran calcolerà automaticamente la dimensione adeguata per ciascun corpus.")[0])
         thisname = []
         if context != "generico" and context != "multicolonna":
             riferimentoName = self.getRiferimento(context)
@@ -327,8 +330,13 @@ class Confronto(QDialog):
                     except:
                         teststring = ""
                 coltotal.append(thistotal)
-                dimCorpus = self.getCorpusDim(thistotal)
+                if normalizzazionecorpus == 0:
+                    dimCorpus = self.getCorpusDim(thistotal)
+                else:
+                    dimCorpus = normalizzazionecorpus
                 dimcorp.append(dimCorpus)
+        print(dimcorp)
+        print(coltotal)
         col = 0
         while col < TBdialog.w.tableWidget.columnCount():
             for row in range(totallines):
