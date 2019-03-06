@@ -78,13 +78,37 @@ class Confronto(QDialog):
         self.w.sel_corpora.setChecked(True)
 
     def readcsv(self, fileName, separator = "\t"):
-        text_file = open(fileName, "r", encoding='utf-8')
-        lines = text_file.read()
-        text_file.close()
+        lines = self.opentextfile(fileName)
         mylist = lines.split("\n")
         for i in range(len(mylist)):
             mylist[i] = mylist[i].split(separator)
         return mylist
+
+    def opentextfile(self, fileName):
+        lines = ""
+        try:
+            text_file = open(fileName, "r", encoding='utf-8')
+            lines = text_file.read()
+            text_file.close()
+        except:
+            myencoding = "ISO-8859-15"
+            #https://pypi.org/project/chardet/
+            gotEncoding = False
+            while gotEncoding == False:
+                try:
+                    myencoding = QInputDialog.getText(self.w, "Scegli la codifica", "Sembra che questo file non sia codificato in UTF-8. Vuoi provare a specificare una codifica diversa? (Es: cp1252 oppure ISO-8859-15)", QLineEdit.Normal, myencoding)
+                except:
+                    print("Sembra che questo file non sia codificato in UTF-8. Vuoi provare a specificare una codifica diversa? (Es: cp1252 oppure ISO-8859-15)")
+                    myencoding = [input()]
+                try:
+                    # TODO: prevediamo la codifica "FORCE", che permette di leggere il file come binario ignorando caratteri strani
+                    text_file = open(fileName, "r", encoding=myencoding[0])
+                    lines = text_file.read()
+                    text_file.close()
+                    gotEncoding = True
+                except:
+                    gotEncoding = False
+        return lines
 
     def fillcombos(self):
         branroot = os.path.abspath(os.path.dirname(sys.argv[0]))
@@ -336,6 +360,7 @@ class Confronto(QDialog):
                 coltotal.append(thistotal)
                 if normalizzazionecorpus == 0:
                     dimCorpus = self.getCorpusDim(thistotal)
+                    normalizzazionecorpus = dimCorpus
                 else:
                     dimCorpus = normalizzazionecorpus
                 dimcorp.append(dimCorpus)
@@ -372,6 +397,9 @@ class Confronto(QDialog):
                                 rifval = 0.0
                                 tbval = 0.0
                             TBdialog.setcelltotable(str(tbval), row, col+1)
+                            if row == 0:
+                                tmpstr = TBdialog.w.tableWidget.horizontalHeaderItem(col+1).text()
+                                TBdialog.w.tableWidget.horizontalHeaderItem(col+1).setText(tmpstr + " per " + str(dimcorp[col-1]) + " token")
                         if self.w.occ_rms.isChecked() and i>0:
                             N = 2
                             try:

@@ -1474,7 +1474,7 @@ class MainWindow(QMainWindow):
             myencoding = "ISO-8859-15"
             #https://pypi.org/project/chardet/
             gotEncoding = False
-            while gotEncoding:
+            while gotEncoding == False:
                 try:
                     myencoding = QInputDialog.getText(self.w, "Scegli la codifica", "Sembra che questo file non sia codificato in UTF-8. Vuoi provare a specificare una codifica diversa? (Es: cp1252 oppure ISO-8859-15)", QLineEdit.Normal, myencoding)
                 except:
