@@ -291,11 +291,15 @@ class Confronto(QDialog):
                         thisvalue = "1"
                     tbrow = TBdialog.finditemincolumn(thistext, col=0, matchexactly = True, escape = True)
                     if tbrow>=0:
-                        tbval = thisvalue
                         if self.w.occ_ds.isChecked() or self.w.occ_rms.isChecked() or self.w.tfidf.isChecked():
-                            TBdialog.setcelltotable(str(thisvalue), tbrow, outputcol)
+                            tbcol = outputcol
                         else:
-                            TBdialog.setcelltotable(str(tbval), tbrow, i+1)
+                            tbcol = i+1
+                        try:
+                            tbval = TBdialog.w.tableWidget.item(tbrow,tbcol).text() + thisvalue
+                        except:
+                            tbval = thisvalue
+                        TBdialog.setcelltotable(str(tbval), tbrow, tbcol)
                     else:
                         TBdialog.addlinetotable(thistext, 0)
                         tbrow = TBdialog.w.tableWidget.rowCount()-1
@@ -335,8 +339,6 @@ class Confronto(QDialog):
                 else:
                     dimCorpus = normalizzazionecorpus
                 dimcorp.append(dimCorpus)
-        print(dimcorp)
-        print(coltotal)
         col = 0
         while col < TBdialog.w.tableWidget.columnCount():
             for row in range(totallines):
