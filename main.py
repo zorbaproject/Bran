@@ -62,27 +62,6 @@ except:
         except:
             sys.exit(1)
 
-try:
-    from pyquery import PyQuery as pqtest
-    from lxml import etree
-except:
-    try:
-        from tkinter import messagebox
-        thispkg = "le librerie per scaricare i tweet"
-        messagebox.showinfo("Installazione, attendi prego", "Sto per installare "+ thispkg +" e ci vorrà del tempo. Premi Ok e vai a prenderti un caffè.")
-        pip.main(["install", "pyquery"])
-        pip.main(["install", "lxml"])
-        messagebox.showinfo("Prendi nota", "Probabilmente dovrai installare i pacchetti di sviluppo, su Ubuntu basta questo comando: sudo apt-get install libxml2-dev libxslt1-dev python-dev")
-    except:
-        try:
-            from pip._internal import main as pipmain
-            from tkinter import messagebox
-            pipmain(["install", "pyquery"])
-            pipmain(["install", "lxml"])
-            messagebox.showinfo("Prendi nota", "Probabilmente dovrai installare i pacchetti di sviluppo, su Ubuntu basta questo comando: sudo apt-get install libxml2-dev libxslt1-dev python-dev")
-        except:
-            sys.exit(1)
-
 
 from PySide2.QtUiTools import QUiLoader
 from PySide2.QtCore import QFile
@@ -243,9 +222,15 @@ class MainWindow(QMainWindow):
             text_file = open(self.mycfgfile, "r", encoding='utf-8')
             lines = text_file.read()
             text_file.close()
-            self.mycfg = json.loads(lines)
+            self.mycfg = json.loads(lines.replace("\n", "").replace("\r", ""))
         except:
-            print("Creo il file di configurazione")
+            try:
+                text_file = open(self.mycfgfile, "r", encoding='ISO-8859-15')
+                lines = text_file.read()
+                text_file.close()
+                self.mycfg = json.loads(lines.replace("\n", "").replace("\r", ""))
+            except:
+                print("Creo il file di configurazione")
 
     def savePersonalCFG(self):
         cfgtxt = json.dumps(self.mycfg)
@@ -1637,6 +1622,8 @@ class MainWindow(QMainWindow):
         else:
             if platform.system() == "Windows":
                 QMessageBox.information(self, "Come usare il server su Windows", "Sembra che tu stia usando Windows. Su questo sistema, per utilizzare il server Tint l'interfaccia di Bran verrà chiusa automaticamente: il terminale dovrà rimanere aperto. Dovrai aprire di nuovo Bran, così verrà caricata una nuova interfaccia grafica.")
+                print("\nNON CHIUDERE QUESTA FINESTRA:  Tint è eseguito dentro questa finestra. Avvia di nuovo Bran.")
+                print("\n\nNON CHIUDERE QUESTA FINESTRA")
                 sys.exit(0)
             self.w.statusbar.showMessage("OK, il server è attivo")
 
@@ -2570,12 +2557,23 @@ if __name__ == "__main__":
                 time.sleep(10)
         if sys.argv[1] == "tintstart":
             TintThread = tint.TintRunner(w)
-            Java = "/usr/bin/java"
-            TintPort = "8012"
-            TintDir = os.path.abspath(os.path.dirname(sys.argv[0]))+"/tint/lib"
+            try:
+                text_file = open(sys.argv[2], "r", encoding='utf-8')
+                lines = text_file.read()
+                text_file.close()
+                mycfg = json.loads(lines.replace("\n", "").replace("\r", ""))
+                Java = mycfg["javapath"]
+                TintDir = mycfg["tintpath"]
+                TintPort = mycfg["tintport"]
+            except:
+                Java = "/usr/bin/java"
+                TintPort = "8012"
+                TintDir = os.path.abspath(os.path.dirname(sys.argv[0]))+"/tint/lib"
             TintThread.loadvariables(Java, TintDir, TintPort)
             TintThread.start()
             time.sleep(30)
+            print("\nNON CHIUDERE QUESTA FINESTRA:  Tint è eseguito dentro questa finestra. Avvia di nuovo Bran.")
+            print("\n\nNON CHIUDERE QUESTA FINESTRA")
         if sys.argv[1] == "texteditor":
             te = texteditor.TextEditor()
             if len(sys.argv)>2:
@@ -2589,6 +2587,7 @@ if __name__ == "__main__":
                                 fileNames.append(os.path.join(sys.argv[i],tfile))
                     te.aprilista(fileNames)
             te.exec()
+            print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
         if sys.argv[1] == "confronto":
             cf = confronto.Confronto(os.path.abspath(os.path.dirname(sys.argv[0])))
             cf.legendaPos = legendaPos
@@ -2603,21 +2602,28 @@ if __name__ == "__main__":
                             if tfile[-4:] == ".txt":
                                 cf.w.corpora.addItem(os.path.join(sys.argv[i],tfile))
             cf.exec()
+            print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
         if sys.argv[1] == "occorrenze":
             calcola_occorrenze()
+            print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
         if sys.argv[1] == "contaverbi":
             contaverbi(corpuscols, legendaPos)
+            print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
         if sys.argv[1] == "extractcolumn":
             estrai_colonna()
+            print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
         if sys.argv[1] == "splitbigfile":
             splitbigfile()
+            print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
         if sys.argv[1] == "samplebigfile":
             samplebigfile()
+            print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
         if sys.argv[1] == "mergetables":
             mergetables()
+            print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
         if sys.argv[1] == "misurelessico":
             misure_lessicometriche(ignoretext, dimList)
-        print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
+            print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
         sys.exit(0)
     else:
         app = QApplication(sys.argv)
