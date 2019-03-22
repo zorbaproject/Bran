@@ -4,6 +4,13 @@ http://www.intratext.com/bsi/listapolirematiche/0-index.htm
 
 https://dizionario.internazionale.it/lettera/a-2
 
+https://www.kdnuggets.com/2017/03/email-spam-filtering-an-implementation-with-python-and-scikit-learn.html
+
+https://github.com/explosion/spaCy
+https://spacy.io/api/token
+
+https://it.wikipedia.org/wiki/Formula_di_Flesch
+https://it.wikipedia.org/wiki/Indice_Gulpease
 
 0,0004$/secondo 0,0008$/secondo
 https://developers-it.googleblog.com/2018/05/migliori-trascrizioni-di-conversazioni.html

@@ -388,15 +388,37 @@ class TextEditor(QDialog):
         myjson = text_file.read().replace("\n", "").replace("\r", "").split("####")[0]
         text_file.close()
         normalizzazione = json.loads(myjson)
+        Progrdialog = progress.Form(self)
+        Progrdialog.show()
+        totallines = len(normalizzazione)
+        row = 0
+        mytext = self.w.plainTextEdit.toPlainText()
+        newtext = ""
         for regola in normalizzazione:
+            if row <51 or row % 500 == 0:
+                Progrdialog.w.testo.setText("Sto cercando la regola numero "+str(row))
+                Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+                QApplication.processEvents()
+                if Progrdialog.w.annulla.isChecked():
+                    return
             searchstr = regola["search"]
             replstr = regola["replace"]
+            escape = False
             if not regola["regex"]:
-                searchstr = re.escape(searchstr)
+                #escape = True
+                #searchstr = " " + searchstr + " "
+                #replstr = " " + replstr + " "
+                searchstr = "([^a-zA-Z0-9òàùèéì])" + re.escape(searchstr) + "([^a-zA-Z0-9òàùèéì])"
+                replstr = "\g<1>" + replstr + "\g<2>"
             ignorecase = regola["caseinsensitive"]
             dolower = regola["lower"]
             doupper = regola["upper"]
-            self.perform_searchreplace(self.w.plainTextEdit.toPlainText(), searchstr, replstr, True, dolower, doupper, ignorecase)
+            mytext = self.perform_searchreplace(mytext, searchstr, replstr, escape, False, dolower, doupper, ignorecase, False)
+            if mytext != "":
+                newtext = mytext
+            row = row + 1
+        self.w.plainTextEdit.setPlainText(newtext)
+        Progrdialog.accept()
 
     def do_searchreplace(self, mytext, searchstr = "", replstr = "", oneline = True, dolower = False, doupper = False):
         repCdialog = regex_replace.Form(self)
@@ -412,9 +434,9 @@ class TextEditor(QDialog):
         repCdialog.w.colcheck.setChecked(oneline)
         repCdialog.exec()
         if repCdialog.result():
-            self.perform_searchreplace(mytext, repCdialog.w.orig.text(), repCdialog.w.dest.text(), repCdialog.w.colcheck.isChecked(), repCdialog.w.dolower.isChecked(), repCdialog.w.doupper.isChecked(), repCdialog.w.ignorecase.isChecked())
+            self.perform_searchreplace(mytext, repCdialog.w.orig.text(), repCdialog.w.dest.text(), False, repCdialog.w.colcheck.isChecked(), repCdialog.w.dolower.isChecked(), repCdialog.w.doupper.isChecked(), repCdialog.w.ignorecase.isChecked())
 
-    def perform_searchreplace(self, mytext, searchstr = "", replstr = "", oneline = True, dolower = False, doupper = False, ignorecase = True):
+    def perform_searchreplace(self, mytext, searchstr = "", replstr = "", escape = False, oneline = True, dolower = False, doupper = False, ignorecase = True, showprogress = True):
         if ignorecase:
             myflags=re.IGNORECASE|re.DOTALL
         else:
@@ -428,8 +450,9 @@ class TextEditor(QDialog):
             fileNames.append("")
         totfiles = len(fileNames)
         filen = 0
-        Progrdialog = progress.Form(self)
-        Progrdialog.show()
+        if showprogress:
+            Progrdialog = progress.Form(self)
+            Progrdialog.show()
         for fileName in fileNames:
             if fileName != "" and os.path.isfile(fileName) and self.batchmode:
                 mytext = self.batchopenwithencoding(fileName, 'utf-8')
@@ -440,24 +463,31 @@ class TextEditor(QDialog):
                     self.nuovo()
                     mytext = self.openwithencoding(fileName, myencoding[0])
                     if mytext == "ERRORE BRAN: Codifica errata":
-                       return
+                       return ""
             else:
-                self.w.plainTextEdit.setPlainText("")
+                if showprogress:
+                    self.w.plainTextEdit.setPlainText("")
             if oneline:
                 textlist = mytext.split("\n")
                 totallines = len(textlist)
                 for row in range(totallines):
-                    Progrdialog.w.testo.setText("Sto cercando nella riga numero "+str(row))
-                    Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
-                    QApplication.processEvents()
-                    if Progrdialog.w.annulla.isChecked():
-                        return
+                    if showprogress:
+                        Progrdialog.w.testo.setText("Sto cercando nella riga numero "+str(row))
+                        Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+                        QApplication.processEvents()
+                        if Progrdialog.w.annulla.isChecked():
+                            return ""
                     origstr = textlist[row]
                     try:
-                        newstr = re.sub(searchstr, replstr, origstr, flags=myflags)
+                        if escape:
+                            #searchstr = re.escape(searchstr)
+                            newstr = origstr.replace(searchstr, replstr)
+                        else:
+                            newstr = re.sub(searchstr, replstr, origstr, flags=myflags)
                     except:
                         self.w.plainTextEdit.setPlainText(mytext)
-                        Progrdialog.accept()
+                        if showprogress:
+                            Progrdialog.accept()
                         QMessageBox.critical(self, "Attenzione", "Sembra ci sia un errore nell'espressione regolare" + searchstr + " -> " + replstr + " \nControlla la sintassi.")
                         return
                     if dolower:
@@ -481,18 +511,24 @@ class TextEditor(QDialog):
                                 newtext = "\n" + newtext
                             myfile.write(newtext)
             else:
-                Progrdialog.w.testo.setText("Sto cercando nel file numero "+str(filen))
-                Progrdialog.w.progressBar.setValue(int((filen/totfiles)*100))
-                QApplication.processEvents()
-                if Progrdialog.w.annulla.isChecked():
-                    return
+                if showprogress:
+                    Progrdialog.w.testo.setText("Sto cercando nel file numero "+str(filen))
+                    Progrdialog.w.progressBar.setValue(int((filen/totfiles)*100))
+                    QApplication.processEvents()
+                    if Progrdialog.w.annulla.isChecked():
+                        return ""
                 try:
-                    newtext = re.sub(searchstr, replstr, mytext, flags=myflags)
+                    if escape:
+                        #searchstr = re.escape(searchstr)
+                        newtext = mytext.replace(searchstr, replstr)
+                    else:
+                        newtext = re.sub(searchstr, replstr, mytext, flags=myflags)
                 except:
                     self.w.plainTextEdit.setPlainText(mytext)
-                    Progrdialog.accept()
+                    if showprogress:
+                        Progrdialog.accept()
                     QMessageBox.critical(self, "Attenzione", "Sembra ci sia un errore nell'espressione regolare. Controlla la sintassi.")
-                    return
+                    return ""
                 if dolower:
                     indexes = [(m.start(0), m.end(0)) for m in re.finditer(searchstr, newtext, flags=myflags)]
                     for f in indexes:
@@ -506,11 +542,16 @@ class TextEditor(QDialog):
                     text_file.write(newtext)
                     text_file.close()
                 else:
-                    self.w.plainTextEdit.setPlainText(newtext)
+                    if showprogress:
+                        self.w.plainTextEdit.setPlainText(newtext)
+                    else:
+                        return newtext
                 filen = filen + 1
-        Progrdialog.accept()
+        if showprogress:
+            Progrdialog.accept()
         if self.batchmode:
             self.switchfile()
+        return ""
 
     def rm_doublephrases(self):
         #dele phrases repeated: https://pastebin.com/7Krbii0d
@@ -590,7 +631,7 @@ class TextEditor(QDialog):
         return -1
 
     def normalizzainiziali(self):
-        self.do_searchreplace(self.w.plainTextEdit.toPlainText(), "([" + re.escape(".?!") + "]) *([A-Z])","\\g<1> \\g<2>", False, True, False)
+        self.do_searchreplace(self.w.plainTextEdit.toPlainText(), "([" + re.escape(".?!") + "]) *([A-ZÈÉÀÒÌÙ])","\\g<1> \\g<2>", False, True, False)
 
     def tuttominuscolo(self):
         self.do_searchreplace(self.w.plainTextEdit.toPlainText(), "(.*)","\\g<1>", False, True, False)
