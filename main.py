@@ -130,6 +130,7 @@ class MainWindow(QMainWindow):
         self.w.actionConta_occorrenze_filtrate.triggered.connect(self.contaoccorrenzefiltrate)
         self.w.actionEsporta_corpus_in_CSV_unico.triggered.connect(self.salvaCSV)
         self.w.actionEsporta_vista_attuale_in_CSV.triggered.connect(self.esportavistaCSV)
+        self.w.actionEsporta_in_formato_CoNNL_U.triggered.connect(self.connluexport)
         self.w.actionAggiungi_tag_in_corpus_in_base_a_RegEx.triggered.connect(self.addTagFromFilter)
         self.w.actionRimuovi_vista_attuale_dal_corpus.triggered.connect(self.removevisiblerows)
         self.w.actionCalcola_densit_lessicale.triggered.connect(self.densitalessico)
@@ -944,6 +945,91 @@ class MainWindow(QMainWindow):
                     if col > 0:
                         csv = csv + self.separator
                     csv = csv + self.w.corpus.item(row,col).text()
+                with open(fileName, "a", encoding='utf-8') as myfile:
+                    myfile.write(csv+"\n")
+            Progrdialog.accept()
+
+    def connluexport(self):
+        fileName = QFileDialog.getSaveFileName(self, "Salva file CSV", self.sessionDir, "Text files (*.tsv *.csv *.txt)")[0]
+        self.Progrdialog = progress.Form()
+        self.Progrdialog.show()
+        self.corpus_to_connlu(fileName, self.Progrdialog, True)
+
+    def corpus_to_connlu(self, fileName, Progrdialog, addheader = False, onlyrows = []):
+        self.sanitizeTable(self.w.corpus)
+        filein = os.path.abspath(os.path.dirname(sys.argv[0]))+"/dizionario/legenda/isdt-ud.json"
+        text_file = open(filein, "r")
+        myjson = text_file.read().replace("\n", "").replace("\r", "").split("####")[0]
+        text_file.close()
+        legendaISDTUD = json.loads(myjson)
+        if fileName != "":
+            if fileName[-4:] != ".csv" and fileName[-4:] != ".tsv":
+                fileName = fileName + ".tsv"
+            csv = ""
+            if addheader:
+            #    for col in range(self.w.corpus.columnCount()):
+            #        if col > 0:
+            #            csv = csv + self.separator
+            #        csv = csv + "ID"
+                csv = "ID" + self.separator + "FORM" + self.separator + "LEMMA" + self.separator + "UPOS" + self.separator + "XPOS" + self.separator + "FEATS" + self.separator + "HEAD" + self.separator + "DEPREL"  + self.separator + "DEPS"  + self.separator + "MISC"
+                csv = csv + "\n"
+            totallines = self.w.corpus.rowCount()
+            text_file = open(fileName, "w", encoding='utf-8')
+            text_file.write(csv)
+            text_file.close()
+            if len(onlyrows)==0:
+                onlyrows = range(self.w.corpus.rowCount())
+            for row in onlyrows:
+                #csv = csv + "\n"
+                csv = ""
+                Progrdialog.w.testo.setText("Sto salvando la riga numero "+str(row))
+                Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+                QApplication.processEvents()
+                if Progrdialog.w.annulla.isChecked():
+                    return
+                Ucolumns = []
+                Ucolumns.append(self.w.corpus.item(row,self.corpuscols['IDword']).text())
+                Ucolumns.append(self.w.corpus.item(row,self.corpuscols['Orig']).text())
+                Ucolumns.append(self.w.corpus.item(row,self.corpuscols['Lemma']).text())
+                mypos = self.w.corpus.item(row,self.corpuscols['pos']).text()
+                myposU = legendaISDTUD["pos"][mypos][0]
+                Ucolumns.append(myposU)
+                Ucolumns.append(mypos)
+                myfeat = self.w.corpus.item(row,self.corpuscols['feat']).text()
+                myfeatU = ""
+                for featpart in myfeat.split("/"):
+                    for featel in featpart.split("+"):
+                        try:
+                            translated = legendaISDTUD["feat"][featel]
+                        except:
+                            if not " " in featel:
+                                print("ERROR: "+featel)
+                            translated = ""
+                        for trelem in translated.split("|"):
+                            if not trelem in myfeatU:
+                                myfeatU = myfeatU + "|" + trelem
+                    myfeatU = myfeatU + "/"
+                #add from pos
+                myfeatU = myfeatU + "|" + legendaISDTUD["pos"][mypos][1]
+                #clean double chars
+                while "||" in myfeatU or "/|" in myfeatU:
+                    myfeatU = myfeatU.replace("||","|")
+                    myfeatU = myfeatU.replace("/|","/")
+                myfeatU = re.sub("^[^a-z]*", "", myfeatU, flags=re.IGNORECASE|re.DOTALL)
+                myfeatU = re.sub("[^a-z]*$", "", myfeatU, flags=re.IGNORECASE|re.DOTALL)
+                Ucolumns.append(myfeatU)
+                Ucolumns.append(self.w.corpus.item(row,self.corpuscols['governor']).text())
+                Ucolumns.append(self.w.corpus.item(row,self.corpuscols['dep']).text())
+                #Ucolumns.append(self.w.corpus.item(row,self.corpuscols['ner']).text())
+                Ucolumns.append("_")
+                Ucolumns.append("_")
+
+                for col in range(len(Ucolumns)):
+                    if Ucolumns[col] == "":
+                        Ucolumns[col] = "_"
+                    if col > 0:
+                        csv = csv + self.separator
+                    csv = csv + Ucolumns[col]
                 with open(fileName, "a", encoding='utf-8') as myfile:
                     myfile.write(csv+"\n")
             Progrdialog.accept()

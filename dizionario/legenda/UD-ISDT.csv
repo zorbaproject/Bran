@@ -1,0 +1,264 @@
+A	A	num=n|gen=n	=>	ADJ	_	biposto, ultra, bene, best, live, running
+A	A	num=p|gen=f	=>	ADJ	Gender=Fem|Number=Plur	violente, personalissime, lisce, paritetiche, vive, immense
+A	A	num=p|gen=m	=>	ADJ	Gender=Masc|Number=Plur	romani, disoccupati, austeri, disposti, radioattivi, corrotti
+A	A	num=p|gen=n	=>	ADJ	Number=Plur	immobili, danesi, principali, presidenziali, lievi, ormonali
+A	A	num=s|gen=f	=>	ADJ	Gender=Fem|Number=Sing	complicata, lontana, missilistica, esigua, immobiliare, famosa
+A	A	num=s|gen=m	=>	ADJ	Gender=Masc|Number=Sing	misterioso, accentuato, preventivo, fondato, fisico, curioso
+A	A	num=s|gen=n	=>	ADJ	Number=Sing	insostenibile, corresponsabile, militare, vergine, keniota, laziale
+A	AP	num=n|gen=n	=>	DET	Poss=Yes|PronType=Prs	loro, altrui, my
+A	AP	num=p|gen=f	=>	DET	Gender=Fem|Number=Plur|Poss=Yes|PronType=Prs	mie, vostre, sue, nostre, proprie
+A	AP	num=p|gen=m	=>	DET	Gender=Masc|Number=Plur|Poss=Yes|PronType=Prs	vostri, propri, tuoi, miei, suoi, nostri
+A	AP	num=s|gen=f	=>	DET	Gender=Fem|Number=Sing|Poss=Yes|PronType=Prs	vostra, mia, sua, propria, nostra, tua
+A	AP	num=s|gen=m	=>	DET	Gender=Masc|Number=Sing|Poss=Yes|PronType=Prs	proprio, tuo, nostro, suo, mio, vostro
+B	B	_	=>	ADV	_	peggio, unicamente, legittimamente, forte, solennemente, carponi
+B	BN	_	=>	ADV	PronType=Neg	no, mica, non, nemmeno, neanche, neppure
+C	CC	_	=>	CONJ	_	bensì, nè, sia, et, mentre, come
+C	CS	_	=>	SCONJ	_	benché, affinché, quale, dopo, poiché, sebbene
+D	DD	num=n|gen=m	=>	DET	Gender=Masc|PronType=Dem	tal
+D	DD	num=p|gen=f	=>	DET	Gender=Fem|Number=Plur|PronType=Dem	queste, quelle
+D	DD	num=p|gen=m	=>	DET	Gender=Masc|Number=Plur|PronType=Dem	quegli, questi, quei
+D	DD	num=p|gen=n	=>	DET	Number=Plur|PronType=Dem	tali
+D	DD	num=s|gen=f	=>	DET	Gender=Fem|Number=Sing|PronType=Dem	questa, quella, tal
+D	DD	num=s|gen=m	=>	DET	Gender=Masc|Number=Sing|PronType=Dem	quello, quel, questo, quest’
+D	DD	num=s|gen=n	=>	DET	Number=Sing|PronType=Dem	tale, tal, quest', quell'
+D	DE	num=n|gen=n	=>	DET	_	che
+D	DE	num=s|gen=n	=>	DET	Number=Sing	quale
+D	DI	num=n|gen=n	=>	DET	PronType=Ind	più
+D	DI	num=p|gen=f	=>	DET	Gender=Fem|Number=Plur|PronType=Ind	determinate, alcune, altre, talune, molte, delle
+D	DI	num=p|gen=m	=>	DET	Gender=Masc|Number=Plur|PronType=Ind	molti, numerosi, tutti, svariati, altrettanti, parecchi
+D	DI	num=s|gen=f	=>	DET	Gender=Fem|Number=Sing|PronType=Ind	alcuna, troppa, ciascuna, diversa, certa, tutta
+D	DI	num=s|gen=m	=>	DET	Gender=Masc|Number=Sing|PronType=Ind	molto, ciascuno, nessun, certo, poco, alcuno
+D	DI	num=s|gen=n	=>	DET	Number=Sing|PronType=Ind	ogni, qualsivoglia, qualunque, qualche, niente, qualsiasi
+D	DQ	num=n|gen=n	=>	DET	PronType=Int	che
+D	DQ	num=p|gen=f	=>	DET	Gender=Fem|Number=Plur|PronType=Int	quante
+D	DQ	num=p|gen=m	=>	DET	Gender=Masc|Number=Plur|PronType=Int	quanti
+D	DQ	num=p|gen=n	=>	DET	Number=Plur|PronType=Int	quali
+D	DQ	num=s|gen=f	=>	DET	Gender=Fem|Number=Sing|PronType=Int	quanta
+D	DQ	num=s|gen=m	=>	DET	Gender=Masc|Number=Sing|PronType=Int	quanto, quel
+D	DQ	num=s|gen=n	=>	DET	Number=Sing|PronType=Int	qual, che, quale
+D	DR	num=n|gen=n	=>	DET	PronType=Rel	cui
+D	DR	num=p|gen=n	=>	DET	Number=Plur|PronType=Rel	quali
+D	DT	num=n|gen=n	=>	DET	_	che
+D	DT	num=s|gen=f	=>	DET	Gender=Fem|Number=Sing	quanta
+E	E	_	=>	ADP	_	pro, entro, onde, fino, davanti, for
+E	EA	num=p|gen=f	=>	ADP	Gender=Fem|Number=Plur	nelle, dalle, sulle, alle, colle, delle
+E	EA	num=p|gen=m	=>	ADP	Gender=Masc|Number=Plur	sui, dagli, dei, sugli, agli, coi
+E	EA	num=p|gen=n	=>	ADP	Number=Plur	dell'
+E	EA	num=s|gen=f	=>	ADP	Gender=Fem|Number=Sing	nella, del, alla, dall', delle, dalla
+E	EA	num=s|gen=m	=>	ADP	Gender=Masc|Number=Sing	sul, dal, nel, pel, nell', del
+E	EA	num=s|gen=n	=>	ADP	Number=Sing	dell’, nell', all’, dall’, all', sull'
+F	FB	_	=>	PUNCT	_	«, ), », ], ”, "
+F	FC	_	=>	PUNCT	_	:, ;
+F	FF	_	=>	PUNCT	_	/, –, ., *, ..., "
+F	FS	_	=>	PUNCT	_	., :, !, ?
+I	I	_	=>	INTJ	_	grazie, già, ciao, ahò, chissà, vabbè
+N	N	_	=>	NUM	NumType=Card	864, 99, 932, 1453, 45227, 1989
+N	NO	num=n|gen=n	=>	ADJ	NumType=Ord	first, 20°, I, 35*, 2°, 3°
+N	NO	num=p|gen=f	=>	ADJ	Gender=Fem|Number=Plur|NumType=Ord	prime, ultime
+N	NO	num=p|gen=m	=>	ADJ	Gender=Masc|Number=Plur|NumType=Ord	terzi, quarti, ultimi, primi
+N	NO	num=s|gen=f	=>	ADJ	Gender=Fem|Number=Sing|NumType=Ord	sesta, settima, terza, nona, ennesima, XXIII
+N	NO	num=s|gen=m	=>	ADJ	Gender=Masc|Number=Sing|NumType=Ord	ultimo, settimo, secondo, penultimo, primo, decimo
+N	NO	num=s|gen=n	=>	ADJ	Number=Sing|NumType=Ord	II, XII, V, XVI, 20th, VII
+P	PC	num=n|gen=n	=>	PRON	_	vi, si, ne, se, n', c'
+P	PC	num=n|per=3|gen=f	=>	PRON	Gender=Fem|Person=3	le
+P	PC	num=n|per=3|gen=n	=>	PRON	Person=3	si, l', glie, s', sè, se
+P	PC	num=p|gen=n	=>	PRON	Number=Plur	ci, vi
+P	PC	num=p|per=1|gen=n	=>	PRON	Number=Plur|Person=1	ci
+P	PC	num=p|per=2|gen=n	=>	PRON	Number=Plur|Person=2	vi
+P	PC	num=p|per=3|gen=f	=>	PRON	Gender=Fem|Number=Plur|Person=3	le
+P	PC	num=p|per=3|gen=m	=>	PRON	Gender=Masc|Number=Plur|Person=3	li
+P	PC	num=s|per=1|gen=n	=>	PRON	Number=Sing|Person=1	m', me, mi
+P	PC	num=s|per=2|gen=n	=>	PRON	Number=Sing|Person=2	ti, te
+P	PC	num=s|per=3|gen=f	=>	PRON	Gender=Fem|Number=Sing|Person=3	la, le
+P	PC	num=s|per=3|gen=m	=>	PRON	Gender=Masc|Number=Sing|Person=3	glie, gli, lo
+P	PC	num=s|per=3|gen=n	=>	PRON	Number=Sing|Person=3	gli, l', la, glie
+P	PD	num=n|gen=n	=>	PRON	PronType=Dem	ciò
+P	PD	num=p|gen=f	=>	PRON	Gender=Fem|Number=Plur|PronType=Dem	stesse, quelle, queste
+P	PD	num=p|gen=m	=>	PRON	Gender=Masc|Number=Plur|PronType=Dem	medesimi, stessi, quelli, questi
+P	PD	num=p|gen=n	=>	PRON	Number=Plur|PronType=Dem	coloro, costoro, tali
+P	PD	num=s|gen=f	=>	PRON	Gender=Fem|Number=Sing|PronType=Dem	quella, questa, stessa, medesima
+P	PD	num=s|gen=m	=>	PRON	Gender=Masc|Number=Sing|PronType=Dem	ciò, medesimo, costui, quello, quel, codesto
+P	PD	num=s|gen=n	=>	PRON	Number=Sing|PronType=Dem	tale
+P	PE	num=n|per=3|gen=n	=>	PRON	Person=3|PronType=Prs	sè
+P	PE	num=p|per=1|gen=n	=>	PRON	Number=Plur|Person=1|PronType=Prs	noi
+P	PE	num=p|per=2|gen=n	=>	PRON	Number=Plur|Person=2|PronType=Prs	voi
+P	PE	num=p|per=3|gen=f	=>	PRON	Gender=Fem|Number=Plur|Person=3|PronType=Prs	esse
+P	PE	num=p|per=3|gen=m	=>	PRON	Gender=Masc|Number=Plur|Person=3|PronType=Prs	essi, uni, al.
+P	PE	num=p|per=3|gen=n	=>	PRON	Number=Plur|Person=3|PronType=Prs	loro, costoro
+P	PE	num=s|gen=m	=>	PRON	Gender=Masc|Number=Sing|PronType=Prs	terzo
+P	PE	num=s|per=1|gen=n	=>	PRON	Number=Sing|Person=1|PronType=Prs	io, me, i
+P	PE	num=s|per=2|gen=n	=>	PRON	Number=Sing|Person=2|PronType=Prs	te, tu
+P	PE	num=s|per=3|gen=f	=>	PRON	Gender=Fem|Number=Sing|Person=3|PronType=Prs	lei, essa, ella
+P	PE	num=s|per=3|gen=m	=>	PRON	Gender=Masc|Number=Sing|Person=3|PronType=Prs	lui, ei, gli, granché, quegli, esso
+P	PE	num=s|per=3|gen=n	=>	PRON	Number=Sing|Person=3|PronType=Prs	sé, lei, costui
+P	PI	num=n|gen=n	=>	PRON	PronType=Ind	granché, più, meno
+P	PI	num=p|gen=f	=>	PRON	Gender=Fem|Number=Plur|PronType=Ind	tutte, molte, altre, poche, alcune
+P	PI	num=p|gen=m	=>	PRON	Gender=Masc|Number=Plur|PronType=Ind	altrettanti, tantissimi, uni, diversi, entrambi, altri
+P	PI	num=p|gen=n	=>	PRON	Number=Plur|PronType=Ind	più, ambedue
+P	PI	num=s|gen=f	=>	PRON	Gender=Fem|Number=Sing|PronType=Ind	ciascuna, tutta, troppa, ognuna, altra, una
+P	PI	num=s|gen=m	=>	PRON	Gender=Masc|Number=Sing|PronType=Ind	uno, nessuno, quello, ciascuno, diverso, nulla
+P	PI	num=s|gen=n	=>	PRON	Number=Sing|PronType=Ind	qualunque, niente, nulla, alcunché, chiunque, qualcosa
+P	PP	num=p|gen=m	=>	PRON	Gender=Masc|Number=Plur|Poss=Yes|PronType=Prs	tuoi, miei, suoi
+P	PP	num=p|gen=n	=>	PRON	Number=Plur|Poss=Yes|PronType=Prs	loro
+P	PP	num=s|gen=f	=>	PRON	Gender=Fem|Number=Sing|Poss=Yes|PronType=Prs	tua, sua, mia
+P	PP	num=s|gen=m	=>	PRON	Gender=Masc|Number=Sing|Poss=Yes|PronType=Prs	mio, tuo, proprio, nostro, suo
+P	PP	num=s|gen=n	=>	PRON	Number=Sing|Poss=Yes|PronType=Prs	sé
+P	PQ	_	=>	PRON	PronType=Int	quanto
+P	PQ	num=n|gen=n	=>	PRON	PronType=Int	che, qual, quanto, chi
+P	PQ	num=p|gen=f	=>	PRON	Gender=Fem|Number=Plur|PronType=Int	quante
+P	PQ	num=p|gen=m	=>	PRON	Gender=Masc|Number=Plur|PronType=Int	quanti
+P	PQ	num=p|gen=n	=>	PRON	Number=Plur|PronType=Int	quali
+P	PQ	num=s|gen=f	=>	PRON	Gender=Fem|Number=Sing|PronType=Int	quanta
+P	PQ	num=s|gen=m	=>	PRON	Gender=Masc|Number=Sing|PronType=Int	quanto
+P	PQ	num=s|gen=n	=>	PRON	Number=Sing|PronType=Int	quanto, cos', chi, cosa, qual, quale
+P	PR	num=n|gen=m	=>	PRON	Gender=Masc|PronType=Rel	che
+P	PR	num=n|gen=n	=>	PRON	PronType=Rel	chi, cui, che, quanto, come, dove
+P	PR	num=p|gen=m	=>	PRON	Gender=Masc|Number=Plur|PronType=Rel	quanti
+P	PR	num=p|gen=n	=>	PRON	Number=Plur|PronType=Rel	quali
+P	PR	num=s|gen=m	=>	PRON	Gender=Masc|Number=Sing|PronType=Rel	quanto
+P	PR	num=s|gen=n	=>	PRON	Number=Sing|PronType=Rel	chiunque, chi, che, quale, cui
+R	RD	num=n|gen=n	=>	DET	Definite=Def|PronType=Art	the
+R	RD	num=p|gen=f	=>	DET	Definite=Def|Gender=Fem|Number=Plur|PronType=Art	le
+R	RD	num=p|gen=m	=>	DET	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	i, gli
+R	RD	num=s|gen=f	=>	DET	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	la, a, le
+R	RD	num=s|gen=m	=>	DET	Definite=Def|Gender=Masc|Number=Sing|PronType=Art	lu, l’, lo, l', le, il
+R	RD	num=s|gen=n	=>	DET	Definite=Def|Number=Sing|PronType=Art	l’, l'
+R	RI	num=n|gen=n	=>	DET	Definite=Ind|PronType=Art	a
+R	RI	num=p|gen=f	=>	DET	Definite=Ind|Gender=Fem|Number=Plur|PronType=Art	delle
+R	RI	num=p|gen=m	=>	DET	Definite=Ind|Gender=Masc|Number=Plur|PronType=Art	degli, dei
+R	RI	num=s|gen=f	=>	DET	Definite=Ind|Gender=Fem|Number=Sing|PronType=Art	un', una, un’
+R	RI	num=s|gen=m	=>	DET	Definite=Ind|Gender=Masc|Number=Sing|PronType=Art	uno, del, un
+R	RI	num=s|gen=n	=>	DET	Definite=Ind|Number=Sing|PronType=Art	a, dell'
+S	S	_	=>	NOUN	_	d, col., es., mq, cm, b.r.
+S	S	num=n|gen=f	=>	NOUN	Gender=Fem	finalità, umanità, metà, capolista, sovranità, insostenibilità
+S	S	num=n|gen=m	=>	NOUN	Gender=Masc	parser, totem, stage, papà, oscar, robot
+S	S	num=n|gen=n	=>	NOUN	_	etagere, ten, soap, radio, show, research
+S	S	num=p|gen=f	=>	NOUN	Gender=Fem|Number=Plur	architetture, scritte, iniziative, apparenze, cose, lunghezze
+S	S	num=p|gen=m	=>	NOUN	Gender=Masc|Number=Plur	tentennamenti, interrogativi, governi, terroristi, altoparlanti, fianchi
+S	S	num=p|gen=n	=>	NOUN	Number=Plur	governanti, tossicomani, mecenati, militanti, simpatizzanti, debuttanti
+S	S	num=s|gen=f	=>	NOUN	Gender=Fem|Number=Sing	generazione, spola, eccezione, grafica, miriade, tattica
+S	S	num=s|gen=m	=>	NOUN	Gender=Masc|Number=Sing	viale, elettrodotto, ambasciatore, soffio, turno, moto
+S	S	num=s|gen=n	=>	NOUN	Number=Sing	presidente, security, paziente, milanese, governante, amante
+S	S	num=s|mod=p|gen=m	=>	NOUN	Gender=Masc|Number=Sing|VerbForm=Part	previsto
+S	SP	_	=>	PROPN	_	Silvio, Respirazione, Apple, Mezzaluna, Ferrari, Springs
+S	SW	_	=>	X	Foreign=Yes	air, i, quo, santo, pars, pingendi
+T	T	num=p|gen=f	=>	DET	Gender=Fem|Number=Plur	tutte, entrambe
+T	T	num=p|gen=m	=>	DET	Gender=Masc|Number=Plur	entrambi, tutti
+T	T	num=p|gen=n	=>	DET	Number=Plur	ambedue
+T	T	num=s|gen=f	=>	DET	Gender=Fem|Number=Sing	tutta
+T	T	num=s|gen=m	=>	DET	Gender=Masc|Number=Sing	tutto
+V	V	mod=f	=>	VERB	VerbForm=Inf	diventare, sistemare, smettere, riaprire, parlar, commutare
+V	V	mod=g	=>	VERB	VerbForm=Ger	cavalcando, pianificando, sciando, mantenendo, assicurando, trasformando
+V	V	num=n|mod=p|gen=n	=>	VERB	VerbForm=Part	distr.
+V	V	num=p|mod=p	=>	VERB	Number=Plur|VerbForm=Part	aventi, decorrenti, risultanti, luccicanti, partecipanti, facenti
+V	V	num=p|mod=p|gen=f	=>	VERB	Gender=Fem|Number=Plur|VerbForm=Part	criptate, approvate, accadute, trattate, alimentate, partite
+V	V	num=p|mod=p|gen=m	=>	VERB	Gender=Masc|Number=Plur|VerbForm=Part	anticipati, discriminati, soddisfatti, lasciati, schierati, imbambolati
+V	V	num=p|per=1|mod=c|ten=i	=>	VERB	Mood=Sub|Number=Plur|Person=1|Tense=Imp|VerbForm=Fin	fossimo
+V	V	num=p|per=1|mod=c|ten=p	=>	VERB	Mood=Sub|Number=Plur|Person=1|Tense=Pres|VerbForm=Fin	nascondiamo
+V	V	num=p|per=1|mod=i|ten=f	=>	VERB	Mood=Ind|Number=Plur|Person=1|Tense=Fut|VerbForm=Fin	agiremo, lavoreremo, sposeremo, permetteremo, andremo, presenteremo
+V	V	num=p|per=1|mod=i|ten=i	=>	VERB	Mood=Ind|Number=Plur|Person=1|Tense=Imp|VerbForm=Fin	chiamavamo, collaudavamo, giocavamo, sapevamo, ascoltavamo, avevamo
+V	V	num=p|per=1|mod=i|ten=p	=>	VERB	Mood=Ind|Number=Plur|Person=1|Tense=Pres|VerbForm=Fin	dirigiamo, siamo, andiamo, riassumiamo, riusciamo, impediamo
+V	V	num=p|per=1|mod=i|ten=s	=>	VERB	Mood=Ind|Number=Plur|Person=1|Tense=Past|VerbForm=Fin	pagammo, andammo, vedemmo, destinammo
+V	V	num=p|per=1|mod=m|ten=p	=>	VERB	Mood=Imp|Number=Plur|Person=1|Tense=Pres|VerbForm=Fin	diciamo, intendiamo
+V	V	num=p|per=2|mod=c|ten=i	=>	VERB	Mood=Sub|Number=Plur|Person=2|Tense=Imp|VerbForm=Fin	sapeste
+V	V	num=p|per=2|mod=d|ten=p	=>	VERB	Mood=Cnd|Number=Plur|Person=2|Tense=Pres|VerbForm=Fin	avreste
+V	V	num=p|per=2|mod=i|ten=f	=>	VERB	Mood=Ind|Number=Plur|Person=2|Tense=Fut|VerbForm=Fin	vedrete
+V	V	num=p|per=2|mod=i|ten=i	=>	VERB	Mood=Ind|Number=Plur|Person=2|Tense=Imp|VerbForm=Fin	eravate
+V	V	num=p|per=2|mod=i|ten=p	=>	VERB	Mood=Ind|Number=Plur|Person=2|Tense=Pres|VerbForm=Fin	spiate, salutate, state, siete, spezzate, somigliate
+V	V	num=p|per=2|mod=m|ten=p	=>	VERB	Mood=Imp|Number=Plur|Person=2|Tense=Pres|VerbForm=Fin	sentite, cercate, chiedete, lasciate, rivolgetevi, sospendete
+V	V	num=p|per=3|mod=c|ten=i	=>	VERB	Mood=Sub|Number=Plur|Person=3|Tense=Imp|VerbForm=Fin	provenissero, fossero, arrivassero, equivalessero, andassero, giocassero
+V	V	num=p|per=3|mod=c|ten=p	=>	VERB	Mood=Sub|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	siano, corrano, riferiscano, consentano, minaccino, associno
+V	V	num=p|per=3|mod=d|ten=p	=>	VERB	Mood=Cnd|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	rifarebbero, commetterebbero, sparerebbero, saprebbero, sarebbero, cesserebbero
+V	V	num=p|per=3|mod=i|ten=f	=>	VERB	Mood=Ind|Number=Plur|Person=3|Tense=Fut|VerbForm=Fin	incontreranno, capiranno, giocheranno, alzeranno, troveranno, vedranno
+V	V	num=p|per=3|mod=i|ten=i	=>	VERB	Mood=Ind|Number=Plur|Person=3|Tense=Imp|VerbForm=Fin	discutevano, vendevano, annotavano, provenivano, agitavano, volevano
+V	V	num=p|per=3|mod=i|ten=p	=>	VERB	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	combinano, estinguono, aumentano, smentiscono, allontanano, posseggono
+V	V	num=p|per=3|mod=i|ten=s	=>	VERB	Mood=Ind|Number=Plur|Person=3|Tense=Past|VerbForm=Fin	confluirono, furono, stabilirono, nascosero, costrinsero, finirono
+V	V	num=s|gen=f	=>	VERB	Gender=Fem|Number=Sing	porta
+V	V	num=s|mod=p	=>	VERB	Number=Sing|VerbForm=Part	confinante, incombente, riducente, risultante, sbadigliante, spettante
+V	V	num=s|mod=p|gen=f	=>	VERB	Gender=Fem|Number=Sing|VerbForm=Part	armonizzata, sciupata, scoperta, emessa, programmata, tarlata
+V	V	num=s|mod=p|gen=m	=>	VERB	Gender=Masc|Number=Sing|VerbForm=Part	annegato, votato, rivendicato, depredato, riconosciuto, convertito
+V	V	num=s|per=1|mod=c|ten=i	=>	VERB	Mood=Sub|Number=Sing|Person=1|Tense=Imp|VerbForm=Fin	fossi, incontrassi, partecipassi
+V	V	num=s|per=1|mod=c|ten=p	=>	VERB	Mood=Sub|Number=Sing|Person=1|Tense=Pres|VerbForm=Fin	giochi
+V	V	num=s|per=1|mod=d|ten=p	=>	VERB	Mood=Cnd|Number=Sing|Person=1|Tense=Pres|VerbForm=Fin	definirei, vorrei, farei, arrabbierei, direi, avrei
+V	V	num=s|per=1|mod=i|ten=f	=>	VERB	Mood=Ind|Number=Sing|Person=1|Tense=Fut|VerbForm=Fin	crederò, sarò, avrò, dedicherò, sorveglierò, troverò
+V	V	num=s|per=1|mod=i|ten=i	=>	VERB	Mood=Ind|Number=Sing|Person=1|Tense=Imp|VerbForm=Fin	amavo, saltavo, dicevo, temevo, sentivo, rispondevo
+V	V	num=s|per=1|mod=i|ten=p	=>	VERB	Mood=Ind|Number=Sing|Person=1|Tense=Pres|VerbForm=Fin	torno, chiedo, ammetto, racconto, continuo, voto
+V	V	num=s|per=1|mod=i|ten=s	=>	VERB	Mood=Ind|Number=Sing|Person=1|Tense=Past|VerbForm=Fin	aspettai, decorsi, tornai, entrai, rimasi, andai
+V	V	num=s|per=2|mod=c|ten=p	=>	VERB	Mood=Sub|Number=Sing|Person=2|Tense=Pres|VerbForm=Fin	permetta
+V	V	num=s|per=2|mod=d|ten=p	=>	VERB	Mood=Cnd|Number=Sing|Person=2|Tense=Pres|VerbForm=Fin	troveresti, stupiresti, percorreresti
+V	V	num=s|per=2|mod=i|ten=f	=>	VERB	Mood=Ind|Number=Sing|Person=2|Tense=Fut|VerbForm=Fin	vedrai, morirai, sentirai
+V	V	num=s|per=2|mod=i|ten=p	=>	VERB	Mood=Ind|Number=Sing|Person=2|Tense=Pres|VerbForm=Fin	ami, vieni, credi, sbagli, limiti, risulti
+V	V	num=s|per=2|mod=m|ten=p	=>	VERB	Mood=Imp|Number=Sing|Person=2|Tense=Pres|VerbForm=Fin	immagina, cerca, elenca, asciuga, scopri, tonifica
+V	V	num=s|per=3|mod=c|ten=i	=>	VERB	Mood=Sub|Number=Sing|Person=3|Tense=Imp|VerbForm=Fin	vedesse, saltasse, riposasse, trovasse, bastasse, internazionalizzasse
+V	V	num=s|per=3|mod=c|ten=p	=>	VERB	Mood=Sub|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	richieda, comporti, consista, esegua, rovini, contrapponga
+V	V	num=s|per=3|mod=d|ten=p	=>	VERB	Mood=Cnd|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	piacerebbe, parrebbe, saprebbe, equivarrebbe, renderebbe, prenderebbe
+V	V	num=s|per=3|mod=i|ten=f	=>	VERB	Mood=Ind|Number=Sing|Person=3|Tense=Fut|VerbForm=Fin	porterà, finirà, rimpiangerà, accompagnerà, seguirà, invocherà
+V	V	num=s|per=3|mod=i|ten=i	=>	VERB	Mood=Ind|Number=Sing|Person=3|Tense=Imp|VerbForm=Fin	preoccupava, rientrava, affidava, rincresceva, piantava, usciva
+V	V	num=s|per=3|mod=i|ten=p	=>	VERB	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	ripubblica, profetizza, sopporta, mostra, disegna, ha
+V	V	num=s|per=3|mod=i|ten=s	=>	VERB	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	suicidò, operò, acquistò, sembrò, rovesciò, andò
+V	V	num=s|per=3|mod=m|ten=p	=>	VERB	Mood=Imp|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	nomina
+V	VA	mod=f	=>	AUX	VerbForm=Inf|VerbType=Aux	aver, avere, venire, esser, essere
+V	VA	mod=g	=>	AUX	VerbForm=Ger|VerbType=Aux	essendo
+V	VA	num=p|mod=p|gen=f	=>	AUX	Gender=Fem|Number=Plur|VerbForm=Part|VerbType=Aux	state
+V	VA	num=p|mod=p|gen=m	=>	AUX	Gender=Masc|Number=Plur|VerbForm=Part|VerbType=Aux	stati
+V	VA	num=p|per=1|mod=d|ten=p	=>	AUX	Mood=Cnd|Number=Plur|Person=1|Tense=Pres|VerbForm=Fin|VerbType=Aux	avremmo, saremmo
+V	VA	num=p|per=1|mod=i|ten=f	=>	AUX	Mood=Ind|Number=Plur|Person=1|Tense=Fut|VerbForm=Fin|VerbType=Aux	saremo
+V	VA	num=p|per=1|mod=i|ten=i	=>	AUX	Mood=Ind|Number=Plur|Person=1|Tense=Imp|VerbForm=Fin|VerbType=Aux	avevamo, eravamo
+V	VA	num=p|per=1|mod=i|ten=p	=>	AUX	Mood=Ind|Number=Plur|Person=1|Tense=Pres|VerbForm=Fin|VerbType=Aux	siamo, abbiamo, veniamo, stiamo
+V	VA	num=p|per=2|mod=i|ten=p	=>	AUX	Mood=Ind|Number=Plur|Person=2|Tense=Pres|VerbForm=Fin|VerbType=Aux	siete, avete
+V	VA	num=p|per=3|mod=c|ten=i	=>	AUX	Mood=Sub|Number=Plur|Person=3|Tense=Imp|VerbForm=Fin|VerbType=Aux	avessero, fossero, venissero
+V	VA	num=p|per=3|mod=c|ten=p	=>	AUX	Mood=Sub|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin|VerbType=Aux	vengano, siano, abbiano
+V	VA	num=p|per=3|mod=d|ten=p	=>	AUX	Mood=Cnd|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin|VerbType=Aux	sarebbero, avrebbero
+V	VA	num=p|per=3|mod=i|ten=f	=>	AUX	Mood=Ind|Number=Plur|Person=3|Tense=Fut|VerbForm=Fin|VerbType=Aux	saranno, avranno, verranno
+V	VA	num=p|per=3|mod=i|ten=i	=>	AUX	Mood=Ind|Number=Plur|Person=3|Tense=Imp|VerbForm=Fin|VerbType=Aux	stavano, avevano, andavano, erano, venivano
+V	VA	num=p|per=3|mod=i|ten=p	=>	AUX	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin|VerbType=Aux	stanno, vengono, son, vanno, sono, hanno
+V	VA	num=p|per=3|mod=i|ten=s	=>	AUX	Mood=Ind|Number=Plur|Person=3|Tense=Past|VerbForm=Fin|VerbType=Aux	vennero, furono
+V	VA	num=s|mod=p|gen=f	=>	AUX	Gender=Fem|Number=Sing|VerbForm=Part|VerbType=Aux	stata
+V	VA	num=s|mod=p|gen=m	=>	AUX	Gender=Masc|Number=Sing|VerbForm=Part|VerbType=Aux	stato
+V	VA	num=s|per=1|mod=c|ten=i	=>	AUX	Mood=Sub|Number=Sing|Person=1|Tense=Imp|VerbForm=Fin|VerbType=Aux	avessi, fossi
+V	VA	num=s|per=1|mod=d|ten=p	=>	AUX	Mood=Cnd|Number=Sing|Person=1|Tense=Pres|VerbForm=Fin|VerbType=Aux	avrei
+V	VA	num=s|per=1|mod=i|ten=i	=>	AUX	Mood=Ind|Number=Sing|Person=1|Tense=Imp|VerbForm=Fin|VerbType=Aux	ero, avevo
+V	VA	num=s|per=1|mod=i|ten=p	=>	AUX	Mood=Ind|Number=Sing|Person=1|Tense=Pres|VerbForm=Fin|VerbType=Aux	sto, ho, sono
+V	VA	num=s|per=1|mod=i|ten=s	=>	AUX	Mood=Ind|Number=Sing|Person=1|Tense=Past|VerbForm=Fin|VerbType=Aux	fui
+V	VA	num=s|per=2|mod=i|ten=i	=>	AUX	Mood=Ind|Number=Sing|Person=2|Tense=Imp|VerbForm=Fin|VerbType=Aux	venivi
+V	VA	num=s|per=2|mod=i|ten=p	=>	AUX	Mood=Ind|Number=Sing|Person=2|Tense=Pres|VerbForm=Fin|VerbType=Aux	stai, sei, hai
+V	VA	num=s|per=3|mod=c|ten=i	=>	AUX	Mood=Sub|Number=Sing|Person=3|Tense=Imp|VerbForm=Fin|VerbType=Aux	avesse, fosse, venisse
+V	VA	num=s|per=3|mod=c|ten=p	=>	AUX	Mood=Sub|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin|VerbType=Aux	stia, sia, venga, abbia
+V	VA	num=s|per=3|mod=d|ten=p	=>	AUX	Mood=Cnd|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin|VerbType=Aux	sarebbe, avrebbe
+V	VA	num=s|per=3|mod=i|ten=f	=>	AUX	Mood=Ind|Number=Sing|Person=3|Tense=Fut|VerbForm=Fin|VerbType=Aux	sarà, verrà, avrà
+V	VA	num=s|per=3|mod=i|ten=i	=>	AUX	Mood=Ind|Number=Sing|Person=3|Tense=Imp|VerbForm=Fin|VerbType=Aux	veniva, stava, era, aveva
+V	VA	num=s|per=3|mod=i|ten=p	=>	AUX	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin|VerbType=Aux	e', viene, è, va, sta, ha
+V	VA	num=s|per=3|mod=i|ten=s	=>	AUX	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin|VerbType=Aux	fu, venne
+V	VM	mod=f	=>	AUX	VerbForm=Inf|VerbType=Mod	voler, dover, poter
+V	VM	mod=g	=>	AUX	VerbForm=Ger|VerbType=Mod	potendo, volendo, dovendo
+V	VM	num=p|mod=p|gen=m	=>	AUX	Gender=Masc|Number=Plur|VerbForm=Part|VerbType=Mod	potuti
+V	VM	num=p|per=1|mod=d|ten=p	=>	AUX	Mood=Cnd|Number=Plur|Person=1|Tense=Pres|VerbForm=Fin|VerbType=Mod	dovremmo, vorremmo, potremmo
+V	VM	num=p|per=1|mod=i|ten=i	=>	AUX	Mood=Ind|Number=Plur|Person=1|Tense=Imp|VerbForm=Fin|VerbType=Mod	potevamo
+V	VM	num=p|per=1|mod=i|ten=p	=>	AUX	Mood=Ind|Number=Plur|Person=1|Tense=Pres|VerbForm=Fin|VerbType=Mod	vogliamo, possiamo, dobbiamo
+V	VM	num=p|per=2|mod=d|ten=p	=>	AUX	Mood=Cnd|Number=Plur|Person=2|Tense=Pres|VerbForm=Fin|VerbType=Mod	vorreste
+V	VM	num=p|per=2|mod=i|ten=f	=>	AUX	Mood=Ind|Number=Plur|Person=2|Tense=Fut|VerbForm=Fin|VerbType=Mod	dovrete
+V	VM	num=p|per=2|mod=i|ten=p	=>	AUX	Mood=Ind|Number=Plur|Person=2|Tense=Pres|VerbForm=Fin|VerbType=Mod	potete, volete
+V	VM	num=p|per=2|mod=m|ten=p	=>	AUX	Mood=Imp|Number=Plur|Person=2|Tense=Pres|VerbForm=Fin|VerbType=Mod	dovete
+V	VM	num=p|per=3|mod=c|ten=i	=>	AUX	Mood=Sub|Number=Plur|Person=3|Tense=Imp|VerbForm=Fin|VerbType=Mod	dovessero, potessero
+V	VM	num=p|per=3|mod=c|ten=p	=>	AUX	Mood=Sub|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin|VerbType=Mod	possano, debbano, vogliano
+V	VM	num=p|per=3|mod=d|ten=p	=>	AUX	Mood=Cnd|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin|VerbType=Mod	potrebbero, dovrebbero
+V	VM	num=p|per=3|mod=i|ten=f	=>	AUX	Mood=Ind|Number=Plur|Person=3|Tense=Fut|VerbForm=Fin|VerbType=Mod	dovranno, potranno
+V	VM	num=p|per=3|mod=i|ten=i	=>	AUX	Mood=Ind|Number=Plur|Person=3|Tense=Imp|VerbForm=Fin|VerbType=Mod	dovevano, potevano, volevano, andavano
+V	VM	num=p|per=3|mod=i|ten=p	=>	AUX	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin|VerbType=Mod	debbono, devono, vogliono, sanno, possono, vanno
+V	VM	num=s|mod=p|gen=f	=>	AUX	Gender=Fem|Number=Sing|VerbForm=Part|VerbType=Mod	potuta
+V	VM	num=s|mod=p|gen=m	=>	AUX	Gender=Masc|Number=Sing|VerbForm=Part|VerbType=Mod	voluto, dovuto, potuto
+V	VM	num=s|per=1|mod=d|ten=p	=>	AUX	Mood=Cnd|Number=Sing|Person=1|Tense=Pres|VerbForm=Fin|VerbType=Mod	vorrei, potrei
+V	VM	num=s|per=1|mod=i|ten=i	=>	AUX	Mood=Ind|Number=Sing|Person=1|Tense=Imp|VerbForm=Fin|VerbType=Mod	volevo
+V	VM	num=s|per=1|mod=i|ten=p	=>	AUX	Mood=Ind|Number=Sing|Person=1|Tense=Pres|VerbForm=Fin|VerbType=Mod	devo, debbo, voglio, posso
+V	VM	num=s|per=2|mod=d|ten=p	=>	AUX	Mood=Cnd|Number=Sing|Person=2|Tense=Pres|VerbForm=Fin|VerbType=Mod	dovresti
+V	VM	num=s|per=2|mod=i|ten=i	=>	AUX	Mood=Ind|Number=Sing|Person=2|Tense=Imp|VerbForm=Fin|VerbType=Mod	dovevi
+V	VM	num=s|per=2|mod=i|ten=p	=>	AUX	Mood=Ind|Number=Sing|Person=2|Tense=Pres|VerbForm=Fin|VerbType=Mod	devi, vuoi, puoi
+V	VM	num=s|per=2|mod=m|ten=p	=>	AUX	Mood=Imp|Number=Sing|Person=2|Tense=Pres|VerbForm=Fin|VerbType=Mod	devi
+V	VM	num=s|per=3|mod=c|ten=i	=>	AUX	Mood=Sub|Number=Sing|Person=3|Tense=Imp|VerbForm=Fin|VerbType=Mod	potesse, dovesse, volesse
+V	VM	num=s|per=3|mod=c|ten=p	=>	AUX	Mood=Sub|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin|VerbType=Mod	voglia, debba, possa
+V	VM	num=s|per=3|mod=d|ten=p	=>	AUX	Mood=Cnd|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin|VerbType=Mod	potrebbe, dovrebbe, vorrebbe
+V	VM	num=s|per=3|mod=i|ten=f	=>	AUX	Mood=Ind|Number=Sing|Person=3|Tense=Fut|VerbForm=Fin|VerbType=Mod	vorrà, potrà, dovrà
+V	VM	num=s|per=3|mod=i|ten=i	=>	AUX	Mood=Ind|Number=Sing|Person=3|Tense=Imp|VerbForm=Fin|VerbType=Mod	doveva, poteva, voleva
+V	VM	num=s|per=3|mod=i|ten=p	=>	AUX	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin|VerbType=Mod	deve, sa, dev', fa, vuole, può
+V	VM	num=s|per=3|mod=i|ten=s	=>	AUX	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin|VerbType=Mod	dovette, potè
+X	X	_	=>	X	_	20'01'', b, o, /, enni, 2'42''

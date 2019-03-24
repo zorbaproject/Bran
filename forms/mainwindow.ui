@@ -184,6 +184,7 @@
      <addaction name="actionEsporta_corpus_in_CSV_unico"/>
      <addaction name="actionEsporta_vista_attuale_in_CSV"/>
      <addaction name="actionEsporta_corpus_in_un_CSV_per_ogni_ID"/>
+     <addaction name="actionEsporta_in_formato_CoNNL_U"/>
     </widget>
     <widget class="QMenu" name="menuImposta_lingua">
      <property name="title">
@@ -480,6 +481,11 @@
   <action name="actionDa_file_di_TreeTagger">
    <property name="text">
     <string>Da file di TreeTagger</string>
+   </property>
+  </action>
+  <action name="actionEsporta_in_formato_CoNNL_U">
+   <property name="text">
+    <string>Esporta in formato CoNNL-U</string>
    </property>
   </action>
  </widget>
