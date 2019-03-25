@@ -955,7 +955,7 @@ class MainWindow(QMainWindow):
         self.Progrdialog.show()
         self.corpus_to_connlu(fileName, self.Progrdialog, True)
 
-    def corpus_to_connlu(self, fileName, Progrdialog, addheader = False, onlyrows = []):
+    def corpus_to_connlu(self, fileName, Progrdialog, addcomments = False, onlyrows = []):
         self.sanitizeTable(self.w.corpus)
         filein = os.path.abspath(os.path.dirname(sys.argv[0]))+"/dizionario/legenda/isdt-ud.json"
         text_file = open(filein, "r")
@@ -966,21 +966,20 @@ class MainWindow(QMainWindow):
             if fileName[-4:] != ".csv" and fileName[-4:] != ".tsv":
                 fileName = fileName + ".tsv"
             csv = ""
-            if addheader:
-            #    for col in range(self.w.corpus.columnCount()):
-            #        if col > 0:
-            #            csv = csv + self.separator
-            #        csv = csv + "ID"
-                csv = "ID" + self.separator + "FORM" + self.separator + "LEMMA" + self.separator + "UPOS" + self.separator + "XPOS" + self.separator + "FEATS" + self.separator + "HEAD" + self.separator + "DEPREL"  + self.separator + "DEPS"  + self.separator + "MISC"
-                csv = csv + "\n"
+            if addcomments:
+                try:
+                    csv = "# newdoc id = " + self.w.corpus.item(0,self.corpuscols['IDcorpus']).text()
+                except:
+                    csv = "# newdoc id = Corpus esportato da Bran"
+                csv = csv + "\n# newpar"
             totallines = self.w.corpus.rowCount()
             text_file = open(fileName, "w", encoding='utf-8')
             text_file.write(csv)
             text_file.close()
             if len(onlyrows)==0:
                 onlyrows = range(self.w.corpus.rowCount())
+            oldphrase = ""
             for row in onlyrows:
-                #csv = csv + "\n"
                 csv = ""
                 Progrdialog.w.testo.setText("Sto salvando la riga numero "+str(row))
                 Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
@@ -990,7 +989,10 @@ class MainWindow(QMainWindow):
                 Ucolumns = []
                 Ucolumns.append(self.w.corpus.item(row,self.corpuscols['IDword']).text())
                 Ucolumns.append(self.w.corpus.item(row,self.corpuscols['Orig']).text())
-                Ucolumns.append(self.w.corpus.item(row,self.corpuscols['Lemma']).text())
+                if "[PUNCT]" in self.w.corpus.item(row,self.corpuscols['Lemma']).text():
+                    Ucolumns.append(self.w.corpus.item(row,self.corpuscols['Orig']).text())
+                else:
+                    Ucolumns.append(self.w.corpus.item(row,self.corpuscols['Lemma']).text())
                 mypos = self.w.corpus.item(row,self.corpuscols['pos']).text()
                 myposU = legendaISDTUD["pos"][mypos][0]
                 Ucolumns.append(myposU)
@@ -998,32 +1000,60 @@ class MainWindow(QMainWindow):
                 myfeat = self.w.corpus.item(row,self.corpuscols['feat']).text()
                 myfeatU = ""
                 for featpart in myfeat.split("/"):
+                    tmpfeat = ""
                     for featel in featpart.split("+"):
                         try:
                             translated = legendaISDTUD["feat"][featel]
                         except:
-                            if not " " in featel:
-                                print("ERROR: "+featel)
+                            #print("IGNORED: "+featel)
                             translated = ""
                         for trelem in translated.split("|"):
-                            if not trelem in myfeatU:
-                                myfeatU = myfeatU + "|" + trelem
-                    myfeatU = myfeatU + "/"
+                            if not trelem in tmpfeat:
+                                tmpfeat = tmpfeat + "|" + trelem
+                    myfeatU = myfeatU + tmpfeat + "/"
                 #add from pos
-                myfeatU = myfeatU + "|" + legendaISDTUD["pos"][mypos][1]
+                myfeatU = re.sub("^\|*", "", myfeatU, flags=re.IGNORECASE|re.DOTALL)
+                myfeatU = re.sub("[^a-z]*$", "", myfeatU, flags=re.IGNORECASE|re.DOTALL)
+                tmpmorf = legendaISDTUD["pos"][mypos][1].split("/")
+                myfeatUtotal = ""
+                for tmppart in range(len(myfeatU.split("/"))):
+                    myfeatUtotal = myfeatUtotal + myfeatU.split("/")[tmppart]
+                    try:
+                        for tmpelem in tmpmorf[tmppart].split("|"):
+                            if not tmpelem in myfeatU.split("/")[tmppart]:
+                                myfeatUtotal = myfeatUtotal + "|" + tmpelem
+                    except:
+                        continue
+                    myfeatUtotal = myfeatUtotal + "/"
+                myfeatU = myfeatUtotal
                 #clean double chars
                 while "||" in myfeatU or "/|" in myfeatU:
                     myfeatU = myfeatU.replace("||","|")
                     myfeatU = myfeatU.replace("/|","/")
-                myfeatU = re.sub("^[^a-z]*", "", myfeatU, flags=re.IGNORECASE|re.DOTALL)
+                myfeatU = re.sub("^[\|]*", "", myfeatU, flags=re.IGNORECASE|re.DOTALL)
                 myfeatU = re.sub("[^a-z]*$", "", myfeatU, flags=re.IGNORECASE|re.DOTALL)
+                if myfeatU == "":
+                    myfeatU = "_"
                 Ucolumns.append(myfeatU)
                 Ucolumns.append(self.w.corpus.item(row,self.corpuscols['governor']).text())
                 Ucolumns.append(self.w.corpus.item(row,self.corpuscols['dep']).text())
+                Ucolumns.append("_")
+                Ucolumns.append("_")
                 #Ucolumns.append(self.w.corpus.item(row,self.corpuscols['ner']).text())
-                Ucolumns.append("_")
-                Ucolumns.append("_")
 
+                #ricostruzione della frase
+                if self.w.corpus.item(row,self.corpuscols['IDphrase']).text() != oldphrase and addcomments:
+                    oldphrase = self.w.corpus.item(row,self.corpuscols['IDphrase']).text()
+                    csv = csv + "\n# sent_id = " + str(int(self.w.corpus.item(row,self.corpuscols['IDphrase']).text())+1) + "\n"
+                    endrow = row
+                    while self.w.corpus.item(row,self.corpuscols['IDphrase']).text() == self.w.corpus.item(endrow,self.corpuscols['IDphrase']).text() and endrow<(self.w.corpus.rowCount()-1):
+                        endrow = endrow +1
+                    myignore = []
+                    phraseText = self.rebuildText(self.w.corpus, self.Progrdialog, self.corpuscols['Orig'], myignore, row, endrow, False)
+                    phraseText = self.remUselessSpaces(phraseText)
+                    if phraseText[-1] == " ":
+                        phraseText = phraseText[:-1]
+                    csv = csv + "# text = " + phraseText + "\n"
                 for col in range(len(Ucolumns)):
                     if Ucolumns[col] == "":
                         Ucolumns[col] = "_"
