@@ -2635,7 +2635,7 @@ if __name__ == "__main__":
             print(corpuscols)
             print("\n")
             print("Elenco dei comandi:\n")
-            print("python3 main.py tintstart [javapath]\n")
+            print("python3 main.py tintstart [brancfg]\n")
             print("python3 main.py txt2corpus file.txt|cartella [indirizzoServerTint] [y]\n")
             print("python3 main.py splitbigfile file.txt [maxnumberoflines] [.]\n")
             print("python3 main.py samplebigfile file.txt [maxnumberoflines] [.]\n")
@@ -2644,6 +2644,8 @@ if __name__ == "__main__":
             print("python3 main.py contaverbi file.tsv|cartella\n")
             print("python3 main.py misurelessico file.tsv|cartella [colonna] [y]\n")
             print("python3 main.py mergetables cartella colonnaChiave [sum|mean|diff,sum|mean|diff] [1] [y]\n")
+            print("python3 main.py texteditor file.tsv|cartella\n")
+            print("python3 main.py confronto file.tsv|cartella\n")
             print("Gli argomenti tra parentesi [] sono facoltativi.")
             print("\nI comandi preceduti da * sono sperimentali o non ancora implementati.")
             sys.exit(0)
@@ -2715,7 +2717,7 @@ if __name__ == "__main__":
                         cf.w.corpora.addItem(sys.argv[i])
                     if os.path.isdir(sys.argv[i]):
                         for tfile in os.listdir(sys.argv[i]):
-                            if tfile[-4:] == ".txt":
+                            if tfile[-4:] == ".tsv" or tfile[-4:] == ".csv":
                                 cf.w.corpora.addItem(os.path.join(sys.argv[i],tfile))
             cf.exec()
             print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
