@@ -123,6 +123,7 @@ class MainWindow(QMainWindow):
         self.w.filtriMultipli.clicked.connect(self.filtriMultipli)
         self.w.actionFiltri_multipli.triggered.connect(self.filtriMultipli)
         self.w.delselected.clicked.connect(self.delselected)
+        self.w.updateCorpus.clicked.connect(self.updateCorpus)
         self.w.actionRimuovi_righe_selezionate.triggered.connect(self.delselected)
         self.w.actionScarica_corpus_da_sito_web.triggered.connect(self.web2corpus)
         self.w.actionEsporta_corpus_in_un_CSV_per_ogni_ID.triggered.connect(self.esportaCSVperID)
@@ -159,6 +160,7 @@ class MainWindow(QMainWindow):
         self.ignorepos = ["punteggiatura - \"\" () «» - - ", "punteggiatura - : ;", "punteggiatura - ,", "altro"] # "punteggiatura - .?!"
         self.separator = "\t"
         self.language = "it-IT"
+        self.corpus = []
         self.enumeratecolumns(self.w.ccolumn)
         self.filtrimultiplienabled = "Filtro multiplo"
         self.w.ccolumn.addItem(self.filtrimultiplienabled)
@@ -216,6 +218,8 @@ class MainWindow(QMainWindow):
                 self.mycfg["sessions"] = tmpsess
                 #print(tmpsess)
                 self.savePersonalCFG()
+        if self.sessionFile == "":
+            sys.exit(0)
 
 
     def loadPersonalCFG(self):
@@ -246,6 +250,7 @@ class MainWindow(QMainWindow):
     def chiudiProgetto(self):
         self.sessionFile = ""
         self.sessionDir = "."
+        self.corpus = []
         for row in range(self.w.corpus.rowCount()):
             self.w.corpus.removeRow(0)
             if row<100 or row%100==0:
@@ -346,8 +351,8 @@ class MainWindow(QMainWindow):
 
     def contaoccorrenze(self):
         thisname = []
-        for col in range(self.w.corpus.columnCount()):
-            thisname.append(self.w.corpus.horizontalHeaderItem(col).text())
+        for col in self.corpuscols:
+            thisname.append(self.corpuscols[col][1])
         column = QInputDialog.getItem(self, "Scegli la colonna", "Su quale colonna devo contare le occorrenze?",thisname,current=0,editable=False)
         col = thisname.index(column[0])
         TBdialog = tableeditor.Form(self)
@@ -356,9 +361,13 @@ class MainWindow(QMainWindow):
         TBdialog.addcolumn("Occorrenze", 1)
         self.Progrdialog = progress.Form()
         self.Progrdialog.show()
-        totallines = self.w.corpus.rowCount()
-        for row in range(self.w.corpus.rowCount()):
-            if self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked() and self.w.corpus.isRowHidden(row):
+        totallines = len(self.corpus)
+        startline = 0
+        if self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked():
+            totallines = self.w.aToken.value()
+            startline = self.w.daToken.value()
+        for row in range(startline, totallines):
+            if self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked() and self.w.corpus.isRowHidden(row-startline):
                 continue
             self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
             self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
@@ -366,12 +375,12 @@ class MainWindow(QMainWindow):
             if self.Progrdialog.w.annulla.isChecked():
                 return
             try:
-                thistext = self.w.corpus.item(row,col).text()
+                thistext = self.corpus[row][col]
                 try:
-                    if col == self.corpuscols["pos"]:
+                    if col == self.corpuscols["pos"][0]:
                         thistext = self.legendaPos[thistext][0]
                 except:
-                    thistext = self.w.corpus.item(row,col).text()
+                    thistext = self.corpus[row][col]
             except:
                 thistext = ""
             tbrow = TBdialog.finditemincolumn(thistext, col=0, matchexactly = True, escape = True)
@@ -387,8 +396,8 @@ class MainWindow(QMainWindow):
 
     def contaoccorrenzefiltrate(self):
         thisname = []
-        for col in range(self.w.corpus.columnCount()):
-            thisname.append(self.w.corpus.horizontalHeaderItem(col).text())
+        for col in self.corpuscols:
+            thisname.append(self.corpuscols[col][1])
         column = QInputDialog.getItem(self, "Scegli la colonna", "Su quale colonna devo contare le occorrenze?",thisname,current=0,editable=False)
         col = thisname.index(column[0])
         QMessageBox.information(self, "Filtro", "Ora devi impostare i filtri con cui dividere i risultati. I vari filtri devono essere separati da condizioni OR, per ciascuno di essi verrà creata una colonna a parte nella tabella dei risultati.")
@@ -408,24 +417,30 @@ class MainWindow(QMainWindow):
         self.Progrdialog.show()
         for myfilter in allfilters:
             TBdialog.addcolumn(myfilter, 1)
-        totallines = self.w.corpus.rowCount()
-        for row in range(self.w.corpus.rowCount()):
+        totallines = len(self.corpus)
+        startline = 0
+        if self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked():
+            totallines = self.w.aToken.value()
+            startline = self.w.daToken.value()
+        for row in range(startline, totallines):
+            if self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked() and self.w.corpus.isRowHidden(row-startline):
+                continue
             self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
             self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
             QApplication.processEvents()
             if self.Progrdialog.w.annulla.isChecked():
                 return
             try:
-                thistext = self.w.corpus.item(row,col).text()
+                thistext = self.corpus[row][col]
                 try:
-                    if col == self.corpuscols["pos"]:
+                    if col == self.corpuscols["pos"][0]:
                         thistext = self.legendaPos[thistext][0]
                 except:
-                    thistext = self.w.corpus.item(row,col).text()
+                    thistext = self.corpus[row][col]
             except:
                 thistext = ""
             for ifilter in range(len(allfilters)):
-                if self.applicaFiltro(self.w.corpus, row, col, allfilters[ifilter]):
+                if self.applicaFiltro(self.corpus, row, col, allfilters[ifilter]):
                     tbrow = TBdialog.finditemincolumn(thistext, col=0, matchexactly = True, escape = True)
                     if tbrow>=0:
                         try:
@@ -441,8 +456,8 @@ class MainWindow(QMainWindow):
         TBdialog.exec()
 
     def contaverbi(self):
-        poscol = self.corpuscols["pos"] #thisname.index(column[0])
-        morfcol = self.corpuscols["feat"]
+        poscol = self.corpuscols["pos"][0] #thisname.index(column[0])
+        morfcol = self.corpuscols["feat"][0]
         TBdialog = tableeditor.Form(self)
         TBdialog.sessionDir = self.sessionDir
         TBdialog.addcolumn("Modo+Tempo", 0)
@@ -460,7 +475,7 @@ class MainWindow(QMainWindow):
             if self.Progrdialog.w.annulla.isChecked():
                 return
             try:
-                thispos = self.legendaPos[self.w.corpus.item(row,self.corpuscols['pos']).text()][0]
+                thispos = self.legendaPos[self.w.corpus.item(row,self.corpuscols['pos'][0]).text()][0]
             except:
                 thispos = ""
             thistext = ""
@@ -470,7 +485,7 @@ class MainWindow(QMainWindow):
             if "ausiliare" in thispos:
                 for ind in range(1,4):
                     try:
-                        tmpos = self.legendaPos[self.w.corpus.item(row+ind,self.corpuscols['pos']).text()][0]
+                        tmpos = self.legendaPos[self.w.corpus.item(row+ind,self.corpuscols['pos'][0]).text()][0]
                     except:
                         tmpos = ""
                     if "verbo" in tmpos:
@@ -479,7 +494,7 @@ class MainWindow(QMainWindow):
             elif thispos.split(" ")[0] == "verbo":
                 for ind in range(1,4):
                     try:
-                        tmpos = self.legendaPos[self.w.corpus.item(row-ind,self.corpuscols['pos']).text()][0]
+                        tmpos = self.legendaPos[self.w.corpus.item(row-ind,self.corpuscols['pos'][0]).text()][0]
                     except:
                         tmpos = ""
                     if "ausiliare" in tmpos and "v+part+pass" in thistext:
@@ -539,7 +554,7 @@ class MainWindow(QMainWindow):
         Repetdialog.loadipos(self.ignorepos)
         Repetdialog.loadallpos(self.legendaPos)
         self.enumeratecolumns(Repetdialog.w.colonna)
-        Repetdialog.w.colonna.setCurrentIndex(self.corpuscols['Orig'])
+        Repetdialog.w.colonna.setCurrentIndex(self.corpuscols['Orig'][0])
         Repetdialog.exec()
         if Repetdialog.result():
             tokenda = Repetdialog.w.tokenda.value()
@@ -614,14 +629,13 @@ class MainWindow(QMainWindow):
             TBdialog.exec()
 
     def ricostruisciTesto(self):
-        thisname = []
-        for col in range(self.w.corpus.columnCount()):
-            thisname.append(self.w.corpus.horizontalHeaderItem(col).text())
+        for col in self.corpuscols:
+            thisname.append(self.corpuscols[col][1])
         column = QInputDialog.getItem(self, "Scegli la colonna", "Su quale colonna devo ricostruire il testo?",thisname,current=1,editable=False)
         col = thisname.index(column[0])
         self.Progrdialog = progress.Form()
         self.Progrdialog.show()
-        mycorpus = self.rebuildText(self.w.corpus, self.Progrdialog, col)
+        mycorpus = self.rebuildText(self.corpus, self.Progrdialog, col)
         mycorpus = self.remUselessSpaces(mycorpus)
         self.Progrdialog.accept()
         te = texteditor.TextEditor()
@@ -631,22 +645,24 @@ class MainWindow(QMainWindow):
     def rebuildText(self, table, Progrdialog, col = "", ipunct = [], startrow = 0, endrow = 0, usefilter = True):
         mycorpus = ""
         if col == "":
-            col = self.corpuscols['Orig']
-        totallines = table.rowCount()
+            col = self.corpuscols['Orig'][0]
+        totallines = len(table)
         if endrow == 0:
             endrow = totallines
         for row in range(startrow, endrow):
-            if self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked() and table.isRowHidden(row) and usefilter:
+            ftext = self.w.cfilter.text()
+            fcol = self.w.ccolumn.currentIndex()
+            if self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked() and self.applicaFiltro(table, row, fcol, ftext) and usefilter:
                 continue
             Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
             Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
             QApplication.processEvents()
             if Progrdialog.w.annulla.isChecked():
                 return
-            if row >= 0 and row < table.rowCount():
-                thispos = self.legendaPos[table.item(row,self.corpuscols['pos']).text()][0]
+            if row >= 0 and row < len(table):
+                thispos = self.legendaPos[table[row][self.corpuscols['pos'][0]]][0]
                 if not thispos in ipunct:
-                    mycorpus = mycorpus + table.item(row,col).text() + " "
+                    mycorpus = mycorpus + table[row][col] + " "
         return mycorpus
 
     def remUselessSpaces(self, tempstring):
@@ -657,7 +673,7 @@ class MainWindow(QMainWindow):
         return tmpstring
 
     def findngrams(self, tokens, minoccur, TBdialog, Progrdialog, ignorecase, remspaces, ipunct, col, vuoteI, vuoteF, charNotWord= False):
-        mycorpus = self.rebuildText(self.w.corpus, Progrdialog, col, ipunct)
+        mycorpus = self.rebuildText(self.corpus, Progrdialog, col, ipunct)
         if ignorecase:
             mycorpus = mycorpus.lower()
         searchthis = " "
@@ -715,7 +731,7 @@ class MainWindow(QMainWindow):
                                 #print("Parola non riconosciuta: "+tmpword)
                                 ppcount = ppcount + 1
                             else:
-                                posword = self.w.corpus.item(tmprow,self.corpuscols['pos']).text()
+                                posword = self.w.corpus.item(tmprow,self.corpuscols['pos'][0]).text()
                                 for key in self.legendaPos:
                                     if posword == self.legendaPos[key][0] or posword == key:
                                         if "piene" == self.legendaPos[key][2]:
@@ -735,7 +751,7 @@ class MainWindow(QMainWindow):
 
 
     def translatePos(self):
-        col = self.corpuscols['pos']
+        col = self.corpuscols['pos'][0]
         self.Progrdialog = progress.Form()
         self.Progrdialog.show()
         totallines = self.w.corpus.rowCount()
@@ -758,7 +774,7 @@ class MainWindow(QMainWindow):
         self.Progrdialog.accept()
 
     def densitalessico(self):
-        col = self.corpuscols['pos']
+        col = self.corpuscols['pos'][0]
         TBdialog = tableeditor.Form(self)
         TBdialog.sessionDir = self.sessionDir
         TBdialog.addcolumn("Part of Speech", 0)
@@ -781,7 +797,7 @@ class MainWindow(QMainWindow):
             try:
                 thistextO = self.w.corpus.item(row,col).text()
                 thistext = self.legendaPos[thistextO][0]
-                thisposc = self.legendaPos[self.w.corpus.item(row,self.corpuscols['pos']).text()][1]
+                thisposc = self.legendaPos[self.w.corpus.item(row,self.corpuscols['pos'][0]).text()][1]
                 try:
                     mytypes[thisposc] = mytypes[thisposc] +1
                 except:
@@ -968,7 +984,7 @@ class MainWindow(QMainWindow):
             csv = ""
             if addcomments:
                 try:
-                    csv = "# newdoc id = " + self.w.corpus.item(0,self.corpuscols['IDcorpus']).text()
+                    csv = "# newdoc id = " + self.w.corpus.item(0,self.corpuscols['IDcorpus'][0]).text()
                 except:
                     csv = "# newdoc id = Corpus esportato da Bran"
                 csv = csv + "\n# newpar"
@@ -987,17 +1003,17 @@ class MainWindow(QMainWindow):
                 if Progrdialog.w.annulla.isChecked():
                     return
                 Ucolumns = []
-                Ucolumns.append(self.w.corpus.item(row,self.corpuscols['IDword']).text())
-                Ucolumns.append(self.w.corpus.item(row,self.corpuscols['Orig']).text())
-                if "[PUNCT]" in self.w.corpus.item(row,self.corpuscols['Lemma']).text():
-                    Ucolumns.append(self.w.corpus.item(row,self.corpuscols['Orig']).text())
+                Ucolumns.append(self.w.corpus.item(row,self.corpuscols['IDword'][0]).text())
+                Ucolumns.append(self.w.corpus.item(row,self.corpuscols['Orig'][0]).text())
+                if "[PUNCT]" in self.w.corpus.item(row,self.corpuscols['Lemma'][0]).text():
+                    Ucolumns.append(self.w.corpus.item(row,self.corpuscols['Orig'][0]).text())
                 else:
-                    Ucolumns.append(self.w.corpus.item(row,self.corpuscols['Lemma']).text())
-                mypos = self.w.corpus.item(row,self.corpuscols['pos']).text()
+                    Ucolumns.append(self.w.corpus.item(row,self.corpuscols['Lemma'][0]).text())
+                mypos = self.w.corpus.item(row,self.corpuscols['pos'][0]).text()
                 myposU = legendaISDTUD["pos"][mypos][0]
                 Ucolumns.append(myposU)
                 Ucolumns.append(mypos)
-                myfeat = self.w.corpus.item(row,self.corpuscols['feat']).text()
+                myfeat = self.w.corpus.item(row,self.corpuscols['feat'][0]).text()
                 myfeatU = ""
                 for featpart in myfeat.split("/"):
                     tmpfeat = ""
@@ -1035,21 +1051,21 @@ class MainWindow(QMainWindow):
                 if myfeatU == "":
                     myfeatU = "_"
                 Ucolumns.append(myfeatU)
-                Ucolumns.append(self.w.corpus.item(row,self.corpuscols['governor']).text())
-                Ucolumns.append(self.w.corpus.item(row,self.corpuscols['dep']).text())
+                Ucolumns.append(self.w.corpus.item(row,self.corpuscols['governor'][0]).text())
+                Ucolumns.append(self.w.corpus.item(row,self.corpuscols['dep'][0]).text())
                 Ucolumns.append("_")
                 Ucolumns.append("_")
-                #Ucolumns.append(self.w.corpus.item(row,self.corpuscols['ner']).text())
+                #Ucolumns.append(self.w.corpus.item(row,self.corpuscols['ner'][0]).text())
 
                 #ricostruzione della frase
-                if self.w.corpus.item(row,self.corpuscols['IDphrase']).text() != oldphrase and addcomments:
-                    oldphrase = self.w.corpus.item(row,self.corpuscols['IDphrase']).text()
-                    csv = csv + "\n# sent_id = " + str(int(self.w.corpus.item(row,self.corpuscols['IDphrase']).text())+1) + "\n"
+                if self.w.corpus.item(row,self.corpuscols['IDphrase'][0]).text() != oldphrase and addcomments:
+                    oldphrase = self.w.corpus.item(row,self.corpuscols['IDphrase'][0]).text()
+                    csv = csv + "\n# sent_id = " + str(int(self.w.corpus.item(row,self.corpuscols['IDphrase'][0]).text())+1) + "\n"
                     endrow = row
-                    while self.w.corpus.item(row,self.corpuscols['IDphrase']).text() == self.w.corpus.item(endrow,self.corpuscols['IDphrase']).text() and endrow<(self.w.corpus.rowCount()-1):
+                    while self.w.corpus.item(row,self.corpuscols['IDphrase'][0]).text() == self.w.corpus.item(endrow,self.corpuscols['IDphrase'][0]).text() and endrow<(self.w.corpus.rowCount()-1):
                         endrow = endrow +1
                     myignore = []
-                    phraseText = self.rebuildText(self.w.corpus, self.Progrdialog, self.corpuscols['Orig'], myignore, row, endrow, False)
+                    phraseText = self.rebuildText(self.corpus, self.Progrdialog, self.corpuscols['Orig'][0], myignore, row, endrow, False)
                     phraseText = self.remUselessSpaces(phraseText)
                     if phraseText[-1] == " ":
                         phraseText = phraseText[:-1]
@@ -1086,7 +1102,7 @@ class MainWindow(QMainWindow):
         self.Progrdialog.show()
         totallines = self.w.corpus.rowCount()
         IDs = []
-        col = self.corpuscols['IDcorpus']
+        col = self.corpuscols['IDcorpus'][0]
         for row in range(self.w.corpus.rowCount()):
             self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
             self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
@@ -1166,18 +1182,19 @@ class MainWindow(QMainWindow):
                 self.dofiltra2()
                 return
         tcount = 0
-        totallines = self.w.corpus.rowCount()
-        for row in range(self.w.corpus.rowCount()):
-            col = self.w.ccolumn.currentIndex()
+        totallines = self.w.aToken.value()
+        startline = self.w.daToken.value()
+        for row in range(startline, totallines):
+            fcol = self.w.ccolumn.currentIndex()
             #ctext = self.w.corpus.item(row,col).text()
             ftext = self.w.cfilter.text()
-            if self.applicaFiltro(self.w.corpus, row, col, ftext): #if bool(re.match(ftext, ctext)):
-                self.w.corpus.setRowHidden(row, False)
+            if self.applicaFiltro(self.corpus, row, fcol, ftext): #if bool(re.match(ftext, ctext)):
+                self.w.corpus.setRowHidden(row-startline, False)
                 tcount = tcount +1
             else:
-                self.w.corpus.setRowHidden(row, True)
+                self.w.corpus.setRowHidden(row-startline, True)
         self.w.statusbar.showMessage("Risultati totali: " +str(tcount))
-        self.Progrdialog.accept()
+        #self.Progrdialog.accept()
 
     def dofiltra2(self):
         self.Progrdialog = progress.Form()
@@ -1219,7 +1236,7 @@ class MainWindow(QMainWindow):
     def applicaFiltro(self, table, row, col, filtro):
         res = False
         if self.w.ccolumn.currentText() != self.filtrimultiplienabled:
-            ctext = table.item(row,col).text()
+            ctext = table[row][col]
             ftext = filtro
             if bool(re.match(ftext, ctext)):
                 res = True
@@ -1235,7 +1252,7 @@ class MainWindow(QMainWindow):
                     except:
                         continue
                     colname = cellname.split("[")[0]
-                    col = self.corpuscols[colname]
+                    col = self.corpuscols[colname][0]
                     if "[" in cellname.replace("]",""):
                         rowlist = cellname.replace("]","").split("[")[1].split(",")
                     else:
@@ -1243,7 +1260,7 @@ class MainWindow(QMainWindow):
                     for rowp in rowlist:
                         tmprow = row + int(rowp)
                         try:
-                            ctext = table.item(tmprow,col).text()
+                            ctext = table[tmprow][col]
                         except:
                             ctext = ""
                         if bool(re.match(ftext, ctext)):
@@ -1257,7 +1274,7 @@ class MainWindow(QMainWindow):
 
     def filtriMultipli(self):
         self.w.ccolumn.setCurrentText(self.filtrimultiplienabled)
-        Fildialog = creafiltro.Form(self.w.corpus, self.corpuscols, self)
+        Fildialog = creafiltro.Form(self.corpus, self.corpuscols, self)
         Fildialog.sessionDir = self.sessionDir
         Fildialog.w.filter.setText(self.w.cfilter.text())
         Fildialog.updateTable()
@@ -1269,8 +1286,8 @@ class MainWindow(QMainWindow):
         self.w.ccolumn.setCurrentText(self.filtrimultiplienabled)
         Fildialog = creafiltro.Form(self.w.corpus, self.corpuscols, self)
         Fildialog.sessionDir = self.sessionDir
-        col = self.corpuscols["dep"]
-        Fildialog.filterColElements(self.corpuscols["IDphrase"])
+        col = self.corpuscols["dep"][0]
+        Fildialog.filterColElements(self.corpuscols["IDphrase"][0])
         Fildialog.updateFilter()
         Fildialog.exec()
         if Fildialog.w.filter.text() != "":
@@ -1293,7 +1310,7 @@ class MainWindow(QMainWindow):
             try:
                 thistext = self.w.corpus.item(row,col).text()
                 try:
-                    if col == self.corpuscols["pos"]:
+                    if col == self.corpuscols["pos"][0]:
                         thistext = self.legendaPos[thistext][0]
                 except:
                     thistext = self.w.corpus.item(row,col).text()
@@ -1340,7 +1357,7 @@ class MainWindow(QMainWindow):
                 myflags=re.DOTALL
         else:
             return
-        col = self.corpuscols['IDcorpus']
+        col = self.corpuscols['IDcorpus'][0]
         self.Progrdialog = progress.Form()
         self.Progrdialog.show()
         totallines = self.w.corpus.rowCount()
@@ -1367,8 +1384,8 @@ class MainWindow(QMainWindow):
     def concordanze(self):
         parola = QInputDialog.getText(self.w, "Scegli la parola", "Indica la parola che vuoi cercare:", QLineEdit.Normal, "")[0]
         thisname = []
-        for col in range(self.w.corpus.columnCount()):
-            thisname.append(self.w.corpus.horizontalHeaderItem(col).text())
+        for col in self.corpuscols:
+            thisname.append(self.corpuscols[col][1])
         column = QInputDialog.getItem(self, "Scegli la colonna", "In quale colonna devo cercare il testo?",thisname,current=1,editable=False)
         col = thisname.index(column[0])
         myrange = int(QInputDialog.getInt(self.w, "Indica il range", "Quante parole, prima e dopo, vuoi leggere?")[0])
@@ -1398,7 +1415,7 @@ class MainWindow(QMainWindow):
         for row in range(self.w.corpus.rowCount()):
             if self.w.corpus.isRowHidden(row):
                 continue
-            thistext = self.rebuildText(self.w.corpus, self.Progrdialog, col, myignore, row-myrange, row+myrange+1, False)
+            thistext = self.rebuildText(self.corpus, self.Progrdialog, col, myignore, row-myrange, row+myrange+1, False)
             thistext = self.remUselessSpaces(thistext)
             tbrow = TBdialog.finditemincolumn(thistext, col=0, matchexactly = True, escape = True)
             if tbrow>=0:
@@ -1414,15 +1431,15 @@ class MainWindow(QMainWindow):
     def coOccorrenze(self):
         parola = QInputDialog.getText(self.w, "Scegli la parola", "Indica la parola che vuoi cercare:", QLineEdit.Normal, "")[0]
         thisname = []
-        for col in range(self.w.corpus.columnCount()):
-            thisname.append(self.w.corpus.horizontalHeaderItem(col).text())
+        for col in self.corpuscols:
+            thisname.append(self.corpuscols[col][1])
         column = QInputDialog.getItem(self, "Scegli la colonna", "In quale colonna devo cercare il testo?",thisname,current=1,editable=False)
         col = thisname.index(column[0])
         myrange = int(QInputDialog.getInt(self.w, "Indica il range", "Quante parole, prima e dopo, vuoi leggere?")[0])
         rangestr = str(myrange)
         myfilter = str(list(self.corpuscols)[col]) +"="+parola
         self.w.ccolumn.setCurrentText(self.filtrimultiplienabled)
-        Fildialog = creafiltro.Form(self.w.corpus, self.corpuscols, self)
+        Fildialog = creafiltro.Form(self.corpus, self.corpuscols, self)
         Fildialog.sessionDir = self.sessionDir
         Fildialog.w.filter.setText(myfilter) #"Lemma=essere&&pos[1,-1]=SP||Lemma[-1]=essere&&pos=S"
         Fildialog.updateTable()
@@ -1442,10 +1459,15 @@ class MainWindow(QMainWindow):
         self.Progrdialog = progress.Form()
         self.Progrdialog.show()
         concordanze = []
-        for row in range(self.w.corpus.rowCount()):
-            if self.w.corpus.isRowHidden(row):
+        totallines = len(self.corpus)
+        for row in range(totallines):
+            #if self.w.corpus.isRowHidden(row):
+            #    continue
+            ftext = myfilter #self.w.cfilter.text()
+            fcol = self.w.ccolumn.currentIndex()
+            if not self.applicaFiltro(self.corpus, row, fcol, ftext):
                 continue
-            thistext = self.rebuildText(self.w.corpus, self.Progrdialog, col, myignore, row-myrange, row+myrange+1, False)
+            thistext = self.rebuildText(self.corpus, self.Progrdialog, col, myignore, row-myrange, row+myrange+1, False)
             #thistext = self.remUselessSpaces(thistext)
             regex = re.escape('.?!')
             if bool(re.match(".*["+regex+"].*", thistext)):
@@ -1454,9 +1476,10 @@ class MainWindow(QMainWindow):
                     thistext = thistext[punctindex[0]+1:]
                 else:
                     thistext = thistext[0:punctindex[0]]
-            concordanze.append(thistext)
+            if thistext != "":
+                concordanze.append(thistext)
         totallines = len(concordanze)
-        for row in range(len(concordanze)):
+        for row in range(totallines):
             self.Progrdialog.w.testo.setText("Sto controllando l'occorrenza numero "+str(row))
             self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
             QApplication.processEvents()
@@ -1537,33 +1560,7 @@ class MainWindow(QMainWindow):
         #https://www.datacamp.com/community/tutorials/stemming-lemmatization-python
 
     def loadjson(self):
-        QMessageBox.information(self, "Attenzione", "Caricare un file JSON prodotto manualmente può essere pericoloso: se i singoli paragrafi sono troppo grandi, il programma può andare in crash. Utilizza questa funzione solo se sai esattamente cosa stai facendo.")
-        fileNames = QFileDialog.getOpenFileNames(self, "Apri file JSON", self.sessionDir, "Json files (*.txt *.json)")[0]
-        fileID = 0
-        for fileName in fileNames:
-            if not fileName == "":
-                if os.path.isfile(fileName):
-                    if self.w.corpus.rowCount() >0:
-                        fileID = int(self.w.corpus.item(self.w.corpus.rowCount()-1,0).text().split("_")[0])
-                    #QApplication.processEvents()
-                    fileID = fileID+1
-                    text_file = open(fileName, "r", encoding='utf-8')
-                    lines = text_file.read()
-                    text_file.close()
-                    IDcorpus = str(fileID)+"_"+os.path.basename(fileName)
-                    try:
-                        myarray = json.loads(lines)
-                    except:
-                        myarray = {'sentences': []}
-                    for sentence in myarray["sentences"]:
-                        for token in sentence["tokens"]:
-                            rowN = self.addlinetocorpus(IDcorpus, self.corpuscols["IDcorpus"])
-                            self.setcelltocorpus(str(token["index"]), rowN, self.corpuscols["IDword"])
-                            self.setcelltocorpus(str(token["originalText"]), rowN, self.corpuscols["Orig"])
-                            self.setcelltocorpus(str(token["lemma"]), rowN, self.corpuscols["Lemma"])
-                            self.setcelltocorpus(str(token["pos"]), rowN, self.corpuscols["pos"])
-                            self.setcelltocorpus(str(token["ner"]), rowN, self.corpuscols["ner"])
-                            self.setcelltocorpus(str(token["full_morpho"]), rowN, self.corpuscols["feat"])
+        QMessageBox.information(self, "Attenzione", "Caricare un file JSON non è più supportato.")
 
     def opentextfile(self, fileName):
         lines = ""
@@ -1616,9 +1613,9 @@ class MainWindow(QMainWindow):
             lines = self.opentextfile(fileName)
             trowN = 0
             for line in lines.split("\n"):
-                self.Progrdialog.w.testo.setText("Sto importando la riga numero "+str(trowN))
-                self.Progrdialog.w.progressBar.setValue(int((trowN/totallines)*100))
                 if trowN<100 or trowN%100==0:
+                    self.Progrdialog.w.testo.setText("Sto importando la riga numero "+str(trowN))
+                    self.Progrdialog.w.progressBar.setValue(int((trowN/totallines)*100))
                     QApplication.processEvents()
                 trowN = trowN + 1
                 colN = 0
@@ -1630,64 +1627,89 @@ class MainWindow(QMainWindow):
                     cols = line.replace("\r", "").split("\t")
                     if cols[0] == "":
                         continue
-                    rowN = self.addlinetocorpus(str(cols[0]), self.corpuscols["Orig"])
-                    self.setcelltocorpus(str(cols[2]), rowN, self.corpuscols["Lemma"])
+                    tmpline = ['' for i in range(len(self.corpuscols))]  #Using list comprehension
+                    tmpline[self.corpuscols["Orig"][0]] = str(cols[0])
+                    tmpline[self.corpuscols["Lemma"][0]] = str(cols[2])
                     try:
-                        self.setcelltocorpus(legendaTT[str(cols[1])], rowN, self.corpuscols["pos"])
+                        tmpline[self.corpuscols["pos"][0]] = legendaTT[str(cols[1])]
                     except:
-                        self.setcelltocorpus(str(cols[1]), rowN, self.corpuscols["pos"])
+                        tmpline[self.corpuscols["pos"][0]] = str(cols[1])
+                    self.corpus.append(tmpline)
                 except:
                     continue
+        self.updateCorpus(self.Progrdialog)
         self.Progrdialog.accept()
 
     def loadCSV(self):
         if self.ImportingFile == False:
             fileNames = QFileDialog.getOpenFileNames(self, "Apri file CSV", self.sessionDir, "File CSV (*.tsv *.txt *.csv)")[0]
-            self.Progrdialog = progress.Form() #self.Progrdialog = progress.Form()
-            self.Progrdialog.show() #self.Progrdialog.show()
             self.ImportingFile = True
-            self.CSVloader(fileNames, self.Progrdialog) #self.CSVloader(fileNames, self.Progrdialog)
+            self.CSVloader(fileNames) #self.CSVloader(fileNames, self.Progrdialog)
 
-    def CSVloader(self, fileNames, Progrdialog):
+    def CSVloader(self, fileNames):
         fileID = 0
         for fileName in fileNames:
             if not fileName == "":
                 if os.path.isfile(fileName):
                     if not os.path.getsize(fileName) > 0:
                         #break
-                        Progrdialog.reject()
                         self.ImportingFile = False
                         return
                     try:
                         totallines = self.linescount(fileName)
                     except:
-                        Progrdialog.reject()
                         self.ImportingFile = False
                         return
                     text_file = open(fileName, "r", encoding='utf-8')
                     lines = text_file.read()
                     text_file.close()
-                    rowN = 0
-                    for line in lines.split('\n'):
-                        Progrdialog.w.testo.setText("Sto importando la riga numero "+str(rowN))
-                        Progrdialog.w.progressBar.setValue(int((rowN/totallines)*100))
-                        if rowN<100 or rowN%100==0:
-                            QApplication.processEvents()
-                        colN = 0
-                        for col in line.split(self.separator):
-                            if Progrdialog.w.annulla.isChecked():
-                                rowN = 0
-                                Progrdialog.reject()
-                                self.ImportingFile = False
-                                return
-                            if colN == 0:
-                                if col == "":
-                                    break
-                                rowN = self.addlinetocorpus(str(col), 0) #self.corpuscols["IDcorpus"]
-                            self.setcelltocorpus(str(col), rowN, colN)
-                            colN = colN + 1
-        Progrdialog.accept()
+                    linesA = lines.split('\n')
+                    maximum = self.w.daToken.value()+len(linesA)-1
+                    self.w.daToken.setMaximum(maximum)
+                    self.w.aToken.setMaximum(maximum)
+                    for line in linesA:
+                        newtoken = line.split(self.separator)
+                        if len(newtoken) == len(self.corpuscols):
+                            self.corpus.append(newtoken)
+        self.updateCorpus()
         self.ImportingFile = False
+
+    def updateCorpus(self):
+        if self.w.allToken.isChecked():
+            self.w.daToken.setValue(0)
+            self.w.aToken.setValue(self.w.aToken.maximum())
+        Progrdialog = progress.Form() #self.Progrdialog = progress.Form()
+        Progrdialog.show() #self.Progrdialog.show()
+        # Clear table before adding new lines
+        for row in range(self.w.corpus.rowCount()):
+            self.w.corpus.removeRow(0)
+            if row<100 or row%100==0:
+                QApplication.processEvents()
+        maximum = self.w.aToken.value()
+        if maximum > len(self.corpus):
+            maximum = len(self.corpus)
+        totallines = maximum-self.w.daToken.value()
+        if totallines < 0:
+            print("daToken need to be smaller than aToken")
+            return
+        for rowN in range(self.w.daToken.value(),maximum):
+            Progrdialog.w.testo.setText("Sto importando la riga numero "+str(rowN))
+            Progrdialog.w.progressBar.setValue(int((rowN/totallines)*100))
+            if rowN<100 or rowN%100==0:
+                QApplication.processEvents()
+            colN = 0
+            line = self.corpus[rowN]
+            for colN in range(len(line)):
+                if Progrdialog.w.annulla.isChecked():
+                    rowN = 0
+                    Progrdialog.reject()
+                    self.ImportingFile = False
+                    return
+                if colN == 0:
+                    if line[colN] == "":
+                        continue
+                    TBrow = self.addlinetocorpus(str(line[colN]), 0) #self.corpuscols["IDcorpus"][0]
+                self.setcelltocorpus(str(line[colN]), TBrow, colN)
 
     def linescount(self, filename):
         f = open(filename, "r+", encoding='utf-8')
@@ -1705,13 +1727,11 @@ class MainWindow(QMainWindow):
                 if not os.path.getsize(self.sessionFile) > 1:
                     return
             try:
-                self.Progrdialog = progress.Form()
-                self.Progrdialog.show()
                 self.ImportingFile = True
                 fileNames = ['']
                 fileNames[0] = self.sessionFile
                 self.w.corpus.setRowCount(0)
-                self.CSVloader(fileNames, self.Progrdialog)
+                self.CSVloader(fileNames)
             except:
                 try:
                     self.myprogress.reject()
@@ -1776,7 +1796,7 @@ class MainWindow(QMainWindow):
     def setcelltocorpus(self, text, row, column):
         titem = QTableWidgetItem()
         titem.setText(text)
-        if column == self.corpuscols["pos"]:
+        if column == self.corpuscols["pos"][0]:
             try:
                 newtext = self.legendaPos[text][0]
                 titem.setToolTip(newtext)
@@ -1819,9 +1839,9 @@ class MainWindow(QMainWindow):
 
     def misure_lessicometriche(self):
         thisname = []
-        for col in range(self.w.corpus.columnCount()):
-            thisname.append(self.w.corpus.horizontalHeaderItem(col).text())
-        column = QInputDialog.getItem(self, "Scegli la colonna", "Se vuoi estrarre il dizionario devi cercare nella colonna dei lemmi o delle forme grafiche. Ma puoi anche scegliere di ottenere le statistiche su altre colonne, come la Forma grafica.",thisname,current=self.corpuscols['Orig'],editable=False)
+        for col in self.corpuscols:
+            thisname.append(self.corpuscols[col][1])
+        column = QInputDialog.getItem(self, "Scegli la colonna", "Se vuoi estrarre il dizionario devi cercare nella colonna dei lemmi o delle forme grafiche. Ma puoi anche scegliere di ottenere le statistiche su altre colonne, come la Forma grafica.",thisname,current=self.corpuscols['Orig'][0],editable=False)
         col = thisname.index(column[0])
         ret = QMessageBox.question(self,'Domanda', "Vuoi ignorare la punteggiatura?", QMessageBox.Yes | QMessageBox.No)
         TBdialog = tableeditor.Form(self)
@@ -2052,8 +2072,8 @@ def calcola_occorrenze():
 
 
 def contaverbi(corpuscols, legendaPos):
-    poscol = corpuscols["pos"] #thisname.index(column[0])
-    morfcol = corpuscols["feat"]
+    poscol = corpuscols["pos"][0] #thisname.index(column[0])
+    morfcol = corpuscols["feat"][0]
     separator = '\t'
     fileNames = []
     if os.path.isfile(sys.argv[2]):
@@ -2606,16 +2626,16 @@ def samplebigfile():
 
 if __name__ == "__main__":
     corpuscols = {
-                'IDcorpus': 0,
-                'Orig': 1,
-                'Lemma': 2,
-                'pos': 3,
-                'feat': 5,
-                'ner': 4,
-                'IDphrase': 7,
-                'IDword': 6,
-                'dep': 8,
-                'governor': 9
+                'IDcorpus': [0, "Tag corpus"],
+                'Orig': [1, "Forma grafica"],
+                'Lemma': [2, "Lemma"],
+                'pos': [3, "Tag PoS"],
+                'feat': [5, "Morfologia"],
+                'ner': [4, "Tag NER"],
+                'IDphrase': [7, "ID frase"],
+                'IDword': [6, "ID parola"],
+                'dep': [8, "Dep"],
+                'governor': [9, "Governor"]
     }
     ignoretext = "((?<=[^0-9])"+ re.escape(".")+ "|^" + re.escape(".")+ "|(?<= )"+ re.escape("-")+ "|^"+re.escape("-")+ "|"+re.escape(":")+"|(?<=[^0-9])"+re.escape(",")+"|^"+re.escape(",")+"|"+re.escape(";")+"|"+re.escape("?")+"|"+re.escape("!")+"|"+re.escape("«")+"|"+re.escape("»")+"|"+re.escape("\"")+"|"+re.escape("(")+"|"+re.escape(")")+"|^"+re.escape("'")+ "|" + re.escape("[PUNCT]") + "|" + re.escape("<unknown>") + ")"
     dimList = [100,1000,5000,10000,50000,100000,150000,200000,250000,300000,350000,400000,450000,500000,1000000]

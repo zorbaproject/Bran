@@ -72,6 +72,51 @@
      </widget>
     </item>
     <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <item>
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Visualizza i token da </string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="daToken"/>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string> a </string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="aToken">
+        <property name="maximum">
+         <number>1000</number>
+        </property>
+        <property name="value">
+         <number>100</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="allToken">
+        <property name="text">
+         <string>Tutti i token</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="updateCorpus">
+        <property name="text">
+         <string>Aggiorna</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
      <widget class="QTableWidget" name="corpus">
       <attribute name="horizontalHeaderDefaultSectionSize">
        <number>150</number>
@@ -475,17 +520,17 @@
   </action>
   <action name="actionAggiungi_tag_in_corpus_in_base_a_RegEx">
    <property name="text">
-    <string>Aggiungi tag in corpus in base a filtro</string>
+    <string>&amp;Aggiungi tag in corpus in base a filtro</string>
    </property>
   </action>
   <action name="actionDa_file_di_TreeTagger">
    <property name="text">
-    <string>Da file di TreeTagger</string>
+    <string>Da &amp;file di TreeTagger</string>
    </property>
   </action>
   <action name="actionEsporta_in_formato_CoNNL_U">
    <property name="text">
-    <string>Esporta in formato CoNNL-U</string>
+    <string>Esporta &amp;in formato CoNNL-U</string>
    </property>
   </action>
  </widget>

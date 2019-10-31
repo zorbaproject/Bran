@@ -287,13 +287,13 @@ class TintCorpus(QThread):
             IDphrase = -1
             if self.outputcsv == "":
                 for crow in range(self.w.corpus.rowCount()):
-                    if int(self.w.corpus.item(crow, self.corpuscols["IDphrase"]).text()) > IDphrase:
-                        IDphrase = int(self.w.corpus.item(crow, self.corpuscols["IDphrase"]).text())
+                    if int(self.w.corpus.item(crow, self.corpuscols["IDphrase"][0]).text()) > IDphrase:
+                        IDphrase = int(self.w.corpus.item(crow, self.corpuscols["IDphrase"][0]).text())
             else:
                 with open(self.rowfilename, "r", encoding='utf-8') as ins:
                     for line in ins:
-                        if int(line.split("\t")[self.corpuscols["IDphrase"]]) > IDphrase:
-                            IDphrase = int(line.split("\t")[self.corpuscols["IDphrase"]])
+                        if int(line.split("\t")[self.corpuscols["IDphrase"][0]]) > IDphrase:
+                            IDphrase = int(line.split("\t")[self.corpuscols["IDphrase"][0]])
         except:
             IDphrase = -1
         row = 0
@@ -379,19 +379,8 @@ class TintCorpus(QThread):
                             #print(posL)
                             #print(str(token["full_morpho"]))
                         if self.outputcsv == "":
-                            rowN = self.addlinetocorpus(IDcorpus, self.corpuscols["IDcorpus"])
-                            self.setcelltocorpus(str(token["index"]), rowN, self.corpuscols["IDword"])
-                            self.setcelltocorpus(str(token["originalText"]), rowN, self.corpuscols["Orig"])
-                            self.setcelltocorpus(str(token["lemma"]), rowN, self.corpuscols["Lemma"])
-                            self.setcelltocorpus(str(token["pos"]), rowN, self.corpuscols["pos"])
-                            self.setcelltocorpus(str(token["ner"]), rowN, self.corpuscols["ner"])
-                            self.setcelltocorpus(morf, rowN, self.corpuscols["feat"])
-                            self.setcelltocorpus(str(IDphrase), rowN, self.corpuscols["IDphrase"])
-                            for mydep in sentence["basic-dependencies"]:
-                                if mydep["dependent"] == token["index"]:
-                                    self.setcelltocorpus(str(mydep["dep"]), rowN, self.corpuscols["dep"])
-                                    self.setcelltocorpus(str(mydep["governor"]), rowN, self.corpuscols["governor"])
-                                    break
+                            print("You don't have a session. Tint is not going to run.")
+                            return
                         else:
                             fullline = str(IDcorpus) + "\t"
                             fullline = fullline + str(token["originalText"]) + "\t"

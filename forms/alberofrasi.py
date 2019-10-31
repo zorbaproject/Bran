@@ -76,8 +76,8 @@ class Form(QDialog):
     def setphraseRange(self):
         IDphrase = -1
         for crow in range(self.mycorpus.rowCount()):
-            if int(self.mycorpus.item(crow, self.corpuscols["IDphrase"]).text()) > IDphrase:
-                IDphrase = int(self.mycorpus.item(crow, self.corpuscols["IDphrase"]).text())
+            if int(self.mycorpus.item(crow, self.corpuscols["IDphrase"][0]).text()) > IDphrase:
+                IDphrase = int(self.mycorpus.item(crow, self.corpuscols["IDphrase"][0]).text())
         self.w.frase.setMinimum(0)
         self.w.frase.setMaximum(IDphrase)
 
@@ -91,7 +91,7 @@ class Form(QDialog):
 
     def openphrase(self, arg1):
         self.w.treeWidget.clear()
-        startrow = self.mainwindow.finditemincolumn(str(arg1), self.corpuscols["IDphrase"])
+        startrow = self.mainwindow.finditemincolumn(str(arg1), self.corpuscols["IDphrase"][0])
         endrow = startrow
         if startrow >= 0:
             self.Progrdialog = progress.Form(self.w)
@@ -103,31 +103,31 @@ class Form(QDialog):
             nsubj = ""
             totallines = self.mycorpus.rowCount()
             try:
-                while self.mycorpus.item(row,self.corpuscols["IDphrase"]).text() == str(arg1):
+                while self.mycorpus.item(row,self.corpuscols["IDphrase"][0]).text() == str(arg1):
                     endrow = row
                     self.Progrdialog.w.testo.setText("Sto leggendo la riga numero "+str(row))
                     self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
                     QApplication.processEvents()
                     if self.Progrdialog.w.annulla.isChecked():
                         return
-                    idparola = self.mycorpus.item(row,self.corpuscols["IDword"]).text()
-                    parolagov = self.mycorpus.item(row,self.corpuscols["governor"]).text()
+                    idparola = self.mycorpus.item(row,self.corpuscols["IDword"][0]).text()
+                    parolagov = self.mycorpus.item(row,self.corpuscols["governor"][0]).text()
                     words[idparola] = str(row)
                     try:
                         gov[parolagov].append(idparola)
                     except:
                         gov[parolagov] = [idparola]
-                    if self.mycorpus.item(row,self.corpuscols["dep"]).text() == "ROOT":
+                    if self.mycorpus.item(row,self.corpuscols["dep"][0]).text() == "ROOT":
                         root = idparola
                     row = row + 1
             except:
                 row = 0
-            phtext = self.mainwindow.rebuildText(self.mycorpus, self.Progrdialog, self.corpuscols['Orig'], [], startrow, endrow+1)
+            phtext = self.mainwindow.rebuildText(self.mycorpus, self.Progrdialog, self.corpuscols['Orig'][0], [], startrow, endrow+1)
             self.w.fraseLabel.setText(phtext)
             rootitem = QTreeWidgetItem(self.w.treeWidget)
-            rootitem.setText(0,self.mycorpus.item(int(words[root]),self.corpuscols["Orig"]).text())
-            rootitem.setText(1,self.mycorpus.item(int(words[root]),self.corpuscols["dep"]).text())
-            rootitem.setText(2,self.mycorpus.item(int(words[root]),self.corpuscols["IDword"]).text())
+            rootitem.setText(0,self.mycorpus.item(int(words[root]),self.corpuscols["Orig"][0]).text())
+            rootitem.setText(1,self.mycorpus.item(int(words[root]),self.corpuscols["dep"][0]).text())
+            rootitem.setText(2,self.mycorpus.item(int(words[root]),self.corpuscols["IDword"][0]).text())
             rootitem.setText(3,words[root])
             rootitem.setExpanded(True)
             active = True
@@ -145,9 +145,9 @@ class Form(QDialog):
                         continue
                     for elem in gov[parolagov]:
                         tritem = QTreeWidgetItem(olditems[pi])
-                        tritem.setText(0,self.mycorpus.item(int(words[elem]),self.corpuscols["Orig"]).text())
-                        tritem.setText(1,self.mycorpus.item(int(words[elem]),self.corpuscols["dep"]).text())
-                        tritem.setText(2,self.mycorpus.item(int(words[elem]),self.corpuscols["IDword"]).text())
+                        tritem.setText(0,self.mycorpus.item(int(words[elem]),self.corpuscols["Orig"][0]).text())
+                        tritem.setText(1,self.mycorpus.item(int(words[elem]),self.corpuscols["dep"][0]).text())
+                        tritem.setText(2,self.mycorpus.item(int(words[elem]),self.corpuscols["IDword"][0]).text())
                         tritem.setText(3,words[elem])
                         tritem.setExpanded(True)
                         newdipendenti.append(elem)

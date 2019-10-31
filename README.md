@@ -2,6 +2,7 @@
 Bran è un programma per la linguistica dei corpora. Nasce come soluzione completa per chi studia linguistica italiana creando e analizzando corpora di testi.
 Il nome "bran" in lingua inglese indica la crusca, ed è un riferimento all'Accademia della Crusca.
 ![Logo di Bran](https://raw.githubusercontent.com/zorbaproject/VdB-Hacking/master/bran-logo-small.png)
+ATTENZIONE: Al momento il repository di Bran contiene codice instabile. Per provare Bran, l'ultima release prima della riscrittura del codice è la 0.5 (https://github.com/zorbaproject/Bran/releases/tag/v0.5).
 
 ## Come funziona Bran
 Bran utilizza le librerie grafiche PySide2 per disegnare una interfaccia grafica comoda. Inoltre, utilizza Tint, la versione italiana di StanfordCoreNLP per ottenere lemmatizzazione e PoS tagging dei testi, al posto dell'ormai inaffidabile treetagger. È stato testato su Windows (7-10) e GNU/Linux (Kubuntu). L'unico requisito per far funzionare Bran è Python3.6 a 64bit, poi basta lanciare lo script *main.py*. Al primo avvio, il programma installa tutte le librerie di cui ha bisogno. 

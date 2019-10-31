@@ -79,7 +79,7 @@ class Form(QDialog):
 
     def isrejected(self):
         self.filesessione = ""
-        ret = QMessageBox.question(self,'Sicuro sicuro?', "Stai per avviare Bran senza un file per la sessione di lavoro: questo significa che tutte le modifiche resteranno nella RAM. Se usi file di grandi dimensioni, la memoria potrebbe non bastare, e il programma andrebbe in crash. Sei sicuro di voler procedere senza una sessione di lavoro su file?", QMessageBox.Yes | QMessageBox.No)
+        ret = QMessageBox.question(self,'Sicuro sicuro?', "Bran non può procedere senza una sessione di lavoro: il programma verrà chiuso. Sei sicuro di voler chiudere Bran?", QMessageBox.Yes | QMessageBox.No)
         if ret == QMessageBox.Yes:
             self.reject()
 

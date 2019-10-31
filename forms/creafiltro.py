@@ -104,23 +104,23 @@ class Form(QDialog):
     def filterColElements(self, col):
         self.Progrdialog = progress.Form(self.w)
         self.Progrdialog.show()
-        totallines = self.mycorpus.rowCount()
+        totallines = len(self.mycorpus)
         myvalues = []
-        for row in range(self.mycorpus.rowCount()):
+        for row in range(totallines):
             self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
             self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
             QApplication.processEvents()
             if self.Progrdialog.w.annulla.isChecked():
                 return
             try:
-                thistext = self.mycorpus.item(row,col).text()
+                thistext = str(self.mycorpus[row][col])
                 if not thistext in myvalues:
                     myvalues.append(thistext)
             except:
                 thistext = ""
         mycol = ""
         for key in self.corpuscols:
-            if self.corpuscols[key] == col:
+            if self.corpuscols[key][0] == col:
                 mycol = key
         totallines = len(myvalues)
         for row in range(len(myvalues)):
@@ -179,7 +179,7 @@ class Form(QDialog):
             row = row + 1
         mycol = ""
         for key in self.corpuscols:
-            if self.corpuscols[key] == col:
+            if self.corpuscols[key][0] == col:
                 mycol = key
         totallines = len(myvalues)
         for row in range(len(myvalues)):
@@ -197,9 +197,9 @@ class Form(QDialog):
     def filtroautomatico(self):
         if self.w.autofiltercombo.currentIndex() == 1:
             thisname = []
-            for col in range(self.mycorpus.columnCount()):
-                thisname.append(self.mycorpus.horizontalHeaderItem(col).text())
-            column = QInputDialog.getItem(self, "Scegli la colonna", "Da quale colonna del corpus devo estrarre i valori del filtro?",thisname,current=self.corpuscols['pos'],editable=False)
+            for col in self.corpuscols:
+                thisname.append(self.corpuscols[col][1])
+            column = QInputDialog.getItem(self, "Scegli la colonna", "Da quale colonna del corpus devo estrarre i valori del filtro?",thisname,current=self.corpuscols['pos'][0][0],editable=False)
             col = thisname.index(column[0])
             self.filterColElements(col)
         if self.w.autofiltercombo.currentIndex() == 2:
@@ -219,7 +219,7 @@ class Form(QDialog):
             thisname = []
             for col in range(self.mycorpus.columnCount()):
                 thisname.append(self.mycorpus.horizontalHeaderItem(col).text())
-            column = QInputDialog.getItem(self, "Scegli la colonna", "In quale colonna del corpus devo cercare i valori del dizionario?",thisname,current=self.corpuscols['Lemma'],editable=False)
+            column = QInputDialog.getItem(self, "Scegli la colonna", "In quale colonna del corpus devo cercare i valori del dizionario?",thisname,current=self.corpuscols['Lemma'][0],editable=False)
             col = thisname.index(column[0])
             self.filterDizionario(col, fileName, dizcol)
         self.updateFilter()
