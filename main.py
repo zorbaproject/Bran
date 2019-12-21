@@ -157,6 +157,7 @@ class MainWindow(QMainWindow):
         self.w.actionTrova_ripetizioni.triggered.connect(self.trovaripetizioni)
         self.w.actionConta_verbi.triggered.connect(self.contaverbi)
         self.w.actionItaliano.triggered.connect(lambda: self.changeLang("it-IT"))
+        self.w.corpus.cellChanged.connect(self.corpusCellChanged)
         self.ignorepos = ["punteggiatura - \"\" () «» - - ", "punteggiatura - : ;", "punteggiatura - ,", "altro"] # "punteggiatura - .?!"
         self.separator = "\t"
         self.language = "it-IT"
@@ -412,7 +413,7 @@ class MainWindow(QMainWindow):
         col = thisname.index(column[0])
         QMessageBox.information(self, "Filtro", "Ora devi impostare i filtri con cui dividere i risultati. I vari filtri devono essere separati da condizioni OR, per ciascuno di essi verrà creata una colonna a parte nella tabella dei risultati.")
         self.w.ccolumn.setCurrentText(self.filtrimultiplienabled)
-        Fildialog = creafiltro.Form(self.w.corpus, self.corpuscols, self)
+        Fildialog = creafiltro.Form(self.corpus, self.corpuscols, self)
         Fildialog.sessionDir = self.sessionDir
         Fildialog.w.filter.setText("pos=A.*||pos=S.*")
         Fildialog.updateTable()
@@ -644,6 +645,7 @@ class MainWindow(QMainWindow):
             TBdialog.exec()
 
     def ricostruisciTesto(self):
+        thisname = []
         for col in self.corpuscols:
             thisname.append(self.corpuscols[col][1])
         column = QInputDialog.getItem(self, "Scegli la colonna", "Su quale colonna devo ricostruire il testo?",thisname,current=1,editable=False)
@@ -1174,6 +1176,7 @@ class MainWindow(QMainWindow):
                 return
             toselect.append(row)
         totallines = len(toselect)
+        startline = self.w.daToken.value()
         for row in range(len(toselect),0,-1):
             self.Progrdialog.w.testo.setText("Sto eliminando la riga numero "+str(row))
             self.Progrdialog.w.progressBar.setValue(int(((len(toselect)-row)/totallines)*100))
@@ -1181,6 +1184,8 @@ class MainWindow(QMainWindow):
             if self.Progrdialog.w.annulla.isChecked():
                 return
             self.w.corpus.removeRow(toselect[row-1])
+            del self.corpus[startline+toselect[row-1]]
+
         self.Progrdialog.accept()
 
     def enumeratecolumns(self, combo):
@@ -1267,7 +1272,11 @@ class MainWindow(QMainWindow):
     def applicaFiltro(self, table, row, col, filtro):
         res = False
         if self.w.ccolumn.currentText() != self.filtrimultiplienabled:
-            ctext = table[row][col]
+            try:
+                ctext = table[row][col]
+            except:
+                print("Unable to find row " +str(row) + " col "+ str(col))
+                return False
             ftext = filtro
             if bool(re.match(ftext, ctext)):
                 res = True
@@ -1315,7 +1324,7 @@ class MainWindow(QMainWindow):
 
     def actionNumero_dipendenze_per_frase(self):
         self.w.ccolumn.setCurrentText(self.filtrimultiplienabled)
-        Fildialog = creafiltro.Form(self.w.corpus, self.corpuscols, self)
+        Fildialog = creafiltro.Form(self.corpus, self.corpuscols, self)
         Fildialog.sessionDir = self.sessionDir
         col = self.corpuscols["dep"][0]
         Fildialog.filterColElements(self.corpuscols["IDphrase"][0])
@@ -1331,24 +1340,28 @@ class MainWindow(QMainWindow):
         self.Progrdialog.show()
         for myfilter in allfilters:
             TBdialog.addcolumn(myfilter, 1)
-        totallines = self.w.corpus.rowCount()
-        for row in range(self.w.corpus.rowCount()):
+        totallines = len(self.corpus)
+        startline = 0
+        if self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked():
+            totallines = self.w.aToken.value()
+            startline = self.w.daToken.value()
+        for row in range(startline, totallines):
             self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
             self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
             QApplication.processEvents()
             if self.Progrdialog.w.annulla.isChecked():
                 return
             try:
-                thistext = self.w.corpus.item(row,col).text()
+                thistext = self.corpus[row][col]
                 try:
                     if col == self.corpuscols["pos"][0]:
                         thistext = self.legendaPos[thistext][0]
                 except:
-                    thistext = self.w.corpus.item(row,col).text()
+                    thistext = self.corpus[row][col]
             except:
                 thistext = ""
             for ifilter in range(len(allfilters)):
-                if self.applicaFiltro(self.w.corpus, row, col, allfilters[ifilter]):
+                if self.applicaFiltro(self.corpus, row, col, allfilters[ifilter]):
                     tbrow = TBdialog.finditemincolumn(thistext, col=0, matchexactly = True, escape = True)
                     if tbrow>=0:
                         try:
@@ -1366,7 +1379,7 @@ class MainWindow(QMainWindow):
     def addTagFromFilter(self):
         QMessageBox.information(self, "Istruzioni", "Crea il filtro per selezionare gli elementi a cui vuoi aggiungere un tag.")
         self.w.ccolumn.setCurrentText(self.filtrimultiplienabled)
-        Fildialog = creafiltro.Form(self.w.corpus, self.corpuscols, self)
+        Fildialog = creafiltro.Form(self.corpus, self.corpuscols, self)
         Fildialog.sessionDir = self.sessionDir
         Fildialog.exec()
         if Fildialog.w.filter.text() != "":
@@ -1391,15 +1404,19 @@ class MainWindow(QMainWindow):
         col = self.corpuscols['IDcorpus'][0]
         self.Progrdialog = progress.Form()
         self.Progrdialog.show()
-        totallines = self.w.corpus.rowCount()
-        for row in range(self.w.corpus.rowCount()):
+        totallines = len(self.corpus)
+        startline = 0
+        if self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked():
+            totallines = self.w.aToken.value()
+            startline = self.w.daToken.value()
+        for row in range(startline, totallines):
             self.Progrdialog.w.testo.setText("Sto modificando la riga numero "+str(row))
             self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
             QApplication.processEvents()
             if self.Progrdialog.w.annulla.isChecked():
                 return
-            if self.applicaFiltro(self.w.corpus, row, col, self.w.cfilter.text()):
-                origstr = self.w.corpus.item(row,col).text()
+            if self.applicaFiltro(self.corpus, row, col, self.w.cfilter.text()):
+                origstr = self.corpus[row][col]
                 newstr = re.sub(repCdialog.w.orig.text(), repCdialog.w.dest.text(), origstr, flags=myflags)
                 if repCdialog.w.dolower.isChecked():
                     indexes = [(m.start(0), m.end(0)) for m in re.finditer(repCdialog.w.orig.text(), newstr, flags=myflags)]
@@ -1409,8 +1426,9 @@ class MainWindow(QMainWindow):
                     indexes = [(m.start(0), m.end(0)) for m in re.finditer(repCdialog.w.orig.text(), newstr, flags=myflags)]
                     for f in indexes:
                         newstr = newstr[0:f[0]] + newstr[f[0]:f[1]].upper() + newstr[f[1]:]
-                self.setcelltocorpus(newstr, row, col)
+                self.corpus[row][col] = newstr
         self.Progrdialog.accept()
+        self.updateCorpus()
 
     def concordanze(self):
         parola = QInputDialog.getText(self.w, "Scegli la parola", "Indica la parola che vuoi cercare:", QLineEdit.Normal, "")[0]
@@ -1424,14 +1442,14 @@ class MainWindow(QMainWindow):
         #myfilter = str(list(self.corpuscols)[col]) + "[" + rangestr + "]" +"="+parola
         myfilter = str(list(self.corpuscols)[col]) +"="+parola
         self.w.ccolumn.setCurrentText(self.filtrimultiplienabled)
-        Fildialog = creafiltro.Form(self.w.corpus, self.corpuscols, self)
+        Fildialog = creafiltro.Form(self.corpus, self.corpuscols, self)
         Fildialog.sessionDir = self.sessionDir
         Fildialog.w.filter.setText(myfilter) #"Lemma=essere&&pos[1,-1]=SP||Lemma[-1]=essere&&pos=S"
         Fildialog.updateTable()
         Fildialog.exec()
         if Fildialog.w.filter.text() != "":
             self.w.cfilter.setText(Fildialog.w.filter.text())
-        self.dofiltra()
+        #self.dofiltra()
         TBdialog = tableeditor.Form(self)
         TBdialog.sessionDir = self.sessionDir
         TBdialog.addcolumn("Segmento", 0)
@@ -1443,8 +1461,13 @@ class MainWindow(QMainWindow):
             myignore = []
         self.Progrdialog = progress.Form()
         self.Progrdialog.show()
-        for row in range(self.w.corpus.rowCount()):
-            if self.w.corpus.isRowHidden(row):
+        totallines = len(self.corpus)
+        startline = 0
+        if self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked():
+            totallines = self.w.aToken.value()
+            startline = self.w.daToken.value()
+        for row in range(startline, totallines):
+            if not self.applicaFiltro(self.corpus, row, self.filtrimultiplienabled, self.w.cfilter.text()):
                 continue
             thistext = self.rebuildText(self.corpus, self.Progrdialog, col, myignore, row-myrange, row+myrange+1, False)
             thistext = self.remUselessSpaces(thistext)
@@ -1477,7 +1500,7 @@ class MainWindow(QMainWindow):
         Fildialog.exec()
         if Fildialog.w.filter.text() != "":
             self.w.cfilter.setText(Fildialog.w.filter.text())
-        self.dofiltra()
+        #self.dofiltra()
         TBdialog = tableeditor.Form(self)
         TBdialog.sessionDir = self.sessionDir
         TBdialog.addcolumn("Segmento", 0)
@@ -1491,9 +1514,11 @@ class MainWindow(QMainWindow):
         self.Progrdialog.show()
         concordanze = []
         totallines = len(self.corpus)
-        for row in range(totallines):
-            #if self.w.corpus.isRowHidden(row):
-            #    continue
+        startline = 0
+        if self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked():
+            totallines = self.w.aToken.value()
+            startline = self.w.daToken.value()
+        for row in range(startline, totallines):
             ftext = myfilter #self.w.cfilter.text()
             fcol = self.w.ccolumn.currentIndex()
             if not self.applicaFiltro(self.corpus, row, fcol, ftext):
@@ -1539,6 +1564,7 @@ class MainWindow(QMainWindow):
         self.Progrdialog = progress.Form()
         self.Progrdialog.show()
         totallines = self.w.corpus.rowCount()
+        startline = self.w.daToken.value()
         toselect = []
         for row in range(self.w.corpus.rowCount()):
             self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
@@ -1556,6 +1582,7 @@ class MainWindow(QMainWindow):
             if self.Progrdialog.w.annulla.isChecked():
                 return
             self.w.corpus.removeRow(toselect[row-1])
+            del self.corpus[startline+toselect[row-1]]
         self.Progrdialog.accept()
 
     def cancelfiltro(self):
@@ -1705,6 +1732,14 @@ class MainWindow(QMainWindow):
         self.updateCorpus()
         self.ImportingFile = False
 
+    def corpusCellChanged(self, row, col):
+        try:
+            startline = self.w.daToken.value()
+            self.corpus[row+startline][col] = self.w.corpus.item(row,col).text()
+        except:
+            print("Error editing cell")
+            self.updateCorpus()
+
     def updateCorpus(self):
         if self.w.allToken.isChecked():
             self.w.daToken.setValue(0)
@@ -1712,10 +1747,7 @@ class MainWindow(QMainWindow):
         Progrdialog = progress.Form() #self.Progrdialog = progress.Form()
         Progrdialog.show() #self.Progrdialog.show()
         # Clear table before adding new lines
-        for row in range(self.w.corpus.rowCount()):
-            self.w.corpus.removeRow(0)
-            if row<100 or row%100==0:
-                QApplication.processEvents()
+        self.w.corpus.setRowCount(0)
         maximum = self.w.aToken.value()
         if maximum > len(self.corpus):
             maximum = len(self.corpus)
@@ -1880,7 +1912,7 @@ class MainWindow(QMainWindow):
         thisname = []
         for col in self.corpuscols:
             thisname.append(self.corpuscols[col][1])
-        column = QInputDialog.getItem(self, "Scegli la colonna", "Se vuoi estrarre il dizionario devi cercare nella colonna dei lemmi o delle forme grafiche. Ma puoi anche scegliere di ottenere le statistiche su altre colonne, come la Forma grafica.",thisname,current=self.corpuscols['Orig'][0],editable=False)
+        column = QInputDialog.getItem(self, "Scegli la colonna", "Se vuoi estrarre il dizionario devi cercare nella colonna dei lemmi. Ma puoi anche scegliere di ottenere le statistiche su altre colonne, come la Forma grafica.",thisname,current=self.corpuscols['Orig'][0],editable=False)
         col = thisname.index(column[0])
         ret = QMessageBox.question(self,'Domanda', "Vuoi ignorare la punteggiatura?", QMessageBox.Yes | QMessageBox.No)
         TBdialog = tableeditor.Form(self)
@@ -1890,11 +1922,15 @@ class MainWindow(QMainWindow):
         #calcolo le occorrenze del pos
         self.Progrdialog = progress.Form()
         self.Progrdialog.show()
-        totallines = self.w.corpus.rowCount()
         totaltypes = 0
         mytypes = {}
-        for row in range(self.w.corpus.rowCount()):
-            if self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked() and self.w.corpus.isRowHidden(row):
+        totallines = len(self.corpus)
+        startline = 0
+        if self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked():
+            totallines = self.w.aToken.value()
+            startline = self.w.daToken.value()
+        for row in range(startline, totallines):
+            if self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked() and self.w.corpus.isRowHidden(row-startline):
                 continue
             self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
             self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
@@ -1903,7 +1939,7 @@ class MainWindow(QMainWindow):
                 return
             thisposc = "False"
             try:
-                thistext = self.w.corpus.item(row,col).text()
+                thistext = self.corpus[row][col]
             except:
                 thistext = ""
             if ret == QMessageBox.Yes:
@@ -2009,6 +2045,8 @@ class MainWindow(QMainWindow):
         #mostro i risultati
         self.Progrdialog.accept()
         TBdialog.exec()
+
+#Inizio funzioni da riga di comando
 
 def findintable(table, stringa, col=0):
     resrow = -1
