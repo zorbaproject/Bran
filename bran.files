@@ -1,5 +1,8 @@
+forms/BranCorpus.py
 forms/alberofrasi.py
 forms/alberofrasi.ui
+forms/branwindow.py
+forms/branwindow.ui
 forms/confronto.py
 forms/confronto.ui
 forms/creafiltro.py
@@ -7,7 +10,6 @@ forms/creafiltro.ui
 testfb.py
 forms/about.py
 forms/about.ui
-forms/mainwindow.ui
 forms/progress.py
 forms/progress.ui
 forms/regex_replace.py
