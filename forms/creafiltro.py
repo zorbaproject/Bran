@@ -199,7 +199,7 @@ class Form(QDialog):
             thisname = []
             for col in self.corpuscols:
                 thisname.append(self.corpuscols[col][1])
-            column = QInputDialog.getItem(self, "Scegli la colonna", "Da quale colonna del corpus devo estrarre i valori del filtro?",thisname,current=self.corpuscols['pos'][0][0],editable=False)
+            column = QInputDialog.getItem(self, "Scegli la colonna", "Da quale colonna del corpus devo estrarre i valori del filtro?",thisname,current=self.corpuscols['pos'][0],editable=False)
             col = thisname.index(column[0])
             self.filterColElements(col)
         if self.w.autofiltercombo.currentIndex() == 2:

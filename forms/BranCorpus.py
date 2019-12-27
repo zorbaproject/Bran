@@ -1,6 +1,61 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import pip
+import sys
+import os
+import re
+import urllib.request
+import urllib.parse
+import html
+import datetime
+import time
+import json
+from socket import timeout
+import subprocess
+import platform
+import mmap
+import random
+import math
+
+arch = platform.architecture()[0]
+
+try:
+    from PySide2.QtWidgets import QApplication
+except:
+    try:
+        from tkinter import messagebox
+        thispkg = "le librerie grafiche"
+        messagebox.showinfo("Installazione, attendi prego", "Sto per installare "+ thispkg +" e ci vorrà del tempo. Premi Ok e vai a prenderti un caffè.")
+        pip.main(["install", "PySide2"])
+        #pip install --index-url=http://download.qt.io/snapshots/ci/pyside/5.9/latest/ pyside2 --trusted-host download.qt.io
+        from PySide2.QtWidgets import QApplication
+    except:
+        try:
+            from pip._internal import main as pipmain
+            from tkinter import messagebox
+            pipmain(["install", "PySide2"])
+            from PySide2.QtWidgets import QApplication
+        except:
+            sys.exit(1)
+
+from PySide2.QtUiTools import QUiLoader
+from PySide2.QtCore import QFile
+from PySide2.QtCore import QDir
+from PySide2.QtCore import Qt
+from PySide2.QtCore import Signal
+from PySide2.QtWidgets import QLabel
+from PySide2.QtWidgets import QLineEdit
+from PySide2.QtWidgets import QFileDialog
+from PySide2.QtWidgets import QInputDialog
+from PySide2.QtWidgets import QMessageBox
+from PySide2.QtWidgets import QMainWindow
+from PySide2.QtWidgets import QTableWidget
+from PySide2.QtWidgets import QTableWidgetItem
+from PySide2.QtWidgets import QTableWidgetSelectionRange
+from PySide2.QtCore import QThread
+
+
 from forms import regex_replace
 from forms import url2corpus
 from forms import texteditor
@@ -22,8 +77,11 @@ class BranCorpus():
         #super(MainWindow, self).__init__(parent)
         self.w = window
         self.corpuswidget = tablewidget
-        self.setCentralWidget(self.w)
-        self.setWindowTitle("Bran")
+        self.daToken = self.w.daToken.value()
+        self.aToken = self.w.aToken.value()
+        self.corpuswidget.cellChanged.connect(self.corpusCellChanged)
+        #self.setCentralWidget(self.w)
+        #self.setWindowTitle("Bran")
         self.corpuscols = corpcol
         self.legendaPos = legPos
         self.ignoretext = ignthis
@@ -42,13 +100,19 @@ class BranCorpus():
         self.mycfgfile = QDir.homePath() + "/.brancfg"
         self.mycfg = json.loads('{"javapath": "", "tintpath": "", "tintaddr": "", "tintport": "", "sessions" : []}')
         self.loadPersonalCFG()
-        self.loadSession()
-        self.loadConfig()
+        #self.loadSession()
+        #self.loadConfig()
         self.txtloadingstopped()
 
     def changeLang(self, lang):
         self.language = lang
         print("Set language "+self.language)
+
+    def setStart(self, value):
+        self.daToken = value
+
+    def setEnd(self, value):
+        self.aToken = value
 
     def loadPersonalCFG(self):
         try:
@@ -82,7 +146,7 @@ class BranCorpus():
         #self.setWindowTitle("Bran")
 
     def loadtxt(self):
-        fileNames = QFileDialog.getOpenFileNames(self, "Apri file TXT", self.sessionDir, "Text files (*.txt *.md)")[0]
+        fileNames = QFileDialog.getOpenFileNames(self.corpuswidget, "Apri file TXT", self.sessionDir, "Text files (*.txt *.md)")[0]
         if len(fileNames)<1:
             return
         #self.w.statusbar.showMessage("ATTENDI: Sto importando i file txt nel corpus...")
@@ -95,7 +159,7 @@ class BranCorpus():
         #https://www.datacamp.com/community/tutorials/stemming-lemmatization-python
 
     def loadTextFromCSV(self):
-        fileNames = QFileDialog.getOpenFileNames(self, "Apri file CSV", self.sessionDir, "CSV files (*.tsv *.csv)")[0]
+        fileNames = QFileDialog.getOpenFileNames(self.corpuswidget, "Apri file CSV", self.sessionDir, "CSV files (*.tsv *.csv)")[0]
         if len(fileNames)<1:
             return
         #self.w.statusbar.showMessage("ATTENDI: Sto importando i file txt nel corpus...")
@@ -110,7 +174,7 @@ class BranCorpus():
         #https://www.datacamp.com/community/tutorials/stemming-lemmatization-python
 
     def loadjson(self):
-        QMessageBox.information(self, "Attenzione", "Caricare un file JSON non è più supportato.")
+        QMessageBox.information(self.corpuswidget, "Attenzione", "Caricare un file JSON non è più supportato.")
 
     def opentextfile(self, fileName):
         lines = ""
@@ -124,7 +188,7 @@ class BranCorpus():
             gotEncoding = False
             while gotEncoding == False:
                 try:
-                    myencoding = QInputDialog.getText(self.w, "Scegli la codifica", "Sembra che questo file non sia codificato in UTF-8. Vuoi provare a specificare una codifica diversa? (Es: cp1252 oppure ISO-8859-15)", QLineEdit.Normal, myencoding)
+                    myencoding = QInputDialog.getText(self.corpuswidget, "Scegli la codifica", "Sembra che questo file non sia codificato in UTF-8. Vuoi provare a specificare una codifica diversa? (Es: cp1252 oppure ISO-8859-15)", QLineEdit.Normal, myencoding)
                 except:
                     print("Sembra che questo file non sia codificato in UTF-8. Vuoi provare a specificare una codifica diversa? (Es: cp1252 oppure ISO-8859-15)")
                     myencoding = [input()]
@@ -139,7 +203,7 @@ class BranCorpus():
         return lines
 
     def importfromTreeTagger(self):
-        fileNames = QFileDialog.getOpenFileNames(self, "Apri file CSV", self.sessionDir, "CSV files (*.tsv *.csv *.txt)")[0]
+        fileNames = QFileDialog.getOpenFileNames(self.corpuswidget, "Apri file CSV", self.sessionDir, "CSV files (*.tsv *.csv *.txt)")[0]
         filein = os.path.abspath(os.path.dirname(sys.argv[0]))+"/dizionario/legenda/treetagger-"+self.language+".json"
         try:
             text_file = open(filein, "r")
@@ -147,7 +211,7 @@ class BranCorpus():
             text_file.close()
             legendaTT = json.loads(myjson)
         except:
-            QMessageBox.warning(self, "Errore", "Non riesco a leggere il dizionario di traduzione per TreeTagger.")
+            QMessageBox.warning(self.corpuswidget, "Errore", "Non riesco a leggere il dizionario di traduzione per TreeTagger.")
             return
         self.Progrdialog = progress.Form()
         self.Progrdialog.show()
@@ -192,7 +256,7 @@ class BranCorpus():
 
     def loadCSV(self):
         if self.ImportingFile == False:
-            fileNames = QFileDialog.getOpenFileNames(self, "Apri file CSV", self.sessionDir, "File CSV (*.tsv *.txt *.csv)")[0]
+            fileNames = QFileDialog.getOpenFileNames(self.corpuswidget, "Apri file CSV", self.sessionDir, "File CSV (*.tsv *.txt *.csv)")[0]
             self.ImportingFile = True
             self.CSVloader(fileNames) #self.CSVloader(fileNames, self.Progrdialog)
 
@@ -254,7 +318,7 @@ class BranCorpus():
 
     def salvaProgetto(self):
         if self.sessionFile == "":
-            fileName = QFileDialog.getSaveFileName(self, "Salva file CSV", self.sessionDir, "Text files (*.tsv *.csv *.txt)")[0]
+            fileName = QFileDialog.getSaveFileName(self.corpuswidget, "Salva file CSV", self.sessionDir, "Text files (*.tsv *.csv *.txt)")[0]
             if fileName != "":
                 self.sessionFile = fileName
         if self.sessionFile != "":
@@ -263,7 +327,7 @@ class BranCorpus():
             self.CSVsaver(self.sessionFile, self.Progrdialog, False)
 
     def salvaCSV(self):
-        fileName = QFileDialog.getSaveFileName(self, "Salva file CSV", self.sessionDir, "Text files (*.tsv *.csv *.txt)")[0]
+        fileName = QFileDialog.getSaveFileName(self.corpuswidget, "Salva file CSV", self.sessionDir, "Text files (*.tsv *.csv *.txt)")[0]
         self.Progrdialog = progress.Form()
         self.Progrdialog.show()
         self.CSVsaver(fileName, self.Progrdialog, True)
@@ -305,7 +369,7 @@ class BranCorpus():
             Progrdialog.accept()
 
     def connluexport(self):
-        fileName = QFileDialog.getSaveFileName(self, "Salva file CSV", self.sessionDir, "Text files (*.tsv *.csv *.txt)")[0]
+        fileName = QFileDialog.getSaveFileName(self.corpuswidget, "Salva file CSV", self.sessionDir, "Text files (*.tsv *.csv *.txt)")[0]
         self.Progrdialog = progress.Form()
         self.Progrdialog.show()
         self.corpus_to_connlu(fileName, self.Progrdialog, True)
@@ -421,7 +485,7 @@ class BranCorpus():
             Progrdialog.accept()
 
     def esportavistaCSV(self):
-        fileName = QFileDialog.getSaveFileName(self, "Salva file CSV", self.sessionDir, "Text files (*.tsv *.csv *.txt)")[0]
+        fileName = QFileDialog.getSaveFileName(self.corpuswidget, "Salva file CSV", self.sessionDir, "Text files (*.tsv *.csv *.txt)")[0]
         self.Progrdialog = progress.Form()
         self.Progrdialog.show()
         totallines = self.corpuswidget.rowCount()
@@ -437,7 +501,7 @@ class BranCorpus():
         self.CSVsaver(fileName, self.Progrdialog, True, toselect)
 
     def esportaCSVperID(self):
-        fileName = QFileDialog.getSaveFileName(self, "Salva file CSV", self.sessionDir, "Text files (*.tsv *.csv *.txt)")[0]
+        fileName = QFileDialog.getSaveFileName(self.corpuswidget, "Salva file CSV", self.sessionDir, "Text files (*.tsv *.csv *.txt)")[0]
         self.Progrdialog = progress.Form()
         self.Progrdialog.show()
         totallines = len(self.corpus)
@@ -467,7 +531,7 @@ class BranCorpus():
 
 
     def replaceCorpus(self):
-        repCdialog = regex_replace.Form(self)
+        repCdialog = regex_replace.Form(self.corpuswidget)
         repCdialog.setModal(False)
         self.enumeratecolumns(repCdialog.w.colcombo)
         repCdialog.w.changeCase.show()
@@ -510,7 +574,7 @@ class BranCorpus():
             self.updateCorpus()
 
     def replaceCells(self):
-        repCdialog = regex_replace.Form(self)
+        repCdialog = regex_replace.Form(self.corpuswidget)
         repCdialog.setModal(False)
         self.enumeratecolumns(repCdialog.w.colcombo)
         repCdialog.w.changeCase.show()
@@ -572,9 +636,9 @@ class BranCorpus():
         thisname = []
         for col in self.corpuscols:
             thisname.append(self.corpuscols[col][1])
-        column = QInputDialog.getItem(self, "Scegli la colonna", "Su quale colonna devo contare le occorrenze?",thisname,current=0,editable=False)
+        column = QInputDialog.getItem(self.corpuswidget, "Scegli la colonna", "Su quale colonna devo contare le occorrenze?",thisname,current=0,editable=False)
         col = thisname.index(column[0])
-        TBdialog = tableeditor.Form(self)
+        TBdialog = tableeditor.Form(self.corpuswidget)
         TBdialog.sessionDir = self.sessionDir
         TBdialog.addcolumn(column[0], 0)
         TBdialog.addcolumn("Occorrenze", 1)
@@ -617,11 +681,11 @@ class BranCorpus():
         thisname = []
         for col in self.corpuscols:
             thisname.append(self.corpuscols[col][1])
-        column = QInputDialog.getItem(self, "Scegli la colonna", "Su quale colonna devo contare le occorrenze?",thisname,current=0,editable=False)
+        column = QInputDialog.getItem(self.corpuswidget, "Scegli la colonna", "Su quale colonna devo contare le occorrenze?",thisname,current=0,editable=False)
         col = thisname.index(column[0])
-        QMessageBox.information(self, "Filtro", "Ora devi impostare i filtri con cui dividere i risultati. I vari filtri devono essere separati da condizioni OR, per ciascuno di essi verrà creata una colonna a parte nella tabella dei risultati.")
+        QMessageBox.information(self.corpuswidget, "Filtro", "Ora devi impostare i filtri con cui dividere i risultati. I vari filtri devono essere separati da condizioni OR, per ciascuno di essi verrà creata una colonna a parte nella tabella dei risultati.")
         self.w.ccolumn.setCurrentText(self.filtrimultiplienabled)
-        Fildialog = creafiltro.Form(self.corpus, self.corpuscols, self)
+        Fildialog = creafiltro.Form(self.corpus, self.corpuscols, self.corpuswidget)
         Fildialog.sessionDir = self.sessionDir
         Fildialog.w.filter.setText("pos=A.*||pos=S.*")
         Fildialog.updateTable()
@@ -629,7 +693,7 @@ class BranCorpus():
         if Fildialog.w.filter.text() == "":
             return
         allfilters = Fildialog.w.filter.text().split("||")
-        TBdialog = tableeditor.Form(self)
+        TBdialog = tableeditor.Form(self.corpuswidget)
         TBdialog.sessionDir = self.sessionDir
         TBdialog.addcolumn(column[0], 0)
         self.Progrdialog = progress.Form()
@@ -677,7 +741,7 @@ class BranCorpus():
     def contaverbi(self):
         poscol = self.corpuscols["pos"][0] #thisname.index(column[0])
         morfcol = self.corpuscols["feat"][0]
-        TBdialog = tableeditor.Form(self)
+        TBdialog = tableeditor.Form(self.corpuswidget)
         TBdialog.sessionDir = self.sessionDir
         TBdialog.addcolumn("Modo+Tempo", 0)
         TBdialog.addcolumn("Occorrenze", 1)
@@ -773,7 +837,7 @@ class BranCorpus():
         TBdialog.exec()
 
     def trovaripetizioni(self):
-        Repetdialog = ripetizioni.Form(self)
+        Repetdialog = ripetizioni.Form(self.corpuswidget)
         Repetdialog.loadipos(self.ignorepos)
         Repetdialog.loadallpos(self.legendaPos)
         self.enumeratecolumns(Repetdialog.w.colonna)
@@ -798,7 +862,7 @@ class BranCorpus():
                 for i in range(Repetdialog.w.vuoteF.count()):
                     vuoteF.append(Repetdialog.w.vuoteF.item(i).text())
             charNotWord = Repetdialog.w.charNotWord.isChecked()
-            TBdialog = tableeditor.Form(self)
+            TBdialog = tableeditor.Form(self.corpuswidget)
             TBdialog.sessionDir = self.sessionDir
             TBdialog.addcolumn("nGram", 0)
             TBdialog.addcolumn("Occorrenze", 1)
@@ -856,7 +920,7 @@ class BranCorpus():
         thisname = []
         for col in self.corpuscols:
             thisname.append(self.corpuscols[col][1])
-        column = QInputDialog.getItem(self, "Scegli la colonna", "Su quale colonna devo ricostruire il testo?",thisname,current=1,editable=False)
+        column = QInputDialog.getItem(self.corpuswidget, "Scegli la colonna", "Su quale colonna devo ricostruire il testo?",thisname,current=1,editable=False)
         col = thisname.index(column[0])
         self.Progrdialog = progress.Form()
         self.Progrdialog.show()
@@ -1003,7 +1067,7 @@ class BranCorpus():
 
     def densitalessico(self):
         col = self.corpuscols['pos'][0]
-        TBdialog = tableeditor.Form(self)
+        TBdialog = tableeditor.Form(self.corpuswidget)
         TBdialog.sessionDir = self.sessionDir
         TBdialog.addcolumn("Part of Speech", 0)
         TBdialog.addcolumn("Macrocategoria", 1)
@@ -1153,7 +1217,7 @@ class BranCorpus():
 
     def dofiltra(self):
         if self.w.ccolumn.currentText() == self.filtrimultiplienabled and len(self.w.cfilter.text().split("||"))>10:
-            ret = QMessageBox.question(self,'Domanda', "Sembra che tu voglia applicare un filtro multiplo, l'operazione può essere lenta. Vuoi vedere la percentuale di progresso?", QMessageBox.Yes | QMessageBox.No)
+            ret = QMessageBox.question(self.corpuswidget,'Domanda', "Sembra che tu voglia applicare un filtro multiplo, l'operazione può essere lenta. Vuoi vedere la percentuale di progresso?", QMessageBox.Yes | QMessageBox.No)
             if ret == QMessageBox.Yes:
                 self.dofiltra2()
                 return
@@ -1254,7 +1318,7 @@ class BranCorpus():
 
     def filtriMultipli(self):
         self.w.ccolumn.setCurrentText(self.filtrimultiplienabled)
-        Fildialog = creafiltro.Form(self.corpus, self.corpuscols, self)
+        Fildialog = creafiltro.Form(self.corpus, self.corpuscols, self.corpuswidget)
         Fildialog.sessionDir = self.sessionDir
         Fildialog.w.filter.setText(self.w.cfilter.text())
         Fildialog.updateTable()
@@ -1264,7 +1328,7 @@ class BranCorpus():
 
     def actionNumero_dipendenze_per_frase(self):
         self.w.ccolumn.setCurrentText(self.filtrimultiplienabled)
-        Fildialog = creafiltro.Form(self.corpus, self.corpuscols, self)
+        Fildialog = creafiltro.Form(self.corpus, self.corpuscols, self.corpuswidget)
         Fildialog.sessionDir = self.sessionDir
         col = self.corpuscols["dep"][0]
         Fildialog.filterColElements(self.corpuscols["IDphrase"][0])
@@ -1273,7 +1337,7 @@ class BranCorpus():
         if Fildialog.w.filter.text() != "":
             self.w.cfilter.setText(Fildialog.w.filter.text())
         allfilters = Fildialog.w.filter.text().split("||")
-        TBdialog = tableeditor.Form(self)
+        TBdialog = tableeditor.Form(self.corpuswidget)
         TBdialog.sessionDir = self.sessionDir
         TBdialog.addcolumn("Dependency", 0)
         self.Progrdialog = progress.Form()
@@ -1317,15 +1381,15 @@ class BranCorpus():
         TBdialog.exec()
 
     def addTagFromFilter(self):
-        QMessageBox.information(self, "Istruzioni", "Crea il filtro per selezionare gli elementi a cui vuoi aggiungere un tag.")
+        QMessageBox.information(self.corpuswidget, "Istruzioni", "Crea il filtro per selezionare gli elementi a cui vuoi aggiungere un tag.")
         self.w.ccolumn.setCurrentText(self.filtrimultiplienabled)
-        Fildialog = creafiltro.Form(self.corpus, self.corpuscols, self)
+        Fildialog = creafiltro.Form(self.corpus, self.corpuscols, self.corpuswidget)
         Fildialog.sessionDir = self.sessionDir
         Fildialog.exec()
         if Fildialog.w.filter.text() != "":
             self.w.cfilter.setText(Fildialog.w.filter.text())
-        nuovotag = QInputDialog.getText(self.w, "Scegli il tag", "Indica il tag che vuoi aggiungere alle parole che rispettano il filtro:", QLineEdit.Normal, "")[0]
-        repCdialog = regex_replace.Form(self)
+        nuovotag = QInputDialog.getText(self.corpuswidget, "Scegli il tag", "Indica il tag che vuoi aggiungere alle parole che rispettano il filtro:", QLineEdit.Normal, "")[0]
+        repCdialog = regex_replace.Form(self.corpuswidget)
         repCdialog.setModal(False)
         repCdialog.w.orig.setText("(.*)")
         repCdialog.w.dest.setText("\g<1>, "+nuovotag)
@@ -1371,18 +1435,18 @@ class BranCorpus():
         self.updateCorpus()
 
     def concordanze(self):
-        parola = QInputDialog.getText(self.w, "Scegli la parola", "Indica la parola che vuoi cercare:", QLineEdit.Normal, "")[0]
+        parola = QInputDialog.getText(self.corpuswidget, "Scegli la parola", "Indica la parola che vuoi cercare:", QLineEdit.Normal, "")[0]
         thisname = []
         for col in self.corpuscols:
             thisname.append(self.corpuscols[col][1])
-        column = QInputDialog.getItem(self, "Scegli la colonna", "In quale colonna devo cercare il testo?",thisname,current=1,editable=False)
+        column = QInputDialog.getItem(self.corpuswidget, "Scegli la colonna", "In quale colonna devo cercare il testo?",thisname,current=1,editable=False)
         col = thisname.index(column[0])
-        myrange = int(QInputDialog.getInt(self.w, "Indica il range", "Quante parole, prima e dopo, vuoi leggere?")[0])
+        myrange = int(QInputDialog.getInt(self.corpuswidget, "Indica il range", "Quante parole, prima e dopo, vuoi leggere?")[0])
         rangestr = str(myrange)
         #myfilter = str(list(self.corpuscols)[col]) + "[" + rangestr + "]" +"="+parola
         myfilter = str(list(self.corpuscols)[col]) +"="+parola
         self.w.ccolumn.setCurrentText(self.filtrimultiplienabled)
-        Fildialog = creafiltro.Form(self.corpus, self.corpuscols, self)
+        Fildialog = creafiltro.Form(self.corpus, self.corpuscols, self.corpuswidget)
         Fildialog.sessionDir = self.sessionDir
         Fildialog.w.filter.setText(myfilter) #"Lemma=essere&&pos[1,-1]=SP||Lemma[-1]=essere&&pos=S"
         Fildialog.updateTable()
@@ -1390,11 +1454,11 @@ class BranCorpus():
         if Fildialog.w.filter.text() != "":
             self.w.cfilter.setText(Fildialog.w.filter.text())
         #self.dofiltra()
-        TBdialog = tableeditor.Form(self)
+        TBdialog = tableeditor.Form(self.corpuswidget)
         TBdialog.sessionDir = self.sessionDir
         TBdialog.addcolumn("Segmento", 0)
         TBdialog.addcolumn("Occorrenze", 1)
-        ret = QMessageBox.question(self,'Domanda', "Vuoi ignorare la punteggiatura?", QMessageBox.Yes | QMessageBox.No)
+        ret = QMessageBox.question(self.corpuswidget,'Domanda', "Vuoi ignorare la punteggiatura?", QMessageBox.Yes | QMessageBox.No)
         if ret == QMessageBox.Yes:
             myignore = self.ignorepos
         else:
@@ -1423,17 +1487,17 @@ class BranCorpus():
         TBdialog.exec()
 
     def coOccorrenze(self):
-        parola = QInputDialog.getText(self.w, "Scegli la parola", "Indica la parola che vuoi cercare:", QLineEdit.Normal, "")[0]
+        parola = QInputDialog.getText(self.corpuswidget, "Scegli la parola", "Indica la parola che vuoi cercare:", QLineEdit.Normal, "")[0]
         thisname = []
         for col in self.corpuscols:
             thisname.append(self.corpuscols[col][1])
-        column = QInputDialog.getItem(self, "Scegli la colonna", "In quale colonna devo cercare il testo?",thisname,current=1,editable=False)
+        column = QInputDialog.getItem(self.corpuswidget, "Scegli la colonna", "In quale colonna devo cercare il testo?",thisname,current=1,editable=False)
         col = thisname.index(column[0])
-        myrange = int(QInputDialog.getInt(self.w, "Indica il range", "Quante parole, prima e dopo, vuoi leggere?")[0])
+        myrange = int(QInputDialog.getInt(self.corpuswidget, "Indica il range", "Quante parole, prima e dopo, vuoi leggere?")[0])
         rangestr = str(myrange)
         myfilter = str(list(self.corpuscols)[col]) +"="+parola
         self.w.ccolumn.setCurrentText(self.filtrimultiplienabled)
-        Fildialog = creafiltro.Form(self.corpus, self.corpuscols, self)
+        Fildialog = creafiltro.Form(self.corpus, self.corpuscols, self.corpuswidget)
         Fildialog.sessionDir = self.sessionDir
         Fildialog.w.filter.setText(myfilter) #"Lemma=essere&&pos[1,-1]=SP||Lemma[-1]=essere&&pos=S"
         Fildialog.updateTable()
@@ -1441,11 +1505,11 @@ class BranCorpus():
         if Fildialog.w.filter.text() != "":
             self.w.cfilter.setText(Fildialog.w.filter.text())
         #self.dofiltra()
-        TBdialog = tableeditor.Form(self)
+        TBdialog = tableeditor.Form(self.corpuswidget)
         TBdialog.sessionDir = self.sessionDir
         TBdialog.addcolumn("Segmento", 0)
         TBdialog.addcolumn("Occorrenze", 1)
-        ret = QMessageBox.question(self,'Domanda', "Vuoi ignorare la punteggiatura?", QMessageBox.Yes | QMessageBox.No)
+        ret = QMessageBox.question(self.corpuswidget,'Domanda', "Vuoi ignorare la punteggiatura?", QMessageBox.Yes | QMessageBox.No)
         if ret == QMessageBox.Yes:
             myignore = self.ignorepos
         else:
@@ -1532,6 +1596,8 @@ class BranCorpus():
 
 
     def corpusCellChanged(self, row, col):
+        if self.ImportingFile:
+            return
         try:
             startline = self.w.daToken.value()
             self.corpus[row+startline][col] = self.corpuswidget.item(row,col).text()
@@ -1573,10 +1639,14 @@ class BranCorpus():
                     TBrow = self.addlinetocorpus(str(line[colN]), 0) #self.corpuscols["IDcorpus"][0]
                 self.setcelltocorpus(str(line[colN]), TBrow, colN)
 
+    def visualizzafrasi(self):
+        alberofrasidialog = alberofrasi.Form(self)
+        alberofrasidialog.exec()
+
     def runServer(self, ok = False):
         if not ok:
             if self.alreadyChecked:
-                QMessageBox.warning(self, "Errore", "Non ho trovato il server Tint.")
+                QMessageBox.warning(self.corpuswidget, "Errore", "Non ho trovato il server Tint.")
                 self.alreadyChecked = False
                 return
             self.Java = self.TintSetdialog.w.java.text()
@@ -1591,7 +1661,7 @@ class BranCorpus():
             self.TintThread.start()
         else:
             if platform.system() == "Windows":
-                QMessageBox.information(self, "Come usare il server su Windows", "Sembra che tu stia usando Windows. Su questo sistema, per utilizzare il server Tint l'interfaccia di Bran verrà chiusa automaticamente: il terminale dovrà rimanere aperto. Dovrai aprire di nuovo Bran, così verrà caricata una nuova interfaccia grafica.")
+                QMessageBox.information(self.corpuswidget, "Come usare il server su Windows", "Sembra che tu stia usando Windows. Su questo sistema, per utilizzare il server Tint l'interfaccia di Bran verrà chiusa automaticamente: il terminale dovrà rimanere aperto. Dovrai aprire di nuovo Bran, così verrà caricata una nuova interfaccia grafica.")
                 print("\nNON CHIUDERE QUESTA FINESTRA:  Tint è eseguito dentro questa finestra. Avvia di nuovo Bran.")
                 print("\n\nNON CHIUDERE QUESTA FINESTRA")
                 sys.exit(0)
@@ -1600,7 +1670,7 @@ class BranCorpus():
     def checkServer(self, ok = False):
         if not ok:
             if self.alreadyChecked:
-                QMessageBox.warning(self, "Errore", "Non ho trovato il server Tint.")
+                QMessageBox.warning(self.corpuswidget, "Errore", "Non ho trovato il server Tint.")
                 self.alreadyChecked = False
                 return
             self.Java = self.TintSetdialog.w.java.text()
@@ -1619,15 +1689,18 @@ class BranCorpus():
             self.TintSetdialog.accept()
 
     def addlinetocorpus(self, text, column):
+        #self.corpuswidget.cellChanged.disconnect(self.corpusCellChanged)
         row = self.corpuswidget.rowCount()
         self.corpuswidget.insertRow(row)
         titem = QTableWidgetItem()
         titem.setText(text)
         self.corpuswidget.setItem(row, column, titem)
         self.corpuswidget.setCurrentCell(row, column)
+        #self.corpuswidget.cellChanged.connect(self.corpusCellChanged)
         return row
 
     def setcelltocorpus(self, text, row, column):
+        #self.corpuswidget.cellChanged.disconnect(self.corpusCellChanged)
         titem = QTableWidgetItem()
         titem.setText(text)
         if column == self.corpuscols["pos"][0]:
@@ -1637,6 +1710,7 @@ class BranCorpus():
             except:
                 newtext = text
         self.corpuswidget.setItem(row, column, titem)
+        #self.corpuswidget.cellChanged.connect(self.corpusCellChanged)
 
     def sanitizeTable(self, table):
         for row in range(table.rowCount()):
@@ -1663,9 +1737,9 @@ class BranCorpus():
         cf.dimList = self.dimList
         cf.exec()
 
-    def aboutbran(self):
-        aw = about.Form(self)
-        aw.exec()
+    #def aboutbran(self):
+    #    aw = about.Form(self.corpuswidget)
+    #    aw.exec()
 
     def getCorpusDim(self, thistotal):
         dimCorpus = self.dimList[0]
@@ -1683,10 +1757,10 @@ class BranCorpus():
         thisname = []
         for col in self.corpuscols:
             thisname.append(self.corpuscols[col][1])
-        column = QInputDialog.getItem(self, "Scegli la colonna", "Se vuoi estrarre il dizionario devi cercare nella colonna dei lemmi. Ma puoi anche scegliere di ottenere le statistiche su altre colonne, come la Forma grafica.",thisname,current=self.corpuscols['Orig'][0],editable=False)
+        column = QInputDialog.getItem(self.corpuswidget, "Scegli la colonna", "Se vuoi estrarre il dizionario devi cercare nella colonna dei lemmi. Ma puoi anche scegliere di ottenere le statistiche su altre colonne, come la Forma grafica.",thisname,current=self.corpuscols['Orig'][0],editable=False)
         col = thisname.index(column[0])
-        ret = QMessageBox.question(self,'Domanda', "Vuoi ignorare la punteggiatura?", QMessageBox.Yes | QMessageBox.No)
-        TBdialog = tableeditor.Form(self)
+        ret = QMessageBox.question(self.corpuswidget,'Domanda', "Vuoi ignorare la punteggiatura?", QMessageBox.Yes | QMessageBox.No)
+        TBdialog = tableeditor.Form(self.corpuswidget)
         TBdialog.sessionDir = self.sessionDir
         TBdialog.addcolumn("Token", 0)
         TBdialog.addcolumn("Occorrenze", 1)

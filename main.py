@@ -63,37 +63,15 @@ except:
             sys.exit(1)
 
 
-from PySide2.QtUiTools import QUiLoader
 from PySide2.QtCore import QFile
 from PySide2.QtCore import QDir
 from PySide2.QtCore import Qt
-from PySide2.QtCore import Signal
-from PySide2.QtWidgets import QLabel
-from PySide2.QtWidgets import QLineEdit
-from PySide2.QtWidgets import QFileDialog
-from PySide2.QtWidgets import QInputDialog
-from PySide2.QtWidgets import QMessageBox
 from PySide2.QtWidgets import QMainWindow
-from PySide2.QtWidgets import QTableWidget
-from PySide2.QtWidgets import QTableWidgetItem
-from PySide2.QtWidgets import QTableWidgetSelectionRange
 from PySide2.QtCore import QThread
 
 
-
 from forms import branwindow
-from forms import regex_replace
-from forms import url2corpus
-from forms import texteditor
-from forms import tableeditor
-from forms import confronto
-from forms import tint
-from forms import progress
-from forms import sessione
-from forms import ripetizioni
-from forms import about
-from forms import creafiltro
-from forms import alberofrasi
+
 
 
 def findintable(table, stringa, col=0):

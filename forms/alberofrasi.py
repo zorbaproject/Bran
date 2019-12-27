@@ -23,8 +23,8 @@ from forms import progress
 
 
 class Form(QDialog):
-    def __init__(self, mainwindow, parent=None):
-        super(Form, self).__init__(parent)
+    def __init__(self, parent=None):
+        super(Form, self).__init__(parent.corpuswidget)
         file = QFile(os.path.abspath(os.path.dirname(sys.argv[0]))+"/forms/alberofrasi.ui")
         file.open(QFile.ReadOnly)
         loader = QUiLoader()
@@ -38,9 +38,7 @@ class Form(QDialog):
         self.w.prev.clicked.connect(self.prev)
         self.w.frase.valueChanged.connect(self.openphrase)
         self.setWindowTitle("Visualizza albero delle frasi")
-        self.mycorpus = mainwindow.corpus
-        self.corpuscols = mainwindow.corpuscols
-        self.mainwindow = mainwindow
+        self.Corpus = parent
         self.setphraseRange()
         self.setcss()
         self.openphrase(0)
@@ -75,9 +73,9 @@ class Form(QDialog):
 
     def setphraseRange(self):
         IDphrase = -1
-        for crow in range(len(self.mycorpus)):
-            if int(self.mycorpus[crow][self.corpuscols["IDphrase"][0]]) > IDphrase:
-                IDphrase = int(self.mycorpus[crow][ self.corpuscols["IDphrase"][0]])
+        for crow in range(len(self.Corpus.corpus)):
+            if int(self.Corpus.corpus[crow][self.Corpus.corpuscols["IDphrase"][0]]) > IDphrase:
+                IDphrase = int(self.Corpus.corpus[crow][ self.Corpus.corpuscols["IDphrase"][0]])
         self.w.frase.setMinimum(0)
         self.w.frase.setMaximum(IDphrase)
 
@@ -91,7 +89,7 @@ class Form(QDialog):
 
     def openphrase(self, arg1):
         self.w.treeWidget.clear()
-        startrow = self.mainwindow.finditemincolumn(str(arg1), self.corpuscols["IDphrase"][0])
+        startrow = self.Corpus.finditemincolumn(str(arg1), self.Corpus.corpuscols["IDphrase"][0])
         endrow = startrow
         if startrow >= 0:
             self.Progrdialog = progress.Form(self.w)
@@ -101,33 +99,33 @@ class Form(QDialog):
             gov = {}
             root = ""
             nsubj = ""
-            totallines = len(self.mycorpus)
+            totallines = len(self.Corpus.corpus)
             try:
-                while self.mycorpus[row][self.corpuscols["IDphrase"][0]] == str(arg1):
+                while self.Corpus.corpus[row][self.Corpus.corpuscols["IDphrase"][0]] == str(arg1):
                     endrow = row
                     self.Progrdialog.w.testo.setText("Sto leggendo la riga numero "+str(row))
                     self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
                     QApplication.processEvents()
                     if self.Progrdialog.w.annulla.isChecked():
                         return
-                    idparola = self.mycorpus[row][self.corpuscols["IDword"][0]]
-                    parolagov = self.mycorpus[row][self.corpuscols["governor"][0]]
+                    idparola = self.Corpus.corpus[row][self.Corpus.corpuscols["IDword"][0]]
+                    parolagov = self.Corpus.corpus[row][self.Corpus.corpuscols["governor"][0]]
                     words[idparola] = str(row)
                     try:
                         gov[parolagov].append(idparola)
                     except:
                         gov[parolagov] = [idparola]
-                    if self.mycorpus[row][self.corpuscols["dep"][0]] == "ROOT":
+                    if self.Corpus.corpus[row][self.Corpus.corpuscols["dep"][0]] == "ROOT":
                         root = idparola
                     row = row + 1
             except:
                 row = 0
-            phtext = self.mainwindow.rebuildText(self.mycorpus, self.Progrdialog, self.corpuscols['Orig'][0], [], startrow, endrow+1)
+            phtext = self.Corpus.rebuildText(self.Corpus.corpus, self.Progrdialog, self.Corpus.corpuscols['Orig'][0], [], startrow, endrow+1)
             self.w.fraseLabel.setText(phtext)
             rootitem = QTreeWidgetItem(self.w.treeWidget)
-            rootitem.setText(0,self.mycorpus[int(words[root])][self.corpuscols["Orig"][0]])
-            rootitem.setText(1,self.mycorpus[int(words[root])][self.corpuscols["dep"][0]])
-            rootitem.setText(2,self.mycorpus[int(words[root])][self.corpuscols["IDword"][0]])
+            rootitem.setText(0,self.Corpus.corpus[int(words[root])][self.Corpus.corpuscols["Orig"][0]])
+            rootitem.setText(1,self.Corpus.corpus[int(words[root])][self.Corpus.corpuscols["dep"][0]])
+            rootitem.setText(2,self.Corpus.corpus[int(words[root])][self.Corpus.corpuscols["IDword"][0]])
             rootitem.setText(3,words[root])
             rootitem.setExpanded(True)
             active = True
@@ -145,9 +143,9 @@ class Form(QDialog):
                         continue
                     for elem in gov[parolagov]:
                         tritem = QTreeWidgetItem(olditems[pi])
-                        tritem.setText(0,self.mycorpus[int(words[elem])][self.corpuscols["Orig"][0]])
-                        tritem.setText(1,self.mycorpus[int(words[elem])][self.corpuscols["dep"][0]])
-                        tritem.setText(2,self.mycorpus[int(words[elem])][self.corpuscols["IDword"][0]])
+                        tritem.setText(0,self.Corpus.corpus[int(words[elem])][self.Corpus.corpuscols["Orig"][0]])
+                        tritem.setText(1,self.Corpus.corpus[int(words[elem])][self.Corpus.corpuscols["dep"][0]])
+                        tritem.setText(2,self.Corpus.corpus[int(words[elem])][self.Corpus.corpuscols["IDword"][0]])
                         tritem.setText(3,words[elem])
                         tritem.setExpanded(True)
                         newdipendenti.append(elem)
