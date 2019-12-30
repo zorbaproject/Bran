@@ -144,8 +144,11 @@ class MainWindow(QMainWindow):
         self.ignorepos = ["punteggiatura - \"\" () «» - - ", "punteggiatura - : ;", "punteggiatura - ,", "altro"] # "punteggiatura - .?!"
         self.separator = "\t"
         self.language = "it-IT"
-        #self.corpus = []
-        self.Corpus = BranCorpus.BranCorpus(self.corpuscols, self.legendaPos, self.ignoretext, self.dimList, tablewidget=self.w.corpus, window=self.w)
+        self.Corpus = BranCorpus.BranCorpus(self.corpuscols, self.legendaPos, self.ignoretext, self.dimList, tablewidget=self.w.corpus)
+        self.w.allToken.toggled.connect(lambda: self.Corpus.setAllTokens(self.w.allToken.isChecked()))
+        self.w.actionEsegui_calcoli_solo_su_righe_visibili.toggled.connect(lambda: self.Corpus.setOnlyVisible(self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked()))
+        self.w.daToken.valueChanged.connect(self.Corpus.setStart)
+        self.w.aToken.valueChanged.connect(self.Corpus.setEnd)
         self.enumeratecolumns(self.w.ccolumn)
         self.filtrimultiplienabled = "Filtro multiplo"
         self.w.ccolumn.addItem(self.filtrimultiplienabled)
@@ -162,6 +165,9 @@ class MainWindow(QMainWindow):
         self.loadSession()
         self.loadConfig()
         self.Corpus.txtloadingstopped()
+        maximum = len(self.Corpus.corpus)
+        self.w.daToken.setMaximum(maximum)
+        self.w.aToken.setMaximum(maximum)
 
     def changeLang(self, lang):
         self.language = lang
@@ -230,7 +236,10 @@ class MainWindow(QMainWindow):
 
     def apriProgetto(self):
         self.loadSession()
-        self.txtloadingstopped()
+        self.Corpus.txtloadingstopped()
+        maximum = len(self.Corpus.corpus)
+        self.w.daToken.setMaximum(maximum)
+        self.w.aToken.setMaximum(maximum)
 
     def chiudiProgetto(self):
         self.Corpus.sessionFile = ""
@@ -243,13 +252,9 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Bran")
 
     def replaceCorpus(self):
-        self.Corpus.setStart(self.w.daToken.value())
-        self.Corpus.setEnd(self.w.aToken.value())
         self.Corpus.replaceCorpus()
 
     def replaceCells(self):
-        self.Corpus.setStart(self.w.daToken.value())
-        self.Corpus.setEnd(self.w.aToken.value())
         self.Corpus.replaceCells()
 
     def selectVisibleCells(self):
@@ -274,28 +279,18 @@ class MainWindow(QMainWindow):
         self.w.corpus.clearSelection()
 
     def contaoccorrenze(self):
-        self.Corpus.setStart(self.w.daToken.value())
-        self.Corpus.setEnd(self.w.aToken.value())
         self.Corpus.contaoccorrenze()
 
     def contaoccorrenzefiltrate(self):
-        self.Corpus.setStart(self.w.daToken.value())
-        self.Corpus.setEnd(self.w.aToken.value())
         self.Corpus.contaoccorrenzefiltrate()
 
     def contaverbi(self):
-        self.Corpus.setStart(self.w.daToken.value())
-        self.Corpus.setEnd(self.w.aToken.value())
         self.Corpus.contaverbi()
 
     def trovaripetizioni(self):
-        self.Corpus.setStart(self.w.daToken.value())
-        self.Corpus.setEnd(self.w.aToken.value())
         self.Corpus.trovaripetizioni()
 
     def ricostruisciTesto(self):
-        self.Corpus.setStart(self.w.daToken.value())
-        self.Corpus.setEnd(self.w.aToken.value())
         self.Corpus.ricostruisciTesto()
 
     def remUselessSpaces(self, tempstring):
@@ -306,13 +301,9 @@ class MainWindow(QMainWindow):
         return tmpstring
 
     def translatePos(self):
-        self.Corpus.setStart(self.w.daToken.value())
-        self.Corpus.setEnd(self.w.aToken.value())
         self.Corpus.translatePos()
 
     def densitalessico(self):
-        self.Corpus.setStart(self.w.daToken.value())
-        self.Corpus.setEnd(self.w.aToken.value())
         self.Corpus.densitalessico()
 
     def aggiornamenti(self):
@@ -363,18 +354,12 @@ class MainWindow(QMainWindow):
         self.Progrdialog.accept()
 
     def salvaProgetto(self):
-        self.Corpus.setStart(self.w.daToken.value())
-        self.Corpus.setEnd(self.w.aToken.value())
         self.Corpus.salvaProgetto()
 
     def salvaCSV(self):
-        self.Corpus.setStart(self.w.daToken.value())
-        self.Corpus.setEnd(self.w.aToken.value())
         self.Corpus.salvaCSV()
 
     def connluexport(self):
-        self.Corpus.setStart(self.w.daToken.value())
-        self.Corpus.setEnd(self.w.aToken.value())
         self.Corpus.connluexport()
 
     def esportavistaCSV(self):
@@ -394,8 +379,6 @@ class MainWindow(QMainWindow):
         self.Corpus.CSVsaver(fileName, self.Progrdialog, True, toselect)
 
     def esportaCSVperID(self):
-        self.Corpus.setStart(self.w.daToken.value())
-        self.Corpus.setEnd(self.w.aToken.value())
         self.Corpus.esportaCSVperID()
 
     def web2corpus(self):
@@ -404,35 +387,17 @@ class MainWindow(QMainWindow):
         w2Cdialog.exec()
 
     def visualizzafrasi(self):
-        self.Corpus.setStart(self.w.daToken.value())
-        self.Corpus.setEnd(self.w.aToken.value())
         self.Corpus.visualizzafrasi()
         #alberofrasidialog = alberofrasi.Form(self, self)
         #alberofrasidialog.exec()
 
     def delselected(self):
-        self.Corpus.setStart(self.w.daToken.value())
-        self.Corpus.setEnd(self.w.aToken.value())
         self.Corpus.delselected()
 
     def enumeratecolumns(self, combo):
         for col in range(self.w.corpus.columnCount()):
             thisname = self.w.corpus.horizontalHeaderItem(col).text()
             combo.addItem(thisname)
-
-    #def finditemincolumn(self, mytext, col=0, matchexactly = True, escape = True, myflags=0):
-    #    myregex = mytext
-    #    if escape:
-    #        myregex = re.escape(myregex)
-    #    if matchexactly:
-    #        myregex = "^" + myregex + "$"
-    #    for row in range(len(self.corpus)):
-    #        try:
-    #            if bool(re.match(myregex, self.corpus[row][col], flags=myflags)):
-    #                return row
-    #        except:
-    #            continue
-    #    return -1
 
     def findItemsInColumn(self, table, value, col):
         mylist = [row[col] for row in table if row[col]==value]
@@ -451,7 +416,7 @@ class MainWindow(QMainWindow):
             fcol = self.w.ccolumn.currentIndex()
             #ctext = self.w.corpus.item(row,col).text()
             ftext = self.w.cfilter.text()
-            if self.applicaFiltro(self.corpus, row, fcol, ftext): #if bool(re.match(ftext, ctext)):
+            if self.Corpus.applicaFiltro(row, fcol, ftext): #if bool(re.match(ftext, ctext)):
                 self.w.corpus.setRowHidden(row-startline, False)
                 tcount = tcount +1
             else:
@@ -459,13 +424,13 @@ class MainWindow(QMainWindow):
         self.w.statusbar.showMessage("Risultati totali: " +str(tcount))
         #self.Progrdialog.accept()
 
-    #TODO: Fix applicafiltro
     def dofiltra2(self):
         self.Progrdialog = progress.Form()
         self.Progrdialog.show()
         tcount = 0
-        totallines = self.w.corpus.rowCount()
-        for row in range(self.w.corpus.rowCount()):
+        totallines = self.w.aToken.value()
+        startline = self.w.daToken.value()
+        for row in range(startline, totallines):
             if row<100 or row%200==0:
                 self.Progrdialog.w.testo.setText("Sto filtrando la riga numero "+str(row))
                 self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
@@ -475,16 +440,17 @@ class MainWindow(QMainWindow):
             col = self.w.ccolumn.currentIndex()
             #ctext = self.w.corpus.item(row,col).text()
             ftext = self.w.cfilter.text()
-            if self.applicaFiltro(self.w.corpus, row, col, ftext): #if bool(re.match(ftext, ctext)):
-                self.w.corpus.setRowHidden(row, False)
+            if self.Corpus.applicaFiltro(row, fcol, ftext): #if bool(re.match(ftext, ctext)):
+                self.w.corpus.setRowHidden(row-startline, False)
                 tcount = tcount +1
             else:
-                self.w.corpus.setRowHidden(row, True)
+                self.w.corpus.setRowHidden(row-startline, True)
         self.w.statusbar.showMessage("Risultati totali: " +str(tcount))
         self.Progrdialog.accept()
 
-    #TODO: fix applicafiltro
     def findNext(self):
+        totallines = self.w.aToken.value()
+        startline = self.w.daToken.value()
         irow = 0
         if len(self.w.corpus.selectedItems())>0:
             irow = self.w.corpus.selectedItems()[len(self.w.corpus.selectedItems())-1].row()+1
@@ -494,82 +460,27 @@ class MainWindow(QMainWindow):
                 if self.w.corpus.isRowHidden(row):
                     continue
                 ftext = self.w.cfilter.text()
-                if self.applicaFiltro(self.w.corpus, row, col, ftext):
+                if self.Corpus.applicaFiltro(row+startline, col, ftext):
                     self.w.corpus.setCurrentCell(row,0)
                     break
 
-    #TODO: we should be using this only in BranCorpus
-    def applicaFiltro(self, table, row, col, filtro):
-        res = False
-        if self.w.ccolumn.currentText() != self.filtrimultiplienabled:
-            try:
-                ctext = table[row][col]
-            except:
-                print("Unable to find row " +str(row) + " col "+ str(col))
-                return False
-            ftext = filtro
-            if bool(re.match(ftext, ctext)):
-                res = True
-            else:
-                res = False
-        else:
-            for option in filtro.split("||"):
-                for andcond in option.split("&&"):
-                    res = False
-                    cellname = andcond.split("=")[0]
-                    try:
-                        ftext = andcond.split("=")[1]
-                    except:
-                        continue
-                    colname = cellname.split("[")[0]
-                    col = self.corpuscols[colname][0]
-                    if "[" in cellname.replace("]",""):
-                        rowlist = cellname.replace("]","").split("[")[1].split(",")
-                    else:
-                        rowlist = [0]
-                    for rowp in rowlist:
-                        tmprow = row + int(rowp)
-                        try:
-                            ctext = table[tmprow][col]
-                        except:
-                            ctext = ""
-                        if bool(re.match(ftext, ctext)):
-                            res = True
-                            break
-                    if res == False:
-                        break
-                if res == True:
-                    break
-        return res
-
     def filtriMultipli(self):
-        self.Corpus.setStart(self.w.daToken.value())
-        self.Corpus.setEnd(self.w.aToken.value())
         self.Corpus.filtriMultipli()
+        self.w.ccolumn.setCurrentText(self.filtrimultiplienabled)
 
     def actionNumero_dipendenze_per_frase(self):
-        self.Corpus.setStart(self.w.daToken.value())
-        self.Corpus.setEnd(self.w.aToken.value())
         self.Corpus.actionNumero_dipendenze_per_frase()
 
     def addTagFromFilter(self):
-        self.Corpus.setStart(self.w.daToken.value())
-        self.Corpus.setEnd(self.w.aToken.value())
         self.Corpus.addTagFromFilter()
 
     def concordanze(self):
-        self.Corpus.setStart(self.w.daToken.value())
-        self.Corpus.setEnd(self.w.aToken.value())
         self.Corpus.concordanze()
 
     def coOccorrenze(self):
-        self.Corpus.setStart(self.w.daToken.value())
-        self.Corpus.setEnd(self.w.aToken.value())
         self.Corpus.coOccorrenze()
 
     def removevisiblerows(self):
-        self.Corpus.setStart(self.w.daToken.value())
-        self.Corpus.setEnd(self.w.aToken.value())
         self.Corpus.removevisiblerows()
 
     def cancelfiltro(self):
@@ -577,14 +488,13 @@ class MainWindow(QMainWindow):
             self.w.corpus.setRowHidden(row, False)
 
     def loadtxt(self):
-        self.Corpus.setStart(self.w.daToken.value())
-        self.Corpus.setEnd(self.w.aToken.value())
         self.Corpus.loadtxt()
 
     def loadTextFromCSV(self):
-        self.Corpus.setStart(self.w.daToken.value())
-        self.Corpus.setEnd(self.w.aToken.value())
         self.Corpus.loadTextFromCSV()
+        maximum = len(self.Corpus.corpus)
+        self.w.daToken.setMaximum(maximum)
+        self.w.aToken.setMaximum(maximum)
 
     def loadjson(self):
         QMessageBox.information(self, "Attenzione", "Caricare un file JSON non è più supportato.")
@@ -616,14 +526,13 @@ class MainWindow(QMainWindow):
     #    return lines
 
     def importfromTreeTagger(self):
-        self.Corpus.setStart(self.w.daToken.value())
-        self.Corpus.setEnd(self.w.aToken.value())
         self.Corpus.importfromTreeTagger()
 
     def loadCSV(self):
-        self.Corpus.setStart(self.w.daToken.value())
-        self.Corpus.setEnd(self.w.aToken.value())
         self.Corpus.loadCSV()
+        maximum = len(self.Corpus.corpus)
+        self.w.daToken.setMaximum(maximum)
+        self.w.aToken.setMaximum(maximum)
 
     #def corpusCellChanged(self, row, col):
     #    if self.Corpus.ImportingFile:
@@ -636,8 +545,6 @@ class MainWindow(QMainWindow):
     #        self.updateCorpus()
 
     def updateCorpus(self):
-        self.Corpus.setStart(self.w.daToken.value())
-        self.Corpus.setEnd(self.w.aToken.value())
         self.Corpus.updateCorpus()
 
     def linescount(self, filename):
@@ -756,6 +663,4 @@ class MainWindow(QMainWindow):
         return dimCorpus
 
     def misure_lessicometriche(self):
-        self.Corpus.setStart(self.w.daToken.value())
-        self.Corpus.setEnd(self.w.aToken.value())
         self.Corpus.misure_lessicometriche()

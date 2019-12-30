@@ -73,14 +73,15 @@ from forms import alberofrasi
 
 class BranCorpus():
 
-    def __init__(self, corpcol, legPos, ignthis, dimlst, tablewidget=None, window=None, parent=None):
+    def __init__(self, corpcol, legPos, ignthis, dimlst, tablewidget=None, parent=None):
         #super(MainWindow, self).__init__(parent)
-        self.w = window
+        #self.w = window
         self.corpuswidget = tablewidget
-        self.daToken = self.w.daToken.value()
-        self.aToken = self.w.aToken.value()
+        self.corpus = []
+        self.daToken = 0
+        self.aToken = 100
+        self.allToken = False
         self.corpuswidget.cellChanged.connect(self.corpusCellChanged)
-        #self.setCentralWidget(self.w)
         #self.setWindowTitle("Bran")
         self.corpuscols = corpcol
         self.legendaPos = legPos
@@ -89,14 +90,14 @@ class BranCorpus():
         self.ignorepos = ["punteggiatura - \"\" () «» - - ", "punteggiatura - : ;", "punteggiatura - ,", "altro"] # "punteggiatura - .?!"
         self.separator = "\t"
         self.language = "it-IT"
-        self.corpus = []
-        self.filtrimultiplienabled = "Filtro multiplo"
+        self.filtrimultiplienabled = 10 #"Filtro multiplo"
+        self.filter = ""
+        self.filterColumn = self.filtrimultiplienabled
         self.alreadyChecked = False
         self.ImportingFile = False
+        self.OnlyVisibleRows = False
         self.sessionFile = ""
         self.sessionDir = "."
-        #self.w.cfilter.setMaxLength(sys.maxsize-1)
-        self.w.cfilter.setMaxLength(2147483647)
         self.mycfgfile = QDir.homePath() + "/.brancfg"
         self.mycfg = json.loads('{"javapath": "", "tintpath": "", "tintaddr": "", "tintport": "", "sessions" : []}')
         self.loadPersonalCFG()
@@ -108,11 +109,17 @@ class BranCorpus():
         self.language = lang
         print("Set language "+self.language)
 
+    def setOnlyVisible(self, value):
+        self.OnlyVisibleRows = value
+
     def setStart(self, value):
         self.daToken = value
 
     def setEnd(self, value):
         self.aToken = value
+
+    def setAllTokens(self, value):
+        self.allToken = value
 
     def loadPersonalCFG(self):
         try:
@@ -149,9 +156,8 @@ class BranCorpus():
         fileNames = QFileDialog.getOpenFileNames(self.corpuswidget, "Apri file TXT", self.sessionDir, "Text files (*.txt *.md)")[0]
         if len(fileNames)<1:
             return
-        #self.w.statusbar.showMessage("ATTENDI: Sto importando i file txt nel corpus...")
         if self.language == "it-IT":
-            self.TCThread = tint.TintCorpus(self.w, fileNames, self.corpuscols, self.TintAddr)
+            self.TCThread = tint.TintCorpus(self.corpuswidget, fileNames, self.corpuscols, self.TintAddr)
             self.TCThread.outputcsv = self.sessionFile
             self.TCThread.finished.connect(self.txtloadingstopped)
             self.TCThread.start()
@@ -162,9 +168,8 @@ class BranCorpus():
         fileNames = QFileDialog.getOpenFileNames(self.corpuswidget, "Apri file CSV", self.sessionDir, "CSV files (*.tsv *.csv)")[0]
         if len(fileNames)<1:
             return
-        #self.w.statusbar.showMessage("ATTENDI: Sto importando i file txt nel corpus...")
         if self.language == "it-IT":
-            self.TCThread = tint.TintCorpus(self.w, fileNames, self.corpuscols, self.TintAddr)
+            self.TCThread = tint.TintCorpus(self.corpuswidget, fileNames, self.corpuscols, self.TintAddr)
             self.TCThread.outputcsv = self.sessionFile
             self.TCThread.csvIDcolumn = 0
             self.TCThread.csvTextcolumn = 0
@@ -251,8 +256,9 @@ class BranCorpus():
                     self.corpus.append(tmpline)
                 except:
                     continue
-        self.updateCorpus(self.Progrdialog)
+        #self.updateCorpus(self.Progrdialog)
         self.Progrdialog.accept()
+        self.updateCorpus()
 
     def loadCSV(self):
         if self.ImportingFile == False:
@@ -278,9 +284,7 @@ class BranCorpus():
                     lines = text_file.read()
                     text_file.close()
                     linesA = lines.split('\n')
-                    maximum = self.w.daToken.value()+len(linesA)-1
-                    self.w.daToken.setMaximum(maximum)
-                    self.w.aToken.setMaximum(maximum)
+                    maximum = self.daToken+len(linesA)-1
                     for line in linesA:
                         newtoken = line.split(self.separator)
                         if len(newtoken) == len(self.corpuscols):
@@ -298,7 +302,6 @@ class BranCorpus():
         return lines
 
     def txtloadingstopped(self):
-        self.w.statusbar.clearMessage()
         if self.sessionFile != "" and self.ImportingFile == False:
             if os.path.isfile(self.sessionFile):
                 if not os.path.getsize(self.sessionFile) > 1:
@@ -469,7 +472,7 @@ class BranCorpus():
                     while self.corpus[row][self.corpuscols['IDphrase'][0]] == self.corpus[endrow][self.corpuscols['IDphrase'][0]] and endrow<(len(self.corpus)-1):
                         endrow = endrow +1
                     myignore = []
-                    phraseText = self.rebuildText(self.corpus, self.Progrdialog, self.corpuscols['Orig'][0], myignore, row, endrow, False)
+                    phraseText = self.rebuildText(self.corpus, self.Progrdialog, self.corpuscols['Orig'][0], myignore, row, endrow)
                     phraseText = self.remUselessSpaces(phraseText)
                     if phraseText[-1] == " ":
                         phraseText = phraseText[:-1]
@@ -545,16 +548,16 @@ class BranCorpus():
             self.Progrdialog.show()
             totallines = len(self.corpus)
             startline = 0
-            if self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked():
-                totallines = self.w.aToken.value()
-                startline = self.w.daToken.value()
+            if self.OnlyVisibleRows:
+                totallines = self.aToken
+                startline = self.daToken
             for row in range(startline, totallines):
                 self.Progrdialog.w.testo.setText("Sto cercando nella riga numero "+str(row))
                 self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
                 QApplication.processEvents()
                 if self.Progrdialog.w.annulla.isChecked():
                     return
-                if self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked() and self.corpuswidget.isRowHidden(row-startline):
+                if self.OnlyVisibleRows and self.corpuswidget.isRowHidden(row-startline):
                         continue
                 for col in range(len(self.corpus[row])):
                     if repCdialog.w.colcheck.isChecked() or (not repCdialog.w.colcheck.isChecked() and col == repCdialog.w.colcombo.currentIndex()):
@@ -586,7 +589,7 @@ class BranCorpus():
                 myflags=re.DOTALL
             self.Progrdialog = progress.Form()
             self.Progrdialog.show()
-            startline = self.w.daToken.value()
+            startline = self.daToken
             totallines = len(self.corpuswidget.selectedItems())
             for i in range(len(self.corpuswidget.selectedItems())):
                 row = self.corpuswidget.selectedItems()[i].row()
@@ -617,7 +620,7 @@ class BranCorpus():
         self.Progrdialog.show()
         totallines = self.corpuswidget.rowCount()
         for row in range(self.corpuswidget.rowCount()):
-            if self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked() and self.corpuswidget.isRowHidden(row):
+            if self.OnlyVisibleRows and self.corpuswidget.isRowHidden(row):
                 continue
             if row<100 or row%100==0:
                 self.Progrdialog.w.testo.setText("Sto selezionando la riga numero "+str(row))
@@ -646,11 +649,11 @@ class BranCorpus():
         self.Progrdialog.show()
         totallines = len(self.corpus)
         startline = 0
-        if self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked():
-            totallines = self.w.aToken.value()
-            startline = self.w.daToken.value()
+        if self.OnlyVisibleRows:
+            totallines = self.aToken
+            startline = self.daToken
         for row in range(startline, totallines):
-            if self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked() and self.corpuswidget.isRowHidden(row-startline):
+            if self.OnlyVisibleRows and self.corpuswidget.isRowHidden(row-startline):
                 continue
             self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
             self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
@@ -684,7 +687,7 @@ class BranCorpus():
         column = QInputDialog.getItem(self.corpuswidget, "Scegli la colonna", "Su quale colonna devo contare le occorrenze?",thisname,current=0,editable=False)
         col = thisname.index(column[0])
         QMessageBox.information(self.corpuswidget, "Filtro", "Ora devi impostare i filtri con cui dividere i risultati. I vari filtri devono essere separati da condizioni OR, per ciascuno di essi verrà creata una colonna a parte nella tabella dei risultati.")
-        self.w.ccolumn.setCurrentText(self.filtrimultiplienabled)
+        fcol = self.filtrimultiplienabled
         Fildialog = creafiltro.Form(self.corpus, self.corpuscols, self.corpuswidget)
         Fildialog.sessionDir = self.sessionDir
         Fildialog.w.filter.setText("pos=A.*||pos=S.*")
@@ -702,11 +705,11 @@ class BranCorpus():
             TBdialog.addcolumn(myfilter, 1)
         totallines = len(self.corpus)
         startline = 0
-        if self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked():
-            totallines = self.w.aToken.value()
-            startline = self.w.daToken.value()
+        if self.OnlyVisibleRows:
+            totallines = self.aToken
+            startline = self.daToken
         for row in range(startline, totallines):
-            if self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked() and self.corpuswidget.isRowHidden(row-startline):
+            if self.OnlyVisibleRows and self.corpuswidget.isRowHidden(row-startline):
                 continue
             self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
             self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
@@ -723,7 +726,7 @@ class BranCorpus():
             except:
                 thistext = ""
             for ifilter in range(len(allfilters)):
-                if self.applicaFiltro(self.corpus, row, col, allfilters[ifilter]):
+                if self.applicaFiltro(row, fcol, allfilters[ifilter]):
                     tbrow = TBdialog.finditemincolumn(thistext, col=0, matchexactly = True, escape = True)
                     if tbrow>=0:
                         try:
@@ -750,11 +753,11 @@ class BranCorpus():
         self.Progrdialog.show()
         totallines = len(self.corpus)
         startline = 0
-        if self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked():
-            totallines = self.w.aToken.value()
-            startline = self.w.daToken.value()
+        if self.OnlyVisibleRows:
+            totallines = self.aToken
+            startline = self.daToken
         for row in range(startline, totallines):
-            if self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked() and self.corpuswidget.isRowHidden(row-startline):
+            if self.OnlyVisibleRows and self.corpuswidget.isRowHidden(row-startline):
                 continue
             self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
             self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
@@ -888,7 +891,7 @@ class BranCorpus():
                     sommatoria = 0.0
                     tmplist = tmpstring.split(" ")
                     for tmpword in tmplist:
-                        # Controlliamo self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked() e facciamo un subset solo con le righe visibili?
+                        # Controlliamo self.OnlyVisibleRows e facciamo un subset solo con le righe visibili?
                         crpitems = self.findItemsInColumn(self.corpus, tmpword, col)
                         lencrpitems = len(crpitems)
                         #lencrpitems = 0
@@ -931,7 +934,7 @@ class BranCorpus():
         te.w.plainTextEdit.setPlainText(mycorpus)
         te.exec()
 
-    def rebuildText(self, table, Progrdialog, col = "", ipunct = [], startrow = 0, endrow = 0, usefilter = True):
+    def rebuildText(self, table, Progrdialog, col = "", ipunct = [], startrow = 0, endrow = 0, filtercol = None):
         mycorpus = ""
         if col == "":
             col = self.corpuscols['Orig'][0]
@@ -939,10 +942,10 @@ class BranCorpus():
         if endrow == 0:
             endrow = totallines
         for row in range(startrow, endrow):
-            ftext = self.w.cfilter.text()
-            fcol = self.w.ccolumn.currentIndex()
-            if self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked() and self.applicaFiltro(table, row, fcol, ftext) and usefilter:
-                continue
+            ftext = self.filter
+            if filtercol != None:
+                if self.OnlyVisibleRows and self.applicaFiltro(row, filtercol, ftext, table):
+                    continue
             Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
             Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
             QApplication.processEvents()
@@ -1079,11 +1082,11 @@ class BranCorpus():
         mytypes = {}
         totallines = len(self.corpus)
         startline = 0
-        if self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked():
-            totallines = self.w.aToken.value()
-            startline = self.w.daToken.value()
+        if self.OnlyVisibleRows:
+            totallines = self.aToken
+            startline = self.daToken
         for row in range(startline, totallines):
-            if self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked() and self.corpuswidget.isRowHidden(row-startline):
+            if self.OnlyVisibleRows and self.corpuswidget.isRowHidden(row-startline):
                 continue
             self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
             self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
@@ -1180,7 +1183,7 @@ class BranCorpus():
                 return
             toselect.append(row)
         totallines = len(toselect)
-        startline = self.w.daToken.value()
+        startline = self.daToken
         for row in range(len(toselect),0,-1):
             self.Progrdialog.w.testo.setText("Sto eliminando la riga numero "+str(row))
             self.Progrdialog.w.progressBar.setValue(int(((len(toselect)-row)/totallines)*100))
@@ -1215,69 +1218,14 @@ class BranCorpus():
         mylist = [row[col] for row in table if row[col]==value]
         return mylist
 
-    def dofiltra(self):
-        if self.w.ccolumn.currentText() == self.filtrimultiplienabled and len(self.w.cfilter.text().split("||"))>10:
-            ret = QMessageBox.question(self.corpuswidget,'Domanda', "Sembra che tu voglia applicare un filtro multiplo, l'operazione può essere lenta. Vuoi vedere la percentuale di progresso?", QMessageBox.Yes | QMessageBox.No)
-            if ret == QMessageBox.Yes:
-                self.dofiltra2()
-                return
-        tcount = 0
-        totallines = self.w.aToken.value()
-        startline = self.w.daToken.value()
-        for row in range(startline, totallines):
-            fcol = self.w.ccolumn.currentIndex()
-            #ctext = self.corpuswidget.item(row,col).text()
-            ftext = self.w.cfilter.text()
-            if self.applicaFiltro(self.corpus, row, fcol, ftext): #if bool(re.match(ftext, ctext)):
-                self.corpuswidget.setRowHidden(row-startline, False)
-                tcount = tcount +1
-            else:
-                self.corpuswidget.setRowHidden(row-startline, True)
-        self.w.statusbar.showMessage("Risultati totali: " +str(tcount))
-        #self.Progrdialog.accept()
-
-    def dofiltra2(self):
-        self.Progrdialog = progress.Form()
-        self.Progrdialog.show()
-        tcount = 0
-        totallines = self.corpuswidget.rowCount()
-        for row in range(self.corpuswidget.rowCount()):
-            if row<100 or row%200==0:
-                self.Progrdialog.w.testo.setText("Sto filtrando la riga numero "+str(row))
-                self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
-                QApplication.processEvents()
-            if self.Progrdialog.w.annulla.isChecked():
-                return
-            col = self.w.ccolumn.currentIndex()
-            #ctext = self.corpuswidget.item(row,col).text()
-            ftext = self.w.cfilter.text()
-            if self.applicaFiltro(self.corpuswidget, row, col, ftext): #if bool(re.match(ftext, ctext)):
-                self.corpuswidget.setRowHidden(row, False)
-                tcount = tcount +1
-            else:
-                self.corpuswidget.setRowHidden(row, True)
-        self.w.statusbar.showMessage("Risultati totali: " +str(tcount))
-        self.Progrdialog.accept()
-
-    def findNext(self):
-        irow = 0
-        if len(self.corpuswidget.selectedItems())>0:
-            irow = self.corpuswidget.selectedItems()[len(self.corpuswidget.selectedItems())-1].row()+1
-        if irow < self.corpuswidget.rowCount():
-            col = self.w.ccolumn.currentIndex()
-            for row in range(irow, self.corpuswidget.rowCount()):
-                if self.corpuswidget.isRowHidden(row):
-                    continue
-                ftext = self.w.cfilter.text()
-                if self.applicaFiltro(self.corpuswidget, row, col, ftext):
-                    self.corpuswidget.setCurrentCell(row,0)
-                    break
-
-    def applicaFiltro(self, table, row, col, filtro):
+    def applicaFiltro(self, row, col, filtro, table = None):
         res = False
-        if self.w.ccolumn.currentText() != self.filtrimultiplienabled:
+        if col != self.filtrimultiplienabled:
             try:
-                ctext = table[row][col]
+                if table == None:
+                    ctext = self.corpus[row][col]
+                else:
+                    ctext = table[row][col]
             except:
                 print("Unable to find row " +str(row) + " col "+ str(col))
                 return False
@@ -1304,7 +1252,10 @@ class BranCorpus():
                     for rowp in rowlist:
                         tmprow = row + int(rowp)
                         try:
-                            ctext = table[tmprow][col]
+                            if table == None:
+                                ctext = self.corpus[tmprow][col]
+                            else:
+                                ctext = table[tmprow][col]
                         except:
                             ctext = ""
                         if bool(re.match(ftext, ctext)):
@@ -1317,17 +1268,17 @@ class BranCorpus():
         return res
 
     def filtriMultipli(self):
-        self.w.ccolumn.setCurrentText(self.filtrimultiplienabled)
+        #fcol = self.filtrimultiplienabled
         Fildialog = creafiltro.Form(self.corpus, self.corpuscols, self.corpuswidget)
         Fildialog.sessionDir = self.sessionDir
-        Fildialog.w.filter.setText(self.w.cfilter.text())
+        Fildialog.w.filter.setText(self.filter)
         Fildialog.updateTable()
         Fildialog.exec()
         if Fildialog.w.filter.text() != "":
-            self.w.cfilter.setText(Fildialog.w.filter.text())
+            self.filter = Fildialog.w.filter.text()
 
     def actionNumero_dipendenze_per_frase(self):
-        self.w.ccolumn.setCurrentText(self.filtrimultiplienabled)
+        fcol = self.filtrimultiplienabled
         Fildialog = creafiltro.Form(self.corpus, self.corpuscols, self.corpuswidget)
         Fildialog.sessionDir = self.sessionDir
         col = self.corpuscols["dep"][0]
@@ -1335,7 +1286,7 @@ class BranCorpus():
         Fildialog.updateFilter()
         Fildialog.exec()
         if Fildialog.w.filter.text() != "":
-            self.w.cfilter.setText(Fildialog.w.filter.text())
+            self.filter = Fildialog.w.filter.text()
         allfilters = Fildialog.w.filter.text().split("||")
         TBdialog = tableeditor.Form(self.corpuswidget)
         TBdialog.sessionDir = self.sessionDir
@@ -1346,9 +1297,9 @@ class BranCorpus():
             TBdialog.addcolumn(myfilter, 1)
         totallines = len(self.corpus)
         startline = 0
-        if self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked():
-            totallines = self.w.aToken.value()
-            startline = self.w.daToken.value()
+        if self.OnlyVisibleRows:
+            totallines = self.aToken
+            startline = self.daToken
         for row in range(startline, totallines):
             self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
             self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
@@ -1365,7 +1316,7 @@ class BranCorpus():
             except:
                 thistext = ""
             for ifilter in range(len(allfilters)):
-                if self.applicaFiltro(self.corpus, row, col, allfilters[ifilter]):
+                if self.applicaFiltro(row, fcol, allfilters[ifilter]):
                     tbrow = TBdialog.finditemincolumn(thistext, col=0, matchexactly = True, escape = True)
                     if tbrow>=0:
                         try:
@@ -1382,12 +1333,12 @@ class BranCorpus():
 
     def addTagFromFilter(self):
         QMessageBox.information(self.corpuswidget, "Istruzioni", "Crea il filtro per selezionare gli elementi a cui vuoi aggiungere un tag.")
-        self.w.ccolumn.setCurrentText(self.filtrimultiplienabled)
+        fcol = self.filtrimultiplienabled
         Fildialog = creafiltro.Form(self.corpus, self.corpuscols, self.corpuswidget)
         Fildialog.sessionDir = self.sessionDir
         Fildialog.exec()
         if Fildialog.w.filter.text() != "":
-            self.w.cfilter.setText(Fildialog.w.filter.text())
+            self.filter = Fildialog.w.filter.text()
         nuovotag = QInputDialog.getText(self.corpuswidget, "Scegli il tag", "Indica il tag che vuoi aggiungere alle parole che rispettano il filtro:", QLineEdit.Normal, "")[0]
         repCdialog = regex_replace.Form(self.corpuswidget)
         repCdialog.setModal(False)
@@ -1410,16 +1361,16 @@ class BranCorpus():
         self.Progrdialog.show()
         totallines = len(self.corpus)
         startline = 0
-        if self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked():
-            totallines = self.w.aToken.value()
-            startline = self.w.daToken.value()
+        if self.OnlyVisibleRows:
+            totallines = self.aToken
+            startline = self.daToken
         for row in range(startline, totallines):
             self.Progrdialog.w.testo.setText("Sto modificando la riga numero "+str(row))
             self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
             QApplication.processEvents()
             if self.Progrdialog.w.annulla.isChecked():
                 return
-            if self.applicaFiltro(self.corpus, row, col, self.w.cfilter.text()):
+            if self.applicaFiltro(row, fcol, self.filter):
                 origstr = self.corpus[row][col]
                 newstr = re.sub(repCdialog.w.orig.text(), repCdialog.w.dest.text(), origstr, flags=myflags)
                 if repCdialog.w.dolower.isChecked():
@@ -1445,14 +1396,14 @@ class BranCorpus():
         rangestr = str(myrange)
         #myfilter = str(list(self.corpuscols)[col]) + "[" + rangestr + "]" +"="+parola
         myfilter = str(list(self.corpuscols)[col]) +"="+parola
-        self.w.ccolumn.setCurrentText(self.filtrimultiplienabled)
+        fcol = self.filtrimultiplienabled
         Fildialog = creafiltro.Form(self.corpus, self.corpuscols, self.corpuswidget)
         Fildialog.sessionDir = self.sessionDir
         Fildialog.w.filter.setText(myfilter) #"Lemma=essere&&pos[1,-1]=SP||Lemma[-1]=essere&&pos=S"
         Fildialog.updateTable()
         Fildialog.exec()
         if Fildialog.w.filter.text() != "":
-            self.w.cfilter.setText(Fildialog.w.filter.text())
+            self.filter = Fildialog.w.filter.text()
         #self.dofiltra()
         TBdialog = tableeditor.Form(self.corpuswidget)
         TBdialog.sessionDir = self.sessionDir
@@ -1467,13 +1418,13 @@ class BranCorpus():
         self.Progrdialog.show()
         totallines = len(self.corpus)
         startline = 0
-        if self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked():
-            totallines = self.w.aToken.value()
-            startline = self.w.daToken.value()
+        if self.OnlyVisibleRows:
+            totallines = self.aToken
+            startline = self.daToken
         for row in range(startline, totallines):
-            if not self.applicaFiltro(self.corpus, row, self.filtrimultiplienabled, self.w.cfilter.text()):
+            if not self.applicaFiltro(row, self.filtrimultiplienabled, self.filter):
                 continue
-            thistext = self.rebuildText(self.corpus, self.Progrdialog, col, myignore, row-myrange, row+myrange+1, False)
+            thistext = self.rebuildText(self.corpus, self.Progrdialog, col, myignore, row-myrange, row+myrange+1)
             thistext = self.remUselessSpaces(thistext)
             tbrow = TBdialog.finditemincolumn(thistext, col=0, matchexactly = True, escape = True)
             if tbrow>=0:
@@ -1496,14 +1447,14 @@ class BranCorpus():
         myrange = int(QInputDialog.getInt(self.corpuswidget, "Indica il range", "Quante parole, prima e dopo, vuoi leggere?")[0])
         rangestr = str(myrange)
         myfilter = str(list(self.corpuscols)[col]) +"="+parola
-        self.w.ccolumn.setCurrentText(self.filtrimultiplienabled)
+        fcol = self.filtrimultiplienabled
         Fildialog = creafiltro.Form(self.corpus, self.corpuscols, self.corpuswidget)
         Fildialog.sessionDir = self.sessionDir
         Fildialog.w.filter.setText(myfilter) #"Lemma=essere&&pos[1,-1]=SP||Lemma[-1]=essere&&pos=S"
         Fildialog.updateTable()
         Fildialog.exec()
         if Fildialog.w.filter.text() != "":
-            self.w.cfilter.setText(Fildialog.w.filter.text())
+            self.filter = Fildialog.w.filter.text()
         #self.dofiltra()
         TBdialog = tableeditor.Form(self.corpuswidget)
         TBdialog.sessionDir = self.sessionDir
@@ -1519,15 +1470,14 @@ class BranCorpus():
         concordanze = []
         totallines = len(self.corpus)
         startline = 0
-        if self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked():
-            totallines = self.w.aToken.value()
-            startline = self.w.daToken.value()
+        if self.OnlyVisibleRows:
+            totallines = self.aToken
+            startline = self.daToken
         for row in range(startline, totallines):
-            ftext = myfilter #self.w.cfilter.text()
-            fcol = self.w.ccolumn.currentIndex()
-            if not self.applicaFiltro(self.corpus, row, fcol, ftext):
+            ftext = myfilter #self.filter
+            if not self.applicaFiltro(row, fcol, ftext):
                 continue
-            thistext = self.rebuildText(self.corpus, self.Progrdialog, col, myignore, row-myrange, row+myrange+1, False)
+            thistext = self.rebuildText(self.corpus, self.Progrdialog, col, myignore, row-myrange, row+myrange+1)
             #thistext = self.remUselessSpaces(thistext)
             regex = re.escape('.?!')
             if bool(re.match(".*["+regex+"].*", thistext)):
@@ -1568,7 +1518,7 @@ class BranCorpus():
         self.Progrdialog = progress.Form()
         self.Progrdialog.show()
         totallines = self.corpuswidget.rowCount()
-        startline = self.w.daToken.value()
+        startline = self.daToken
         toselect = []
         for row in range(self.corpuswidget.rowCount()):
             self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
@@ -1599,28 +1549,31 @@ class BranCorpus():
         if self.ImportingFile:
             return
         try:
-            startline = self.w.daToken.value()
+            startline = self.daToken
             self.corpus[row+startline][col] = self.corpuswidget.item(row,col).text()
         except:
             print("Error editing cell")
             self.updateCorpus()
 
     def updateCorpus(self):
-        if self.w.allToken.isChecked():
-            self.w.daToken.setValue(0)
-            self.w.aToken.setValue(self.w.aToken.maximum())
         Progrdialog = progress.Form() #self.Progrdialog = progress.Form()
         Progrdialog.show() #self.Progrdialog.show()
         # Clear table before adding new lines
         self.corpuswidget.setRowCount(0)
-        maximum = self.w.aToken.value()
+        starting = self.daToken
+        maximum = self.aToken
+        if self.allToken:
+            starting = 0
+            maximum = len(self.corpus)
         if maximum > len(self.corpus):
             maximum = len(self.corpus)
-        totallines = maximum-self.w.daToken.value()
+        if starting < 0:
+            starting = 0
+        totallines = maximum-starting
         if totallines < 0:
             print("daToken need to be smaller than aToken")
             return
-        for rowN in range(self.w.daToken.value(),maximum):
+        for rowN in range(starting,maximum):
             Progrdialog.w.testo.setText("Sto importando la riga numero "+str(rowN))
             Progrdialog.w.progressBar.setValue(int((rowN/totallines)*100))
             if rowN<100 or rowN%100==0:
@@ -1653,7 +1606,6 @@ class BranCorpus():
             self.TintDir = self.TintSetdialog.w.tintlib.text()
             self.TintPort = self.TintSetdialog.w.port.text()
             self.TintAddr = "http://" + self.TintSetdialog.w.address.text() + ":" +self.TintPort +"/tint"
-            self.w.statusbar.showMessage("ATTENDI: Devo avviare il server")
             self.TintThread = tint.TintRunner(self.TintSetdialog.w)
             self.TintThread.loadvariables(self.Java, self.TintDir, self.TintPort)
             self.TintThread.dataReceived.connect(lambda data: self.runServer(bool(data)))
@@ -1665,7 +1617,6 @@ class BranCorpus():
                 print("\nNON CHIUDERE QUESTA FINESTRA:  Tint è eseguito dentro questa finestra. Avvia di nuovo Bran.")
                 print("\n\nNON CHIUDERE QUESTA FINESTRA")
                 sys.exit(0)
-            self.w.statusbar.showMessage("OK, il server è attivo")
 
     def checkServer(self, ok = False):
         if not ok:
@@ -1678,7 +1629,7 @@ class BranCorpus():
             self.TintPort = self.TintSetdialog.w.port.text()
             self.TintAddr = "http://" + self.TintSetdialog.w.address.text() + ":" +self.TintPort +"/tint"
             QApplication.processEvents()
-            self.TestThread = tint.TintCorpus(self.w, [], self.corpuscols, self.TintAddr)
+            self.TestThread = tint.TintCorpus(self.corpuswidget, [], self.corpuscols, self.TintAddr)
             self.TestThread.dataReceived.connect(lambda data: self.checkServer(bool(data)))
             self.alreadyChecked = True
             self.TestThread.start()
@@ -1771,11 +1722,11 @@ class BranCorpus():
         mytypes = {}
         totallines = len(self.corpus)
         startline = 0
-        if self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked():
-            totallines = self.w.aToken.value()
-            startline = self.w.daToken.value()
+        if self.OnlyVisibleRows:
+            totallines = self.aToken
+            startline = self.daToken
         for row in range(startline, totallines):
-            if self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked() and self.corpuswidget.isRowHidden(row-startline):
+            if self.OnlyVisibleRows and self.corpuswidget.isRowHidden(row-startline):
                 continue
             self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
             self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))

@@ -121,7 +121,7 @@ class TintCorpus(QThread):
 
     def __init__(self, widget, fnames, corpcol, myTintAddr):
         QThread.__init__(self)
-        self.w = widget
+        self.corpuswidget = widget
         self.fileNames = fnames
         self.corpuscols = corpcol
         self.Tintaddr = myTintAddr
@@ -132,7 +132,7 @@ class TintCorpus(QThread):
         self.setTerminationEnabled(True)
         self.iscli = False
         try:
-            if self.w == "cli":
+            if self.corpuswidget == "cli":
                 self.iscli = True
         except:
             self.iscli = False
@@ -160,8 +160,8 @@ class TintCorpus(QThread):
             if not fileName == "":
                 if os.path.isfile(fileName):
                     try:
-                        if self.w.corpus.rowCount() >0:
-                            fileID = int(self.w.corpus.item(self.w.corpus.rowCount()-1,0).text().split("_")[0])
+                        if self.corpuswidget.rowCount() >0:
+                            fileID = int(self.corpuswidget.item(self.corpuswidget.rowCount()-1,0).text().split("_")[0])
                     except:
                         fileID = 0
                     #QApplication.processEvents()
@@ -177,7 +177,7 @@ class TintCorpus(QThread):
                         gotEncoding = False
                         while gotEncoding == False:
                             try:
-                                myencoding = QInputDialog.getText(self.w, "Scegli la codifica", "Sembra che questo file non sia codificato in UTF-8. Vuoi provare a specificare una codifica diversa? (Es: cp1252 oppure ISO-8859-15)", QLineEdit.Normal, myencoding)
+                                myencoding = QInputDialog.getText(self.corpuswidget, "Scegli la codifica", "Sembra che questo file non sia codificato in UTF-8. Vuoi provare a specificare una codifica diversa? (Es: cp1252 oppure ISO-8859-15)", QLineEdit.Normal, myencoding)
                             except:
                                 print("Sembra che questo file non sia codificato in UTF-8. Vuoi provare a specificare una codifica diversa? (Es: cp1252 oppure ISO-8859-15)")
                                 myencoding = [input()]
@@ -195,17 +195,17 @@ class TintCorpus(QThread):
                     if self.csvIDcolumn <0 or self.csvTextcolumn <0:
                         try:
                             corpusID = str(fileID)+"_"+os.path.basename(fileName)
-                            corpusID = QInputDialog.getText(self.w, "Scegli il tag", "Indica il tag di questo file nel corpus:", QLineEdit.Normal, corpusID)[0]
+                            corpusID = QInputDialog.getText(self.corpuswidget, "Scegli il tag", "Indica il tag di questo file nel corpus:", QLineEdit.Normal, corpusID)[0]
                         except:
                             corpusID = str(fileID)+"_"+os.path.basename(fileName)
                         self.text2corpusTINT(lines, corpusID)
                     else:
                         try:
-                            sep = QInputDialog.getText(self.w, "Scegli il separatore", "Indica il carattere che separa le colonne (\\t è la tabulazione):", QLineEdit.Normal, "\\t")[0]
+                            sep = QInputDialog.getText(self.corpuswidget, "Scegli il separatore", "Indica il carattere che separa le colonne (\\t è la tabulazione):", QLineEdit.Normal, "\\t")[0]
                             if sep == "\\t":
                                 sep = "\t"
-                            textID = QInputDialog.getInt(self.w, "Scegli il testo", "Indica la colonna della tabella che contiene il testo di questo sottocorpus:")[0]
-                            corpusIDtext = QInputDialog.getText(self.w, "Scegli il tag", "Indica il tag di questo file nel corpus. Puoi usare [filename] per indicare il nome del file e [numeroColonna] per indicare la colonna da cui estrarre un tag.", QLineEdit.Normal, "[filename], [0]")[0]
+                            textID = QInputDialog.getInt(self.corpuswidget, "Scegli il testo", "Indica la colonna della tabella che contiene il testo di questo sottocorpus:")[0]
+                            corpusIDtext = QInputDialog.getText(self.corpuswidget, "Scegli il tag", "Indica il tag di questo file nel corpus. Puoi usare [filename] per indicare il nome del file e [numeroColonna] per indicare la colonna da cui estrarre un tag.", QLineEdit.Normal, "[filename], [0]")[0]
                             textID = int(textID)
                             for line in lines.split("\n"):
                                 corpusID = corpusIDtext.replace("[filename]", os.path.basename(fileName))
@@ -243,19 +243,19 @@ class TintCorpus(QThread):
 
 
     def addlinetocorpus(self, text, column):
-        row = self.w.corpus.rowCount()
-        self.w.corpus.insertRow(row)
+        row = self.corpuswidget.rowCount()
+        self.corpuswidget.insertRow(row)
         titem = QTableWidgetItem()
         titem.setText(text)
-        self.w.corpus.setItem(row, column, titem)
-        self.w.corpus.setCurrentCell(row, column)
+        self.corpuswidget.setItem(row, column, titem)
+        self.corpuswidget.setCurrentCell(row, column)
         return row
 
     def setcelltocorpus(self, text, row, column):
         titem = QTableWidgetItem()
         titem.setText(text)
-        self.w.corpus.setItem(row, column, titem)
-        #self.w.corpus.setCurrentCell(row, column)
+        self.corpuswidget.setItem(row, column, titem)
+        #self.corpuswidget.setCurrentCell(row, column)
 
     def text2corpusTINT(self, text, IDcorpus):
         #process
@@ -286,9 +286,9 @@ class TintCorpus(QThread):
         try:
             IDphrase = -1
             if self.outputcsv == "":
-                for crow in range(self.w.corpus.rowCount()):
-                    if int(self.w.corpus.item(crow, self.corpuscols["IDphrase"][0]).text()) > IDphrase:
-                        IDphrase = int(self.w.corpus.item(crow, self.corpuscols["IDphrase"][0]).text())
+                for crow in range(self.corpuswidget.rowCount()):
+                    if int(self.corpuswidget.item(crow, self.corpuscols["IDphrase"][0]).text()) > IDphrase:
+                        IDphrase = int(self.corpuswidget.item(crow, self.corpuscols["IDphrase"][0]).text())
             else:
                 with open(self.rowfilename, "r", encoding='utf-8') as ins:
                     for line in ins:
@@ -430,7 +430,7 @@ class TintCorpus(QThread):
                 print(msg)
                 sys.exit(1)
             else:
-                ret = QMessageBox.question(self.w,'Errore', msg + " Vuoi chiudere Bran?", QMessageBox.Yes | QMessageBox.No)
+                ret = QMessageBox.question(self.corpuswidget,'Errore', msg + " Vuoi chiudere Bran?", QMessageBox.Yes | QMessageBox.No)
                 if ret == QMessageBox.Yes:
                     sys.exit(1)
         try:
