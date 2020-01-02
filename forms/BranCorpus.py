@@ -152,7 +152,8 @@ class BranCorpus():
                 QApplication.processEvents()
         #self.setWindowTitle("Bran")
 
-    def loadtxt(self):
+    def loadtxt(self, tintaddr = "localhost"):
+        self.TintAddr = tintaddr
         fileNames = QFileDialog.getOpenFileNames(self.corpuswidget, "Apri file TXT", self.sessionDir, "Text files (*.txt *.md)")[0]
         if len(fileNames)<1:
             return

@@ -488,7 +488,7 @@ class MainWindow(QMainWindow):
             self.w.corpus.setRowHidden(row, False)
 
     def loadtxt(self):
-        self.Corpus.loadtxt()
+        self.Corpus.loadtxt(self.TintAddr)
 
     def loadTextFromCSV(self):
         self.Corpus.loadTextFromCSV()

@@ -118,6 +118,7 @@ class TintRunner(QThread):
 
 class TintCorpus(QThread):
     dataReceived = Signal(bool)
+    updated = Signal(int)
 
     def __init__(self, widget, fnames, corpcol, myTintAddr):
         QThread.__init__(self)
@@ -155,6 +156,7 @@ class TintCorpus(QThread):
         fileID = 0
         self.Progrdialog = progress.Form()
         if not self.iscli:
+            self.updated.connect(self.Progrdialog.setValue)
             self.Progrdialog.show()
         for fileName in self.fileNames:
             if not fileName == "":
@@ -265,6 +267,8 @@ class TintCorpus(QThread):
         #itext = re.split('[\n\.\?]', text)
         totallines = len(itext)
         print("Total lines: "+str(totallines))
+        self.Progrdialog.setBasetext("Sto lavorando sulla frase numero ")
+        self.Progrdialog.setTotal(totallines)
         startatrow = -1
         try:
             if os.path.isfile(self.rowfilename):
@@ -300,8 +304,9 @@ class TintCorpus(QThread):
         for line in itext:
             row = row + 1
             if row > startatrow:
-                self.Progrdialog.w.testo.setText("Sto lavorando sulla frase numero "+str(row))
-                self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+                #self.Progrdialog.w.testo.setText("Sto lavorando sulla frase numero "+str(row))
+                #self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+                self.updated.emit(row)
                 if not self.iscli and row % 20 == 0:
                     QApplication.processEvents()
                 if self.Progrdialog.w.annulla.isChecked():

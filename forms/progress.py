@@ -22,7 +22,7 @@ import platform
 
 
 class ProgressDialog(QThread):
-    dataReceived = Signal(bool)
+    #dataReceived = Signal(bool)
 
     def __init__(self, widget):
         QThread.__init__(self)
@@ -48,8 +48,6 @@ class ProgressDialog(QThread):
         #self.Progrdialog.isaccepted()
 
 
-
-
 class Form(QDialog):
     def __init__(self, parent=None):
         super(Form, self).__init__(parent)
@@ -61,9 +59,24 @@ class Form(QDialog):
         layout.addWidget(self.w)
         self.setLayout(layout)
         self.w.annulla.clicked.connect(self.isrejected)
+        self.basetext = ""
+        self.totallines = 0
+        self.currentValue = 0
         self.setWindowTitle("Operazione in corso")
 
     def isaccepted(self):
         self.accept()
     def isrejected(self):
         self.reject()
+
+    def setBasetext(self, basetext):
+        self.basetext = basetext
+
+    def setTotal(self, total):
+        self.totallines = total
+
+    def setValue(self, value):
+        self.w.testo.setText(self.basetext+str(value))
+        if self.currentValue != int((value/self.totallines)*100):
+            self.currentValue = int((value/self.totallines)*100)
+            self.w.progressBar.setValue(self.currentValue)
