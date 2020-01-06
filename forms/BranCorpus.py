@@ -74,6 +74,7 @@ from forms import alberofrasi
 
 class BranCorpus(QObject):
     sizeChanged = Signal(int)
+    progressUpdated = Signal(int)
 
     def __init__(self, corpcol, legPos, ignthis, dimlst, tablewidget=None, parent=None):
         #super(BranCorpus, self).__init__(parent)
@@ -673,12 +674,18 @@ class BranCorpus(QObject):
         if self.OnlyVisibleRows:
             totallines = self.aToken
             startline = self.daToken
+        self.progressUpdated.connect(self.Progrdialog.setValue)
+        self.Progrdialog.setBasetext("Sto conteggiando la riga numero ")
+        self.Progrdialog.setTotal(totallines)
         for row in range(startline, totallines):
             if self.OnlyVisibleRows and self.corpuswidget.isRowHidden(row-startline):
                 continue
-            self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
-            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
-            QApplication.processEvents()
+            #self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
+            #self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            #QApplication.processEvents()
+            self.progressUpdated.emit(row)
+            if row<100 or row % 100 == 0:
+                QApplication.processEvents()
             if self.Progrdialog.w.annulla.isChecked():
                 return
             try:

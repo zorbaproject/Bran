@@ -220,7 +220,7 @@ class TintCorpus(QThread):
                                         intCol = int(corpusID[start+1:end-1])
                                         corpusID = corpusID.replace(strCol, line.split(sep)[intCol])
                                     except:
-                                        print("Impossiible trovare la colonna nel CSV")
+                                        print("Impossibile trovare la colonna nel CSV")
                                 print(corpusID)
                                 self.text2corpusTINT(line.split(sep)[textID], corpusID)
                         except:
