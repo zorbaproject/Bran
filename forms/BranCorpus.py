@@ -54,7 +54,8 @@ from PySide2.QtWidgets import QTableWidget
 from PySide2.QtWidgets import QTableWidgetItem
 from PySide2.QtWidgets import QTableWidgetSelectionRange
 from PySide2.QtCore import QThread
-
+from PySide2.QtCore import QObject
+from PySide2.QtWidgets import QWidget
 
 from forms import regex_replace
 from forms import url2corpus
@@ -71,10 +72,12 @@ from forms import alberofrasi
 
 
 
-class BranCorpus():
+class BranCorpus(QObject):
+    sizeChanged = Signal(int)
 
     def __init__(self, corpcol, legPos, ignthis, dimlst, tablewidget=None, parent=None):
-        #super(MainWindow, self).__init__(parent)
+        #super(BranCorpus, self).__init__(parent)
+        super(BranCorpus, self).__init__()
         #self.w = window
         self.corpuswidget = tablewidget
         self.corpus = []
@@ -101,9 +104,8 @@ class BranCorpus():
         self.mycfgfile = QDir.homePath() + "/.brancfg"
         self.mycfg = json.loads('{"javapath": "", "tintpath": "", "tintaddr": "", "tintport": "", "sessions" : []}')
         self.loadPersonalCFG()
-        #self.loadSession()
-        #self.loadConfig()
-        self.txtloadingstopped()
+        #TODO: Should we specify the session in the constructor?
+        #self.txtloadingstopped()
 
     def changeLang(self, lang):
         self.language = lang
@@ -259,6 +261,7 @@ class BranCorpus():
                     continue
         #self.updateCorpus(self.Progrdialog)
         self.Progrdialog.accept()
+        self.sizeChanged.emit(len(self.corpus))
         self.updateCorpus()
 
     def loadCSV(self):
@@ -272,24 +275,37 @@ class BranCorpus():
         for fileName in fileNames:
             if not fileName == "":
                 if os.path.isfile(fileName):
+                    print(fileName)
                     if not os.path.getsize(fileName) > 0:
                         #break
                         self.ImportingFile = False
-                        return
+                        continue
+                    #print("Importing")
                     try:
                         totallines = self.linescount(fileName)
-                    except:
+                        #print(totallines)
+                    except Exception as ex:
+                        print(ex)
                         self.ImportingFile = False
-                        return
+                        continue
                     text_file = open(fileName, "r", encoding='utf-8')
                     lines = text_file.read()
                     text_file.close()
                     linesA = lines.split('\n')
                     maximum = self.daToken+len(linesA)-1
+                    #print("Maximum: "+str(maximum))
                     for line in linesA:
+                        if line == "":
+                            continue
                         newtoken = line.split(self.separator)
-                        if len(newtoken) == len(self.corpuscols):
-                            self.corpus.append(newtoken)
+                        if len(newtoken) < len(self.corpuscols):
+                            for i in range(len(newtoken),len(self.corpuscols)):
+                                newtoken.append("")
+                        elif len(newtoken) > len(self.corpuscols):
+                            newtoken = newtoken[0:len(self.corpuscols)]
+                        self.corpus.append(newtoken)
+        #print("Updating view")
+        self.sizeChanged.emit(len(self.corpus))
         self.updateCorpus()
         self.ImportingFile = False
 
@@ -303,6 +319,7 @@ class BranCorpus():
         return lines
 
     def txtloadingstopped(self):
+        print("Loading project")
         if self.sessionFile != "" and self.ImportingFile == False:
             if os.path.isfile(self.sessionFile):
                 if not os.path.getsize(self.sessionFile) > 1:
@@ -312,12 +329,15 @@ class BranCorpus():
                 fileNames = ['']
                 fileNames[0] = self.sessionFile
                 self.corpuswidget.setRowCount(0)
+                print("Reading CSV")
                 self.CSVloader(fileNames)
-            except:
+            except Exception as ex:
+                print(ex)
                 try:
                     self.myprogress.reject()
                     self.ImportingFile = False
                 except:
+                    self.ImportingFile = False
                     return
 
     def salvaProgetto(self):
@@ -1195,6 +1215,7 @@ class BranCorpus():
             del self.corpus[startline+toselect[row-1]]
 
         self.Progrdialog.accept()
+        self.sizeChanged.emit(len(self.corpus))
 
     def enumeratecolumns(self, combo):
         for col in range(self.corpuswidget.columnCount()):
@@ -1539,6 +1560,7 @@ class BranCorpus():
             self.corpuswidget.removeRow(toselect[row-1])
             del self.corpus[startline+toselect[row-1]]
         self.Progrdialog.accept()
+        self.sizeChanged.emit(len(self.corpus))
 
     def cancelfiltro(self):
         for row in range(self.corpuswidget.rowCount()):
@@ -1563,6 +1585,8 @@ class BranCorpus():
         self.corpuswidget.setRowCount(0)
         starting = self.daToken
         maximum = self.aToken
+        #print(starting)
+        #print(maximum)
         if self.allToken:
             starting = 0
             maximum = len(self.corpus)
@@ -1571,6 +1595,7 @@ class BranCorpus():
         if starting < 0:
             starting = 0
         totallines = maximum-starting
+        print("Showing lines: "+str(totallines))
         if totallines < 0:
             print("daToken need to be smaller than aToken")
             return
@@ -1589,7 +1614,7 @@ class BranCorpus():
                     return
                 if colN == 0:
                     if line[colN] == "":
-                        continue
+                        break
                     TBrow = self.addlinetocorpus(str(line[colN]), 0) #self.corpuscols["IDcorpus"][0]
                 self.setcelltocorpus(str(line[colN]), TBrow, colN)
 

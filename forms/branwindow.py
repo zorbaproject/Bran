@@ -145,6 +145,7 @@ class MainWindow(QMainWindow):
         self.separator = "\t"
         self.language = "it-IT"
         self.Corpus = BranCorpus.BranCorpus(self.corpuscols, self.legendaPos, self.ignoretext, self.dimList, tablewidget=self.w.corpus)
+        self.Corpus.sizeChanged.connect(self.corpusSizeChanged)
         self.w.allToken.toggled.connect(lambda: self.Corpus.setAllTokens(self.w.allToken.isChecked()))
         self.w.actionEsegui_calcoli_solo_su_righe_visibili.toggled.connect(lambda: self.Corpus.setOnlyVisible(self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked()))
         self.w.daToken.valueChanged.connect(self.Corpus.setStart)
@@ -165,9 +166,25 @@ class MainWindow(QMainWindow):
         self.loadSession()
         self.loadConfig()
         self.Corpus.txtloadingstopped()
-        maximum = len(self.Corpus.corpus)
-        self.w.daToken.setMaximum(maximum)
-        self.w.aToken.setMaximum(maximum)
+
+    def corpusSizeChanged(self, newsize):
+        #maximum = len(self.Corpus.corpus)
+        d = self.w.daToken.value()
+        a = self.w.aToken.value()
+        if a == 0 or a < d:
+            a = 100
+        if a < d:
+            d = 0
+        self.w.daToken.setMaximum(newsize)
+        self.w.aToken.setMaximum(newsize)
+        if newsize > d:
+            self.w.daToken.setValue(d)
+        else:
+            self.w.daToken.setValue(newsize)
+        if newsize > a:
+            self.w.aToken.setValue(a)
+        else:
+            self.w.aToken.setValue(newsize)
 
     def changeLang(self, lang):
         self.language = lang
@@ -237,9 +254,6 @@ class MainWindow(QMainWindow):
     def apriProgetto(self):
         self.loadSession()
         self.Corpus.txtloadingstopped()
-        maximum = len(self.Corpus.corpus)
-        self.w.daToken.setMaximum(maximum)
-        self.w.aToken.setMaximum(maximum)
 
     def chiudiProgetto(self):
         self.Corpus.sessionFile = ""
@@ -492,9 +506,6 @@ class MainWindow(QMainWindow):
 
     def loadTextFromCSV(self):
         self.Corpus.loadTextFromCSV()
-        maximum = len(self.Corpus.corpus)
-        self.w.daToken.setMaximum(maximum)
-        self.w.aToken.setMaximum(maximum)
 
     def loadjson(self):
         QMessageBox.information(self, "Attenzione", "Caricare un file JSON non è più supportato.")
@@ -530,9 +541,6 @@ class MainWindow(QMainWindow):
 
     def loadCSV(self):
         self.Corpus.loadCSV()
-        maximum = len(self.Corpus.corpus)
-        self.w.daToken.setMaximum(maximum)
-        self.w.aToken.setMaximum(maximum)
 
     #def corpusCellChanged(self, row, col):
     #    if self.Corpus.ImportingFile:
