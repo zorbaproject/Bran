@@ -124,13 +124,14 @@ class MainWindow(QMainWindow):
         self.w.actionRicostruisci_testo.triggered.connect(self.ricostruisciTesto)
         self.w.actionConcordanze.triggered.connect(self.concordanze)
         self.w.actionCo_occorrenze.triggered.connect(self.coOccorrenze)
-        self.w.actionDa_file_txt.triggered.connect(self.loadtxt)
+        self.w.actionDa_file_di_testo_con_Tint.triggered.connect(self.loadFromTint)
+        self.w.actionDa_file_di_testo_con_UDpipe.triggered.connect(self.loadFromUDpipe)
         #self.w.actionTraduci_i_tag_PoS_in_forma_leggibile.triggered.connect(self.translatePos)
         #self.w.actionDa_file_JSON.triggered.connect(self.loadjson)
         self.w.actionEstrai_testo_da_CSV.triggered.connect(self.loadTextFromCSV)
         self.w.actionDa_file_CSV.triggered.connect(self.loadCSV)
         self.w.actionDa_file_di_TreeTagger.triggered.connect(self.importfromTreeTagger)
-        self.w.actionConfigurazione_Tint.triggered.connect(self.loadConfig)
+        self.w.actionConfigurazione_Tint.triggered.connect(self.loadTintConfig)
         self.w.actionSalva.triggered.connect(self.salvaProgetto)
         self.w.actionApri.triggered.connect(self.apriProgetto)
         self.w.actionChiudi.triggered.connect(self.chiudiProgetto)
@@ -164,7 +165,7 @@ class MainWindow(QMainWindow):
         self.mycfg = json.loads('{"javapath": "", "tintpath": "", "tintaddr": "", "tintport": "", "sessions" : []}')
         self.loadPersonalCFG()
         self.loadSession()
-        self.loadConfig()
+        #self.loadTintConfig()
         self.Corpus.txtloadingstopped()
 
     def corpusSizeChanged(self, newsize):
@@ -190,7 +191,7 @@ class MainWindow(QMainWindow):
         self.language = lang
         print("Set language "+self.language)
 
-    def loadConfig(self):
+    def loadTintConfig(self):
         self.TintSetdialog = tint.Form(self, self.mycfg)
         self.TintSetdialog.w.start.clicked.connect(self.runServer)
         self.TintSetdialog.w.check.clicked.connect(self.checkServer)
@@ -211,12 +212,11 @@ class MainWindow(QMainWindow):
         seSdialog = sessione.Form(self)
         seSdialog.loadhistory(self.mycfg["sessions"])
         seSdialog.exec()
-        self.Corpus.sessionFile = ""
+        self.Corpus.sessionFile = seSdialog.filesessione
+        self.setWindowTitle("Bran - "+self.Corpus.sessionFile)
+        self.sessionDir = os.path.abspath(os.path.dirname(self.Corpus.sessionFile))
         if seSdialog.result():
-            self.Corpus.sessionFile = seSdialog.filesessione
             if os.path.isfile(self.Corpus.sessionFile):
-                self.setWindowTitle("Bran - "+self.Corpus.sessionFile)
-                self.sessionDir = os.path.abspath(os.path.dirname(self.Corpus.sessionFile))
                 tmpsess = [self.Corpus.sessionFile]
                 for i in range(len(self.mycfg["sessions"])-1,-1,-1):
                     if not self.mycfg["sessions"][i] in tmpsess:
@@ -226,7 +226,10 @@ class MainWindow(QMainWindow):
                 self.mycfg["sessions"] = tmpsess
                 #print(tmpsess)
                 self.savePersonalCFG()
+        else:
+            print("Temporary folder")
         if self.Corpus.sessionFile == "":
+            print("Session file does not exist")
             sys.exit(0)
 
 
@@ -501,8 +504,11 @@ class MainWindow(QMainWindow):
         for row in range(self.w.corpus.rowCount()):
             self.w.corpus.setRowHidden(row, False)
 
-    def loadtxt(self):
-        self.Corpus.loadtxt(self.TintAddr)
+    def loadFromTint(self):
+        self.Corpus.loadFromTint(self.TintAddr)
+
+    def loadFromUDpipe(self):
+        self.Corpus.loadFromUDpipe()
 
     def loadTextFromCSV(self):
         self.Corpus.loadTextFromCSV()

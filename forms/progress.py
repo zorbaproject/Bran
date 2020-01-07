@@ -63,6 +63,7 @@ class Form(QDialog):
         self.totallines = 0
         self.currentValue = 0
         self.setWindowTitle("Operazione in corso")
+        #https://stackoverflow.com/questions/11754865/how-to-show-an-infinite-floating-progressbar-in-qt-without-knowing-the-percent
 
     def isaccepted(self):
         self.accept()

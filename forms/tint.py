@@ -466,12 +466,22 @@ class Form(QDialog):
         self.w.quit.clicked.connect(self.quitme)
         self.w.loadjava.clicked.connect(self.loadjava)
         self.w.loadtint.clicked.connect(self.loadtint)
+        self.w.installJava.clicked.connect(self.installJava)
+        self.w.installTint.clicked.connect(self.installTint)
         self.setWindowTitle("Impostazioni di Tint")
         self.notint = False
 
     def quitme(self):
         self.notint = True
         self.accept()
+
+    def installJava(self):
+        url = "https://jdk.java.net/13/"
+        QMessageBox.information(self, "Scarica Java", "Se non hai Java puoi scaricarlo da qui per Windows: <a href=\""+url+"\">"+url+"</a>. Devi solo estrarre il file con 7Zip, non servono privilegi di amministrazione. Poi, indica la posizione del file java.exe (di solito nella cartella bin).")
+
+    def installTint(self):
+        url = "https://github.com/dhfbk/tint/releases/download/0.2/tint-runner-0.2-bin.tar.gz"
+        QMessageBox.information(self, "Scarica Tint", "Se non hai Tint puoi scaricarlo da qui per Windows: <a href=\""+url+"\">"+url+"</a>. Devi solo estrarre il file con 7Zip, non servono privilegi di amministrazione. Poi, indica la posizione della cartella lib.")
 
     def loadsettings(self):
         if platform.system() == "Windows":

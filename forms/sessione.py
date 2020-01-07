@@ -9,6 +9,7 @@ from PySide2.QtWidgets import QFileDialog
 from PySide2.QtWidgets import QInputDialog
 from PySide2.QtWidgets import QMessageBox
 from PySide2.QtCore import QFile
+from PySide2.QtCore import QTemporaryDir
 from PySide2.QtWidgets import QTableWidget
 from PySide2.QtWidgets import QTableWidgetItem
 
@@ -78,9 +79,21 @@ class Form(QDialog):
             self.isrejected()
 
     def isrejected(self):
-        self.filesessione = ""
-        ret = QMessageBox.question(self,'Sicuro sicuro?', "Bran non può procedere senza una sessione di lavoro: il programma verrà chiuso. Sei sicuro di voler chiudere Bran?", QMessageBox.Yes | QMessageBox.No)
+        tdir = QTemporaryDir()
+        self.filesessione = tdir.path().replace("-","_")
+        ret = QMessageBox.question(self,'Sicuro sicuro?', "Bran creerà una sessione temporanea nella cartella "+self.filesessione+". La cartella continuerà a esistere anche dopo la chiusura di Bran, ma verrà cancellata automaticamente al riavvio del sistema. Sei sicuro di voler continuare?", QMessageBox.Yes | QMessageBox.No)
         if ret == QMessageBox.Yes:
+            sname = os.path.basename(self.filesessione)
+            folder = self.filesessione
+            tempfile = folder + "/" + sname +"-bran.tsv"
+            try:
+                os.makedirs(folder)
+                text_file = open(tempfile, "w")
+                text_file.write("")
+                text_file.close()
+                self.filesessione = tempfile
+            except:
+                QMessageBox.critical(self, "Errore", "Impossibile creare la cartella "+folder+" e il file " + tempfile + ": forse non hai il permesso di scrivere in questa posizione, oppure la cartella esiste già.")
             self.reject()
 
     def clearh(self):

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>477</width>
-    <height>398</height>
+    <height>422</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -115,7 +115,7 @@
      <item>
       <widget class="QPushButton" name="annulla">
        <property name="text">
-        <string>Annulla</string>
+        <string>Usa una sessione temporanea</string>
        </property>
       </widget>
      </item>

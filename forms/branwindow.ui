@@ -217,7 +217,8 @@
      <property name="title">
       <string>&amp;Importa corpus</string>
      </property>
-     <addaction name="actionDa_file_txt"/>
+     <addaction name="actionDa_file_di_testo_con_Tint"/>
+     <addaction name="actionDa_file_di_testo_con_UDpipe"/>
      <addaction name="actionEstrai_testo_da_CSV"/>
      <addaction name="actionDa_file_di_TreeTagger"/>
      <addaction name="actionDa_file_CSV"/>
@@ -330,9 +331,9 @@
     <string>&amp;Salva progetto</string>
    </property>
   </action>
-  <action name="actionDa_file_txt">
+  <action name="actionDa_file_di_testo_con_Tint">
    <property name="text">
-    <string>&amp;Da file di testo (TXT)</string>
+    <string>&amp;Da file di testo con Tint</string>
    </property>
   </action>
   <action name="actionDa_file_zip">
@@ -454,6 +455,9 @@
    </property>
   </action>
   <action name="actionItaliano">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>&amp;Italiano</string>
    </property>
@@ -531,6 +535,11 @@
   <action name="actionEsporta_in_formato_CoNNL_U">
    <property name="text">
     <string>Esporta &amp;in formato CoNNL-U</string>
+   </property>
+  </action>
+  <action name="actionDa_file_di_testo_con_UDpipe">
+   <property name="text">
+    <string>Da file di testo con UDpipe</string>
    </property>
   </action>
  </widget>

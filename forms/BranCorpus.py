@@ -155,7 +155,20 @@ class BranCorpus(QObject):
                 QApplication.processEvents()
         #self.setWindowTitle("Bran")
 
-    def loadtxt(self, tintaddr = "localhost"):
+    def loadFromTint(self, tintaddr = "localhost"):
+        self.TintAddr = tintaddr
+        fileNames = QFileDialog.getOpenFileNames(self.corpuswidget, "Apri file TXT", self.sessionDir, "Text files (*.txt *.md)")[0]
+        if len(fileNames)<1:
+            return
+        if self.language == "it-IT":
+            self.TCThread = tint.TintCorpus(self.corpuswidget, fileNames, self.corpuscols, self.TintAddr)
+            self.TCThread.outputcsv = self.sessionFile
+            self.TCThread.finished.connect(self.txtloadingstopped)
+            self.TCThread.start()
+        #else if self.language == "en-US":
+        #https://www.datacamp.com/community/tutorials/stemming-lemmatization-python
+
+    def loadFromUDpipe(self):
         self.TintAddr = tintaddr
         fileNames = QFileDialog.getOpenFileNames(self.corpuswidget, "Apri file TXT", self.sessionDir, "Text files (*.txt *.md)")[0]
         if len(fileNames)<1:
@@ -173,12 +186,7 @@ class BranCorpus(QObject):
         if len(fileNames)<1:
             return
         if self.language == "it-IT":
-            self.TCThread = tint.TintCorpus(self.corpuswidget, fileNames, self.corpuscols, self.TintAddr)
-            self.TCThread.outputcsv = self.sessionFile
-            self.TCThread.csvIDcolumn = 0
-            self.TCThread.csvTextcolumn = 0
-            self.TCThread.finished.connect(self.txtloadingstopped)
-            self.TCThread.start()
+            print("UDpipe still not supported")
         #else if self.language == "en-US":
         #https://www.datacamp.com/community/tutorials/stemming-lemmatization-python
 
