@@ -165,6 +165,7 @@ class MainWindow(QMainWindow):
         self.mycfg = json.loads('{"javapath": "", "tintpath": "", "tintaddr": "", "tintport": "", "sessions" : []}')
         self.loadPersonalCFG()
         self.loadSession()
+        self.TintAddr = ""
         #self.loadTintConfig()
         self.Corpus.txtloadingstopped()
 
@@ -505,6 +506,8 @@ class MainWindow(QMainWindow):
             self.w.corpus.setRowHidden(row, False)
 
     def loadFromTint(self):
+        if self.TintAddr=="":
+            self.loadTintConfig()
         self.Corpus.loadFromTint(self.TintAddr)
 
     def loadFromUDpipe(self):
