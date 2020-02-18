@@ -28,9 +28,12 @@ try:
     from PySide2.QtWidgets import QApplication
 except:
     try:
-        from tkinter import messagebox
         thispkg = "le librerie grafiche"
-        messagebox.showinfo("Installazione, attendi prego", "Sto per installare "+ thispkg +" e ci vorrà del tempo. Premi Ok e vai a prenderti un caffè.")
+        try:
+            from tkinter import messagebox
+            messagebox.showinfo("Installazione, attendi prego", "Sto per installare "+ thispkg +" e ci vorrà del tempo. Premi Ok e vai a prenderti un caffè.")
+        except:
+            print("Sto per installare "+ thispkg +" e ci vorrà del tempo. Premi Ok e vai a prenderti un caffè.")
         pip.main(["install", "PySide2"])
         #pip install --index-url=http://download.qt.io/snapshots/ci/pyside/5.9/latest/ pyside2 --trusted-host download.qt.io
         from PySide2.QtWidgets import QApplication
@@ -42,6 +45,7 @@ except:
             from PySide2.QtWidgets import QApplication
         except:
             print("Errore: Impossibile installare "+thispkg)
+            print("Prova ariavviare Bran: se ottieni lo stesso errore, segnalalo.")
             print("If you don't have pip, please run 'python -m ensurepip'")
             print("Then try 'py -m pip install PySide2'")
             sys.exit(1)
@@ -51,9 +55,12 @@ try:
     import psutil
 except:
     try:
-        from tkinter import messagebox
         thispkg = "la libreria psutil"
-        messagebox.showinfo("Installazione, attendi prego", "Sto per installare "+ thispkg +" e ci vorrà del tempo. Premi Ok e vai a prenderti un caffè.")
+        try:
+            from tkinter import messagebox
+            messagebox.showinfo("Installazione, attendi prego", "Sto per installare "+ thispkg +" e ci vorrà del tempo. Premi Ok e vai a prenderti un caffè.")
+        except:
+            print("Sto per installare "+ thispkg +" e ci vorrà del tempo. Premi Ok e vai a prenderti un caffè.")
         pip.main(["install", "psutil"])
         #pip install --index-url=http://download.qt.io/snapshots/ci/pyside/5.9/latest/ pyside2 --trusted-host download.qt.io
         import psutil
@@ -64,6 +71,7 @@ except:
             import psutil
         except:
             print("Errore: Impossibile installare "+thispkg)
+            print("Prova ariavviare Bran: se ottieni lo stesso errore, segnalalo.")
             sys.exit(1)
 
 
