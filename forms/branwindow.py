@@ -27,25 +27,6 @@ arch = platform.architecture()[0]
 
 from PySide2.QtWidgets import QApplication
 
-#
-try:
-    import psutil
-except:
-    try:
-        from tkinter import messagebox
-        thispkg = "la libreria psutil"
-        messagebox.showinfo("Installazione, attendi prego", "Sto per installare "+ thispkg +" e ci vorrà del tempo. Premi Ok e vai a prenderti un caffè.")
-        pip.main(["install", "psutil"])
-        #pip install --index-url=http://download.qt.io/snapshots/ci/pyside/5.9/latest/ pyside2 --trusted-host download.qt.io
-        import psutil
-    except:
-        try:
-            from pip._internal import main as pipmain
-            pipmain(["install", "psutil"])
-            import psutil
-        except:
-            sys.exit(1)
-
 
 from PySide2.QtUiTools import QUiLoader
 from PySide2.QtCore import QFile
@@ -71,6 +52,7 @@ from forms import texteditor
 from forms import tableeditor
 from forms import confronto
 from forms import tint
+from forms import settings
 from forms import progress
 from forms import sessione
 from forms import ripetizioni
@@ -136,6 +118,8 @@ class MainWindow(QMainWindow):
         self.w.actionApri.triggered.connect(self.apriProgetto)
         self.w.actionChiudi.triggered.connect(self.chiudiProgetto)
         self.w.actionEditor_di_testo.triggered.connect(self.texteditor)
+        self.w.actionEditor_tabelle.triggered.connect(self.tableeditor)
+        self.w.actionConfigurazione_di_Bran.triggered.connect(self.showbranconfig)
         self.w.actionConfronta_corpora.triggered.connect(self.confronto)
         self.w.actionAbout_Bran.triggered.connect(self.aboutbran)
         self.w.actionEstrai_dizionario.triggered.connect(self.misure_lessicometriche)
@@ -618,6 +602,20 @@ class MainWindow(QMainWindow):
         else:
             self.TintSetdialog.accept()
 
+    def showbranconfig(self):
+        self.BranSetdialog = settings.Form(self, self.mycfg)
+        self.BranSetdialog.exec()
+        #self.Java = self.TintSetdialog.w.java.text()
+        #self.TintDir = self.TintSetdialog.w.tintlib.text()
+        #self.TintPort = self.TintSetdialog.w.port.text()
+        #self.TintAddr = "http://" + self.TintSetdialog.w.address.text() + ":" +self.TintPort +"/tint"
+        #if not self.TintSetdialog.notint:
+        #    self.mycfg["javapath"] = self.TintSetdialog.w.java.text()
+        #    self.mycfg["tintpath"] = self.TintSetdialog.w.tintlib.text()
+        #    self.mycfg["tintaddr"] = self.TintSetdialog.w.address.text()
+        #    self.mycfg["tintport"] = self.TintSetdialog.w.port.text()
+        #    self.savePersonalCFG()
+
     def addlinetocorpus(self, text, column):
         row = self.w.corpus.rowCount()
         self.w.corpus.insertRow(row)
@@ -655,6 +653,12 @@ class MainWindow(QMainWindow):
     def texteditor(self):
         te = texteditor.TextEditor()
         te.exec()
+
+    def tableeditor(self):
+        TBdialog = tableeditor.Form(self.w.corpus)
+        TBdialog.sessionDir = self.sessionDir
+        TBdialog.w.apricsv.show()
+        TBdialog.exec()
 
     def confronto(self):
         cf = confronto.Confronto(self.sessionDir)

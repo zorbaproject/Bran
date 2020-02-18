@@ -23,39 +23,45 @@ from PySide2.QtWidgets import QMainWindow
 from PySide2.QtWidgets import QListWidget
 
 
-try:
-    from pyquery import PyQuery as pqtest
-    from lxml import etree
-except:
-    try:
-        from tkinter import messagebox
-        thispkg = "le librerie per scaricare i tweet"
-        messagebox.showinfo("Installazione, attendi prego", "Sto per installare "+ thispkg +" e ci vorrà del tempo. Premi Ok e vai a prenderti un caffè.")
-        pip.main(["install", "pyquery"])
-        pip.main(["install", "lxml"])
-        messagebox.showinfo("Prendi nota", "Probabilmente dovrai installare i pacchetti di sviluppo, su Ubuntu basta questo comando: sudo apt-get install libxml2-dev libxslt1-dev python-dev")
-    except:
-        try:
-            from pip._internal import main as pipmain
-            from tkinter import messagebox
-            pipmain(["install", "pyquery"])
-            pipmain(["install", "lxml"])
-            messagebox.showinfo("Prendi nota", "Probabilmente dovrai installare i pacchetti di sviluppo, su Ubuntu basta questo comando: sudo apt-get install libxml2-dev libxslt1-dev python-dev")
-        except:
-            sys.exit(1)
-
-import got3 as got
 
 
 class TXTdownloader(QThread):
 
     def __init__(self, widget, whattodo):
         QThread.__init__(self)
+        self.importLibs()
         self.w = widget
         self.whattodo = whattodo
         self.loadvariables()
         self.setTerminationEnabled(True)
         self.stopme = False
+
+    def importLibs(self):
+        #TODO: this should be more user friendly
+        #TODO: Check PyQuery installation on windows
+        # py -m pip install pyquery
+        try:
+            from pyquery import PyQuery as pqtest
+            from lxml import etree
+        except:
+            try:
+                from tkinter import messagebox
+                thispkg = "le librerie per scaricare i tweet"
+                messagebox.showinfo("Installazione, attendi prego", "Sto per installare "+ thispkg +" e ci vorrà del tempo. Premi Ok e vai a prenderti un caffè.")
+                pip.main(["install", "pyquery"])
+                pip.main(["install", "lxml"])
+                messagebox.showinfo("Prendi nota", "Probabilmente dovrai installare i pacchetti di sviluppo, su Ubuntu basta questo comando: sudo apt-get install libxml2-dev libxslt1-dev python-dev")
+            except:
+                try:
+                    from pip._internal import main as pipmain
+                    from tkinter import messagebox
+                    pipmain(["install", "pyquery"])
+                    pipmain(["install", "lxml"])
+                    messagebox.showinfo("Prendi nota", "Probabilmente dovrai installare i pacchetti di sviluppo, su Ubuntu basta questo comando: sudo apt-get install libxml2-dev libxslt1-dev python-dev")
+                except:
+                    sys.exit(1)
+
+        import got3 as got
 
     def loadvariables(self):
         #there are a few urls we should ignore

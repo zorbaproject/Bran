@@ -45,6 +45,13 @@
             <widget class="QComboBox" name="ccolumn"/>
            </item>
            <item>
+            <widget class="QCheckBox" name="filtronumerico">
+             <property name="text">
+              <string>Numero</string>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QPushButton" name="dofiltra">
              <property name="text">
               <string>Filtra</string>
@@ -72,6 +79,13 @@
       <widget class="QPushButton" name="apricsv">
        <property name="text">
         <string>Apri file CSV</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="creagrafico">
+       <property name="text">
+        <string>Crea grafico</string>
        </property>
       </widget>
      </item>

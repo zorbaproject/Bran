@@ -41,6 +41,9 @@ except:
             pipmain(["install", "PySide2"])
             from PySide2.QtWidgets import QApplication
         except:
+            print("Errore: Impossibile installare "+thispkg)
+            print("If you don't have pip, please run 'python -m ensurepip'")
+            print("Then try 'py -m pip install PySide2'")
             sys.exit(1)
 
 #
@@ -60,6 +63,7 @@ except:
             pipmain(["install", "psutil"])
             import psutil
         except:
+            print("Errore: Impossibile installare "+thispkg)
             sys.exit(1)
 
 

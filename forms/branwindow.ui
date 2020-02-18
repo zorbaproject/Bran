@@ -266,9 +266,11 @@
     </property>
     <addaction name="actionScarica_corpus_da_sito_web"/>
     <addaction name="actionConfronta_corpora"/>
+    <addaction name="actionEditor_tabelle"/>
     <addaction name="actionEditor_di_testo"/>
     <addaction name="separator"/>
     <addaction name="actionConfigurazione_Tint"/>
+    <addaction name="actionConfigurazione_di_Bran"/>
    </widget>
    <widget class="QMenu" name="menuAbout">
     <property name="title">
@@ -408,7 +410,7 @@
   </action>
   <action name="actionConfigurazione_Tint">
    <property name="text">
-    <string>&amp;Configurazione Tint</string>
+    <string>Avvia Tint</string>
    </property>
   </action>
   <action name="actionTraduci_i_tag_PoS_in_forma_leggibile">
@@ -539,7 +541,17 @@
   </action>
   <action name="actionDa_file_di_testo_con_UDpipe">
    <property name="text">
-    <string>Da file di testo con UDpipe</string>
+    <string>Da file di testo &amp;con UDpipe</string>
+   </property>
+  </action>
+  <action name="actionEditor_tabelle">
+   <property name="text">
+    <string>Editor tabelle</string>
+   </property>
+  </action>
+  <action name="actionConfigurazione_di_Bran">
+   <property name="text">
+    <string>Configurazione di Bran</string>
    </property>
   </action>
  </widget>

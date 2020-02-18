@@ -16,6 +16,11 @@ from PySide2.QtWidgets import QTableWidgetItem
 import re
 import sys
 import os
+import math
+import mmap
+
+from forms import progress
+from forms import texteditor
 
 
 class Form(QDialog):
@@ -32,6 +37,7 @@ class Form(QDialog):
         self.w.rejected.connect(self.isrejected)
         self.w.apricsv.clicked.connect(self.apriCSV)
         self.w.salvacsv.clicked.connect(self.salvaCSV)
+        self.w.creagrafico.clicked.connect(self.creagrafico)
         self.w.tableWidget.itemSelectionChanged.connect(self.selOps)
         self.w.dofiltra.clicked.connect(self.dofiltra)
         self.w.cancelfiltro.clicked.connect(self.cancelfiltro)
@@ -42,6 +48,7 @@ class Form(QDialog):
         self.sessionDir = "."
         self.separator = "\t"
         self.w.filterWidget.hide()
+        self.Rpath = "/usr/bin/Rscript"
 
     def isaccepted(self):
         self.accept()
@@ -107,7 +114,56 @@ class Form(QDialog):
             text_file.close()
 
     def apriCSV(self):
-        print("Niente")
+        fileNames = QFileDialog.getOpenFileNames(self.w.tableWidget, "Apri file CSV", self.sessionDir, "CSV files (*.tsv *.csv)")[0]
+        self.Progrdialog = progress.Form(self.w.tableWidget)
+        self.Progrdialog.show()
+        for fileName in fileNames:
+            if not fileName == "":
+                if os.path.isfile(fileName):
+                    print(fileName)
+                    if not os.path.getsize(fileName) > 0:
+                        continue
+                    try:
+                        totallines = self.linescount(fileName)
+                    except Exception as ex:
+                        print(ex)
+                        continue
+                    text_file = open(fileName, "r", encoding='utf-8')
+                    lines = text_file.read()
+                    text_file.close()
+                    linesA = lines.split('\n')
+                    row = 0
+                    firstrow = True
+                    for line in linesA:
+                        if line == "":
+                            continue
+                        if row<100 or row%100==0:
+                            self.Progrdialog.w.testo.setText("Sto selezionando la riga numero "+str(row))
+                            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+                            QApplication.processEvents()
+                        if self.Progrdialog.w.annulla.isChecked():
+                            return
+                        newtoken = line.split(self.separator)
+                        while len(newtoken) > self.w.tableWidget.columnCount():
+                            ci = self.w.tableWidget.columnCount()
+                            #self.addcolumn("Colonna"+str(ci), ci)
+                            self.addcolumn(newtoken[ci], ci)
+                        if firstrow:
+                            firstrow = False
+                            continue
+                        row = self.addlinetotable(newtoken[0],0)
+                        for c in range(1,len(newtoken)):
+                            self.setcelltotable(newtoken[c],row, c)
+        self.Progrdialog.accept()
+
+    def linescount(self, filename):
+        f = open(filename, "r+", encoding='utf-8')
+        buf = mmap.mmap(f.fileno(), 0)
+        lines = 0
+        readline = buf.readline
+        while readline():
+            lines += 1
+        return lines
 
     def finditemincolumn(self, mytext, col=0, matchexactly = True, escape = True, myflags=0):
         myregex = mytext
@@ -150,11 +206,39 @@ class Form(QDialog):
             col = self.w.ccolumn.currentIndex()
             ctext = self.w.tableWidget.item(row,col).text()
             ftext = self.w.cfilter.text()
-            if bool(re.match(ftext, ctext)):
-                self.w.tableWidget.setRowHidden(row, False)
-                tcount = tcount +1
-            else:
-                self.w.tableWidget.setRowHidden(row, True)
+            try:
+                if self.w.filtronumerico.isChecked():
+                    filterit = False
+                    if ftext.startswith(">"):
+                        filterit = bool(float(ctext) > float(eval(ftext[ftext.find(">")+1:])))
+                    elif ftext.startswith("<"):
+                        filterit = bool(float(ctext) < float(eval(ftext[ftext.find("<")+1:])))
+                    elif ftext.startswith("="):
+                        filterit = bool(float(ctext) == float(eval(ftext[ftext.find("=")+1:])))
+                    elif ftext.startswith(">="):
+                        filterit = bool(float(ctext) >= float(eval(ftext[ftext.find(">=")+2:])))
+                    elif ftext.startswith("<="):
+                        filterit = bool(float(ctext) <= float(eval(ftext[ftext.find("<=")+2:])))
+                    elif ftext.startswith("=="):
+                        filterit = bool(float(ctext) == float(eval(ftext[ftext.find("==")+2:])))
+                    elif ftext.startswith("!="):
+                        filterit = bool(float(ctext) != float(eval(ftext[ftext.find("!=")+2:])))
+                    elif ftext.startswith("~"):
+                        filterit = math.isclose(float(ctext), float(eval(ftext[ftext.find("~")+1:])), rel_tol=0.1)
+                    if filterit:
+                        self.w.tableWidget.setRowHidden(row, False)
+                        tcount = tcount +1
+                    else:
+                        self.w.tableWidget.setRowHidden(row, True)
+                else:
+                    if bool(re.match(ftext, ctext)):
+                        self.w.tableWidget.setRowHidden(row, False)
+                        tcount = tcount +1
+                    else:
+                        self.w.tableWidget.setRowHidden(row, True)
+            except:
+                print("Error filtering row " + str(row) + " in TableEditor")
+                continue
         self.w.statusbar.setText("Risultati totali: " +str(tcount))
 
     def cancelfiltro(self):
@@ -179,6 +263,9 @@ class Form(QDialog):
                 continue
         self.w.tableWidget.setSortingEnabled(True)
         self.w.tableWidget.sortItems(col)
+
+    def creagrafico(self):
+        print("R path: " + self.Rpath)
 
 
 class QTableNumberItem(QTableWidgetItem):
