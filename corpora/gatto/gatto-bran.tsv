@@ -1,0 +1,2001 @@
+1_gatto.txt	Il	il	RD	O	art+m+sing	1	0	det	2
+1_gatto.txt	gatto	gatto	S	O	n+m+sing	2	0	nsubj	20
+1_gatto.txt	domestico	domestico	A	O	adj+m+sing+pst	3	0	amod	2
+1_gatto.txt	(	[PUNCT]	FB	O	( [PUNCT]	4	0	punct	5
+1_gatto.txt	Felis	Felis	SP	ORG	Felis	5	0	nmod	2
+1_gatto.txt	catus	catus	A	ORG	catus	6	0	amod	5
+1_gatto.txt	Linnaeus	Linnaeus	SP	ORG	Linnaeus	7	0	name	5
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	8	0	punct	5
+1_gatto.txt	1758	1758	N	O	1758	9	0	conj	5
+1_gatto.txt	o	o	CC	O	conj	10	0	cc	5
+1_gatto.txt	Felis	Felis	SP	PER	Felis	11	0	conj	5
+1_gatto.txt	silvestris	silvestris	S	O	silvestris	12	0	conj	5
+1_gatto.txt	catus	catus	A	O	catus	13	0	amod	12
+1_gatto.txt	Linnaeus	Linnaeus	SP	PER	Linnaeus	14	0	nmod	12
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	15	0	punct	5
+1_gatto.txt	1758	1758	N	O	1758	16	0	nummod	5
+1_gatto.txt	)	[PUNCT]	FB	O	) [PUNCT]	17	0	punct	5
+1_gatto.txt	è	essere	V	O	v+indic+pres+nil+3+sing	18	0	cop	20
+1_gatto.txt	un	un	RI	O	art+m+sing	19	0	det	20
+1_gatto.txt	mammifero	mammifero	S	O	n+m+sing	20	0	ROOT	0
+1_gatto.txt	carnivoro	carnivoro	A	O	adj+m+sing+pst	21	0	amod	20
+1_gatto.txt	appartenente	appartenere	V	O	v+part+pres+nil+nil+sing	22	0	acl	20
+1_gatto.txt	alla	alla	E+RD	O	prep/art+f+sing	23	0	case	24
+1_gatto.txt	famiglia	famiglia	S	O	n+f+sing	24	0	nmod	22
+1_gatto.txt	dei	del	E+RD	O	prep/art+m+plur	25	0	case	26
+1_gatto.txt	felini	felino	S	O	n+m+plur	26	0	nmod	24
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	27	0	punct	20
+1_gatto.txt	Si	si	PC	O	pron+accdat+_+3+_+clit	1	1	expl:impers	2
+1_gatto.txt	contano	contare	V	O	v+indic+pres+nil+3+plur	2	1	ROOT	0
+1_gatto.txt	una	una	RI	O	art+f+sing	3	1	det	4
+1_gatto.txt	cinquantina	cinquantina	S	O	n+f+sing	4	1	dobj	2
+1_gatto.txt	di	di	E	O	prep	5	1	case	6
+1_gatto.txt	razze	razza	S	O	n+f+plur	6	1	nmod	4
+1_gatto.txt	differenti	differente	A	O	adj+f+plur+pst	7	1	amod	6
+1_gatto.txt	riconosciute	riconoscere	V	O	v+part+pass+f+nil+plur	8	1	acl	6
+1_gatto.txt	con	con	E	O	prep	9	1	case	10
+1_gatto.txt	certificazioni	certificazione	S	O	n+f+plur	10	1	nmod	8
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	11	1	punct	2
+1_gatto.txt	Essenzialmente	essenzialmente	B	O	adv	1	2	advmod	2
+1_gatto.txt	territoriale	territoriale	A	O	adj+f+sing+pst	2	2	ROOT	0
+1_gatto.txt	e	e	CC	O	conj	3	2	cc	2
+1_gatto.txt	crepuscolare	crepuscolare	A	O	crepuscolare	4	2	conj	2
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	5	2	punct	2
+1_gatto.txt	il	il	RD	O	art+m+sing	6	2	det	7
+1_gatto.txt	gatto	gatto	S	O	n+m+sing	7	2	nsubj	10
+1_gatto.txt	è	essere	V	O	v+indic+pres+nil+3+sing	8	2	cop	10
+1_gatto.txt	un	un	RI	O	art+m+sing	9	2	det	10
+1_gatto.txt	predatore	predatore	S	O	n+m+sing	10	2	conj	2
+1_gatto.txt	di	di	E	O	prep	11	2	case	13
+1_gatto.txt	piccoli	piccolo	A	O	adj+m+plur+pst	12	2	amod	13
+1_gatto.txt	animali	animale	S	O	n+m+plur	13	2	nmod	10
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	14	2	punct	2
+1_gatto.txt	specialmente	specialmente	B	O	adv	15	2	advmod	16
+1_gatto.txt	roditori	roditore	S	O	n+m+plur	16	2	conj	2
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	17	2	punct	2
+1_gatto.txt	Per	per	E	O	prep	1	3	mark	2
+1_gatto.txt	comunicare	comunicare	V	O	v+infinito+pres+nil+nil+nil	2	3	ROOT	0
+1_gatto.txt	utilizza	utilizzare	V	O	v+indic+pres+nil+3+sing	3	3	advcl	2
+1_gatto.txt	vari	vario	DI	O	adj+m+plur+pst	4	3	det	5
+1_gatto.txt	vocalizzi	vocalizzo	S	O	n+m+plur	5	3	dobj	3
+1_gatto.txt	(	[PUNCT]	FB	O	( [PUNCT]	6	3	punct	7
+1_gatto.txt	più	più	PI	O	più più+adv	7	3	nmod	5
+1_gatto.txt	di	di	E	O	prep	8	3	case	9
+1_gatto.txt	sedici	sedici	N	O	sedici sedici+adj+_+_+pst+num sedici+adj+_+_+pst+num	9	3	nummod	7
+1_gatto.txt	)	[PUNCT]	FB	O	) [PUNCT]	10	3	punct	7
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	11	3	punct	3
+1_gatto.txt	le	la	RD	O	pron+acc+f+3+plur+clit	12	3	det	13
+1_gatto.txt	fusa	fusa	S	O	fusa fondere+v+part+pass+f+nil+sing fuso+adj+f+sing+pst	13	3	conj	3
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	14	3	punct	3
+1_gatto.txt	le	la	RD	O	pron+acc+f+3+plur+clit	15	3	det	16
+1_gatto.txt	posizioni	posizione	S	O	n+f+plur	16	3	conj	3
+1_gatto.txt	del	del	E+RD	O	prep/art+m+sing	17	3	case	18
+1_gatto.txt	corpo	corpo	S	O	n+m+sing	18	3	nmod	16
+1_gatto.txt	e	e	CC	O	conj	19	3	cc	3
+1_gatto.txt	produce	produrre	V	O	v+indic+pres+nil+3+sing	20	3	conj	3
+1_gatto.txt	dei	del	E+RD	O	prep/art+m+plur	21	3	case	22
+1_gatto.txt	feromoni	feromone	S	O	n+m+plur	22	3	nmod	20
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	23	3	punct	2
+1_gatto.txt	Prevalentemente	prevalentemente	B	O	adv	1	4	advmod	2
+1_gatto.txt	domestico	domestico	A	O	adj+m+sing+pst	2	4	advcl	8
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	3	4	punct	2
+1_gatto.txt	il	il	RD	O	art+m+sing	4	4	det	5
+1_gatto.txt	gatto	gatto	S	O	n+m+sing	5	4	nsubjpass	8
+1_gatto.txt	può	potere	VM	O	v+indic+pres+nil+3+sing	6	4	aux	8
+1_gatto.txt	essere	essere	VA	O	v+infinito+pres+nil+nil+nil	7	4	auxpass	8
+1_gatto.txt	addestrato	addestrare	V	O	v+part+pass+m+nil+sing	8	4	ROOT	0
+1_gatto.txt	ad	ad	E	O	prep	9	4	mark	10
+1_gatto.txt	accettare	accettare	V	O	v+infinito+pres+nil+nil+nil	10	4	xcomp	8
+1_gatto.txt	istruzioni	istruzione	S	O	n+f+plur	11	4	dobj	10
+1_gatto.txt	semplici	semplice	A	O	adj+f+plur+pst	12	4	amod	11
+1_gatto.txt	e	e	CC	O	conj	13	4	cc	8
+1_gatto.txt	può	potere	VM	O	v+indic+pres+nil+3+sing	14	4	aux	15
+1_gatto.txt	imparare	imparare	V	O	v+infinito+pres+nil+nil+nil	15	4	conj	8
+1_gatto.txt	da	da	E	O	prep	16	4	case	17
+1_gatto.txt	solo	solo	B	O	adv	17	4	advmod	15
+1_gatto.txt	a	a	E	O	prep	18	4	mark	19
+1_gatto.txt	manipolare	manipolare	V	O	v+infinito+pres+nil+nil+nil	19	4	xcomp	15
+1_gatto.txt	svariati	svariato	A	O	adj+m+plur+pst	20	4	amod	21
+1_gatto.txt	meccanismi	meccanismo	S	O	n+m+plur	21	4	dobj	19
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	22	4	punct	19
+1_gatto.txt	anche	anche	B	O	adv	23	4	advmod	24
+1_gatto.txt	complessi	complesso	A	O	adj+m+plur+pst	24	4	conj	19
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	25	4	punct	24
+1_gatto.txt	tra	tra	E	O	prep	26	4	case	27
+1_gatto.txt	cui	cui	PR	O	pron+_+_+3+plur+int	27	4	nmod	24
+1_gatto.txt	le	la	RD	O	pron+acc+f+3+plur+clit	28	4	det	29
+1_gatto.txt	maniglie	maniglia	S	O	n+f+plur	29	4	nsubj	27
+1_gatto.txt	delle	della	E+RD	O	prep/art+f+plur	30	4	case	31
+1_gatto.txt	porte	porta	S	O	n+f+plur	31	4	nmod	29
+1_gatto.txt	o	o	CC	O	conj	32	4	cc	29
+1_gatto.txt	le	la	RD	O	pron+acc+f+3+plur+clit	33	4	det	34
+1_gatto.txt	chiusure	chiusura	S	O	n+f+plur	34	4	conj	29
+1_gatto.txt	delle	della	E+RD	O	prep/art+f+plur	35	4	case	36
+1_gatto.txt	gabbie	gabbia	S	O	n+f+plur	36	4	nmod	34
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	37	4	punct	8
+1_gatto.txt	È	essere	V	O	v+indic+pres+nil+3+sing	1	5	cop	3
+1_gatto.txt	il	il	RD	O	art+m+sing	2	5	det	3
+1_gatto.txt	felino	felino	S	O	n+m+sing	3	5	ROOT	0
+1_gatto.txt	col	col	E+RD	O	prep/art+m+sing	4	5	case	6
+1_gatto.txt	più	più	B	O	adv	5	5	advmod	6
+1_gatto.txt	vasto	vasto	A	O	adj+m+sing+pst	6	5	nmod	3
+1_gatto.txt	areale	areale	A	O	areale	7	5	amod	6
+1_gatto.txt	nel	nel	E+RD	O	prep/art+m+sing	8	5	case	9
+1_gatto.txt	mondo	mondo	S	O	n+m+sing	9	5	nmod	7
+1_gatto.txt	e	e	CC	O	conj	10	5	cc	6
+1_gatto.txt	con	con	E	O	prep	11	5	case	13
+1_gatto.txt	la	la	RD	O	pron+accdat+_+3+_+clit	12	5	det	13
+1_gatto.txt	popolazione	popolazione	S	O	n+f+sing	13	5	conj	6
+1_gatto.txt	più	più	B	O	adv	14	5	advmod	15
+1_gatto.txt	numerosa	numeroso	A	O	adj+f+sing+pst	15	5	amod	13
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	16	5	punct	3
+1_gatto.txt	protagonista	protagonista	S	O	n+f+sing	17	5	nsubj	3
+1_gatto.txt	anche	anche	B	O	adv	18	5	advmod	20
+1_gatto.txt	di	di	E	O	prep	19	5	case	20
+1_gatto.txt	fenomeni	fenomeno	S	O	n+m+plur	20	5	nmod	17
+1_gatto.txt	di	di	E	O	prep	21	5	case	22
+1_gatto.txt	inselvatichimento	inselvatichimento	S	O	inselvatichimento	22	5	nmod	20
+1_gatto.txt	così	così	B	O	adv	23	5	advmod	24
+1_gatto.txt	ampi	ampio	A	O	adj+m+plur+pst	24	5	amod	22
+1_gatto.txt	da	da	E	O	prep	25	5	mark	26
+1_gatto.txt	determinarne	determinare	V+PC	O	v+infinito+pres+nil+nil+nil/pron+gen+_+3+_	26	5	acl	20
+1_gatto.txt	l'	l'	RD	O	pron+accdat+_+3+_+clit	27	5	det	28
+1_gatto.txt	inclusione	inclusione	S	O	n+f+sing	28	5	dobj	26
+1_gatto.txt	nella	nella	E+RD	O	prep/art+f+sing	29	5	case	30
+1_gatto.txt	lista	lista	S	O	n+f+sing	30	5	nmod	26
+1_gatto.txt	delle	della	E+RD	O	prep/art+f+plur	31	5	case	32
+1_gatto.txt	cento	cento	N	O	cento cento+adj+_+_+pst+num cento+adj+_+_+pst+num	32	5	nummod	30
+1_gatto.txt	specie	specie	B	O	adv	33	5	advmod	34
+1_gatto.txt	invasive	invasive	A	O	invasive	34	5	amod	30
+1_gatto.txt	più	più	B	O	adv	35	5	advmod	36
+1_gatto.txt	dannose	dannoso	A	O	adj+f+plur+pst	36	5	amod	34
+1_gatto.txt	da	da	E	O	prep	37	5	case	38
+1_gatto.txt	parte	parte	S	O	n+f+sing	38	5	nmod	36
+1_gatto.txt	dell'	dell'	E+RD	O	prep/art+f+sing	39	5	case	40
+1_gatto.txt	Unione	Unione	SP	ORG	Unione unione+n+f+sing	40	5	nmod	38
+1_gatto.txt	Internazionale	Internazionale	SP	ORG	Internazionale internazionale+adj+f+sing+pst internazionale+adj+m+sing+pst	41	5	name	40
+1_gatto.txt	per	per	E	ORG	prep	42	5	case	44
+1_gatto.txt	la	la	RD	ORG	pron+accdat+_+3+_+clit	43	5	det	44
+1_gatto.txt	Conservazione	conservazione	S	ORG	n+f+sing	44	5	nmod	36
+1_gatto.txt	della	della	E+RD	ORG	prep/art+f+sing	45	5	case	46
+1_gatto.txt	Natura	Natura	SP	ORG	Natura natura+n+f+sing	46	5	nmod	44
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	47	5	punct	3
+1_gatto.txt	Cranio	Cranio	SP	O	Cranio cranio+n+m+sing	1	6	ROOT	0
+1_gatto.txt	La	la	RD	O	pron+accdat+_+3+_+clit	1	7	det	2
+1_gatto.txt	temperatura	temperatura	S	O	n+f+sing	2	7	ROOT	0
+1_gatto.txt	corporea	corporeo	A	O	adj+f+sing+pst	3	7	amod	2
+1_gatto.txt	del	del	E+RD	O	prep/art+m+sing	4	7	case	5
+1_gatto.txt	gatto	gatto	S	O	n+m+sing	5	7	nmod	2
+1_gatto.txt	oscilla	oscillare	V	O	v+indic+pres+nil+3+sing	6	7	acl	2
+1_gatto.txt	fra	fra	E	O	prep	7	7	case	9
+1_gatto.txt	i	il	RD	O	art+m+plur	8	7	det	9
+1_gatto.txt	38	38	N	O	38	9	7	nummod	6
+1_gatto.txt	e	e	CC	O	conj	10	7	cc	6
+1_gatto.txt	i	il	RD	O	art+m+plur	11	7	det	13
+1_gatto.txt	38,5	38,5	N	O	38,5	12	7	nummod	13
+1_gatto.txt	°	°	S	O	°	13	7	conj	6
+1_gatto.txt	C	C	SP	O	C	14	7	nmod	13
+1_gatto.txt	;	[PUNCT]	FC	O	; [PUNCT]	15	7	punct	2
+1_gatto.txt	la	la	RD	O	pron+accdat+_+3+_+clit	16	7	det	17
+1_gatto.txt	frequenza	frequenza	S	O	n+f+sing	17	7	nsubj	20
+1_gatto.txt	respiratoria	respiratorio	A	O	adj+f+sing+pst	18	7	amod	17
+1_gatto.txt	normale	normale	A	O	adj+f+sing+pst	19	7	amod	17
+1_gatto.txt	è	essere	V	O	v+indic+pres+nil+3+sing	20	7	advcl	2
+1_gatto.txt	di	di	E	O	prep	21	7	case	23
+1_gatto.txt	10/20	10/20	N	O	10/20	22	7	nummod	23
+1_gatto.txt	respiri	respiro	S	O	n+m+plur	23	7	nmod	20
+1_gatto.txt	al	al	E+RD	O	prep/art+m+sing	24	7	case	25
+1_gatto.txt	minuto	minuto	S	O	n+m+sing	25	7	nmod	20
+1_gatto.txt	e	e	CC	O	conj	26	7	cc	20
+1_gatto.txt	quella	quella	PD	O	quella quella+pron+_+f+3+sing+dim quello+adj+f+sing+pst+dim	27	7	conj	20
+1_gatto.txt	cardiaca	cardiaco	S	O	cardiaca cardiaco+adj+f+sing+pst	28	7	nmod	27
+1_gatto.txt	di	di	E	O	prep	29	7	case	31
+1_gatto.txt	110/140	110/140	N	O	110/140	30	7	nummod	31
+1_gatto.txt	battiti	battito	S	O	n+m+plur	31	7	nmod	28
+1_gatto.txt	al	al	E+RD	O	prep/art+m+sing	32	7	case	33
+1_gatto.txt	minuto	minuto	S	O	n+m+sing	33	7	nmod	31
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	34	7	punct	2
+1_gatto.txt	Scheletro	Scheletro	SP	O	Scheletro scheletro+n+m+sing	1	8	ROOT	0
+1_gatto.txt	e	e	CC	O	conj	2	8	cc	1
+1_gatto.txt	muscoli	muscolo	S	O	n+m+plur	3	8	conj	1
+1_gatto.txt	Il	il	RD	O	art+m+sing	1	9	det	3
+1_gatto.txt	suo	suo	AP	O	adj+m+sing+pst+poss	2	9	det:poss	3
+1_gatto.txt	corpo	corpo	S	O	n+m+sing	3	9	nsubj	6
+1_gatto.txt	è	essere	V	O	v+indic+pres+nil+3+sing	4	9	cop	6
+1_gatto.txt	molto	molto	B	O	adv	5	9	advmod	6
+1_gatto.txt	agile	agile	A	O	adj+f+sing+pst	6	9	ROOT	0
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	7	9	punct	6
+1_gatto.txt	flessibile	flessibile	A	O	adj+f+sing+pst	8	9	conj	6
+1_gatto.txt	e	e	CC	O	conj	9	9	cc	6
+1_gatto.txt	massiccio	massiccio	A	O	adj+m+sing+pst	10	9	conj	6
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	11	9	punct	6
+1_gatto.txt	tale	tale	PD	O	tale tale+n+m+sing	12	9	conj	6
+1_gatto.txt	da	da	E	O	prep	13	9	mark	14
+1_gatto.txt	consentirgli	consentire	V+PC	O	v+infinito+pres+nil+nil+nil/pron+dat+_+3+_	14	9	acl	12
+1_gatto.txt	di	di	E	O	prep	15	9	mark	16
+1_gatto.txt	camminare	camminare	V	O	v+infinito+pres+nil+nil+nil	16	9	xcomp	14
+1_gatto.txt	molto	molto	B	O	adv	17	9	advmod	18
+1_gatto.txt	silenziosamente	silenziosamente	B	O	silenziosamente	18	9	advmod	16
+1_gatto.txt	e	e	CC	O	conj	19	9	cc	16
+1_gatto.txt	di	di	E	O	prep	20	9	mark	21
+1_gatto.txt	spiccare	spiccare	V	O	v+infinito+pres+nil+nil+nil	21	9	conj	16
+1_gatto.txt	grandi	grande	A	O	adj+f+plur+pst	22	9	amod	23
+1_gatto.txt	salti	salto	S	O	n+m+plur	23	9	dobj	21
+1_gatto.txt	;	[PUNCT]	FC	O	; [PUNCT]	24	9	punct	6
+1_gatto.txt	le	la	RD	O	pron+acc+f+3+plur+clit	25	9	det	27
+1_gatto.txt	sue	suo	AP	O	adj+f+plur+pst+poss	26	9	det:poss	27
+1_gatto.txt	unghie	unghia	S	O	n+f+plur	27	9	conj	6
+1_gatto.txt	retrattili	retrattili	A	O	retrattili	28	9	amod	27
+1_gatto.txt	(	[PUNCT]	FB	O	( [PUNCT]	29	9	punct	31
+1_gatto.txt	più	più	B	O	adv	30	9	advmod	31
+1_gatto.txt	precisamente	precisamente	B	O	adv	31	9	advmod	32
+1_gatto.txt	protrattili	protrarre	A	O	protrattili protrarre+v+part+pass+m+nil+plur/li+pron+acc+m+3+plur+clit	32	9	amod	27
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	33	9	punct	27
+1_gatto.txt	dato	dare	V	O	v+part+pass+m+nil+sing	34	9	acl	27
+1_gatto.txt	che	che	CS	O	conj	35	9	mark	42
+1_gatto.txt	nella	nella	E+RD	O	prep/art+f+sing	36	9	case	37
+1_gatto.txt	condizione	condizione	S	O	n+f+sing	37	9	nmod	42
+1_gatto.txt	ordinaria	ordinario	A	O	adj+f+sing+pst	38	9	amod	37
+1_gatto.txt	di	di	E	O	prep	39	9	case	40
+1_gatto.txt	riposo	riposo	S	O	n+m+sing	40	9	nmod	37
+1_gatto.txt	si	si	PC	O	pron+accdat+_+3+_+clit	41	9	expl	42
+1_gatto.txt	trovano	trovare	V	O	v+indic+pres+nil+3+plur	42	9	ccomp	34
+1_gatto.txt	nascoste	nascondere	V	O	v+part+pass+f+nil+plur	43	9	advcl	42
+1_gatto.txt	e	e	CC	O	conj	44	9	cc	43
+1_gatto.txt	sono	essere	VA	O	v+indic+pres+nil+1+sing	45	9	auxpass	46
+1_gatto.txt	estratte	estrarre	V	O	v+part+pass+f+nil+plur	46	9	conj	43
+1_gatto.txt	solo	solo	B	O	adv	47	9	advmod	49
+1_gatto.txt	all'	all'	E+RD	O	prep/art+f+sing	48	9	case	49
+1_gatto.txt	occorrenza	occorrenza	S	O	n+f+sing	49	9	nmod	46
+1_gatto.txt	)	[PUNCT]	FB	O	) [PUNCT]	50	9	punct	27
+1_gatto.txt	gli	il	RD	O	pron+acc+m+3+sing+clit	51	9	det	52
+1_gatto.txt	permettono	permettere	V	O	v+indic+pres+nil+3+plur	52	9	conj	6
+1_gatto.txt	di	di	E	O	prep	53	9	mark	54
+1_gatto.txt	arrampicarsi	arrampicare	V+PC	O	v+infinito+pres+nil+nil+nil/pron+accdat+_+3+_	54	9	xcomp	52
+1_gatto.txt	e	e	CC	O	conj	55	9	cc	54
+1_gatto.txt	di	di	E	O	prep	56	9	mark	57
+1_gatto.txt	afferrare	afferrare	V	O	v+infinito+pres+nil+nil+nil	57	9	conj	54
+1_gatto.txt	con	con	E	O	prep	58	9	case	60
+1_gatto.txt	grande	grande	A	O	adj+f+sing+pst	59	9	amod	60
+1_gatto.txt	agilità	agilità	S	O	n+f+plur	60	9	nmod	57
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	61	9	punct	6
+1_gatto.txt	Lo	il	RD	O	pron+acc+m+3+sing+clit	1	10	det	2
+1_gatto.txt	scheletro	scheletro	S	O	n+m+sing	2	10	nsubjpass	4
+1_gatto.txt	è	essere	VA	O	v+indic+pres+nil+3+sing	3	10	auxpass	4
+1_gatto.txt	formato	formare	V	O	v+part+pass+m+nil+sing	4	10	ROOT	0
+1_gatto.txt	da	da	E	O	prep	5	10	case	7
+1_gatto.txt	250	250	N	O	250	6	10	nummod	7
+1_gatto.txt	ossa	osso	S	O	n+f+plur	7	10	nmod	4
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	8	10	punct	4
+1_gatto.txt	Le	la	RD	O	pron+acc+f+3+plur+clit	1	11	det	2
+1_gatto.txt	vertebre	vertebra	S	O	n+f+plur	2	11	nsubj	6
+1_gatto.txt	del	del	E+RD	O	prep/art+m+sing	3	11	case	4
+1_gatto.txt	collo	collo	S	O	n+m+sing	4	11	nmod	2
+1_gatto.txt	sono	essere	V	O	v+indic+pres+nil+1+sing	5	11	cop	6
+1_gatto.txt	corte	corto	A	O	adj+f+plur+pst	6	11	ROOT	0
+1_gatto.txt	e	e	CC	O	conj	7	11	cc	6
+1_gatto.txt	la	la	RD	O	pron+accdat+_+3+_+clit	8	11	det	9
+1_gatto.txt	colonna	colonna	S	O	n+f+sing	9	11	conj	6
+1_gatto.txt	vertebrale	vertebrale	A	O	adj+f+sing+pst	10	11	amod	9
+1_gatto.txt	molto	molto	B	O	adv	11	11	advmod	12
+1_gatto.txt	mobile	mobile	A	O	adj+f+sing+pst	12	11	amod	9
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	13	11	punct	6
+1_gatto.txt	La	la	RD	O	pron+accdat+_+3+_+clit	1	12	det	2
+1_gatto.txt	clavicola	clavicola	S	O	n+f+sing	2	12	nsubj	25
+1_gatto.txt	dei	del	E+RD	O	prep/art+m+plur	3	12	case	4
+1_gatto.txt	gatti	gatto	S	O	n+m+plur	4	12	nmod	2
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	5	12	punct	2
+1_gatto.txt	come	come	E	O	come come+adv	6	12	case	10
+1_gatto.txt	per	per	E	O	prep	7	12	case	10
+1_gatto.txt	tutti	tutto	T	O	pron+_+m+3+plur+ind	8	12	det:predet	10
+1_gatto.txt	i	il	RD	O	art+m+plur	9	12	det	10
+1_gatto.txt	felini	felino	S	O	n+m+plur	10	12	nmod	2
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	11	12	punct	2
+1_gatto.txt	è	essere	VA	O	v+indic+pres+nil+3+sing	12	12	conj	2
+1_gatto.txt	piccola	piccolo	A	O	adj+f+sing+pst	13	12	xcomp	12
+1_gatto.txt	e	e	CC	O	conj	14	12	cc	13
+1_gatto.txt	collegata	collegare	V	O	v+part+pass+f+nil+sing	15	12	conj	13
+1_gatto.txt	allo	al	E+RD	O	prep/art+m+sing	16	12	case	17
+1_gatto.txt	sterno	sterno	A	O	sterno sterno+n+m+sing	17	12	nmod	15
+1_gatto.txt	unicamente	unicamente	B	O	adv	18	12	advmod	21
+1_gatto.txt	da	da	E	O	prep	19	12	case	21
+1_gatto.txt	un	un	RI	O	art+m+sing	20	12	det	21
+1_gatto.txt	legamento	legamento	S	O	n+m+sing	21	12	nmod	15
+1_gatto.txt	:	[PUNCT]	FC	O	: [PUNCT]	22	12	punct	2
+1_gatto.txt	ciò	ciò	PD	O	ciò ciò+pron+_+m+3+sing+dim	23	12	nsubj	25
+1_gatto.txt	gli	gli	PC	O	pron+acc+m+3+sing+clit	24	12	iobj	25
+1_gatto.txt	conferisce	conferire	V	O	v+indic+pres+nil+3+sing	25	12	ROOT	0
+1_gatto.txt	una	una	RI	O	art+f+sing	26	12	det	28
+1_gatto.txt	grande	grande	A	O	adj+f+sing+pst	27	12	amod	28
+1_gatto.txt	mobilità	mobilità	S	O	n+f+plur	28	12	dobj	25
+1_gatto.txt	visto	vistare	V	O	v+indic+pres+nil+1+sing	29	12	advcl	25
+1_gatto.txt	che	che	CS	O	conj	30	12	mark	34
+1_gatto.txt	le	la	RD	O	pron+acc+f+3+plur+clit	31	12	det	32
+1_gatto.txt	spalle	spalla	S	O	n+f+plur	32	12	nsubj	34
+1_gatto.txt	possono	potere	VM	O	v+indic+pres+nil+3+plur	33	12	aux	34
+1_gatto.txt	muoversi	muovere	V+PC	O	v+infinito+pres+nil+nil+nil/pron+accdat+_+3+_	34	12	ccomp	29
+1_gatto.txt	indipendentemente	indipendentemente	B	O	adv	35	12	advmod	34
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	36	12	punct	25
+1_gatto.txt	Le	la	RD	O	pron+acc+f+3+plur+clit	1	13	det	2
+1_gatto.txt	vertebre	vertebra	S	O	n+f+plur	2	13	nsubj	4
+1_gatto.txt	caudali	caudali	A	O	caudali	3	13	amod	2
+1_gatto.txt	prolungano	prolungare	V	O	v+indic+pres+nil+3+plur	4	13	ROOT	0
+1_gatto.txt	la	la	RD	O	pron+accdat+_+3+_+clit	5	13	det	6
+1_gatto.txt	colonna	colonna	S	O	n+f+sing	6	13	dobj	4
+1_gatto.txt	;	[PUNCT]	FC	O	; [PUNCT]	7	13	punct	4
+1_gatto.txt	il	il	RD	O	art+m+sing	8	13	det	10
+1_gatto.txt	loro	loro	AP	O	adj+f+plur+pst+poss	9	13	det:poss	10
+1_gatto.txt	numero	numero	S	O	n+m+sing	10	13	nsubj	12
+1_gatto.txt	è	essere	VA	O	v+indic+pres+nil+3+sing	11	13	cop	12
+1_gatto.txt	variabile	variabile	S	O	n+f+sing	12	13	conj	4
+1_gatto.txt	in	in	E	O	prep	13	13	case	14
+1_gatto.txt	funzione	funzione	S	O	n+f+sing	14	13	nmod	12
+1_gatto.txt	della	della	E+RD	O	prep/art+f+sing	15	13	case	16
+1_gatto.txt	razza	razza	S	O	n+f+sing	16	13	nmod	14
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	17	13	punct	4
+1_gatto.txt	Artiglio	artiglio	S	PER	n+m+sing	1	14	ROOT	0
+1_gatto.txt	La	la	RD	O	pron+accdat+_+3+_+clit	1	15	det	2
+1_gatto.txt	coda	coda	S	O	n+f+sing	2	15	nsubj	3
+1_gatto.txt	ha	avere	V	O	v+indic+pres+nil+3+sing	3	15	ROOT	0
+1_gatto.txt	un	un	RI	O	art+m+sing	4	15	det	5
+1_gatto.txt	ruolo	ruolo	S	O	n+m+sing	5	15	dobj	3
+1_gatto.txt	importante	importante	A	O	adj+f+sing+pst	6	15	amod	5
+1_gatto.txt	nel	nel	E+RD	O	prep/art+m+sing	7	15	case	8
+1_gatto.txt	mantenimento	mantenimento	S	O	n+m+sing	8	15	nmod	5
+1_gatto.txt	dell'	dell'	E+RD	O	prep/art+f+sing	9	15	case	10
+1_gatto.txt	equilibrio	equilibrio	S	O	n+m+sing	10	15	nmod	8
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	11	15	punct	3
+1_gatto.txt	Le	la	RD	O	pron+acc+f+3+plur+clit	1	16	det	2
+1_gatto.txt	zampe	zampa	S	O	n+f+plur	2	16	nsubj	4
+1_gatto.txt	anteriori	anteriore	A	O	adj+f+plur+pst	3	16	amod	2
+1_gatto.txt	terminano	terminare	V	O	v+indic+pres+nil+3+plur	4	16	ROOT	0
+1_gatto.txt	con	con	E	O	prep	5	16	case	7
+1_gatto.txt	cinque	cinque	N	O	cinque cinque+adj+_+_+pst+num cinque+adj+_+_+pst+num	6	16	nummod	7
+1_gatto.txt	dita	dito	S	O	n+f+plur	7	16	nmod	4
+1_gatto.txt	fornite	fornire	V	O	v+indic+pres+nil+2+plur	8	16	acl	7
+1_gatto.txt	di	di	E	O	prep	9	16	case	10
+1_gatto.txt	artigli	artiglio	S	O	n+m+plur	10	16	nmod	8
+1_gatto.txt	prottatili	prottatili	A	O	prottatili	11	16	amod	10
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	12	16	punct	8
+1_gatto.txt	formati	formare	V	O	v+part+pass+m+nil+plur	13	16	advcl	8
+1_gatto.txt	da	da	E	O	prep	14	16	case	15
+1_gatto.txt	cheratina	cheratina	S	O	cheratina	15	16	nmod	13
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	16	16	punct	4
+1_gatto.txt	ma	ma	CC	O	conj	17	16	cc	4
+1_gatto.txt	solo	solo	B	O	adv	18	16	advmod	19
+1_gatto.txt	quattro	quattro	N	O	quattro quattro+adj+_+_+pst+num quattro+n+f+plur quattro+n+m+plur quattro+n+m+sing quattro+adj+_+_+pst+num	19	16	conj	4
+1_gatto.txt	di	di	E	O	prep	20	16	case	21
+1_gatto.txt	essi	essi	PE	O	pron+_+m+3+plur+strong	21	16	nmod	19
+1_gatto.txt	toccano	toccare	V	O	v+indic+pres+nil+3+plur	22	16	acl	21
+1_gatto.txt	il	il	RD	O	art+m+sing	23	16	det	24
+1_gatto.txt	suolo	suolo	S	O	n+m+sing	24	16	dobj	22
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	25	16	punct	19
+1_gatto.txt	visto	vistare	V	O	v+indic+pres+nil+1+sing	26	16	acl	19
+1_gatto.txt	che	che	CS	O	conj	27	16	mark	37
+1_gatto.txt	il	il	RD	O	art+m+sing	28	16	det	30
+1_gatto.txt	quinto	quinto	NO	O	quinto quinto+adj+m+sing+pst quinto+n+m+sing	29	16	amod	30
+1_gatto.txt	dito	dito	S	O	n+m+sing	30	16	nsubj	37
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	31	16	punct	30
+1_gatto.txt	detto	dettare	V	O	v+indic+pres+nil+1+sing	32	16	acl	30
+1_gatto.txt	"	[PUNCT]	FB	O	" [PUNCT]	33	16	punct	34
+1_gatto.txt	sperone	sperone	A	O	sperone sperone+n+m+sing	34	16	xcomp	32
+1_gatto.txt	"	[PUNCT]	FB	O	" [PUNCT]	35	16	punct	34
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	36	16	punct	30
+1_gatto.txt	resta	restare	V	O	v+indic+pres+nil+3+sing	37	16	ccomp	26
+1_gatto.txt	di	di	E	O	prep	38	16	case	39
+1_gatto.txt	fianco	fianco	S	O	n+m+sing	39	16	nmod	37
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	40	16	punct	4
+1_gatto.txt	Esistono	esistere	V	O	v+indic+pres+nil+3+plur	1	17	ROOT	0
+1_gatto.txt	comunque	comunque	B	O	adv	2	17	advmod	1
+1_gatto.txt	casi	caso	S	O	n+m+plur	3	17	dobj	1
+1_gatto.txt	di	di	E	O	prep	4	17	case	5
+1_gatto.txt	polidattilia	polidattilia	S	O	polidattilia	5	17	nmod	3
+1_gatto.txt	felina	felino	A	O	adj+f+sing+pst	6	17	amod	5
+1_gatto.txt	in	in	E	O	prep	7	17	case	8
+1_gatto.txt	cui	cui	PR	O	pron+_+_+3+plur+int	8	17	nmod	11
+1_gatto.txt	il	il	RD	O	art+m+sing	9	17	det	10
+1_gatto.txt	gatto	gatto	S	O	n+m+sing	10	17	nsubj	11
+1_gatto.txt	risulta	risultare	V	O	v+indic+pres+nil+3+sing	11	17	acl:relcl	5
+1_gatto.txt	avere	avere	V	O	v+infinito+pres+nil+nil+nil	12	17	xcomp	11
+1_gatto.txt	sei	sei	N	O	sei essere+v+indic+pres+nil+2+sing sei+adj+_+_+pst+num sei+adj+_+_+pst+num	13	17	nummod	17
+1_gatto.txt	o	o	CC	O	conj	14	17	cc	13
+1_gatto.txt	addirittura	addirittura	B	O	adv	15	17	advmod	16
+1_gatto.txt	sette	sette	N	O	sette setta+n+f+plur sette+adj+_+_+pst+num sette+adj+_+_+pst+num	16	17	conj	13
+1_gatto.txt	dita	dito	S	O	n+f+plur	17	17	dobj	12
+1_gatto.txt	per	per	E	O	prep	18	17	case	19
+1_gatto.txt	zampa	zampa	S	O	n+f+sing	19	17	nmod	12
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	20	17	punct	1
+1_gatto.txt	Le	la	RD	O	pron+acc+f+3+plur+clit	1	18	det	2
+1_gatto.txt	zampe	zampa	S	O	n+f+plur	2	18	nsubj	11
+1_gatto.txt	posteriori	posteriore	A	O	adj+f+plur+pst	3	18	amod	2
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	4	18	punct	2
+1_gatto.txt	più	più	B	O	adv	5	18	advmod	6
+1_gatto.txt	lunghe	lungo	A	O	adj+f+plur+pst	6	18	amod	2
+1_gatto.txt	di	di	E	O	prep	7	18	case	8
+1_gatto.txt	quelle	quelle	PD	O	quelle quelle+pron+_+m+3+plur+dim quello+adj+f+plur+pst+dim	8	18	nmod	6
+1_gatto.txt	anteriori	anteriore	A	O	adj+f+plur+pst	9	18	amod	8
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	10	18	punct	2
+1_gatto.txt	terminano	terminare	V	O	v+indic+pres+nil+3+plur	11	18	ROOT	0
+1_gatto.txt	con	con	E	O	prep	12	18	case	14
+1_gatto.txt	quattro	quattro	N	O	quattro quattro+adj+_+_+pst+num quattro+n+f+plur quattro+n+m+plur quattro+n+m+sing quattro+adj+_+_+pst+num	13	18	nummod	14
+1_gatto.txt	dita	dito	S	O	n+f+plur	14	18	nmod	11
+1_gatto.txt	fornite	fornire	V	O	v+indic+pres+nil+2+plur	15	18	advcl	11
+1_gatto.txt	anch'	anch'	B	O	adv	16	18	advmod	17
+1_gatto.txt	esse	esse	PE	O	pron+_+f+3+plur+strong	17	18	nsubj	15
+1_gatto.txt	di	di	E	O	prep	18	18	case	19
+1_gatto.txt	artigli	artiglio	S	O	n+m+plur	19	18	nmod	17
+1_gatto.txt	protrattili	protrarre	A	O	protrattili protrarre+v+part+pass+m+nil+plur/li+pron+acc+m+3+plur+clit	20	18	amod	19
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	21	18	punct	11
+1_gatto.txt	I	il	RD	O	art+m+plur	1	19	det	2
+1_gatto.txt	cuscinetti	cuscinetto	S	O	n+m+plur	2	19	nsubjpass	4
+1_gatto.txt	sono	essere	VA	O	v+indic+pres+nil+1+sing	3	19	auxpass	4
+1_gatto.txt	costituiti	costituire	V	O	v+part+pass+m+nil+plur	4	19	ROOT	0
+1_gatto.txt	da	da	E	O	prep	5	19	case	6
+1_gatto.txt	membrane	membrana	S	O	n+f+plur	6	19	nmod	4
+1_gatto.txt	elastiche	elastico	A	O	adj+f+plur+pst	7	19	amod	6
+1_gatto.txt	che	che	PR	O	conj	8	19	nsubj	10
+1_gatto.txt	gli	il	RD	O	pron+acc+m+3+sing+clit	9	19	det	10
+1_gatto.txt	conferiscono	conferire	V	O	v+indic+pres+nil+3+plur	10	19	acl:relcl	6
+1_gatto.txt	un'	un'	RI	O	un'	11	19	det	12
+1_gatto.txt	andatura	andatura	S	O	n+f+sing	12	19	dobj	10
+1_gatto.txt	silenziosa	silenzioso	A	O	adj+f+sing+pst	13	19	amod	12
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	14	19	punct	4
+1_gatto.txt	Sotto	sotto	E	O	prep	1	20	case	3
+1_gatto.txt	le	la	RD	O	pron+acc+f+3+plur+clit	2	20	det	3
+1_gatto.txt	zampe	zampa	S	O	n+f+plur	3	20	nsubj	14
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	4	20	punct	3
+1_gatto.txt	come	come	B	O	adv	5	20	advmod	7
+1_gatto.txt	nel	nel	E+RD	O	prep/art+m+sing	6	20	case	7
+1_gatto.txt	muso	muso	S	O	n+m+sing	7	20	nmod	3
+1_gatto.txt	e	e	CC	O	conj	8	20	cc	7
+1_gatto.txt	sopra	sopra	B	O	adv	9	20	advmod	11
+1_gatto.txt	gli	il	RD	O	pron+acc+m+3+sing+clit	10	20	det	11
+1_gatto.txt	occhi	occhio	S	O	n+m+plur	11	20	conj	7
+1_gatto.txt	sono	essere	V	O	v+indic+pres+nil+1+sing	12	20	cop	14
+1_gatto.txt	anche	anche	B	O	adv	13	20	advmod	14
+1_gatto.txt	presenti	presente	S	O	n+f+plur	14	20	ROOT	0
+1_gatto.txt	le	la	RD	O	pron+acc+f+3+plur+clit	15	20	det	17
+1_gatto.txt	"	[PUNCT]	FB	O	" [PUNCT]	16	20	punct	17
+1_gatto.txt	vibrisse	vibrisse	S	O	vibrisse	17	20	appos	14
+1_gatto.txt	"	[PUNCT]	FB	O	" [PUNCT]	18	20	punct	17
+1_gatto.txt	che	che	PR	O	conj	19	20	nsubj	20
+1_gatto.txt	hanno	avere	V	O	v+indic+pres+nil+3+plur	20	20	acl:relcl	17
+1_gatto.txt	la	la	RD	O	pron+accdat+_+3+_+clit	21	20	det	22
+1_gatto.txt	funzione	funzione	S	O	n+f+sing	22	20	dobj	20
+1_gatto.txt	di	di	E	O	prep	23	20	mark	24
+1_gatto.txt	controllare	controllare	V	O	v+infinito+pres+nil+nil+nil	24	20	acl	22
+1_gatto.txt	l'	l'	RD	O	pron+accdat+_+3+_+clit	25	20	det	26
+1_gatto.txt	equilibrio	equilibrio	S	O	n+m+sing	26	20	dobj	24
+1_gatto.txt	del	del	E+RD	O	prep/art+m+sing	27	20	case	28
+1_gatto.txt	felino	felino	S	O	n+m+sing	28	20	nmod	26
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	29	20	punct	14
+1_gatto.txt	I	il	RD	O	art+m+plur	1	21	det	2
+1_gatto.txt	muscoli	muscolo	S	O	n+m+plur	2	21	nsubj	6
+1_gatto.txt	dorsali	dorsale	A	O	adj+f+plur+pst	3	21	amod	2
+1_gatto.txt	sono	essere	V	O	v+indic+pres+nil+1+sing	4	21	cop	6
+1_gatto.txt	molto	molto	B	O	adv	5	21	advmod	6
+1_gatto.txt	flessibili	flessibile	A	O	adj+f+plur+pst	6	21	ROOT	0
+1_gatto.txt	e	e	CC	O	conj	7	21	cc	6
+1_gatto.txt	quelli	quelli	PD	O	quelli quelli+pron+_+m+3+plur+dim quello+adj+m+plur+pst+dim	8	21	conj	6
+1_gatto.txt	delle	della	E+RD	O	prep/art+f+plur	9	21	case	10
+1_gatto.txt	zampe	zampa	S	O	n+f+plur	10	21	nmod	8
+1_gatto.txt	posteriori	posteriore	V	O	posteriori posteriore+adj+f+plur+pst posteriore+adj+m+plur+pst	11	21	acl	10
+1_gatto.txt	molto	molto	B	O	adv	12	21	advmod	13
+1_gatto.txt	potenti	potente	A	O	adj+f+plur+pst	13	21	xcomp	11
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	14	21	punct	6
+1_gatto.txt	Queste	questo	DD	O	adj+f+plur+pst+dim	1	22	det	2
+1_gatto.txt	specifiche	specifica	S	O	n+f+plur	2	22	nsubj	3
+1_gatto.txt	conferiscono	conferire	V	O	v+indic+pres+nil+3+plur	3	22	ROOT	0
+1_gatto.txt	all'	all'	E+RD	O	prep/art+f+sing	4	22	case	5
+1_gatto.txt	animale	animale	S	O	n+m+sing	5	22	nmod	3
+1_gatto.txt	una	una	RI	O	art+f+sing	6	22	det	8
+1_gatto.txt	grande	grande	A	O	adj+f+sing+pst	7	22	amod	8
+1_gatto.txt	agilità	agilità	S	O	n+f+plur	8	22	dobj	3
+1_gatto.txt	e	e	CC	O	conj	9	22	cc	8
+1_gatto.txt	un'	un'	RI	O	un'	10	22	det	11
+1_gatto.txt	ampiezza	ampiezza	S	O	n+f+sing	11	22	conj	8
+1_gatto.txt	quando	quando	CS	O	quando quando+adv	12	22	mark	13
+1_gatto.txt	salta	saltare	V	O	v+indic+pres+nil+3+sing	13	22	advcl	3
+1_gatto.txt	:	[PUNCT]	FC	O	: [PUNCT]	14	22	punct	3
+1_gatto.txt	può	potere	VM	O	v+indic+pres+nil+3+sing	15	22	aux	16
+1_gatto.txt	saltare	saltare	V	O	v+infinito+pres+nil+nil+nil	16	22	parataxis	3
+1_gatto.txt	a	a	E	O	prep	17	22	case	19
+1_gatto.txt	un'	un'	RI	O	un'	18	22	det	19
+1_gatto.txt	altezza	altezza	S	O	n+f+sing	19	22	nmod	16
+1_gatto.txt	cinque	cinque	N	O	cinque cinque+adj+_+_+pst+num cinque+adj+_+_+pst+num	20	22	nummod	21
+1_gatto.txt	volte	volta	S	O	n+f+plur	21	22	nmod	19
+1_gatto.txt	superiore	superiore	A	O	adj+f+sing+pst	22	22	amod	21
+1_gatto.txt	alla	alla	E+RD	O	prep/art+f+sing	23	22	case	25
+1_gatto.txt	sua	suo	AP	O	adj+f+sing+pst+poss	24	22	det:poss	25
+1_gatto.txt	statura	statura	S	O	n+f+sing	25	22	nmod	22
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	26	22	punct	3
+1_gatto.txt	Nella	nella	E+RD	O	prep/art+f+sing	1	23	case	2
+1_gatto.txt	corsa	corsa	S	O	n+f+sing	2	23	nmod	4
+1_gatto.txt	può	potere	VM	O	v+indic+pres+nil+3+sing	3	23	aux	4
+1_gatto.txt	raggiungere	raggiungere	V	O	v+infinito+pres+nil+nil+nil	4	23	ROOT	0
+1_gatto.txt	i	il	RD	O	art+m+plur	5	23	det	7
+1_gatto.txt	60	60	N	O	60	6	23	nummod	7
+1_gatto.txt	km	km	S	O	n+m+plur	7	23	dobj	4
+1_gatto.txt	/	/	X	O	/ [PUNCT] [SYMBOL]	8	23	punct	7
+1_gatto.txt	h	h	X	O	h	9	23	compound	7
+1_gatto.txt	e	e	CC	O	conj	10	23	cc	4
+1_gatto.txt	percorrere	percorrere	V	O	v+infinito+pres+nil+nil+nil	11	23	conj	4
+1_gatto.txt	120	120	N	O	120	12	23	nummod	13
+1_gatto.txt	m	m	S	O	m	13	23	dobj	11
+1_gatto.txt	in	in	E	O	prep	14	23	case	16
+1_gatto.txt	sette	sette	N	O	sette setta+n+f+plur sette+adj+_+_+pst+num sette+adj+_+_+pst+num	15	23	nummod	16
+1_gatto.txt	secondi	secondo	S	O	n+m+plur	16	23	nmod	11
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	17	23	punct	4
+1_gatto.txt	ed	ed	CC	O	conj	18	23	cc	4
+1_gatto.txt	è	essere	V	O	v+indic+pres+nil+3+sing	19	23	cop	21
+1_gatto.txt	un	un	RI	O	art+m+sing	20	23	det	21
+1_gatto.txt	corridore	corridore	S	O	n+m+sing	21	23	conj	4
+1_gatto.txt	di	di	E	O	prep	22	23	case	24
+1_gatto.txt	lunghe	lungo	A	O	adj+f+plur+pst	23	23	amod	24
+1_gatto.txt	distanze	distanza	S	O	n+f+plur	24	23	nmod	21
+1_gatto.txt	e	e	CC	O	conj	25	23	cc	4
+1_gatto.txt	non	non	BN	O	adv	26	23	neg	28
+1_gatto.txt	si	si	PC	O	pron+accdat+_+3+_+clit	27	23	expl:impers	28
+1_gatto.txt	stanca	stancare	V	O	v+indic+pres+nil+3+sing	28	23	conj	4
+1_gatto.txt	molto	molto	B	O	adv	29	23	advmod	30
+1_gatto.txt	velocemente	velocemente	B	O	adv	30	23	advmod	28
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	31	23	punct	4
+1_gatto.txt	Contrariamente	contrariamente	B	O	adv	1	24	case	3
+1_gatto.txt	a	a	E	O	prep	2	24	mwe	1
+1_gatto.txt	quello	quello	PD	O	quello quello+adj+m+sing+pst+dim quello+pron+_+m+3+sing+dim	3	24	ROOT	0
+1_gatto.txt	che	che	PR	O	conj	4	24	dobj	7
+1_gatto.txt	generalmente	generalmente	B	O	adv	5	24	advmod	7
+1_gatto.txt	si	si	PC	O	pron+accdat+_+3+_+clit	6	24	expl:impers	7
+1_gatto.txt	pensa	pensare	V	O	v+indic+pres+nil+3+sing	7	24	acl:relcl	3
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	8	24	punct	7
+1_gatto.txt	tutti	tutto	T	O	pron+_+m+3+plur+ind	9	24	det:predet	11
+1_gatto.txt	i	il	RD	O	art+m+plur	10	24	det	11
+1_gatto.txt	gatti	gatto	S	O	n+m+plur	11	24	nsubj	12
+1_gatto.txt	sanno	sapere	V	O	v+indic+pres+nil+3+plur	12	24	conj	7
+1_gatto.txt	nuotare	nuotare	V	O	v+infinito+pres+nil+nil+nil	13	24	xcomp	12
+1_gatto.txt	molto	molto	B	O	adv	14	24	advmod	15
+1_gatto.txt	bene	bene	B	O	adv	15	24	advmod	13
+1_gatto.txt	ma	ma	CC	O	conj	16	24	cc	13
+1_gatto.txt	esitano	esitare	V	O	v+indic+pres+nil+3+plur	17	24	conj	13
+1_gatto.txt	a	a	E	O	prep	18	24	mark	19
+1_gatto.txt	gettarsi	gettare	V+PC	O	v+infinito+pres+nil+nil+nil/pron+accdat+_+3+_	19	24	xcomp	17
+1_gatto.txt	in	in	E	O	prep	20	24	case	21
+1_gatto.txt	acqua	acqua	S	O	n+f+sing	21	24	nmod	19
+1_gatto.txt	se	se	CS	O	conj	22	24	mark	23
+1_gatto.txt	costretti	costringere	V	O	v+part+pass+m+nil+plur	23	24	advcl	19
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	24	24	punct	3
+1_gatto.txt	Un	un	RI	O	art+m+sing	1	25	det	2
+1_gatto.txt	gatto	gatto	S	O	n+m+sing	2	25	nsubj	3
+1_gatto.txt	pesa	pendere	V	O	v+part+pass+f+nil+sing	3	25	ROOT	0
+1_gatto.txt	in	in	E	O	prep	4	25	case	5
+1_gatto.txt	media	media	S	O	n+f+sing	5	25	nmod	3
+1_gatto.txt	tra	tra	E	O	prep	6	25	case	8
+1_gatto.txt	i	il	RD	O	art+m+plur	7	25	det	8
+1_gatto.txt	2,5	2,5	N	O	2,5	8	25	nummod	3
+1_gatto.txt	e	e	CC	O	conj	9	25	cc	8
+1_gatto.txt	i	il	RD	O	art+m+plur	10	25	det	12
+1_gatto.txt	4,5	4,5	N	O	4,5	11	25	nummod	12
+1_gatto.txt	kg	kg	S	O	kg	12	25	conj	8
+1_gatto.txt	e	e	CC	O	conj	13	25	cc	8
+1_gatto.txt	misura	misura	S	O	n+f+sing	14	25	conj	8
+1_gatto.txt	da	da	E	O	prep	15	25	case	16
+1_gatto.txt	46	46	N	O	46	16	25	nummod	14
+1_gatto.txt	a	a	E	O	prep	17	25	case	19
+1_gatto.txt	51	51	N	O	51	18	25	nummod	19
+1_gatto.txt	cm	cm	S	O	cm	19	25	nmod	14
+1_gatto.txt	senza	senza	E	O	prep	20	25	case	22
+1_gatto.txt	la	la	RD	O	pron+accdat+_+3+_+clit	21	25	det	22
+1_gatto.txt	coda	coda	S	O	n+f+sing	22	25	nmod	3
+1_gatto.txt	che	che	PR	O	conj	23	25	nsubj	24
+1_gatto.txt	misura	misurare	V	O	v+indic+pres+nil+3+sing	24	25	acl:relcl	22
+1_gatto.txt	dai	dal	E+RD	O	prep/art+m+plur	25	25	case	26
+1_gatto.txt	20	20	N	O	20	26	25	nummod	24
+1_gatto.txt	ai	al	E+RD	O	prep/art+m+plur	27	25	case	29
+1_gatto.txt	25	25	N	O	25	28	25	nummod	29
+1_gatto.txt	cm	cm	S	O	cm	29	25	nmod	24
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	30	25	punct	3
+1_gatto.txt	Il	il	RD	O	art+m+sing	1	26	det	2
+1_gatto.txt	record	record	S	O	n+m+plur	2	26	nsubj	8
+1_gatto.txt	di	di	E	O	prep	3	26	case	4
+1_gatto.txt	peso	peso	S	O	n+m+sing	4	26	nmod	2
+1_gatto.txt	e	e	CC	O	conj	5	26	cc	2
+1_gatto.txt	grandezza	grandezza	S	O	n+f+sing	6	26	conj	2
+1_gatto.txt	è	essere	V	O	v+indic+pres+nil+3+sing	7	26	cop	8
+1_gatto.txt	detenuto	detenere	V	O	v+part+pass+m+nil+sing	8	26	ROOT	0
+1_gatto.txt	da	da	E	O	prep	9	26	case	10
+1_gatto.txt	Balù	Balù	SP	LOC	Balù	10	26	nmod	8
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	11	26	punct	10
+1_gatto.txt	un	un	RI	O	art+m+sing	12	26	det	13
+1_gatto.txt	gatto	gatto	S	O	n+m+sing	13	26	appos	10
+1_gatto.txt	castrato	castrato	S	O	n+m+sing	14	26	compound	13
+1_gatto.txt	Italiano	italiano	S	O	n+m+sing	15	26	compound	14
+1_gatto.txt	che	che	PR	O	conj	16	26	nsubj	22
+1_gatto.txt	alla	alla	E+RD	O	prep/art+f+sing	17	26	case	19
+1_gatto.txt	sua	suo	AP	O	adj+f+sing+pst+poss	18	26	det:poss	19
+1_gatto.txt	morte	morte	S	O	n+f+sing	19	26	nmod	22
+1_gatto.txt	nel	nel	E+RD	O	prep/art+m+sing	20	26	case	21
+1_gatto.txt	2010	2010	N	O	2010	21	26	nummod	22
+1_gatto.txt	pesava	pesare	V	O	v+indic+imperf+nil+3+sing	22	26	acl:relcl	13
+1_gatto.txt	23	23	N	O	23	23	26	nummod	24
+1_gatto.txt	kg	kg	S	O	kg	24	26	dobj	22
+1_gatto.txt	per	per	E	O	prep	25	26	case	27
+1_gatto.txt	96,5	96,5	N	O	96,5	26	26	nummod	27
+1_gatto.txt	cm	cm	S	O	cm	27	26	nmod	24
+1_gatto.txt	di	di	E	O	prep	28	26	case	29
+1_gatto.txt	lunghezza	lunghezza	S	O	n+f+sing	29	26	nmod	27
+1_gatto.txt	totale	totale	A	O	adj+f+sing+pst	30	26	amod	29
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	31	26	punct	8
+1_gatto.txt	Sistema	sistema	S	O	n+m+sing	1	27	ROOT	0
+1_gatto.txt	digestivo	digestivo	A	O	adj+m+sing+pst	2	27	amod	1
+1_gatto.txt	Organi	organo	S	O	n+m+plur	1	28	ROOT	0
+1_gatto.txt	interni	interno	A	O	adj+m+plur+pst	2	28	amod	1
+1_gatto.txt	Come	come	E	O	Come come+adv	1	29	case	4
+1_gatto.txt	tutti	tutto	T	O	pron+_+m+3+plur+ind	2	29	det:predet	4
+1_gatto.txt	i	il	RD	O	art+m+plur	3	29	det	4
+1_gatto.txt	carnivori	carnivoro	S	O	n+m+plur	4	29	nmod	15
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	5	29	punct	4
+1_gatto.txt	l'	l'	RD	O	pron+accdat+_+3+_+clit	6	29	det	8
+1_gatto.txt	ultimo	ultimo	A	O	adj+m+sing+pst	7	29	amod	8
+1_gatto.txt	premolare	premolare	A	O	premolare	8	29	amod	4
+1_gatto.txt	superiore	superiore	A	O	adj+f+sing+pst	9	29	amod	8
+1_gatto.txt	e	e	CC	O	conj	10	29	cc	8
+1_gatto.txt	il	il	RD	O	art+m+sing	11	29	det	13
+1_gatto.txt	primo	primo	NO	O	primo primo+adj+m+sing+pst primo+n+m+sing	12	29	amod	13
+1_gatto.txt	molare	molare	S	O	molare molare+v+infinito+pres+nil+nil+nil	13	29	conj	8
+1_gatto.txt	inferiore	inferiore	A	O	adj+f+sing+pst	14	29	amod	13
+1_gatto.txt	formano	formare	V	O	v+indic+pres+nil+3+plur	15	29	ROOT	0
+1_gatto.txt	i	il	RD	O	art+m+plur	16	29	det	19
+1_gatto.txt	cosiddetti	cosiddetto	A	O	adj+m+plur+pst	17	29	amod	19
+1_gatto.txt	"	[PUNCT]	FB	O	" [PUNCT]	18	29	punct	19
+1_gatto.txt	ferini	ferino	S	O	ferini ferino+adj+m+plur+pst	19	29	dobj	15
+1_gatto.txt	"	[PUNCT]	FB	O	" [PUNCT]	20	29	punct	19
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	21	29	punct	15
+1_gatto.txt	Questi	questi	PD	O	Questi questi+pron+_+m+3+plur+dim questi+pron+_+m+3+sing+dim questo+adj+m+plur+pst+dim	1	30	nsubj	2
+1_gatto.txt	permettono	permettere	V	O	v+indic+pres+nil+3+plur	2	30	ROOT	0
+1_gatto.txt	ai	al	E+RD	O	prep/art+m+plur	3	30	case	4
+1_gatto.txt	gatti	gatto	S	O	n+m+plur	4	30	nmod	2
+1_gatto.txt	di	di	E	O	prep	5	30	mark	6
+1_gatto.txt	strappare	strappare	V	O	v+infinito+pres+nil+nil+nil	6	30	xcomp	2
+1_gatto.txt	il	il	RD	O	art+m+sing	7	30	det	8
+1_gatto.txt	cibo	cibo	S	O	n+m+sing	8	30	dobj	6
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	9	30	punct	6
+1_gatto.txt	grazie	grazia	S	O	n+f+plur	10	30	case	13
+1_gatto.txt	ai	al	E+RD	O	prep/art+m+plur	11	30	mwe	10
+1_gatto.txt	potenti	potente	A	O	adj+f+plur+pst	12	30	amod	13
+1_gatto.txt	muscoli	muscolo	S	O	n+m+plur	13	30	nmod	6
+1_gatto.txt	fissati	fissare	V	O	v+part+pass+m+nil+plur	14	30	acl	13
+1_gatto.txt	alle	alla	E+RD	O	prep/art+f+plur	15	30	case	16
+1_gatto.txt	pareti	parete	S	O	n+f+plur	16	30	nmod	14
+1_gatto.txt	laterali	laterale	A	O	adj+f+plur+pst	17	30	amod	16
+1_gatto.txt	del	del	E+RD	O	prep/art+m+sing	18	30	case	20
+1_gatto.txt	suo	suo	AP	O	adj+m+sing+pst+poss	19	30	det:poss	20
+1_gatto.txt	cranio	cranio	S	O	n+m+sing	20	30	nmod	16
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	21	30	punct	6
+1_gatto.txt	inghiottendo	inghiottire	V	O	v+gerundio+pres+nil+nil+nil	22	30	advcl	6
+1_gatto.txt	senza	senza	E	O	prep	23	30	mark	24
+1_gatto.txt	masticare	masticare	V	O	v+infinito+pres+nil+nil+nil	24	30	xcomp	22
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	25	30	punct	2
+1_gatto.txt	La	la	RD	O	pron+accdat+_+3+_+clit	1	31	det	2
+1_gatto.txt	mandibola	mandibola	S	O	n+f+sing	2	31	nsubjpass	6
+1_gatto.txt	del	del	E+RD	O	prep/art+m+sing	3	31	case	4
+1_gatto.txt	gatto	gatto	S	O	n+m+sing	4	31	nmod	2
+1_gatto.txt	è	essere	VA	O	v+indic+pres+nil+3+sing	5	31	auxpass	6
+1_gatto.txt	fatta	fare	V	O	v+part+pass+f+nil+sing	6	31	ROOT	0
+1_gatto.txt	in	in	E	O	prep	7	31	case	8
+1_gatto.txt	modo	modo	S	O	n+m+sing	8	31	nmod	18
+1_gatto.txt	che	che	CS	O	conj	9	31	mark	12
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	10	31	punct	12
+1_gatto.txt	pur	pur	B	O	adv	11	31	advmod	12
+1_gatto.txt	consentendo	consentire	V	O	v+gerundio+pres+nil+nil+nil	12	31	advcl	18
+1_gatto.txt	unicamente	unicamente	B	O	adv	13	31	advmod	12
+1_gatto.txt	una	una	RI	O	art+f+sing	14	31	det	15
+1_gatto.txt	masticazione	masticazione	S	O	masticazione	15	31	dobj	12
+1_gatto.txt	verticale	verticale	A	O	adj+f+sing+pst	16	31	amod	15
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	17	31	punct	12
+1_gatto.txt	ha	avere	V	O	v+indic+pres+nil+3+sing	18	31	advcl	6
+1_gatto.txt	il	il	RD	O	art+m+sing	19	31	det	20
+1_gatto.txt	vantaggio	vantaggio	S	O	n+m+sing	20	31	dobj	18
+1_gatto.txt	di	di	E	O	prep	21	31	mark	22
+1_gatto.txt	permettere	permettere	V	O	v+infinito+pres+nil+nil+nil	22	31	acl	20
+1_gatto.txt	un	un	RI	O	art+m+sing	23	31	det	24
+1_gatto.txt	effetto	effetto	S	O	n+m+sing	24	31	dobj	22
+1_gatto.txt	a	a	E	O	prep	25	31	case	26
+1_gatto.txt	forbice	forbice	S	O	n+f+sing	26	31	nmod	24
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	27	31	punct	6
+1_gatto.txt	L'	l'	RD	O	pron+accdat+_+3+_+clit	1	32	det	2
+1_gatto.txt	osso	osso	S	O	n+m+sing	2	32	nsubj	5
+1_gatto.txt	ioideo	ioideo	A	O	ioideo	3	32	amod	2
+1_gatto.txt	è	essere	V	O	v+indic+pres+nil+3+sing	4	32	cop	5
+1_gatto.txt	ossificato	ossificare	A	O	ossificato ossificare+v+part+pass+m+nil+sing	5	32	ROOT	0
+1_gatto.txt	internamente	internamente	B	O	adv	6	32	advmod	5
+1_gatto.txt	:	[PUNCT]	FC	O	: [PUNCT]	7	32	punct	5
+1_gatto.txt	ciò	ciò	PD	O	ciò ciò+pron+_+m+3+sing+dim	8	32	nsubj	9
+1_gatto.txt	permette	permettere	V	O	v+indic+pres+nil+3+sing	9	32	advcl	5
+1_gatto.txt	al	al	E+RD	O	prep/art+m+sing	10	32	case	11
+1_gatto.txt	gatto	gatto	S	O	n+m+sing	11	32	nmod	9
+1_gatto.txt	di	di	E	O	prep	12	32	mark	13
+1_gatto.txt	fare	fare	V	O	v+infinito+pres+nil+nil+nil	13	32	xcomp	9
+1_gatto.txt	le	la	RD	O	pron+acc+f+3+plur+clit	14	32	det	15
+1_gatto.txt	fusa	fusa	S	O	fusa fondere+v+part+pass+f+nil+sing fuso+adj+f+sing+pst	15	32	dobj	13
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	16	32	punct	13
+1_gatto.txt	ma	ma	CC	O	conj	17	32	cc	13
+1_gatto.txt	non	non	BN	O	adv	18	32	neg	20
+1_gatto.txt	di	di	E	O	prep	19	32	mark	20
+1_gatto.txt	ruggire	ruggire	V	O	v+infinito+pres+nil+nil+nil	20	32	conj	13
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	21	32	punct	5
+1_gatto.txt	Contrariamente	contrariamente	B	O	adv	1	33	case	3
+1_gatto.txt	all'	all'	E+RD	O	prep/art+f+sing	2	33	mwe	1
+1_gatto.txt	uomo	uomo	S	O	n+m+sing	3	33	nmod	14
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	4	33	punct	3
+1_gatto.txt	il	il	RD	O	art+m+sing	5	33	det	6
+1_gatto.txt	gatto	gatto	S	O	n+m+sing	6	33	nsubj	14
+1_gatto.txt	mastica	masticare	A	O	mastica masticare+v+imp+pres+nil+2+sing masticare+v+indic+pres+nil+3+sing	7	33	amod	6
+1_gatto.txt	poco	poco	B	O	adv	8	33	nmod	6
+1_gatto.txt	e	e	CC	O	conj	9	33	cc	8
+1_gatto.txt	il	il	RD	O	art+m+sing	10	33	det	11
+1_gatto.txt	processo	processo	S	O	n+m+sing	11	33	conj	8
+1_gatto.txt	di	di	E	O	prep	12	33	case	13
+1_gatto.txt	digestione	digestione	S	O	n+f+sing	13	33	nmod	11
+1_gatto.txt	comincia	cominciare	V	O	v+indic+pres+nil+3+sing	14	33	ROOT	0
+1_gatto.txt	nello	nel	E+RD	O	prep/art+m+sing	15	33	case	16
+1_gatto.txt	stomaco	stomaco	S	O	n+m+sing	16	33	nmod	14
+1_gatto.txt	e	e	CC	O	conj	17	33	cc	14
+1_gatto.txt	non	non	BN	O	adv	18	33	neg	20
+1_gatto.txt	in	in	E	O	prep	19	33	case	20
+1_gatto.txt	bocca	bocca	S	O	n+f+sing	20	33	conj	14
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	21	33	punct	14
+1_gatto.txt	Lo	il	RD	O	pron+acc+m+3+sing+clit	1	34	det	2
+1_gatto.txt	stomaco	stomaco	S	O	n+m+sing	2	34	nsubj	6
+1_gatto.txt	del	del	E+RD	O	prep/art+m+sing	3	34	case	4
+1_gatto.txt	gatto	gatto	S	O	n+m+sing	4	34	nmod	2
+1_gatto.txt	è	essere	V	O	v+indic+pres+nil+3+sing	5	34	cop	6
+1_gatto.txt	piccolo	piccolo	A	O	adj+m+sing+pst	6	34	ROOT	0
+1_gatto.txt	(	[PUNCT]	FB	O	( [PUNCT]	7	34	punct	10
+1_gatto.txt	circa	circa	B	O	adv	8	34	advmod	9
+1_gatto.txt	300	300	N	O	300	9	34	nummod	10
+1_gatto.txt	millilitri	millilitri	S	O	millilitri	10	34	nmod	6
+1_gatto.txt	)	[PUNCT]	FB	O	) [PUNCT]	11	34	punct	10
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	12	34	punct	6
+1_gatto.txt	ma	ma	CC	O	conj	13	34	cc	6
+1_gatto.txt	possiede	possedere	V	O	v+indic+pres+nil+3+sing	14	34	conj	6
+1_gatto.txt	un'	un'	RI	O	un'	15	34	det	16
+1_gatto.txt	acidità	acidità	S	O	n+f+plur	16	34	dobj	14
+1_gatto.txt	molto	molto	B	O	adv	17	34	advmod	18
+1_gatto.txt	elevata	elevato	A	O	adj+f+sing+pst	18	34	amod	16
+1_gatto.txt	che	che	PR	O	conj	19	34	nsubj	21
+1_gatto.txt	è	essere	V	O	v+indic+pres+nil+3+sing	20	34	cop	21
+1_gatto.txt	utile	utile	A	O	adj+f+sing+pst	21	34	acl:relcl	16
+1_gatto.txt	anche	anche	B	O	adv	22	34	advmod	21
+1_gatto.txt	come	come	CC	O	come come+adv	23	34	cc	22
+1_gatto.txt	mezzo	mezzo	B	O	mezzo mezzo+adj+m+sing+pst mezzo+n+m+sing	24	34	advmod	26
+1_gatto.txt	di	di	E	O	prep	25	34	case	26
+1_gatto.txt	prevenzione	prevenzione	S	O	n+f+sing	26	34	conj	22
+1_gatto.txt	delle	della	E+RD	O	prep/art+f+plur	27	34	case	28
+1_gatto.txt	infezioni	infezione	S	O	n+f+plur	28	34	nmod	26
+1_gatto.txt	digestive	digestivo	A	O	adj+f+plur+pst	29	34	amod	28
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	30	34	punct	6
+1_gatto.txt	I	il	RD	O	art+m+plur	1	35	det	2
+1_gatto.txt	cambi	cambio	S	O	n+m+plur	2	35	ROOT	0
+1_gatto.txt	di	di	E	O	prep	3	35	case	4
+1_gatto.txt	direzione	direzione	S	O	n+f+sing	4	35	nmod	2
+1_gatto.txt	del	del	E+RD	O	prep/art+m+sing	5	35	case	6
+1_gatto.txt	pelo	pelo	S	O	n+m+sing	6	35	nmod	4
+1_gatto.txt	sul	sul	E+RD	O	prep/art+m+sing	7	35	case	8
+1_gatto.txt	muso	muso	S	O	n+m+sing	8	35	nmod	2
+1_gatto.txt	Il	il	RD	O	art+m+sing	1	36	det	3
+1_gatto.txt	suo	suo	AP	O	adj+m+sing+pst+poss	2	36	det:poss	3
+1_gatto.txt	intestino	intestino	S	O	n+m+sing	3	36	nsubj	25
+1_gatto.txt	piuttosto	piuttosto	B	O	adv	4	36	advmod	5
+1_gatto.txt	corto	corto	A	O	adj+m+sing+pst	5	36	amod	3
+1_gatto.txt	(	[PUNCT]	FB	O	( [PUNCT]	6	36	punct	9
+1_gatto.txt	circa	circa	B	O	adv	7	36	advmod	9
+1_gatto.txt	un	un	RI	O	art+m+sing	8	36	det	9
+1_gatto.txt	metro	metro	S	O	n+f+plur	9	36	nmod	3
+1_gatto.txt	per	per	E	O	prep	10	36	case	12
+1_gatto.txt	l'	l'	RD	O	pron+accdat+_+3+_+clit	11	36	det	12
+1_gatto.txt	intestino	intestino	S	O	n+m+sing	12	36	nmod	9
+1_gatto.txt	tenue	tenue	V	O	tenue tenue+adj+f+sing+pst tenue+adj+m+sing+pst	13	36	acl	12
+1_gatto.txt	e	e	CC	O	conj	14	36	cc	13
+1_gatto.txt	da	da	E	O	prep	15	36	case	16
+1_gatto.txt	20	20	N	O	20	16	36	conj	13
+1_gatto.txt	a	a	E	O	prep	17	36	case	19
+1_gatto.txt	40	40	N	O	40	18	36	nummod	19
+1_gatto.txt	cm	cm	S	O	cm	19	36	nmod	16
+1_gatto.txt	per	per	E	O	prep	20	36	case	22
+1_gatto.txt	il	il	RD	O	art+m+sing	21	36	det	22
+1_gatto.txt	colon	colon	S	O	n+m+plur	22	36	nmod	16
+1_gatto.txt	)	[PUNCT]	FB	O	) [PUNCT]	23	36	punct	9
+1_gatto.txt	è	essere	VA	O	v+indic+pres+nil+3+sing	24	36	cop	25
+1_gatto.txt	tipico	tipico	A	O	adj+m+sing+pst	25	36	ROOT	0
+1_gatto.txt	dei	del	E+RD	O	prep/art+m+plur	26	36	case	27
+1_gatto.txt	cacciatori	cacciatore	S	O	n+m+plur	27	36	nmod	25
+1_gatto.txt	di	di	E	O	prep	28	36	case	30
+1_gatto.txt	piccole	piccolo	A	O	adj+f+plur+pst	29	36	amod	30
+1_gatto.txt	prede	preda	S	O	n+f+plur	30	36	nmod	27
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	31	36	punct	25
+1_gatto.txt	Queste	questo	DD	O	adj+f+plur+pst+dim	1	37	det	2
+1_gatto.txt	dimensioni	dimensione	S	O	n+f+plur	2	37	nsubj	3
+1_gatto.txt	spiegano	spiegare	V	O	v+indic+pres+nil+3+plur	3	37	ROOT	0
+1_gatto.txt	perché	perché	CS	O	perché perché+adv	4	37	mark	8
+1_gatto.txt	il	il	RD	O	art+m+sing	5	37	det	6
+1_gatto.txt	gatto	gatto	S	O	n+m+sing	6	37	nsubj	8
+1_gatto.txt	deve	dovere	VM	O	v+indic+pres+nil+3+sing	7	37	aux	8
+1_gatto.txt	mangiare	mangiare	V	O	v+infinito+pres+nil+nil+nil	8	37	advcl	3
+1_gatto.txt	frequentemente	frequentemente	B	O	adv	9	37	advmod	8
+1_gatto.txt	ma	ma	CC	O	conj	10	37	cc	8
+1_gatto.txt	in	in	E	O	prep	11	37	case	13
+1_gatto.txt	piccole	piccolo	A	O	adj+f+plur+pst	12	37	amod	13
+1_gatto.txt	quantità	quantità	S	O	n+f+plur	13	37	conj	8
+1_gatto.txt	(	[PUNCT]	FB	O	( [PUNCT]	14	37	punct	13
+1_gatto.txt	tra	tra	E	O	prep	15	37	case	17
+1_gatto.txt	i	il	RD	O	art+m+plur	16	37	det	17
+1_gatto.txt	dieci	dieci	N	O	dieci dieci+adj+_+_+pst+num dieci+adj+_+_+pst+num	17	37	nummod	14
+1_gatto.txt	e	e	CC	O	conj	18	37	cc	17
+1_gatto.txt	i	il	RD	O	art+m+plur	19	37	det	21
+1_gatto.txt	sedici	sedici	N	O	sedici sedici+adj+_+_+pst+num sedici+adj+_+_+pst+num	20	37	nummod	21
+1_gatto.txt	pasti	pasto	S	O	n+m+plur	21	37	conj	17
+1_gatto.txt	)	[PUNCT]	FB	O	) [PUNCT]	22	37	punct	17
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	23	37	punct	3
+1_gatto.txt	Il	il	RD	O	art+m+sing	1	38	det	2
+1_gatto.txt	pelo	pelo	S	O	n+m+sing	2	38	ROOT	0
+1_gatto.txt	Gatto	gatto	S	O	n+m+sing	1	39	ROOT	0
+1_gatto.txt	persiano	persiano	A	O	adj+m+sing+pst	2	39	amod	1
+1_gatto.txt	Un	un	RI	O	art+m+sing	1	40	det	2
+1_gatto.txt	gatto	gatto	S	O	n+m+sing	2	40	ROOT	0
+1_gatto.txt	calico	calico	A	O	calico	3	40	amod	2
+1_gatto.txt	o	o	CC	O	conj	4	40	cc	3
+1_gatto.txt	tartarugato	tartarugato	A	O	tartarugato	5	40	conj	3
+1_gatto.txt	femmina	femmina	S	O	n+f+sing	6	40	nmod	2
+1_gatto.txt	La	la	RD	O	pron+accdat+_+3+_+clit	1	41	det	2
+1_gatto.txt	colorazione	colorazione	S	O	n+f+sing	2	41	ROOT	0
+1_gatto.txt	differenziale	differenziale	A	O	adj+f+sing+pst	3	41	amod	2
+1_gatto.txt	della	della	E+RD	O	prep/art+f+sing	4	41	case	6
+1_gatto.txt	sua	suo	AP	O	adj+f+sing+pst+poss	5	41	det:poss	6
+1_gatto.txt	pelliccia	pelliccia	A	O	pelliccia pelliccia+n+f+sing	6	41	nmod	2
+1_gatto.txt	dipende	dipendere	V	O	v+indic+pres+nil+3+sing	7	41	acl	6
+1_gatto.txt	dall'	dall'	E+RD	O	prep/art+f+sing	8	41	case	9
+1_gatto.txt	inattivazione	inattivazione	S	O	n+f+sing	9	41	nmod	7
+1_gatto.txt	selettiva	selettivo	A	O	adj+f+sing+pst	10	41	amod	9
+1_gatto.txt	di	di	E	O	prep	11	41	case	12
+1_gatto.txt	cromosomi	cromosoma	S	O	n+m+plur	12	41	nmod	9
+1_gatto.txt	X	X	SP	O	X	13	41	nmod	12
+1_gatto.txt	nelle	nella	E+RD	O	prep/art+f+plur	14	41	case	16
+1_gatto.txt	sue	suo	AP	O	adj+f+plur+pst+poss	15	41	det:poss	16
+1_gatto.txt	cellule	cellula	S	O	n+f+plur	16	41	nmod	7
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	17	41	punct	16
+1_gatto.txt	che	che	PR	O	conj	18	41	nsubj	19
+1_gatto.txt	portano	portare	V	O	v+indic+pres+nil+3+plur	19	41	acl:relcl	16
+1_gatto.txt	alleli	alleli	S	O	alleli	20	41	dobj	19
+1_gatto.txt	diversi	diverso	A	O	adj+m+plur+pst	21	41	amod	20
+1_gatto.txt	per	per	E	O	prep	22	41	case	24
+1_gatto.txt	il	il	RD	O	art+m+sing	23	41	det	24
+1_gatto.txt	colore	colore	S	O	n+m+sing	24	41	nmod	19
+1_gatto.txt	del	del	E+RD	O	prep/art+m+sing	25	41	case	26
+1_gatto.txt	pelo	pelo	S	O	n+m+sing	26	41	nmod	24
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	27	41	punct	2
+1_gatto.txt	La	la	RD	O	pron+accdat+_+3+_+clit	1	42	det	2
+1_gatto.txt	sordità	sordità	S	O	n+f+plur	2	42	nsubj	9
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	3	42	punct	2
+1_gatto.txt	ad	ad	E	O	prep	4	42	case	5
+1_gatto.txt	esempio	esempio	S	O	n+m+sing	5	42	nmod	9
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	6	42	punct	5
+1_gatto.txt	è	essere	V	O	v+indic+pres+nil+3+sing	7	42	cop	9
+1_gatto.txt	una	una	RI	O	art+f+sing	8	42	det	9
+1_gatto.txt	malattia	malattia	S	O	n+f+sing	9	42	ROOT	0
+1_gatto.txt	molto	molto	B	O	adv	10	42	advmod	11
+1_gatto.txt	comune	comune	A	O	adj+f+sing+pst	11	42	amod	9
+1_gatto.txt	nei	nel	E+RD	O	prep/art+m+plur	12	42	case	13
+1_gatto.txt	gatti	gatto	S	O	n+m+plur	13	42	nmod	9
+1_gatto.txt	bianchi	bianco	A	O	adj+m+plur+pst	14	42	amod	13
+1_gatto.txt	a	a	E	O	prep	15	42	case	16
+1_gatto.txt	causa	causa	S	O	n+f+sing	16	42	nmod	13
+1_gatto.txt	di	di	E	O	prep	17	42	case	19
+1_gatto.txt	una	una	RI	O	art+f+sing	18	42	det	19
+1_gatto.txt	predisposizione	predisposizione	S	O	n+f+sing	19	42	nmod	16
+1_gatto.txt	genetica	genetico	A	O	adj+f+sing+pst	20	42	amod	19
+1_gatto.txt	(	[PUNCT]	FB	O	( [PUNCT]	21	42	punct	22
+1_gatto.txt	gene	gene	S	O	n+m+sing	22	42	appos	19
+1_gatto.txt	W	W	SP	O	W	23	42	nmod	22
+1_gatto.txt	)	[PUNCT]	FB	O	) [PUNCT]	24	42	punct	22
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	25	42	punct	9
+1_gatto.txt	I	il	RD	O	art+m+plur	1	43	det	2
+1_gatto.txt	gatti	gatto	S	O	n+m+plur	2	43	nsubj	6
+1_gatto.txt	bianchi	bianco	A	O	adj+m+plur+pst	3	43	amod	2
+1_gatto.txt	più	più	B	O	adv	4	43	advmod	5
+1_gatto.txt	colpiti	colpire	V	O	v+part+pass+m+nil+plur	5	43	acl	2
+1_gatto.txt	sono	essere	V	O	v+indic+pres+nil+1+sing	6	43	ROOT	0
+1_gatto.txt	generalmente	generalmente	B	O	adv	7	43	advmod	8
+1_gatto.txt	quelli	quelli	PD	O	quelli quelli+pron+_+m+3+plur+dim quello+adj+m+plur+pst+dim	8	43	xcomp	6
+1_gatto.txt	con	con	E	O	prep	9	43	case	11
+1_gatto.txt	gli	il	RD	O	pron+acc+m+3+sing+clit	10	43	det	11
+1_gatto.txt	occhi	occhio	S	O	n+m+plur	11	43	nmod	8
+1_gatto.txt	azzurri	azzurro	A	O	adj+m+plur+pst	12	43	amod	11
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	13	43	punct	8
+1_gatto.txt	sempre	sempre	B	O	adv	14	43	advmod	16
+1_gatto.txt	a	a	E	O	prep	15	43	case	16
+1_gatto.txt	motivo	motivo	S	O	n+m+sing	16	43	nmod	8
+1_gatto.txt	dello	del	E+RD	O	prep/art+m+sing	17	43	case	19
+1_gatto.txt	stesso	stesso	A	O	adj+m+sing+pst	18	43	amod	19
+1_gatto.txt	gene	gene	S	O	n+m+sing	19	43	nmod	16
+1_gatto.txt	W	W	SP	O	W	20	43	nmod	19
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	21	43	punct	6
+1_gatto.txt	Il	il	RD	O	art+m+sing	1	44	det	2
+1_gatto.txt	colore	colore	S	O	n+m+sing	2	44	nsubj	7
+1_gatto.txt	del	del	E+RD	O	prep/art+m+sing	3	44	case	4
+1_gatto.txt	pelo	pelo	S	O	n+m+sing	4	44	nmod	2
+1_gatto.txt	è	essere	V	O	v+indic+pres+nil+3+sing	5	44	cop	7
+1_gatto.txt	molto	molto	B	O	adv	6	44	advmod	7
+1_gatto.txt	vario	vario	A	O	adj+m+sing+pst	7	44	ROOT	0
+1_gatto.txt	in	in	E	O	prep	8	44	case	9
+1_gatto.txt	funzione	funzione	S	O	n+f+sing	9	44	nmod	7
+1_gatto.txt	delle	della	E+RD	O	prep/art+f+plur	10	44	case	11
+1_gatto.txt	razze	razza	S	O	n+f+plur	11	44	nmod	9
+1_gatto.txt	:	[PUNCT]	FC	O	: [PUNCT]	12	44	punct	7
+1_gatto.txt	si	si	PC	O	pron+accdat+_+3+_+clit	13	44	expl:impers	14
+1_gatto.txt	va	andare	V	O	v+indic+pres+nil+3+sing	14	44	advcl	7
+1_gatto.txt	dalle	dalla	E+RD	O	prep/art+f+plur	15	44	case	16
+1_gatto.txt	razze	razza	S	O	n+f+plur	16	44	nmod	14
+1_gatto.txt	a	a	E	O	prep	17	44	case	18
+1_gatto.txt	pelo	pelo	S	O	n+m+sing	18	44	nmod	14
+1_gatto.txt	lungo	lungo	A	O	adj+m+sing+pst	19	44	amod	18
+1_gatto.txt	fino	fino	B	O	prep	20	44	case	22
+1_gatto.txt	a	a	E	O	prep	21	44	mwe	20
+1_gatto.txt	razze	razza	S	O	n+f+plur	22	44	nmod	14
+1_gatto.txt	quasi	quasi	B	O	adv	23	44	advmod	22
+1_gatto.txt	del	del	E+RD	O	prep/art+m+sing	24	44	case	25
+1_gatto.txt	tutto	tutto	PI	O	pron+_+m+3+sing+ind	25	44	nmod	23
+1_gatto.txt	senza	senza	E	O	prep	26	44	case	27
+1_gatto.txt	pelo	pelo	S	O	n+m+sing	27	44	nmod	25
+1_gatto.txt	come	come	E	O	come come+adv	28	44	case	30
+1_gatto.txt	lo	il	RD	O	pron+acc+m+3+sing+clit	29	44	det	30
+1_gatto.txt	sphynx	sphynx	S	O	sphynx	30	44	nmod	23
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	31	44	punct	7
+1_gatto.txt	Probabilmente	probabilmente	B	O	adv	1	45	advmod	3
+1_gatto.txt	in	in	E	O	prep	2	45	case	3
+1_gatto.txt	origine	origine	S	O	n+f+sing	3	45	nmod	6
+1_gatto.txt	il	il	RD	O	art+m+sing	4	45	det	5
+1_gatto.txt	pelo	pelo	S	O	n+m+sing	5	45	nsubj	6
+1_gatto.txt	era	essere	V	O	v+indic+imperf+nil+3+sing	6	45	ROOT	0
+1_gatto.txt	di	di	E	O	prep	7	45	case	8
+1_gatto.txt	colore	colore	S	O	n+m+sing	8	45	nmod	6
+1_gatto.txt	grigio-marrone	grigio-marrone	A	O	grigio-marrone	9	45	amod	8
+1_gatto.txt	tigrato	tigrato	V	O	tigrato tigrato+adj+m+sing+pst	10	45	xcomp	6
+1_gatto.txt	adatto	adatto	A	O	adj+m+sing+pst	11	45	xcomp	10
+1_gatto.txt	alla	alla	E+RD	O	prep/art+f+sing	12	45	case	13
+1_gatto.txt	mimetizzazione	mimetizzazione	S	O	n+f+sing	13	45	nmod	11
+1_gatto.txt	durante	durante	E	O	prep	14	45	case	16
+1_gatto.txt	la	la	RD	O	pron+accdat+_+3+_+clit	15	45	det	16
+1_gatto.txt	caccia	caccia	S	O	n+f+sing	16	45	nmod	10
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	17	45	punct	6
+1_gatto.txt	La	la	RD	O	pron+accdat+_+3+_+clit	1	46	det	2
+1_gatto.txt	pelliccia	pelliccia	S	O	n+f+sing	2	46	nsubjpass	6
+1_gatto.txt	del	del	E+RD	O	prep/art+m+sing	3	46	case	4
+1_gatto.txt	gatto	gatto	S	O	n+m+sing	4	46	nmod	2
+1_gatto.txt	è	essere	VA	O	v+indic+pres+nil+3+sing	5	46	auxpass	6
+1_gatto.txt	composta	comporre	V	O	v+part+pass+f+nil+sing	6	46	ROOT	0
+1_gatto.txt	da	da	E	O	prep	7	46	case	8
+1_gatto.txt	peli	pelo	S	O	n+m+plur	8	46	nmod	6
+1_gatto.txt	lunghi	lungo	A	O	adj+m+plur+pst	9	46	amod	8
+1_gatto.txt	che	che	PR	O	conj	10	46	nsubj	11
+1_gatto.txt	coprono	coprire	V	O	v+indic+pres+nil+3+plur	11	46	acl:relcl	8
+1_gatto.txt	la	la	RD	O	pron+accdat+_+3+_+clit	12	46	det	13
+1_gatto.txt	superficie	superficie	S	O	n+f+sing	13	46	dobj	11
+1_gatto.txt	esterna	esterno	A	O	adj+f+sing+pst	14	46	amod	13
+1_gatto.txt	e	e	CC	O	conj	15	46	cc	11
+1_gatto.txt	da	da	E	O	prep	16	46	case	17
+1_gatto.txt	peli	pelo	S	O	n+m+plur	17	46	conj	11
+1_gatto.txt	corti	corto	A	O	adj+m+plur+pst	18	46	amod	17
+1_gatto.txt	sotto	sotto	B	O	adv	19	46	advmod	17
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	20	46	punct	6
+1_gatto.txt	Questo	questo	PD	O	Questo questo+adj+m+sing+pst+dim questo+pron+_+m+3+sing+dim	1	47	nsubj	2
+1_gatto.txt	permette	permettere	V	O	v+indic+pres+nil+3+sing	2	47	ROOT	0
+1_gatto.txt	un	un	RI	O	art+m+sing	3	47	det	5
+1_gatto.txt	buon	buon	A	O	adj+f+plur+pst	4	47	amod	5
+1_gatto.txt	isolamento	isolamento	S	O	n+m+sing	5	47	dobj	2
+1_gatto.txt	termico	termico	A	O	adj+m+sing+pst	6	47	amod	5
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	7	47	punct	2
+1_gatto.txt	Il	il	RD	O	art+m+sing	1	48	det	2
+1_gatto.txt	manto	manto	S	O	n+m+sing	2	48	nsubjpass	7
+1_gatto.txt	di	di	E	O	prep	3	48	case	5
+1_gatto.txt	un	un	RI	O	art+m+sing	4	48	det	5
+1_gatto.txt	gatto	gatto	S	O	n+m+sing	5	48	nmod	2
+1_gatto.txt	è	essere	VA	O	v+indic+pres+nil+3+sing	6	48	auxpass	7
+1_gatto.txt	composto	comporre	V	O	v+part+pass+m+nil+sing	7	48	ROOT	0
+1_gatto.txt	da	da	E	O	prep	8	48	case	10
+1_gatto.txt	più	più	B	O	adv	9	48	advmod	10
+1_gatto.txt	colori	colore	S	O	n+m+plur	10	48	nmod	7
+1_gatto.txt	che	che	PR	O	conj	11	48	nsubj	12
+1_gatto.txt	formano	formare	V	O	v+indic+pres+nil+3+plur	12	48	acl:relcl	10
+1_gatto.txt	diversi	diverso	DI	O	adj+m+plur+pst	13	48	det	14
+1_gatto.txt	motivi	motivo	S	O	n+m+plur	14	48	dobj	12
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	15	48	punct	7
+1_gatto.txt	Certi	certo	V	O	Certi certo+adj+m+plur+pst	1	49	ROOT	0
+1_gatto.txt	esemplari	esemplare	A	O	adj+f+plur+pst	2	49	amod	1
+1_gatto.txt	hanno	avere	V	O	v+indic+pres+nil+3+plur	3	49	conj	1
+1_gatto.txt	delle	della	RI	O	prep/	4	49	det	6
+1_gatto.txt	grandi	grande	A	O	adj+f+plur+pst	5	49	amod	6
+1_gatto.txt	macchie	macchia	S	O	n+f+plur	6	49	dobj	3
+1_gatto.txt	mentre	mentre	CS	O	conj	7	49	mark	8
+1_gatto.txt	altri	altri	PI	O	pron+_+m+3+plur+ind	8	49	advcl	6
+1_gatto.txt	delle	della	E+RD	O	prep/art+f+plur	9	49	case	10
+1_gatto.txt	striature	striatura	S	O	n+f+plur	10	49	nmod	8
+1_gatto.txt	o	o	CC	O	conj	11	49	cc	10
+1_gatto.txt	delle	della	E+RD	O	prep/art+f+plur	12	49	case	13
+1_gatto.txt	macchie	macchia	S	O	n+f+plur	13	49	conj	10
+1_gatto.txt	più	più	B	O	adv	14	49	advmod	15
+1_gatto.txt	piccole	piccolo	A	O	adj+f+plur+pst	15	49	amod	10
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	16	49	punct	8
+1_gatto.txt	Il	il	RD	O	art+m+sing	1	50	det	2
+1_gatto.txt	colore	colore	S	O	n+m+sing	2	50	nsubj	9
+1_gatto.txt	del	del	E+RD	O	prep/art+m+sing	3	50	case	4
+1_gatto.txt	pelo	pelo	S	O	n+m+sing	4	50	nmod	2
+1_gatto.txt	di	di	E	O	prep	5	50	case	7
+1_gatto.txt	un	un	RI	O	art+m+sing	6	50	det	7
+1_gatto.txt	gatto	gatto	S	O	n+m+sing	7	50	nmod	4
+1_gatto.txt	può	potere	VM	O	v+indic+pres+nil+3+sing	8	50	aux	9
+1_gatto.txt	avere	avere	V	O	v+infinito+pres+nil+nil+nil	9	50	ROOT	0
+1_gatto.txt	più	più	DI	O	più più+adv	10	50	det	11
+1_gatto.txt	tinte	tinta	S	O	n+f+plur	11	50	dobj	9
+1_gatto.txt	(	[PUNCT]	FB	O	( [PUNCT]	12	50	punct	13
+1_gatto.txt	nero	nero	S	O	n+m+sing	13	50	appos	11
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	14	50	punct	13
+1_gatto.txt	bianco	bianco	S	O	n+m+sing	15	50	conj	13
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	16	50	punct	13
+1_gatto.txt	rosso	rosso	S	O	n+m+sing	17	50	conj	13
+1_gatto.txt	)	[PUNCT]	FB	O	) [PUNCT]	18	50	punct	13
+1_gatto.txt	più	più	B	O	adv	19	50	advmod	22
+1_gatto.txt	o	o	CC	O	conj	20	50	cc	19
+1_gatto.txt	meno	meno	B	O	adv	21	50	conj	19
+1_gatto.txt	diluiti	diluire	V	O	v+part+pass+m+nil+plur	22	50	advcl	9
+1_gatto.txt	o	o	CC	O	conj	23	50	cc	22
+1_gatto.txt	scuri	scuro	A	O	adj+m+plur+pst	24	50	conj	22
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	25	50	punct	9
+1_gatto.txt	Il	il	RD	O	art+m+sing	1	51	det	2
+1_gatto.txt	maschio	maschio	S	O	n+m+sing	2	51	nsubj	8
+1_gatto.txt	per	per	E	O	prep	3	51	case	5
+1_gatto.txt	delle	della	E+RD	O	prep/art+f+plur	4	51	mwe	3
+1_gatto.txt	ragioni	ragione	S	O	n+f+plur	5	51	nmod	2
+1_gatto.txt	genetiche	genetico	A	O	adj+f+plur+pst	6	51	amod	5
+1_gatto.txt	può	potere	VM	O	v+indic+pres+nil+3+sing	7	51	aux	8
+1_gatto.txt	assumere	assumere	V	O	v+infinito+pres+nil+nil+nil	8	51	ROOT	0
+1_gatto.txt	solo	solo	B	O	adv	9	51	advmod	10
+1_gatto.txt	uno	uno	PI	O	pron+_+m+3+sing+ind	10	51	dobj	8
+1_gatto.txt	o	o	CC	O	conj	11	51	cc	10
+1_gatto.txt	due	due	N	O	due due+adj+_+_+pst+num due+adj+_+_+pst+num	12	51	nummod	13
+1_gatto.txt	colori	colore	S	O	n+m+plur	13	51	conj	10
+1_gatto.txt	alla	alla	E+RD	O	prep/art+f+sing	14	51	case	15
+1_gatto.txt	volta	volta	S	O	n+f+sing	15	51	nmod	8
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	16	51	punct	8
+1_gatto.txt	salvo	salvo	E	O	salvo salvare+v+indic+pres+nil+1+sing salvo+adj+m+sing+pst salvo+adv	17	51	case	19
+1_gatto.txt	rare	raro	A	O	adj+f+plur+pst	18	51	amod	19
+1_gatto.txt	eccezioni	eccezione	S	O	n+f+plur	19	51	nmod	26
+1_gatto.txt	(	[PUNCT]	FB	O	( [PUNCT]	20	51	punct	22
+1_gatto.txt	il	il	RD	O	art+m+sing	21	51	det	22
+1_gatto.txt	maschio	maschio	S	O	n+m+sing	22	51	nsubj	26
+1_gatto.txt	calico	calico	A	O	calico	23	51	amod	22
+1_gatto.txt	è	essere	V	O	v+indic+pres+nil+3+sing	24	51	cop	26
+1_gatto.txt	geneticamente	geneticamente	B	O	adv	25	51	advmod	26
+1_gatto.txt	sterile	sterile	A	O	adj+f+sing+pst	26	51	amod	8
+1_gatto.txt	)	[PUNCT]	FB	O	) [PUNCT]	27	51	punct	26
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	28	51	punct	8
+1_gatto.txt	In	in	E	O	prep	1	52	case	2
+1_gatto.txt	principio	principio	S	O	n+m+sing	2	52	nmod	7
+1_gatto.txt	solo	solo	B	O	adv	3	52	advmod	5
+1_gatto.txt	le	la	RD	O	pron+acc+f+3+plur+clit	4	52	det	5
+1_gatto.txt	femmine	femmina	S	O	n+f+plur	5	52	nsubj	7
+1_gatto.txt	possono	potere	VM	O	v+indic+pres+nil+3+plur	6	52	aux	7
+1_gatto.txt	portare	portare	V	O	v+infinito+pres+nil+nil+nil	7	52	ROOT	0
+1_gatto.txt	tre	tre	N	O	tre tre+adj+_+_+pst+num tre+adj+_+_+pst+num	8	52	nummod	9
+1_gatto.txt	colori	colore	S	O	n+m+plur	9	52	dobj	7
+1_gatto.txt	(	[PUNCT]	FB	O	( [PUNCT]	10	52	punct	11
+1_gatto.txt	gatto	gatto	S	O	n+m+sing	11	52	appos	9
+1_gatto.txt	calico	calico	A	O	calico	12	52	amod	11
+1_gatto.txt	o	o	CC	O	conj	13	52	cc	12
+1_gatto.txt	tartarugato	tartarugato	A	O	tartarugato	14	52	conj	12
+1_gatto.txt	)	[PUNCT]	FB	O	) [PUNCT]	15	52	punct	11
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	16	52	punct	7
+1_gatto.txt	Il	il	RD	O	art+m+sing	1	53	det	2
+1_gatto.txt	gatto	gatto	S	O	n+m+sing	2	53	nsubj	3
+1_gatto.txt	impiega	impiegare	V	O	v+indic+pres+nil+3+sing	3	53	ROOT	0
+1_gatto.txt	molto	molto	B	O	adv	4	53	advmod	5
+1_gatto.txt	tempo	tempo	S	O	n+m+sing	5	53	dobj	3
+1_gatto.txt	nella	nella	E+RD	O	prep/art+f+sing	6	53	case	7
+1_gatto.txt	pulizia	pulizia	S	O	n+f+sing	7	53	nmod	3
+1_gatto.txt	del	del	E+RD	O	prep/art+m+sing	8	53	case	10
+1_gatto.txt	suo	suo	AP	O	adj+m+sing+pst+poss	9	53	det:poss	10
+1_gatto.txt	pelo	pelo	S	O	n+m+sing	10	53	nmod	7
+1_gatto.txt	perché	perché	CS	O	perché perché+adv	11	53	mark	15
+1_gatto.txt	questo	questo	PD	O	questo questo+adj+m+sing+pst+dim questo+pron+_+m+3+sing+dim	12	53	nsubj	15
+1_gatto.txt	è	essere	V	O	v+indic+pres+nil+3+sing	13	53	cop	15
+1_gatto.txt	molto	molto	B	O	adv	14	53	advmod	15
+1_gatto.txt	importante	importante	A	O	adj+f+sing+pst	15	53	advcl	3
+1_gatto.txt	per	per	E	O	prep	16	53	mark	17
+1_gatto.txt	regolare	regolare	V	O	v+infinito+pres+nil+nil+nil	17	53	acl	15
+1_gatto.txt	la	la	RD	O	pron+accdat+_+3+_+clit	18	53	det	20
+1_gatto.txt	sua	suo	AP	O	adj+f+sing+pst+poss	19	53	det:poss	20
+1_gatto.txt	temperatura	temperatura	S	O	n+f+sing	20	53	dobj	17
+1_gatto.txt	corporea	corporeo	A	O	adj+f+sing+pst	21	53	amod	20
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	22	53	punct	3
+1_gatto.txt	La	la	RD	O	pron+accdat+_+3+_+clit	1	54	det	3
+1_gatto.txt	sua	suo	AP	O	adj+f+sing+pst+poss	2	54	det:poss	3
+1_gatto.txt	lingua	lingua	S	O	n+f+sing	3	54	nsubjpass	5
+1_gatto.txt	è	essere	VA	O	v+indic+pres+nil+3+sing	4	54	auxpass	5
+1_gatto.txt	coperta	coprire	V	O	v+part+pass+f+nil+sing	5	54	ROOT	0
+1_gatto.txt	da	da	E	O	prep	6	54	case	8
+1_gatto.txt	piccole	piccolo	A	O	adj+f+plur+pst	7	54	amod	8
+1_gatto.txt	papille	papille	S	O	papille	8	54	nmod	5
+1_gatto.txt	che	che	PR	O	conj	9	54	nsubj	11
+1_gatto.txt	la	la	PC	O	pron+accdat+_+3+_+clit	10	54	dobj	11
+1_gatto.txt	rendono	rendere	V	O	v+indic+pres+nil+3+plur	11	54	acl:relcl	8
+1_gatto.txt	molto	molto	B	O	adv	12	54	advmod	13
+1_gatto.txt	ruvida	ruvido	A	O	adj+f+sing+pst	13	54	xcomp	11
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	14	54	punct	5
+1_gatto.txt	e	e	CC	O	conj	15	54	cc	5
+1_gatto.txt	gli	il	RD	O	pron+acc+m+3+sing+clit	16	54	det	17
+1_gatto.txt	permettono	permettere	V	O	v+indic+pres+nil+3+plur	17	54	conj	5
+1_gatto.txt	di	di	E	O	prep	18	54	mark	19
+1_gatto.txt	snodare	snodare	V	O	v+infinito+pres+nil+nil+nil	19	54	xcomp	17
+1_gatto.txt	il	il	RD	O	art+m+sing	20	54	det	21
+1_gatto.txt	pelo	pelo	S	O	n+m+sing	21	54	dobj	19
+1_gatto.txt	durante	durante	E	O	prep	22	54	case	25
+1_gatto.txt	la	la	RD	O	pron+accdat+_+3+_+clit	23	54	det	25
+1_gatto.txt	sua	suo	AP	O	adj+f+sing+pst+poss	24	54	det:poss	25
+1_gatto.txt	toelettatura	toelettatura	S	O	toelettatura	25	54	nmod	19
+1_gatto.txt	(	[PUNCT]	FB	O	( [PUNCT]	26	54	punct	28
+1_gatto.txt	salvo	salvo	A	O	adj+m+sing+pst	27	54	amod	28
+1_gatto.txt	casi	caso	S	O	n+m+plur	28	54	nmod	35
+1_gatto.txt	particolari	particolare	A	O	adj+f+plur+pst	29	54	amod	28
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	30	54	punct	28
+1_gatto.txt	i	il	RD	O	art+m+plur	31	54	det	32
+1_gatto.txt	gatti	gatto	S	O	n+m+plur	32	54	nsubj	35
+1_gatto.txt	si	si	PC	O	pron+accdat+_+3+_+clit	33	54	expl	35
+1_gatto.txt	"	[PUNCT]	FB	O	" [PUNCT]	34	54	punct	35
+1_gatto.txt	lavano	lavare	V	O	v+indic+pres+nil+3+plur	35	54	advcl	19
+1_gatto.txt	"	[PUNCT]	FB	O	" [PUNCT]	36	54	punct	38
+1_gatto.txt	ogni	ogni	DI	O	adj+f+plur+pst	37	54	det	38
+1_gatto.txt	giorno	giorno	S	O	n+m+sing	38	54	nmod	35
+1_gatto.txt	)	[PUNCT]	FB	O	) [PUNCT]	39	54	punct	38
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	40	54	punct	5
+1_gatto.txt	Sphynx	Sphynx	NO	O	Sphynx	1	55	ROOT	0
+1_gatto.txt	Avendo	avere	V	O	v+gerundio+pres+nil+nil+nil	1	56	advcl	17
+1_gatto.txt	un	un	RI	O	art+m+sing	2	56	det	4
+1_gatto.txt	elevato	elevato	A	O	adj+m+sing+pst	3	56	amod	4
+1_gatto.txt	rapporto	rapporto	S	O	n+m+sing	4	56	dobj	1
+1_gatto.txt	fra	fra	E	O	prep	5	56	case	6
+1_gatto.txt	superficie	superficie	S	O	n+f+sing	6	56	nmod	4
+1_gatto.txt	epidermica	epidermico	A	O	adj+f+sing+pst	7	56	amod	6
+1_gatto.txt	e	e	CC	O	conj	8	56	cc	6
+1_gatto.txt	peso	peso	S	O	n+m+sing	9	56	conj	6
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	10	56	punct	1
+1_gatto.txt	il	il	RD	O	art+m+sing	11	56	det	12
+1_gatto.txt	rischio	rischio	S	O	n+m+sing	12	56	nsubj	17
+1_gatto.txt	di	di	E	O	prep	13	56	case	14
+1_gatto.txt	dispersione	dispersione	S	O	n+f+sing	14	56	nmod	12
+1_gatto.txt	termica	termico	A	O	adj+f+sing+pst	15	56	amod	14
+1_gatto.txt	è	essere	V	O	v+indic+pres+nil+3+sing	16	56	cop	17
+1_gatto.txt	grande	grande	A	O	adj+f+sing+pst	17	56	ROOT	0
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	18	56	punct	17
+1_gatto.txt	Se	se	CS	O	conj	1	57	mark	4
+1_gatto.txt	il	il	RD	O	art+m+sing	2	57	det	3
+1_gatto.txt	pelo	pelo	S	O	n+m+sing	3	57	nsubj	4
+1_gatto.txt	fosse	essere	V	O	v+cong+imperf+nil+3+sing	4	57	advcl	15
+1_gatto.txt	in	in	E	O	prep	5	57	case	6
+1_gatto.txt	disordine	disordine	S	O	n+m+sing	6	57	nmod	4
+1_gatto.txt	o	o	CC	O	conj	7	57	cc	6
+1_gatto.txt	sporco	sporco	A	O	adj+m+sing+pst	8	57	conj	6
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	9	57	punct	4
+1_gatto.txt	le	la	RD	O	pron+acc+f+3+plur+clit	10	57	det	11
+1_gatto.txt	caratteristiche	caratteristica	S	O	n+f+plur	11	57	nsubj	15
+1_gatto.txt	isolanti	isolante	A	O	adj+f+plur+pst	12	57	amod	11
+1_gatto.txt	sarebbero	essere	V	O	v+cond+pres+nil+3+plur	13	57	cop	15
+1_gatto.txt	meno	meno	B	O	adv	14	57	advmod	15
+1_gatto.txt	efficaci	efficace	A	O	adj+f+plur+pst	15	57	ROOT	0
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	16	57	punct	15
+1_gatto.txt	Inoltre	inoltre	B	O	adv	1	58	advmod	3
+1_gatto.txt	in	in	E	O	prep	2	58	case	3
+1_gatto.txt	estate	estate	S	O	n+f+sing	3	58	nmod	11
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	4	58	punct	3
+1_gatto.txt	il	il	RD	O	art+m+sing	5	58	det	6
+1_gatto.txt	fatto	fatto	S	O	n+m+sing	6	58	nsubj	11
+1_gatto.txt	di	di	E	O	prep	7	58	mark	8
+1_gatto.txt	bagnare	bagnare	V	O	v+infinito+pres+nil+nil+nil	8	58	acl	6
+1_gatto.txt	la	la	RD	O	pron+accdat+_+3+_+clit	9	58	det	10
+1_gatto.txt	pelliccia	pelliccia	S	O	n+f+sing	10	58	dobj	8
+1_gatto.txt	provoca	provocare	V	O	v+indic+pres+nil+3+sing	11	58	ROOT	0
+1_gatto.txt	un	un	RI	O	art+m+sing	12	58	det	13
+1_gatto.txt	raffreddamento	raffreddamento	S	O	n+m+sing	13	58	dobj	11
+1_gatto.txt	grazie	grazia	S	O	n+f+plur	14	58	case	16
+1_gatto.txt	all'	all'	E+RD	O	prep/art+f+sing	15	58	mwe	14
+1_gatto.txt	evaporazione	evaporazione	S	O	evaporazione	16	58	nmod	13
+1_gatto.txt	della	della	E+RD	O	prep/art+f+sing	17	58	case	18
+1_gatto.txt	saliva	saliva	S	O	n+f+sing	18	58	nmod	16
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	19	58	punct	11
+1_gatto.txt	I	il	RD	O	art+m+plur	1	59	det	2
+1_gatto.txt	gatti	gatto	S	O	n+m+plur	2	59	nsubj	3
+1_gatto.txt	perdono	perdere	V	O	v+indic+pres+nil+3+plur	3	59	ROOT	0
+1_gatto.txt	il	il	RD	O	art+m+sing	4	59	det	5
+1_gatto.txt	pelo	pelo	S	O	n+m+sing	5	59	dobj	3
+1_gatto.txt	all'	all'	E+RD	O	prep/art+f+sing	6	59	case	7
+1_gatto.txt	inizio	inizio	S	O	n+m+sing	7	59	nmod	3
+1_gatto.txt	della	della	E+RD	O	prep/art+f+sing	8	59	case	9
+1_gatto.txt	stagione	stagione	S	O	n+f+sing	9	59	nmod	7
+1_gatto.txt	estiva	estivo	A	O	adj+f+sing+pst	10	59	amod	9
+1_gatto.txt	per	per	E	O	prep	11	59	case	12
+1_gatto.txt	effetto	effetto	S	O	n+m+sing	12	59	nmod	3
+1_gatto.txt	della	della	E+RD	O	prep/art+f+sing	13	59	case	14
+1_gatto.txt	muta	muto	A	O	adj+f+sing+pst	14	59	nmod	12
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	15	59	punct	3
+1_gatto.txt	I	il	RD	O	art+m+plur	1	60	det	2
+1_gatto.txt	sensi	senso	S	O	n+m+plur	2	60	ROOT	0
+1_gatto.txt	Predatore	predatore	S	O	n+m+sing	1	61	nmod	6
+1_gatto.txt	crepuscolare	crepuscolare	A	O	crepuscolare	2	61	amod	1
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	3	61	punct	1
+1_gatto.txt	il	il	RD	O	art+m+sing	4	61	det	5
+1_gatto.txt	gatto	gatto	S	O	n+m+sing	5	61	nsubj	6
+1_gatto.txt	possiede	possedere	V	O	v+indic+pres+nil+3+sing	6	61	ROOT	0
+1_gatto.txt	dei	del	E+RD	O	prep/art+m+plur	7	61	case	8
+1_gatto.txt	sensi	senso	S	O	n+m+plur	8	61	nmod	6
+1_gatto.txt	molto	molto	B	O	adv	9	61	advmod	10
+1_gatto.txt	sviluppati	sviluppato	A	O	adj+m+plur+pst	10	61	amod	8
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	11	61	punct	6
+1_gatto.txt	Percepisce	percepire	V	O	v+indic+pres+nil+3+sing	1	62	ROOT	0
+1_gatto.txt	il	il	RD	O	art+m+sing	2	62	det	3
+1_gatto.txt	mondo	mondo	S	O	n+m+sing	3	62	dobj	1
+1_gatto.txt	diversamente	diversamente	B	O	adv	4	62	advmod	6
+1_gatto.txt	dagli	dal	E+RD	O	prep/art+m+plur	5	62	case	6
+1_gatto.txt	esseri	essere	S	O	n+m+plur	6	62	nmod	3
+1_gatto.txt	umani	umano	A	O	adj+m+plur+pst	7	62	amod	6
+1_gatto.txt	;	[PUNCT]	FC	O	; [PUNCT]	8	62	punct	1
+1_gatto.txt	è	essere	V	O	v+indic+pres+nil+3+sing	9	62	conj	1
+1_gatto.txt	forse	forse	B	O	adv	10	62	advmod	12
+1_gatto.txt	per	per	E	O	prep	11	62	case	12
+1_gatto.txt	questo	questo	PD	O	questo questo+adj+m+sing+pst+dim questo+pron+_+m+3+sing+dim	12	62	nmod	9
+1_gatto.txt	che	che	CS	O	conj	13	62	mark	16
+1_gatto.txt	gli	il	RD	O	pron+acc+m+3+sing+clit	14	62	iobj	16
+1_gatto.txt	vengono	venire	VA	O	v+indic+pres+nil+3+plur	15	62	auxpass	16
+1_gatto.txt	associati	associare	V	O	v+part+pass+m+nil+plur	16	62	acl	12
+1_gatto.txt	dei	del	E+RD	O	prep/art+m+plur	17	62	case	18
+1_gatto.txt	poteri	potere	S	O	n+m+plur	18	62	nmod	16
+1_gatto.txt	soprannaturali	soprannaturale	A	O	adj+f+plur+pst	19	62	amod	18
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	20	62	punct	1
+1_gatto.txt	Esistono	esistere	V	O	v+indic+pres+nil+3+plur	1	63	ROOT	0
+1_gatto.txt	diverse	diverso	DI	O	adj+f+plur+pst	2	63	det	3
+1_gatto.txt	storie	storia	S	O	n+f+plur	3	63	dobj	1
+1_gatto.txt	che	che	PR	O	conj	4	63	nsubj	5
+1_gatto.txt	raccontano	raccontare	V	O	v+indic+pres+nil+3+plur	5	63	acl:relcl	3
+1_gatto.txt	come	come	E	O	come come+adv	6	63	case	8
+1_gatto.txt	dei	del	E+RD	O	prep/art+m+plur	7	63	mwe	6
+1_gatto.txt	gatti	gatto	S	O	n+m+plur	8	63	nmod	5
+1_gatto.txt	hanno	avere	VA	O	v+indic+pres+nil+3+plur	9	63	aux	10
+1_gatto.txt	predetto	predire	V	O	v+part+pass+m+nil+sing	10	63	parataxis	1
+1_gatto.txt	dei	del	E+RD	O	prep/art+m+plur	11	63	case	12
+1_gatto.txt	terremoti	terremoto	S	O	n+m+plur	12	63	nmod	10
+1_gatto.txt	o	o	CC	O	conj	13	63	cc	12
+1_gatto.txt	altre	altro	A	O	adj+f+plur+pst	14	63	amod	15
+1_gatto.txt	catastrofi	catastrofe	S	O	n+f+plur	15	63	conj	12
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	16	63	punct	10
+1_gatto.txt	scappando	scappare	V	O	v+gerundio+pres+nil+nil+nil	17	63	advcl	10
+1_gatto.txt	prima	prima	B	O	adv	18	63	case	20
+1_gatto.txt	del	del	E+RD	O	prep/art+m+sing	19	63	mwe	18
+1_gatto.txt	fenomeno	fenomeno	S	O	n+m+sing	20	63	nmod	17
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	21	63	punct	1
+1_gatto.txt	La	la	RD	O	pron+accdat+_+3+_+clit	1	64	det	2
+1_gatto.txt	spiegazione	spiegazione	S	O	n+f+sing	2	64	nsubj	5
+1_gatto.txt	è	essere	V	O	v+indic+pres+nil+3+sing	3	64	cop	5
+1_gatto.txt	probabilmente	probabilmente	B	O	adv	4	64	advmod	5
+1_gatto.txt	legata	legare	V	O	v+part+pass+f+nil+sing	5	64	ROOT	0
+1_gatto.txt	alla	alla	E+RD	O	prep/art+f+sing	6	64	case	7
+1_gatto.txt	percezione	percezione	S	O	n+f+sing	7	64	nmod	5
+1_gatto.txt	di	di	E	O	prep	8	64	case	9
+1_gatto.txt	frequenze	frequenza	S	O	n+f+plur	9	64	nmod	7
+1_gatto.txt	che	che	PR	O	conj	10	64	nsubj	13
+1_gatto.txt	non	non	BN	O	adv	11	64	neg	13
+1_gatto.txt	sono	essere	VA	O	v+indic+pres+nil+1+sing	12	64	cop	13
+1_gatto.txt	udibili	udibile	A	O	adj+f+plur+pst	13	64	acl:relcl	9
+1_gatto.txt	dagli	dal	E+RD	O	prep/art+m+plur	14	64	case	15
+1_gatto.txt	esseri	essere	S	O	n+m+plur	15	64	nmod	13
+1_gatto.txt	umani	umano	A	O	adj+m+plur+pst	16	64	amod	15
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	17	64	punct	5
+1_gatto.txt	Vista	vista	S	O	n+f+sing	1	65	ROOT	0
+1_gatto.txt	Riducendo	ridurre	V	O	v+gerundio+pres+nil+nil+nil	1	66	advcl	10
+1_gatto.txt	le	la	RD	O	pron+acc+f+3+plur+clit	2	66	det	3
+1_gatto.txt	pupille	pupilla	S	O	n+f+plur	3	66	dobj	1
+1_gatto.txt	a	a	E	O	prep	4	66	case	6
+1_gatto.txt	due	due	N	O	due due+adj+_+_+pst+num due+adj+_+_+pst+num	5	66	nummod	6
+1_gatto.txt	fessure	fessura	S	O	n+f+plur	6	66	nmod	10
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	7	66	punct	6
+1_gatto.txt	il	il	RD	O	art+m+sing	8	66	det	9
+1_gatto.txt	gatto	gatto	S	O	n+m+sing	9	66	nsubj	10
+1_gatto.txt	riesce	riuscire	V	O	v+indic+pres+nil+3+sing	10	66	advcl	21
+1_gatto.txt	a	a	E	O	prep	11	66	mark	12
+1_gatto.txt	minimizzare	minimizzare	V	O	v+infinito+pres+nil+nil+nil	12	66	advcl	21
+1_gatto.txt	la	la	RD	O	pron+accdat+_+3+_+clit	13	66	det	14
+1_gatto.txt	quantità	quantità	S	O	n+f+plur	14	66	nsubj	21
+1_gatto.txt	di	di	E	O	prep	15	66	case	16
+1_gatto.txt	luce	luce	S	O	n+f+sing	16	66	nmod	14
+1_gatto.txt	che	che	E	O	che che+conj	17	66	case	20
+1_gatto.txt	il	il	RD	O	art+m+sing	18	66	det	20
+1_gatto.txt	suo	suo	AP	O	adj+m+sing+pst+poss	19	66	det:poss	20
+1_gatto.txt	occhio	occhio	S	O	n+m+sing	20	66	nmod	21
+1_gatto.txt	riceve	ricevere	V	O	v+indic+pres+nil+3+sing	21	66	ROOT	0
+1_gatto.txt	Il	il	RD	O	art+m+sing	1	67	det	2
+1_gatto.txt	tapetum	tapetum	S	O	tapetum	2	67	nsubj	3
+1_gatto.txt	lucidum	lucidum	V	O	lucidum	3	67	ROOT	0
+1_gatto.txt	degli	del	E+RD	O	prep/art+m+plur	4	67	case	5
+1_gatto.txt	occhi	occhio	S	O	n+m+plur	5	67	nmod	3
+1_gatto.txt	del	del	E+RD	O	prep/art+m+sing	6	67	case	7
+1_gatto.txt	gatto	gatto	S	O	n+m+sing	7	67	nmod	5
+1_gatto.txt	riflette	riflettere	V	O	v+indic+pres+nil+3+sing	8	67	advcl	3
+1_gatto.txt	la	la	RD	O	pron+accdat+_+3+_+clit	9	67	det	10
+1_gatto.txt	luce	luce	S	O	n+f+sing	10	67	dobj	8
+1_gatto.txt	Il	il	RD	O	art+m+sing	1	68	det	2
+1_gatto.txt	gatto	gatto	S	O	n+m+sing	2	68	nsubj	3
+1_gatto.txt	riesce	riuscire	V	O	v+indic+pres+nil+3+sing	3	68	ROOT	0
+1_gatto.txt	a	a	E	O	prep	4	68	mark	5
+1_gatto.txt	vedere	vedere	V	O	v+infinito+pres+nil+nil+nil	5	68	xcomp	3
+1_gatto.txt	in	in	E	O	prep	6	68	case	7
+1_gatto.txt	condizione	condizione	S	O	n+f+sing	7	68	nmod	5
+1_gatto.txt	di	di	E	O	prep	8	68	case	10
+1_gatto.txt	scarsissima	scarso	A	O	adj+f+sing+sup	9	68	amod	10
+1_gatto.txt	luminosità	luminosità	S	O	n+f+sing	10	68	nmod	7
+1_gatto.txt	grazie	grazia	S	O	n+f+plur	11	68	case	13
+1_gatto.txt	al	al	E+RD	O	prep/art+m+sing	12	68	mwe	11
+1_gatto.txt	tapetum	tapetum	S	O	tapetum	13	68	nmod	5
+1_gatto.txt	lucidum	lucidum	A	O	lucidum	14	68	amod	13
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	15	68	punct	3
+1_gatto.txt	Come	come	B	O	adv	1	69	advmod	3
+1_gatto.txt	l'	l'	RD	O	pron+accdat+_+3+_+clit	2	69	det	3
+1_gatto.txt	uomo	uomo	S	O	n+m+sing	3	69	nmod	7
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	4	69	punct	3
+1_gatto.txt	il	il	RD	O	art+m+sing	5	69	det	6
+1_gatto.txt	gatto	gatto	S	O	n+m+sing	6	69	nsubj	7
+1_gatto.txt	ha	avere	V	O	v+indic+pres+nil+3+sing	7	69	ROOT	0
+1_gatto.txt	una	una	RI	O	art+f+sing	8	69	det	9
+1_gatto.txt	visione	visione	S	O	n+f+sing	9	69	dobj	7
+1_gatto.txt	binoculare	binoculare	A	O	binoculare	10	69	amod	9
+1_gatto.txt	che	che	PR	O	conj	11	69	nsubj	12
+1_gatto.txt	consente	consentire	V	O	v+indic+pres+nil+3+sing	12	69	acl:relcl	9
+1_gatto.txt	di	di	E	O	prep	13	69	mark	14
+1_gatto.txt	percepire	percepire	V	O	v+infinito+pres+nil+nil+nil	14	69	xcomp	12
+1_gatto.txt	le	la	RD	O	pron+acc+f+3+plur+clit	15	69	det	16
+1_gatto.txt	distanze	distanza	S	O	n+f+plur	16	69	dobj	14
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	17	69	punct	7
+1_gatto.txt	Tuttavia	tuttavia	B	O	adv	1	70	advmod	9
+1_gatto.txt	di	di	E	O	prep	2	70	case	3
+1_gatto.txt	giorno	giorno	S	O	n+m+sing	3	70	nmod	1
+1_gatto.txt	la	la	RD	O	pron+accdat+_+3+_+clit	4	70	det	6
+1_gatto.txt	sua	suo	AP	O	adj+f+sing+pst+poss	5	70	det:poss	6
+1_gatto.txt	vista	vista	S	O	n+f+sing	6	70	nsubj	9
+1_gatto.txt	è	essere	V	O	v+indic+pres+nil+3+sing	7	70	cop	9
+1_gatto.txt	meno	meno	B	O	adv	8	70	advmod	9
+1_gatto.txt	efficiente	efficiente	A	O	adj+f+sing+pst	9	70	ROOT	0
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	10	70	punct	9
+1_gatto.txt	anche	anche	B	O	adv	11	70	advmod	12
+1_gatto.txt	se	se	CS	O	conj	12	70	mark	15
+1_gatto.txt	il	il	RD	O	art+m+sing	13	70	det	14
+1_gatto.txt	gatto	gatto	S	O	n+m+sing	14	70	nsubj	15
+1_gatto.txt	coglie	cogliere	V	O	v+indic+pres+nil+3+sing	15	70	advcl	9
+1_gatto.txt	comunque	comunque	B	O	adv	16	70	advmod	17
+1_gatto.txt	bene	bene	B	O	adv	17	70	advmod	15
+1_gatto.txt	i	il	RD	O	art+m+plur	18	70	det	19
+1_gatto.txt	movimenti	movimento	S	O	n+m+plur	19	70	dobj	15
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	20	70	punct	15
+1_gatto.txt	distinguendo	distinguere	V	O	v+gerundio+pres+nil+nil+nil	21	70	advcl	15
+1_gatto.txt	difficilmente	difficilmente	B	O	adv	22	70	advmod	21
+1_gatto.txt	i	il	RD	O	art+m+plur	23	70	det	24
+1_gatto.txt	dettagli	dettaglio	S	O	n+m+plur	24	70	dobj	21
+1_gatto.txt	degli	del	E+RD	O	prep/art+m+plur	25	70	case	26
+1_gatto.txt	oggetti	oggetto	S	O	n+m+plur	26	70	nmod	24
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	27	70	punct	9
+1_gatto.txt	L'	l'	RD	O	pron+accdat+_+3+_+clit	1	71	det	2
+1_gatto.txt	acuità	acuità	S	O	acuità	2	71	nsubj	8
+1_gatto.txt	visiva	visivo	A	O	adj+f+sing+pst	3	71	amod	2
+1_gatto.txt	di	di	E	O	prep	4	71	case	6
+1_gatto.txt	un	un	RI	O	art+m+sing	5	71	det	6
+1_gatto.txt	gatto	gatto	S	O	n+m+sing	6	71	nmod	2
+1_gatto.txt	si	si	PC	O	pron+accdat+_+3+_+clit	7	71	expl	8
+1_gatto.txt	attesta	attestare	V	O	v+indic+pres+nil+3+sing	8	71	ROOT	0
+1_gatto.txt	da	da	E	O	prep	9	71	case	10
+1_gatto.txt	6/30	6/30	N	O	6/30	10	71	nummod	8
+1_gatto.txt	a	a	E	O	prep	11	71	case	12
+1_gatto.txt	6/60	6/60	N	O	6/60	12	71	nummod	8
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	13	71	punct	8
+1_gatto.txt	ovvero	ovvero	CC	O	conj	14	71	cc	8
+1_gatto.txt	un	un	RI	O	art+m+sing	15	71	det	16
+1_gatto.txt	gatto	gatto	S	O	n+m+sing	16	71	nsubj	17
+1_gatto.txt	vede	vedere	V	O	v+indic+pres+nil+3+sing	17	71	conj	8
+1_gatto.txt	un	un	RI	O	art+m+sing	18	71	det	19
+1_gatto.txt	oggetto	oggetto	S	O	n+m+sing	19	71	dobj	17
+1_gatto.txt	a	a	E	O	prep	20	71	case	22
+1_gatto.txt	6	6	N	O	6	21	71	nummod	22
+1_gatto.txt	metri	metro	S	O	n+m+plur	22	71	nmod	19
+1_gatto.txt	di	di	E	O	prep	23	71	case	24
+1_gatto.txt	distanza	distanza	S	O	n+f+sing	24	71	nmod	22
+1_gatto.txt	come	come	E	O	come come+adv	25	71	case	27
+1_gatto.txt	un	un	RI	O	art+m+sing	26	71	det	27
+1_gatto.txt	occhio	occhio	S	O	n+m+sing	27	71	nmod	17
+1_gatto.txt	umano	umano	A	O	adj+m+sing+pst	28	71	amod	27
+1_gatto.txt	può	potere	VM	O	v+indic+pres+nil+3+sing	29	71	aux	30
+1_gatto.txt	vederlo	vedere	V+PC	O	v+infinito+pres+nil+nil+nil/pron+acc+m+3+sing	30	71	advcl	17
+1_gatto.txt	a	a	E	O	prep	31	71	case	33
+1_gatto.txt	30-60	30-60	N	O	30-60	32	71	nummod	33
+1_gatto.txt	metri	metro	S	O	n+m+plur	33	71	nmod	30
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	34	71	punct	8
+1_gatto.txt	Sembra	sembrare	V	O	v+indic+pres+nil+3+sing	1	72	ROOT	0
+1_gatto.txt	che	che	CS	O	conj	2	72	mark	6
+1_gatto.txt	i	il	RD	O	art+m+plur	3	72	det	4
+1_gatto.txt	gatti	gatto	S	O	n+m+plur	4	72	nsubj	6
+1_gatto.txt	siano	essere	V	O	v+cong+pres+nil+3+plur	5	72	cop	6
+1_gatto.txt	miopi	miope	S	O	miopi miope+adj+f+plur+pst miope+adj+m+plur+pst	6	72	ccomp	1
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	7	72	punct	6
+1_gatto.txt	il	il	RD	O	art+m+sing	8	72	det	9
+1_gatto.txt	ché	ché	CS	O	conj	9	72	mark	10
+1_gatto.txt	significa	significare	V	O	v+indic+pres+nil+3+sing	10	72	advcl	6
+1_gatto.txt	che	che	CS	O	conj	11	72	mark	14
+1_gatto.txt	non	non	BN	O	adv	12	72	neg	14
+1_gatto.txt	possono	potere	VM	O	v+indic+pres+nil+3+plur	13	72	aux	14
+1_gatto.txt	vedere	vedere	V	O	v+infinito+pres+nil+nil+nil	14	72	ccomp	10
+1_gatto.txt	oggetti	oggetto	S	O	n+m+plur	15	72	dobj	14
+1_gatto.txt	molto	molto	B	O	adv	16	72	advmod	17
+1_gatto.txt	distanti	distante	A	O	adj+f+plur+pst	17	72	amod	15
+1_gatto.txt	da	da	E	O	prep	18	72	case	19
+1_gatto.txt	loro	loro	PE	O	pron+_+f+3+plur+strong	19	72	nmod	17
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	20	72	punct	1
+1_gatto.txt	È	essere	VA	O	v+indic+pres+nil+3+sing	1	73	aux	8
+1_gatto.txt	stata	essere	V	O	v+part+pass+f+nil+sing	2	73	cop	8
+1_gatto.txt	per	per	E	O	prep	3	73	case	5
+1_gatto.txt	lungo	lungo	A	O	adj+m+sing+pst	4	73	amod	5
+1_gatto.txt	tempo	tempo	S	O	n+m+sing	5	73	nmod	2
+1_gatto.txt	controversa	controverso	A	O	adj+f+sing+pst	6	73	amod	5
+1_gatto.txt	la	la	RD	O	pron+accdat+_+3+_+clit	7	73	det	8
+1_gatto.txt	capacità	capacità	S	O	n+f+plur	8	73	ROOT	0
+1_gatto.txt	da	da	E	O	prep	9	73	case	10
+1_gatto.txt	parte	parte	S	O	n+f+sing	10	73	nmod	8
+1_gatto.txt	del	del	E+RD	O	prep/art+m+sing	11	73	case	12
+1_gatto.txt	gatto	gatto	S	O	n+m+sing	12	73	nmod	10
+1_gatto.txt	di	di	E	O	prep	13	73	mark	14
+1_gatto.txt	percepire	percepire	V	O	v+infinito+pres+nil+nil+nil	14	73	acl	12
+1_gatto.txt	i	il	RD	O	art+m+plur	15	73	det	16
+1_gatto.txt	colori	colore	S	O	n+m+plur	16	73	dobj	14
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	17	73	punct	8
+1_gatto.txt	ma	ma	CC	O	conj	18	73	cc	8
+1_gatto.txt	recenti	recente	A	O	adj+f+plur+pst	19	73	amod	20
+1_gatto.txt	studi	studio	S	O	n+m+plur	20	73	conj	8
+1_gatto.txt	hanno	avere	VA	O	v+indic+pres+nil+3+plur	21	73	aux	22
+1_gatto.txt	dimostrato	dimostrare	V	O	v+part+pass+m+nil+sing	22	73	acl:relcl	8
+1_gatto.txt	la	la	RD	O	pron+accdat+_+3+_+clit	23	73	det	24
+1_gatto.txt	capacità	capacità	S	O	n+f+plur	24	73	dobj	22
+1_gatto.txt	cromatica	cromatico	A	O	adj+f+sing+pst	25	73	amod	24
+1_gatto.txt	dell'	dell'	E+RD	O	prep/art+f+sing	26	73	case	27
+1_gatto.txt	occhio	occhio	S	O	n+m+sing	27	73	nmod	24
+1_gatto.txt	felino	felino	S	O	n+m+sing	28	73	compound	27
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	29	73	punct	8
+1_gatto.txt	Tuttavia	tuttavia	B	O	adv	1	74	advmod	6
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	2	74	punct	1
+1_gatto.txt	in	in	E	O	prep	3	74	case	5
+1_gatto.txt	alcuni	alcun	DI	O	adj+m+plur+pst+ind	4	74	det	5
+1_gatto.txt	casi	caso	S	O	n+m+plur	5	74	nmod	6
+1_gatto.txt	emergerebbe	emergere	V	O	v+cond+pres+nil+3+sing	6	74	ROOT	0
+1_gatto.txt	un	un	RI	O	art+m+sing	7	74	det	9
+1_gatto.txt	certo	certo	A	O	adj+m+sing+pst	8	74	amod	9
+1_gatto.txt	daltonismo	daltonismo	S	O	daltonismo	9	74	nsubj	6
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	10	74	punct	9
+1_gatto.txt	per	per	E	O	prep	11	74	case	12
+1_gatto.txt	cui	cui	PR	O	pron+_+_+3+plur+int	12	74	nmod	15
+1_gatto.txt	diversi	diverso	DI	O	adj+m+plur+pst	13	74	det	14
+1_gatto.txt	gatti	gatto	S	O	n+m+plur	14	74	nsubj	15
+1_gatto.txt	confonderebbero	confondere	V	O	v+cond+pres+nil+3+plur	15	74	acl:relcl	9
+1_gatto.txt	il	il	RD	O	art+m+sing	16	74	det	17
+1_gatto.txt	bianco	bianco	A	O	adj+m+sing+pst	17	74	dobj	15
+1_gatto.txt	col	col	E+RD	O	prep/art+m+sing	18	74	case	19
+1_gatto.txt	giallo	giallo	S	O	n+m+sing	19	74	nmod	17
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	20	74	punct	17
+1_gatto.txt	nonché	nonché	CC	O	conj	21	74	cc	17
+1_gatto.txt	il	il	RD	O	art+m+sing	22	74	det	23
+1_gatto.txt	rosso	rosso	S	O	n+m+sing	23	74	conj	17
+1_gatto.txt	col	col	E+RD	O	prep/art+m+sing	24	74	case	25
+1_gatto.txt	verde	verde	S	O	n+f+sing	25	74	nmod	23
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	26	74	punct	6
+1_gatto.txt	Udito	udire	S	O	Udito udire+v+part+pass+m+nil+sing	1	75	ROOT	0
+1_gatto.txt	Orecchio	orecchio	S	O	n+m+sing	1	76	ROOT	0
+1_gatto.txt	Come	come	E	O	Come come+adv	1	77	case	3
+1_gatto.txt	molti	molto	DI	O	pron+_+m+3+plur+ind	2	77	det	3
+1_gatto.txt	predatori	predatore	S	O	n+m+plur	3	77	nmod	7
+1_gatto.txt	anche	anche	B	O	adv	4	77	advmod	6
+1_gatto.txt	il	il	RD	O	art+m+sing	5	77	det	6
+1_gatto.txt	gatto	gatto	S	O	n+m+sing	6	77	nsubj	7
+1_gatto.txt	ha	avere	V	O	v+indic+pres+nil+3+sing	7	77	ROOT	0
+1_gatto.txt	un	un	RI	O	art+m+sing	8	77	det	9
+1_gatto.txt	udito	udire	S	O	udito udire+v+part+pass+m+nil+sing	9	77	dobj	7
+1_gatto.txt	molto	molto	B	O	adv	10	77	advmod	11
+1_gatto.txt	fine	fine	A	O	adj+f+sing+pst	11	77	amod	9
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	12	77	punct	7
+1_gatto.txt	aiutato	aiutare	V	O	v+part+pass+m+nil+sing	13	77	advcl	7
+1_gatto.txt	dalla	dalla	E+RD	O	prep/art+f+sing	14	77	case	15
+1_gatto.txt	capacità	capacità	S	O	n+f+plur	15	77	nmod	13
+1_gatto.txt	di	di	E	O	prep	16	77	mark	17
+1_gatto.txt	orientare	orientare	V	O	v+infinito+pres+nil+nil+nil	17	77	acl	15
+1_gatto.txt	i	il	RD	O	art+m+plur	18	77	det	19
+1_gatto.txt	padiglioni	padiglione	S	O	n+m+plur	19	77	dobj	17
+1_gatto.txt	auricolari	auricolare	A	O	adj+f+plur+pst	20	77	amod	19
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	21	77	punct	19
+1_gatto.txt	che	che	E	O	che che+conj	22	77	case	23
+1_gatto.txt	isolano	isolano	S	O	n+m+sing	23	77	nmod	19
+1_gatto.txt	la	la	RD	O	pron+accdat+_+3+_+clit	24	77	det	25
+1_gatto.txt	fonte	fonte	S	O	n+f+sing	25	77	nmod	23
+1_gatto.txt	sonora	sonoro	A	O	adj+f+sing+pst	26	77	amod	25
+1_gatto.txt	interessata	interessato	A	O	adj+f+sing+pst	27	77	amod	25
+1_gatto.txt	dai	dal	E+RD	O	prep/art+m+plur	28	77	case	29
+1_gatto.txt	rumori	rumore	S	O	n+m+plur	29	77	nmod	27
+1_gatto.txt	ambientali	ambientale	A	O	adj+f+plur+pst	30	77	amod	29
+1_gatto.txt	rendendo	rendere	V	O	v+gerundio+pres+nil+nil+nil	31	77	acl	25
+1_gatto.txt	possibile	possibile	A	O	adj+f+sing+pst	32	77	xcomp	31
+1_gatto.txt	l'	l'	RD	O	pron+accdat+_+3+_+clit	33	77	det	34
+1_gatto.txt	individuazione	individuazione	S	O	n+f+sing	34	77	dobj	31
+1_gatto.txt	della	della	E+RD	O	prep/art+f+sing	35	77	case	36
+1_gatto.txt	sorgente	sorgente	S	O	n+f+sing	36	77	nmod	34
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	37	77	punct	7
+1_gatto.txt	Tra	tra	E	O	prep	1	78	case	3
+1_gatto.txt	i	il	RD	O	art+m+plur	2	78	det	3
+1_gatto.txt	mammiferi	mammifero	S	O	n+m+plur	3	78	nmod	12
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	4	78	punct	3
+1_gatto.txt	l'	l'	RD	O	pron+accdat+_+3+_+clit	5	78	det	6
+1_gatto.txt	ampiezza	ampiezza	S	O	n+f+sing	6	78	nsubj	12
+1_gatto.txt	dell'	dell'	E+RD	O	prep/art+f+sing	7	78	case	8
+1_gatto.txt	audiogramma	audiogramma	S	O	audiogramma	8	78	nmod	6
+1_gatto.txt	del	del	E+RD	O	prep/art+m+sing	9	78	case	10
+1_gatto.txt	gatto	gatto	S	O	n+m+sing	10	78	nmod	8
+1_gatto.txt	è	essere	V	O	v+indic+pres+nil+3+sing	11	78	cop	12
+1_gatto.txt	notevole	notevole	A	O	adj+f+sing+pst	12	78	ROOT	0
+1_gatto.txt	e	e	CC	O	conj	13	78	cc	12
+1_gatto.txt	arriva	arrivare	V	O	v+indic+pres+nil+3+sing	14	78	conj	12
+1_gatto.txt	fino	fino	B	O	prep	15	78	case	18
+1_gatto.txt	ai	al	E+RD	O	prep/art+m+plur	16	78	mwe	15
+1_gatto.txt	50 000	000	N	O	50 000	17	78	nummod	18
+1_gatto.txt	Hz	Hz	S	O	Hz	18	78	nmod	14
+1_gatto.txt	(	[PUNCT]	FB	O	( [PUNCT]	19	78	punct	41
+1_gatto.txt	mentre	mentre	CS	O	conj	20	78	mark	25
+1_gatto.txt	l'	l'	RD	O	pron+accdat+_+3+_+clit	21	78	det	22
+1_gatto.txt	orecchio	orecchio	S	O	n+m+sing	22	78	nsubjpass	25
+1_gatto.txt	umano	umano	A	O	adj+m+sing+pst	23	78	amod	22
+1_gatto.txt	è	essere	VA	O	v+indic+pres+nil+3+sing	24	78	auxpass	25
+1_gatto.txt	limitato	limitare	V	O	v+part+pass+m+nil+sing	25	78	advcl	41
+1_gatto.txt	a	a	E	O	prep	26	78	case	27
+1_gatto.txt	20 000	000	N	O	20 000	27	78	nummod	25
+1_gatto.txt	)	[PUNCT]	FB	O	) [PUNCT]	28	78	punct	41
+1_gatto.txt	La	la	RD	O	pron+accdat+_+3+_+clit	29	78	det	30
+1_gatto.txt	maggioranza	maggioranza	S	O	n+f+sing	30	78	nsubjpass	41
+1_gatto.txt	dei	del	E+RD	O	prep/art+m+plur	31	78	case	32
+1_gatto.txt	gatti	gatto	S	O	n+m+plur	32	78	nmod	30
+1_gatto.txt	bianchi	bianco	A	O	adj+m+plur+pst	33	78	amod	32
+1_gatto.txt	(	[PUNCT]	FB	O	( [PUNCT]	34	78	punct	38
+1_gatto.txt	più	più	B	O	adv	35	78	advmod	38
+1_gatto.txt	del	del	E+RD	O	prep/art+m+sing	36	78	case	38
+1_gatto.txt	60	60	N	O	60	37	78	nummod	38
+1_gatto.txt	%	[SYMBOL]	X	O	% [SYMBOL]	38	78	nmod	30
+1_gatto.txt	)	[PUNCT]	FB	O	) [PUNCT]	39	78	punct	38
+1_gatto.txt	è	essere	VA	O	v+indic+pres+nil+3+sing	40	78	auxpass	41
+1_gatto.txt	sordo	sordo	V	O	sordo sordo+adj+m+sing+pst sordo+n+m+sing	41	78	advcl	12
+1_gatto.txt	da	da	E	O	prep	42	78	case	43
+1_gatto.txt	una	una	N	O	una una+pron+_+f+3+sing+ind una+art+f+sing	43	78	nummod	41
+1_gatto.txt	o	o	CC	O	conj	44	78	cc	41
+1_gatto.txt	da	da	E	O	prep	45	78	case	48
+1_gatto.txt	entrambe	entrambi	T	O	entrambe entrambi+adj+f+plur+pst	46	78	det:predet	48
+1_gatto.txt	le	la	RD	O	pron+acc+f+3+plur+clit	47	78	det	48
+1_gatto.txt	orecchie	orecchio	S	O	n+f+plur	48	78	conj	41
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	49	78	punct	12
+1_gatto.txt	È	essere	VA	O	v+indic+pres+nil+3+sing	1	79	aux	3
+1_gatto.txt	stato	essere	VA	O	v+part+pass+m+nil+sing	2	79	auxpass	3
+1_gatto.txt	dimostrato	dimostrare	V	O	v+part+pass+m+nil+sing	3	79	ROOT	0
+1_gatto.txt	che	che	CS	O	conj	4	79	mark	18
+1_gatto.txt	l'	l'	RD	O	pron+accdat+_+3+_+clit	5	79	det	6
+1_gatto.txt	allele	allele	S	O	allele	6	79	nsubj	18
+1_gatto.txt	W	W	SP	O	W	7	79	nmod	6
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	8	79	punct	6
+1_gatto.txt	all'	all'	E+RD	O	prep/art+f+sing	9	79	case	10
+1_gatto.txt	origine	origine	S	O	n+f+sing	10	79	nmod	18
+1_gatto.txt	del	del	E+RD	O	prep/art+m+sing	11	79	case	12
+1_gatto.txt	colore	colore	S	O	n+m+sing	12	79	nmod	10
+1_gatto.txt	del	del	E+RD	O	prep/art+m+sing	13	79	case	14
+1_gatto.txt	pelo	pelo	S	O	n+m+sing	14	79	nmod	12
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	15	79	punct	10
+1_gatto.txt	è	essere	V	O	v+indic+pres+nil+3+sing	16	79	cop	18
+1_gatto.txt	direttamente	direttamente	B	O	adv	17	79	advmod	18
+1_gatto.txt	responsabile	responsabile	S	O	n+f+sing	18	79	ccomp	3
+1_gatto.txt	di	di	E	O	prep	19	79	case	21
+1_gatto.txt	una	una	RI	O	art+f+sing	20	79	det	21
+1_gatto.txt	degenerazione	degenerazione	S	O	n+f+sing	21	79	nmod	18
+1_gatto.txt	dell'	dell'	E+RD	O	prep/art+f+sing	22	79	case	23
+1_gatto.txt	orecchio	orecchio	S	O	n+m+sing	23	79	nmod	21
+1_gatto.txt	interno	interno	A	O	adj+m+sing+pst	24	79	amod	23
+1_gatto.txt	che	che	PR	O	conj	25	79	nsubj	26
+1_gatto.txt	provoca	provocare	V	O	v+indic+pres+nil+3+sing	26	79	acl:relcl	21
+1_gatto.txt	la	la	RD	O	pron+accdat+_+3+_+clit	27	79	det	28
+1_gatto.txt	sordità	sordità	S	O	n+f+plur	28	79	dobj	26
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	29	79	punct	3
+1_gatto.txt	Il	il	RD	O	art+m+sing	1	80	det	2
+1_gatto.txt	gatto	gatto	S	O	n+m+sing	2	80	nsubj	3
+1_gatto.txt	nasce	nascere	V	O	v+indic+pres+nil+3+sing	3	80	ROOT	0
+1_gatto.txt	normale	normale	A	O	adj+f+sing+pst	4	80	xcomp	3
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	5	80	punct	3
+1_gatto.txt	ma	ma	CC	O	conj	6	80	cc	3
+1_gatto.txt	dopo	dopo	E	O	prep	7	80	case	9
+1_gatto.txt	una	una	RI	O	art+f+sing	8	80	det	9
+1_gatto.txt	settimana	settimana	S	O	n+f+sing	9	80	nmod	18
+1_gatto.txt	il	il	RD	O	art+m+sing	10	80	det	12
+1_gatto.txt	suo	suo	AP	O	adj+m+sing+pst+poss	11	80	det:poss	12
+1_gatto.txt	orecchio	orecchio	S	O	n+m+sing	12	80	nsubj	18
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	13	80	punct	12
+1_gatto.txt	invece	invece	E	O	invece invece+adv	14	80	mark	16
+1_gatto.txt	di	di	E	O	prep	15	80	mwe	14
+1_gatto.txt	svilupparsi	sviluppare	V+PC	O	v+infinito+pres+nil+nil+nil/pron+accdat+_+3+_	16	80	advcl	18
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	17	80	punct	16
+1_gatto.txt	subisce	subire	V	O	v+indic+pres+nil+3+sing	18	80	conj	3
+1_gatto.txt	delle	della	E+RD	O	prep/art+f+plur	19	80	case	20
+1_gatto.txt	alterazioni	alterazione	S	O	n+f+plur	20	80	nmod	18
+1_gatto.txt	progressive	progressivo	A	O	adj+f+plur+pst	21	80	amod	20
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	22	80	punct	3
+1_gatto.txt	La	la	RD	O	pron+accdat+_+3+_+clit	1	81	det	2
+1_gatto.txt	degenerazione	degenerazione	S	O	n+f+sing	2	81	nsubj	4
+1_gatto.txt	si	si	PC	O	pron+accdat+_+3+_+clit	3	81	expl	4
+1_gatto.txt	completa	completare	V	O	v+indic+pres+nil+3+sing	4	81	ROOT	0
+1_gatto.txt	dopo	dopo	B	O	adv	5	81	advmod	7
+1_gatto.txt	tre	tre	N	O	tre tre+adj+_+_+pst+num tre+adj+_+_+pst+num	6	81	nummod	7
+1_gatto.txt	settimane	settimana	S	O	n+f+plur	7	81	nmod	4
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	8	81	punct	4
+1_gatto.txt	Olfatto	Olfatto	SP	O	Olfatto olfatto+adj+m+sing+pst	1	82	ROOT	0
+1_gatto.txt	Il	il	RD	O	art+m+sing	1	83	det	2
+1_gatto.txt	naso	naso	S	O	n+m+sing	2	83	ROOT	0
+1_gatto.txt	Il	il	RD	O	art+m+sing	1	84	det	2
+1_gatto.txt	gatto	gatto	S	O	n+m+sing	2	84	nsubj	3
+1_gatto.txt	possiede	possedere	V	O	v+indic+pres+nil+3+sing	3	84	ROOT	0
+1_gatto.txt	200	200	N	O	200	4	84	nummod	5
+1_gatto.txt	milioni	milione	S	O	n+m+plur	5	84	dobj	3
+1_gatto.txt	di	di	E	O	prep	6	84	case	7
+1_gatto.txt	terminazioni	terminazione	S	O	n+f+plur	7	84	nmod	5
+1_gatto.txt	olfattive	olfattivo	A	O	adj+f+plur+pst	8	84	amod	7
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	9	84	punct	5
+1_gatto.txt	molte	molto	PI	O	molte molto+adj+f+plur+pst molto+adj+f+plur+pst+dim	10	84	appos	5
+1_gatto.txt	di	di	E	O	prep	11	84	case	12
+1_gatto.txt	più	più	B	O	adv	12	84	advmod	10
+1_gatto.txt	rispetto	rispetto	B	O	prep	13	84	case	15
+1_gatto.txt	al	al	E+RD	O	prep/art+m+sing	14	84	mwe	13
+1_gatto.txt	cane	cane	S	O	n+m+sing	15	84	nmod	12
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	16	84	punct	10
+1_gatto.txt	che	che	PR	O	conj	17	84	nsubj	42
+1_gatto.txt	ne	ne	PC	O	pron+gen+_+3+_+clit	18	84	advmod	42
+1_gatto.txt	ha	avere	VA	O	v+indic+pres+nil+3+sing	19	84	aux	42
+1_gatto.txt	da	da	E	O	prep	20	84	case	21
+1_gatto.txt	ottanta	ottanta	N	O	ottanta ottanta+adj+_+_+pst+num ottanta+n+m+plur ottanta+n+m+sing ottanta+adj+_+_+pst+num	21	84	nummod	19
+1_gatto.txt	a	a	E	O	prep	22	84	case	24
+1_gatto.txt	cento	cento	N	O	cento cento+adj+_+_+pst+num cento+adj+_+_+pst+num	23	84	nummod	24
+1_gatto.txt	milioni	milione	S	O	n+m+plur	24	84	nmod	21
+1_gatto.txt	a	a	E	O	prep	25	84	case	26
+1_gatto.txt	seconda	seconda	S	O	n+f+sing	26	84	nmod	24
+1_gatto.txt	della	della	E+RD	O	prep/art+f+sing	27	84	case	28
+1_gatto.txt	specie	specie	S	O	n+f+plur	28	84	nmod	26
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	29	84	punct	21
+1_gatto.txt	e	e	CC	O	conj	30	84	cc	21
+1_gatto.txt	all'	all'	E+RD	O	prep/art+f+sing	31	84	case	33
+1_gatto.txt	essere	essere	V	O	v+infinito+pres+nil+nil+nil	32	84	cop	33
+1_gatto.txt	umano	umano	A	O	adj+m+sing+pst	33	84	conj	21
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	34	84	punct	33
+1_gatto.txt	che	che	PR	O	conj	35	84	nsubj	39
+1_gatto.txt	ne	ne	PC	O	pron+gen+_+3+_+clit	36	84	advmod	39
+1_gatto.txt	ha	avere	VA	O	v+indic+pres+nil+3+sing	37	84	aux	39
+1_gatto.txt	cinque	cinque	N	O	cinque cinque+adj+_+_+pst+num cinque+adj+_+_+pst+num	38	84	nummod	39
+1_gatto.txt	milioni	milione	S	O	n+m+plur	39	84	conj	33
+1_gatto.txt	;	[PUNCT]	FC	O	; [PUNCT]	40	84	punct	19
+1_gatto.txt	esse	esse	PE	O	pron+_+f+3+plur+strong	41	84	nsubj	42
+1_gatto.txt	sono	essere	V	O	v+indic+pres+nil+1+sing	42	84	acl:relcl	10
+1_gatto.txt	specializzate	specializzato	A	O	adj+f+plur+pst	43	84	xcomp	42
+1_gatto.txt	nell'	nell'	E+RD	O	prep/art+f+sing	44	84	case	45
+1_gatto.txt	individuazione	individuazione	S	O	n+f+sing	45	84	nmod	43
+1_gatto.txt	del	del	E+RD	O	prep/art+m+sing	46	84	case	47
+1_gatto.txt	cibo	cibo	S	O	n+m+sing	47	84	nmod	45
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	48	84	punct	3
+1_gatto.txt	In	in	E	O	prep	1	85	case	2
+1_gatto.txt	effetti	effetto	S	O	n+m+plur	2	85	nmod	3
+1_gatto.txt	ha	avere	V	O	v+indic+pres+nil+3+sing	3	85	ROOT	0
+1_gatto.txt	una	una	RI	O	art+f+sing	4	85	det	5
+1_gatto.txt	sensibilità	sensibilità	S	O	n+f+plur	5	85	dobj	3
+1_gatto.txt	a	a	E	O	prep	6	85	case	8
+1_gatto.txt	vari	vario	DI	O	adj+m+plur+pst	7	85	det	8
+1_gatto.txt	composti	composto	S	O	n+m+plur	8	85	nmod	5
+1_gatto.txt	azotati	azotati	V	O	azotati	9	85	acl	8
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	10	85	punct	3
+1_gatto.txt	consentendo	consentire	V	O	v+gerundio+pres+nil+nil+nil	11	85	advcl	3
+1_gatto.txt	all'	all'	E+RD	O	prep/art+f+sing	12	85	case	13
+1_gatto.txt	animale	animale	S	O	n+m+sing	13	85	nmod	11
+1_gatto.txt	di	di	E	O	prep	14	85	mark	15
+1_gatto.txt	stabilire	stabilire	V	O	v+infinito+pres+nil+nil+nil	15	85	xcomp	11
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	16	85	punct	15
+1_gatto.txt	con	con	E	O	prep	17	85	case	19
+1_gatto.txt	grande	grande	A	O	adj+f+sing+pst	18	85	amod	19
+1_gatto.txt	sensibilità	sensibilità	S	O	n+f+plur	19	85	nmod	15
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	20	85	punct	15
+1_gatto.txt	se	se	CS	O	conj	21	85	mark	25
+1_gatto.txt	il	il	RD	O	art+m+sing	22	85	det	23
+1_gatto.txt	pasto	pasto	S	O	n+m+sing	23	85	nsubj	25
+1_gatto.txt	è	essere	VA	O	v+indic+pres+nil+3+sing	24	85	aux	25
+1_gatto.txt	rancido	rancido	V	O	rancido rancido+adj+m+sing+pst	25	85	advcl	15
+1_gatto.txt	e	e	CC	O	conj	26	85	cc	25
+1_gatto.txt	andato	andare	V	O	v+part+pass+m+nil+sing	27	85	conj	25
+1_gatto.txt	a	a	E	O	prep	28	85	case	29
+1_gatto.txt	male	male	S	O	n+m+sing	29	85	nmod	27
+1_gatto.txt	:	[PUNCT]	FC	O	: [PUNCT]	30	85	punct	15
+1_gatto.txt	mentre	mentre	CS	O	conj	31	85	mark	34
+1_gatto.txt	il	il	RD	O	art+m+sing	32	85	det	33
+1_gatto.txt	cane	cane	S	O	n+m+sing	33	85	nsubj	34
+1_gatto.txt	azzanna	azzannare	V	O	v+indic+pres+nil+3+sing	34	85	advcl	45
+1_gatto.txt	il	il	RD	O	art+m+sing	35	85	det	36
+1_gatto.txt	boccone	boccone	S	O	n+m+sing	36	85	dobj	34
+1_gatto.txt	che	che	PR	O	conj	37	85	nsubj	40
+1_gatto.txt	gli	gli	PC	O	pron+acc+m+3+sing+clit	38	85	iobj	40
+1_gatto.txt	viene	venire	VA	O	v+indic+pres+nil+3+sing	39	85	aux	40
+1_gatto.txt	dato	dare	V	O	v+part+pass+m+nil+sing	40	85	acl:relcl	36
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	41	85	punct	34
+1_gatto.txt	il	il	RD	O	art+m+sing	42	85	det	43
+1_gatto.txt	gatto	gatto	S	O	n+m+sing	43	85	nsubj	45
+1_gatto.txt	lo	lo	PC	O	pron+acc+m+3+sing+clit	44	85	dobj	45
+1_gatto.txt	ispeziona	ispezionare	V	O	v+indic+pres+nil+3+sing	45	85	ccomp	15
+1_gatto.txt	annusandolo	annusare	V+PC	O	annusandolo annusare+v+gerundio+pres+nil+nil+nil/lo+pron+acc+m+3+sing+clit	46	85	xcomp	45
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	47	85	punct	3
+1_gatto.txt	L'	l'	RD	O	pron+accdat+_+3+_+clit	1	86	det	2
+1_gatto.txt	Organo	organo	S	O	n+m+sing	2	86	nsubj	5
+1_gatto.txt	di	di	E	O	prep	3	86	case	4
+1_gatto.txt	Jacobson	Jacobson	SP	PER	Jacobson	4	86	nmod	2
+1_gatto.txt	è	essere	V	O	v+indic+pres+nil+3+sing	5	86	ROOT	0
+1_gatto.txt	in	in	E	O	prep	6	86	case	7
+1_gatto.txt	grado	grado	S	O	n+m+sing	7	86	nmod	5
+1_gatto.txt	di	di	E	O	prep	8	86	mark	9
+1_gatto.txt	rilevare	rilevare	V	O	v+infinito+pres+nil+nil+nil	9	86	acl	7
+1_gatto.txt	sensazioni	sensazione	S	O	n+f+plur	10	86	dobj	9
+1_gatto.txt	sia	essere	VA	O	v+cong+pres+nil+1+sing	11	86	aux	12
+1_gatto.txt	olfattive	olfattivo	V	O	olfattive olfattivo+adj+f+plur+pst	12	86	advcl	9
+1_gatto.txt	sia	sia	CC	O	conj	13	86	cc	14
+1_gatto.txt	gustative	gustativo	A	O	adj+f+plur+pst	14	86	xcomp	12
+1_gatto.txt	;	[PUNCT]	FC	O	; [PUNCT]	15	86	punct	5
+1_gatto.txt	esso	esso	PE	O	pron+_+m+3+sing+strong	16	86	nsubj	17
+1_gatto.txt	ha	avere	V	O	v+indic+pres+nil+3+sing	17	86	parataxis	5
+1_gatto.txt	lo	il	RD	O	pron+acc+m+3+sing+clit	18	86	det	20
+1_gatto.txt	specifico	specifico	A	O	adj+m+sing+pst	19	86	amod	20
+1_gatto.txt	scopo	scopo	S	O	n+m+sing	20	86	dobj	17
+1_gatto.txt	di	di	E	O	prep	21	86	mark	22
+1_gatto.txt	trasmettere	trasmettere	V	O	v+infinito+pres+nil+nil+nil	22	86	acl	20
+1_gatto.txt	gli	il	RD	O	pron+acc+m+3+sing+clit	23	86	det	24
+1_gatto.txt	stimoli	stimolo	S	O	n+m+plur	24	86	dobj	22
+1_gatto.txt	sensitivi	sensitivo	A	O	adj+m+plur+pst	25	86	amod	24
+1_gatto.txt	ai	al	E+RD	O	prep/art+m+plur	26	86	case	27
+1_gatto.txt	centri	centro	S	O	n+m+plur	27	86	nmod	22
+1_gatto.txt	sessuali	sessuale	A	O	adj+f+plur+pst	28	86	amod	27
+1_gatto.txt	del	del	E+RD	O	prep/art+m+sing	29	86	case	30
+1_gatto.txt	cervello	cervello	S	O	n+m+sing	30	86	nmod	27
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	31	86	punct	5
+1_gatto.txt	L'	l'	RD	O	pron+accdat+_+3+_+clit	1	87	det	2
+1_gatto.txt	olfatto	olfatto	S	O	olfatto olfatto+adj+m+sing+pst	2	87	nsubj	5
+1_gatto.txt	è	essere	V	O	v+indic+pres+nil+3+sing	3	87	cop	5
+1_gatto.txt	anche	anche	B	O	adv	4	87	advmod	5
+1_gatto.txt	importante	importante	A	O	adj+f+sing+pst	5	87	ROOT	0
+1_gatto.txt	nella	nella	E+RD	O	prep/art+f+sing	6	87	case	8
+1_gatto.txt	sua	suo	AP	O	adj+f+sing+pst+poss	7	87	det:poss	8
+1_gatto.txt	vita	vita	S	O	n+f+sing	8	87	nmod	5
+1_gatto.txt	sessuale	sessuale	A	O	adj+f+sing+pst	9	87	amod	8
+1_gatto.txt	:	[PUNCT]	FC	O	: [PUNCT]	10	87	punct	5
+1_gatto.txt	il	il	RD	O	art+m+sing	11	87	det	12
+1_gatto.txt	maschio	maschio	S	O	n+m+sing	12	87	nsubj	13
+1_gatto.txt	riesce	riuscire	V	O	v+indic+pres+nil+3+sing	13	87	conj	5
+1_gatto.txt	a	a	E	O	prep	14	87	mark	15
+1_gatto.txt	sentire	sentire	V	O	v+infinito+pres+nil+nil+nil	15	87	xcomp	13
+1_gatto.txt	l'	l'	RD	O	pron+accdat+_+3+_+clit	16	87	det	17
+1_gatto.txt	odore	odore	S	O	n+m+sing	17	87	dobj	15
+1_gatto.txt	della	della	E+RD	O	prep/art+f+sing	18	87	case	19
+1_gatto.txt	femmina	femmina	S	O	n+f+sing	19	87	nmod	17
+1_gatto.txt	a	a	E	O	prep	20	87	case	21
+1_gatto.txt	centinaia	centinaio	S	O	n+f+plur	21	87	nmod	15
+1_gatto.txt	di	di	E	O	prep	22	87	case	23
+1_gatto.txt	metri	metro	S	O	n+m+plur	23	87	nmod	21
+1_gatto.txt	di	di	E	O	prep	24	87	case	25
+1_gatto.txt	distanza	distanza	S	O	n+f+sing	25	87	nmod	23
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	26	87	punct	5
+1_gatto.txt	Gusto	gusto	S	O	n+m+sing	1	88	ROOT	0
+1_gatto.txt	La	la	RD	O	pron+accdat+_+3+_+clit	1	89	det	2
+1_gatto.txt	lingua	lingua	S	O	n+f+sing	2	89	ROOT	0
+1_gatto.txt	Ha	avere	V	O	v+indic+pres+nil+3+sing	1	90	ROOT	0
+1_gatto.txt	un	un	RI	O	art+m+sing	2	90	det	3
+1_gatto.txt	senso	senso	S	O	n+m+sing	3	90	dobj	1
+1_gatto.txt	del	del	E+RD	O	prep/art+m+sing	4	90	case	5
+1_gatto.txt	gusto	gusto	S	O	n+m+sing	5	90	nmod	3
+1_gatto.txt	molto	molto	B	O	adv	6	90	advmod	7
+1_gatto.txt	sviluppato	sviluppare	V	O	v+part+pass+m+nil+sing	7	90	acl	3
+1_gatto.txt	grazie	grazia	S	O	n+f+plur	8	90	case	10
+1_gatto.txt	al	al	E+RD	O	prep/art+m+sing	9	90	mwe	8
+1_gatto.txt	quale	quale	PR	O	pron+_+_+3+sing+int	10	90	nmod	12
+1_gatto.txt	può	potere	VM	O	v+indic+pres+nil+3+sing	11	90	aux	12
+1_gatto.txt	percepire	percepire	V	O	v+infinito+pres+nil+nil+nil	12	90	acl:relcl	7
+1_gatto.txt	una	una	RI	O	art+f+sing	13	90	det	15
+1_gatto.txt	minima	minimo	A	O	adj+f+sing+pst	14	90	amod	15
+1_gatto.txt	variazione	variazione	S	O	n+f+sing	15	90	dobj	12
+1_gatto.txt	nel	nel	E+RD	O	prep/art+m+sing	16	90	case	17
+1_gatto.txt	sapore	sapore	S	O	n+m+sing	17	90	nmod	12
+1_gatto.txt	dell'	dell'	E+RD	O	prep/art+f+sing	18	90	case	19
+1_gatto.txt	acqua	acqua	S	O	n+f+sing	19	90	nmod	17
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	20	90	punct	1
+1_gatto.txt	Il	il	RD	O	art+m+sing	1	91	det	2
+1_gatto.txt	gatto	gatto	S	O	n+m+sing	2	91	nsubj	3
+1_gatto.txt	percepisce	percepire	V	O	v+indic+pres+nil+3+sing	3	91	ROOT	0
+1_gatto.txt	poco	poco	B	O	adv	4	91	advmod	3
+1_gatto.txt	i	il	RD	O	art+m+plur	5	91	det	6
+1_gatto.txt	sapori	sapore	S	O	n+m+plur	6	91	dobj	3
+1_gatto.txt	dolci	dolce	A	O	adj+f+plur+pst	7	91	amod	6
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	8	91	punct	3
+1_gatto.txt	Tatto	tatto	S	O	n+m+sing	1	92	ROOT	0
+1_gatto.txt	I	il	RD	O	art+m+plur	1	93	det	2
+1_gatto.txt	cuscinetti	cuscinetto	S	O	n+m+plur	2	93	ROOT	0
+1_gatto.txt	plantari	plantari	A	O	plantari	3	93	amod	2
+1_gatto.txt	Anche	anche	B	O	adv	1	94	advmod	4
+1_gatto.txt	il	il	RD	O	art+m+sing	2	94	det	4
+1_gatto.txt	suo	suo	AP	O	adj+m+sing+pst+poss	3	94	det:poss	4
+1_gatto.txt	senso	senso	S	O	n+m+sing	4	94	nsubjpass	9
+1_gatto.txt	del	del	E+RD	O	prep/art+m+sing	5	94	case	6
+1_gatto.txt	tatto	tatto	S	O	n+m+sing	6	94	nmod	4
+1_gatto.txt	è	essere	VA	O	v+indic+pres+nil+3+sing	7	94	auxpass	9
+1_gatto.txt	ben	ben	B	O	adv	8	94	advmod	9
+1_gatto.txt	sviluppato	sviluppare	V	O	v+part+pass+m+nil+sing	9	94	ROOT	0
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	10	94	punct	9
+1_gatto.txt	I	il	RD	O	art+m+plur	1	95	det	3
+1_gatto.txt	suoi	suo	AP	O	adj+m+plur+pst+poss	2	95	det:poss	3
+1_gatto.txt	baffi	baffo	S	O	n+m+plur	3	95	nsubj	9
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	4	95	punct	3
+1_gatto.txt	chiamati	chiamare	V	O	v+part+pass+m+nil+plur	5	95	acl	3
+1_gatto.txt	vibrisse	vibrisse	S	O	vibrisse	6	95	xcomp	5
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	7	95	punct	3
+1_gatto.txt	gli	il	RD	O	pron+acc+m+3+sing+clit	8	95	det	9
+1_gatto.txt	permettono	permettere	V	O	v+indic+pres+nil+3+plur	9	95	ROOT	0
+1_gatto.txt	di	di	E	O	prep	10	95	mark	11
+1_gatto.txt	percepire	percepire	V	O	v+infinito+pres+nil+nil+nil	11	95	ccomp	9
+1_gatto.txt	piccole	piccolo	A	O	adj+f+plur+pst	12	95	amod	13
+1_gatto.txt	variazioni	variazione	S	O	n+f+plur	13	95	dobj	11
+1_gatto.txt	nella	nella	E+RD	O	prep/art+f+sing	14	95	case	15
+1_gatto.txt	pressione	pressione	S	O	n+f+sing	15	95	nmod	11
+1_gatto.txt	dell'	dell'	E+RD	O	prep/art+f+sing	16	95	case	17
+1_gatto.txt	aria	aria	S	O	n+f+sing	17	95	nmod	15
+1_gatto.txt	e	e	CC	O	conj	18	95	cc	17
+1_gatto.txt	ostacoli	ostacolo	S	O	n+m+plur	19	95	conj	17
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	20	95	punct	9
+1_gatto.txt	È	essere	V	O	v+indic+pres+nil+3+sing	1	96	cop	3
+1_gatto.txt	anche	anche	B	O	adv	2	96	advmod	3
+1_gatto.txt	grazie	grazia	S	O	n+f+plur	3	96	ROOT	0
+1_gatto.txt	a	a	E	O	prep	4	96	case	5
+1_gatto.txt	essi	essi	PE	O	pron+_+m+3+plur+strong	5	96	nmod	3
+1_gatto.txt	che	che	PR	O	conj	6	96	nsubj	7
+1_gatto.txt	riesce	riuscire	V	O	v+indic+pres+nil+3+sing	7	96	acl:relcl	5
+1_gatto.txt	a	a	E	O	prep	8	96	mark	9
+1_gatto.txt	orientarsi	orientare	V+PC	O	v+infinito+pres+nil+nil+nil/pron+accdat+_+3+_	9	96	xcomp	7
+1_gatto.txt	nel	nel	E+RD	O	prep/art+m+sing	10	96	case	11
+1_gatto.txt	buio	buio	S	O	n+m+sing	11	96	nmod	9
+1_gatto.txt	più	più	B	O	adv	12	96	advmod	13
+1_gatto.txt	assoluto	assoluto	A	O	adj+m+sing+pst	13	96	xcomp	9
+1_gatto.txt	e	e	CC	O	conj	14	96	cc	13
+1_gatto.txt	a	a	E	O	prep	15	96	mark	16
+1_gatto.txt	percepire	percepire	V	O	v+infinito+pres+nil+nil+nil	16	96	conj	13
+1_gatto.txt	le	la	RD	O	pron+acc+f+3+plur+clit	17	96	det	18
+1_gatto.txt	dimensioni	dimensione	S	O	n+f+plur	18	96	dobj	9
+1_gatto.txt	dei	del	E+RD	O	prep/art+m+plur	19	96	case	21
+1_gatto.txt	piccoli	piccolo	A	O	adj+m+plur+pst	20	96	amod	21
+1_gatto.txt	spazi	spazio	S	O	n+m+plur	21	96	nmod	18
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	22	96	punct	3
+1_gatto.txt	Possiede	possedere	V	O	v+indic+pres+nil+3+sing	1	97	ROOT	0
+1_gatto.txt	delle	della	E+RD	O	prep/art+f+plur	2	97	case	3
+1_gatto.txt	vibrisse	vibrisse	S	O	vibrisse	3	97	nmod	1
+1_gatto.txt	anche	anche	B	O	adv	4	97	advmod	7
+1_gatto.txt	sotto	sotto	E	O	prep	5	97	case	7
+1_gatto.txt	le	la	RD	O	pron+acc+f+3+plur+clit	6	97	det	7
+1_gatto.txt	zampe	zampa	S	O	n+f+plur	7	97	nmod	1
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	8	97	punct	1
+1_gatto.txt	sotto	sotto	E	O	prep	9	97	case	11
+1_gatto.txt	al	al	E+RD	O	prep/art+m+sing	10	97	mwe	9
+1_gatto.txt	mento	mento	S	O	n+m+sing	11	97	nmod	1
+1_gatto.txt	e	e	CC	O	conj	12	97	cc	11
+1_gatto.txt	alle	alla	E+RD	O	prep/art+f+plur	13	97	case	14
+1_gatto.txt	sopracciglia	sopracciglio	S	O	n+f+plur	14	97	conj	11
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	15	97	punct	1
+1_gatto.txt	I	il	RD	O	art+m+plur	1	98	det	2
+1_gatto.txt	cuscinetti	cuscinetto	S	O	n+m+plur	2	98	nsubj	8
+1_gatto.txt	sotto	sotto	E	O	prep	3	98	case	5
+1_gatto.txt	le	la	RD	O	pron+acc+f+3+plur+clit	4	98	det	5
+1_gatto.txt	zampe	zampa	S	O	n+f+plur	5	98	nmod	2
+1_gatto.txt	sono	essere	V	O	v+indic+pres+nil+1+sing	6	98	cop	8
+1_gatto.txt	molto	molto	B	O	adv	7	98	advmod	8
+1_gatto.txt	sensibili	sensibile	A	O	adj+f+plur+pst	8	98	ROOT	0
+1_gatto.txt	alle	alla	E+RD	O	prep/art+f+plur	9	98	case	10
+1_gatto.txt	vibrazioni	vibrazione	S	O	n+f+plur	10	98	nmod	8
+1_gatto.txt	e	e	CC	O	conj	11	98	cc	10
+1_gatto.txt	la	la	RD	O	pron+accdat+_+3+_+clit	12	98	det	14
+1_gatto.txt	sua	suo	AP	O	adj+f+sing+pst+poss	13	98	det:poss	14
+1_gatto.txt	pelle	pelle	S	O	n+f+sing	14	98	conj	10
+1_gatto.txt	è	essere	VA	O	v+indic+pres+nil+3+sing	15	98	auxpass	16
+1_gatto.txt	coperta	coprire	V	O	v+part+pass+f+nil+sing	16	98	acl	8
+1_gatto.txt	di	di	E	O	prep	17	98	case	18
+1_gatto.txt	cellule	cellula	S	O	n+f+plur	18	98	nmod	16
+1_gatto.txt	tattili	tattile	A	O	adj+f+plur+pst	19	98	amod	18
+1_gatto.txt	estremamente	estremamente	B	O	adv	20	98	advmod	21
+1_gatto.txt	sensibili	sensibile	A	O	adj+f+plur+pst	21	98	amod	19
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	22	98	punct	8
+1_gatto.txt	L'	l'	RD	O	pron+accdat+_+3+_+clit	1	99	det	2
+1_gatto.txt	equilibrio	equilibrio	S	O	n+m+sing	2	99	ROOT	0
+1_gatto.txt	durante	durante	E	O	prep	3	99	case	5
+1_gatto.txt	le	la	RD	O	pron+acc+f+3+plur+clit	4	99	det	5
+1_gatto.txt	cadute	caduta	S	O	n+f+plur	5	99	nmod	2
+1_gatto.txt	:	[PUNCT]	FC	O	: [PUNCT]	6	99	punct	2
+1_gatto.txt	l'	l'	RD	O	pron+accdat+_+3+_+clit	7	99	det	8
+1_gatto.txt	apparato	apparato	S	O	n+m+sing	8	99	appos	2
+1_gatto.txt	vestibolare	vestibolare	A	O	adj+f+sing+pst	9	99	amod	8
+1_gatto.txt	Il	il	RD	O	art+m+sing	1	100	det	3
+1_gatto.txt	suo	suo	AP	O	adj+m+sing+pst+poss	2	100	det:poss	3
+1_gatto.txt	sistema	sistema	S	O	n+m+sing	3	100	nsubjpass	7
+1_gatto.txt	vestibolare	vestibolare	V	O	vestibolare vestibolare+adj+f+sing+pst vestibolare+adj+m+sing+pst	4	100	acl	3
+1_gatto.txt	è	essere	VA	O	v+indic+pres+nil+3+sing	5	100	auxpass	7
+1_gatto.txt	particolarmente	particolarmente	B	O	adv	6	100	advmod	7
+1_gatto.txt	sviluppato	sviluppare	V	O	v+part+pass+m+nil+sing	7	100	ROOT	0
+1_gatto.txt	e	e	CC	O	conj	8	100	cc	7
+1_gatto.txt	gli	gli	PC	O	pron+acc+m+3+sing+clit	9	100	iobj	10
+1_gatto.txt	conferisce	conferire	V	O	v+indic+pres+nil+3+sing	10	100	conj	7
+1_gatto.txt	un	un	RI	O	art+m+sing	11	100	det	13
+1_gatto.txt	buon	buon	A	O	adj+f+plur+pst	12	100	amod	13
+1_gatto.txt	senso	senso	S	O	n+m+sing	13	100	dobj	10
+1_gatto.txt	dell'	dell'	E+RD	O	prep/art+f+sing	14	100	case	15
+1_gatto.txt	equilibrio	equilibrio	S	O	n+m+sing	15	100	nmod	13
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	16	100	punct	7
+1_gatto.txt	Ciò	ciò	PD	O	Ciò ciò+pron+_+m+3+sing+dim	1	101	nsubj	2
+1_gatto.txt	spiega	spiegare	V	O	v+indic+pres+nil+3+sing	2	101	ROOT	0
+1_gatto.txt	la	la	RD	O	pron+accdat+_+3+_+clit	3	101	det	6
+1_gatto.txt	sua	suo	AP	O	adj+f+sing+pst+poss	4	101	det:poss	6
+1_gatto.txt	particolare	particolare	A	O	adj+f+sing+pst	5	101	amod	6
+1_gatto.txt	capacità	capacità	S	O	n+f+plur	6	101	dobj	2
+1_gatto.txt	di	di	E	O	prep	7	101	mark	8
+1_gatto.txt	rigirarsi	rigirare	V+PC	O	v+infinito+pres+nil+nil+nil/pron+accdat+_+3+_	8	101	acl	6
+1_gatto.txt	durante	durante	E	O	prep	9	101	case	11
+1_gatto.txt	una	una	RI	O	art+f+sing	10	101	det	11
+1_gatto.txt	caduta	caduta	S	O	n+f+sing	11	101	nmod	8
+1_gatto.txt	per	per	E	O	prep	12	101	mark	13
+1_gatto.txt	atterrare	atterrare	V	O	v+infinito+pres+nil+nil+nil	13	101	advcl	8
+1_gatto.txt	sulle	sulla	E+RD	O	prep/art+f+plur	14	101	case	15
+1_gatto.txt	zampe	zampa	S	O	n+f+plur	15	101	nmod	13
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	16	101	punct	2
+1_gatto.txt	Se	se	CS	O	conj	1	102	mark	4
+1_gatto.txt	un	un	RI	O	art+m+sing	2	102	det	3
+1_gatto.txt	gatto	gatto	S	O	n+m+sing	3	102	nsubj	4
+1_gatto.txt	cade	cadere	V	O	v+indic+pres+nil+3+sing	4	102	advcl	18
+1_gatto.txt	anche	anche	B	O	adv	5	102	advmod	8
+1_gatto.txt	da	da	E	O	prep	6	102	case	8
+1_gatto.txt	pochi	poco	DI	O	pron+_+m+3+plur+ind	7	102	det	8
+1_gatto.txt	centimetri	centimetro	S	O	n+m+plur	8	102	nmod	4
+1_gatto.txt	dal	dal	E+RD	O	prep/art+m+sing	9	102	case	10
+1_gatto.txt	suolo	suolo	S	O	n+m+sing	10	102	nmod	8
+1_gatto.txt	ed	ed	CC	O	conj	11	102	cc	4
+1_gatto.txt	è	essere	VA	O	v+indic+pres+nil+3+sing	12	102	aux	13
+1_gatto.txt	girato	girare	V	O	v+part+pass+m+nil+sing	13	102	conj	4
+1_gatto.txt	di	di	E	O	prep	14	102	case	15
+1_gatto.txt	schiena	schiena	S	O	n+f+sing	15	102	nmod	13
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	16	102	punct	4
+1_gatto.txt	può	potere	VM	O	v+indic+pres+nil+3+sing	17	102	aux	18
+1_gatto.txt	rigirarsi	rigirare	V+PC	O	v+infinito+pres+nil+nil+nil/pron+accdat+_+3+_	18	102	ROOT	0
+1_gatto.txt	ruotando	ruotare	V	O	v+gerundio+pres+nil+nil+nil	19	102	xcomp	18
+1_gatto.txt	dapprima	dapprima	B	O	adv	20	102	advmod	19
+1_gatto.txt	la	la	RD	O	pron+accdat+_+3+_+clit	21	102	det	22
+1_gatto.txt	testa	testa	S	O	n+f+sing	22	102	dobj	19
+1_gatto.txt	in	in	E	O	prep	23	102	case	24
+1_gatto.txt	direzione	direzione	S	O	n+f+sing	24	102	nmod	19
+1_gatto.txt	del	del	E+RD	O	prep/art+m+sing	25	102	case	26
+1_gatto.txt	suolo	suolo	S	O	n+m+sing	26	102	nmod	24
+1_gatto.txt	,	[PUNCT]	FF	O	, [PUNCT]	27	102	punct	18
+1_gatto.txt	poi	poi	B	O	adv	28	102	advmod	30
+1_gatto.txt	le	la	RD	O	pron+acc+f+3+plur+clit	29	102	det	30
+1_gatto.txt	zampe	zampa	S	O	n+f+plur	30	102	dobj	18
+1_gatto.txt	anteriori	anteriore	A	O	adj+f+plur+pst	31	102	amod	30
+1_gatto.txt	e	e	CC	O	conj	32	102	cc	30
+1_gatto.txt	infine	infine	B	O	adv	33	102	advmod	34
+1_gatto.txt	quelle	quelle	PD	O	quelle quelle+pron+_+m+3+plur+dim quello+adj+f+plur+pst+dim	34	102	conj	30
+1_gatto.txt	posteriori	posteriore	A	O	adj+f+plur+pst	35	102	amod	34
+1_gatto.txt	.	[PUNCT]	FS	O	. [PUNCT]	36	102	punct	18
