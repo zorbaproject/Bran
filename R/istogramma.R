@@ -17,18 +17,18 @@ require(gridSVG);
 fullpath <- "mytable.csv";
 
 basename <- sub('\\.csv$', '', fullpath);
-file <- read.table(fullpath,header=FALSE, sep=",", col.names=c("Risposte" , "Utenti"), colClasses = c("character", "numeric"));
+file <- read.table(fullpath,header=TRUE, sep="\t", col.names=c("BranColonna0" , "BranColonna1"), colClasses = c("character", "numeric"));
 # Ordino la tabella in base alla prima colonna (i punteggi calcolati con le risposte degli utenti)
-file <- file[order(file$Utenti),];
-file$Risposte <- as.factor(file$Risposte);
+file <- file[order(file$BranColonna1),];
+file$BranColonna0 <- as.factor(file$BranColonna0);
 # Scrivo i dati per debug
 print(basename)
 print(file);
 # Creo un istogramma
-histogram = ggplot(file, aes(x=file$Risposte, y=file$Utenti, fill=file$Risposte)) + geom_bar(stat="identity");
+histogram = ggplot(file, aes(x=file$BranColonna0, y=file$BranColonna1, fill=file$BranColonna0)) + geom_bar(stat="identity");
 # Percentuale o numero puro nelle etichette?
-#mylabels = paste0(round(file$Utenti*100/sum(file$Utenti)), "%");
-mylabels = file$Utenti;
+#mylabels = paste0(round(file$BranColonna1*100/sum(file$BranColonna1)), "%");
+mylabels = file$BranColonna1;
 histogram = histogram + stat_count(aes(y=..count..,label=mylabels),geom="text",vjust=-1)
 histogram = histogram + labs(x = NULL, y = NULL, fill = NULL, title = sub('-', ' ', basename));
 histogram = histogram + theme_classic() + theme(axis.line = element_blank(),

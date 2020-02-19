@@ -91,24 +91,42 @@ class Form(QDialog):
                     checkfilter = True
                 break
         fileName = QFileDialog.getSaveFileName(self, "Salva file CSV", self.sessionDir, "Text files (*.tsv *.csv *.txt)")[0]
+        self.CSVsaver(fileName, checkfilter)
+
+    def CSVsaver(self, fileName, checkfilter = False, customheader = [], onlycols = []):
         if fileName != "":
             if fileName[-4:] != ".csv" and fileName[-4:] != ".tsv":
                 fileName = fileName + ".tsv"
             csv = ""
-            for col in range(self.w.tableWidget.columnCount()):
-                if col > 0:
-                    csv = csv + self.separator
-                csv = csv + self.w.tableWidget.horizontalHeaderItem(col).text()
+            if len(customheader) > 0:
+                for col in range(len(customheader)):
+                    if col > 0:
+                        csv = csv + self.separator
+                    csv = csv + customheader[col]
+            else:
+                for col in range(self.w.tableWidget.columnCount()):
+                    if col > 0:
+                        csv = csv + self.separator
+                    csv = csv + self.w.tableWidget.horizontalHeaderItem(col).text()
             for row in range(self.w.tableWidget.rowCount()):
                 if self.w.tableWidget.isRowHidden(row) == False or checkfilter == False:
                     csv = csv + "\n"
-                    for col in range(self.w.tableWidget.columnCount()):
-                        if col > 0:
-                            csv = csv + self.separator
-                        try:
-                            csv = csv + self.w.tableWidget.item(row,col).text()
-                        except:
-                            csv = csv + ""
+                    if len(onlycols) > 0:
+                        for col in onlycols:
+                            if col > 0:
+                                csv = csv + self.separator
+                            try:
+                                csv = csv + self.w.tableWidget.item(row,col).text()
+                            except:
+                                csv = csv + ""
+                    else:
+                        for col in range(self.w.tableWidget.columnCount()):
+                            if col > 0:
+                                csv = csv + self.separator
+                            try:
+                                csv = csv + self.w.tableWidget.item(row,col).text()
+                            except:
+                                csv = csv + ""
             text_file = open(fileName, "w", encoding='utf-8')
             text_file.write(csv)
             text_file.close()
@@ -266,6 +284,54 @@ class Form(QDialog):
 
     def creagrafico(self):
         print("R path: " + self.Rpath)
+        scriptdir = os.path.abspath(os.path.dirname(sys.argv[0]))
+
+        templates = {"Istogramma": scriptdir + "/R/istogramma.R", "Torta": scriptdir + "/R/torta.R"}
+
+        thisname = []
+        for key in templates:
+            thisname.append(key)
+        type = QInputDialog.getItem(self.w.tableWidget, "Scegli il tipo di grafico", "Quale grafico vuoi realizzare?",thisname,current=0,editable=False)[0]
+
+        onlycols = []
+        customheader = []
+
+        thisname = []
+        for col in range(self.w.tableWidget.columnCount()):
+            thisname.append(self.w.tableWidget.horizontalHeaderItem(col).text())
+        labels = QInputDialog.getItem(self.w.tableWidget, "Scegli la colonna", "Quale colonna della tabella contiene le etichette (testo) del grafico?",thisname,current=0,editable=False)[0]
+        onlycols.append(thisname.index(labels))
+        customheader.append(labels)
+
+        values = QInputDialog.getItem(self.w.tableWidget, "Scegli la colonna", "Quale colonna della tabella contiene i valori numerici del grafico?",thisname,current=0,editable=False)[0]
+        onlycols.append(thisname.index(values))
+        customheader.append(values)
+
+        path = QFileDialog.getExistingDirectory(self, "Seleziona la cartella in cui salvare i file del grafico")
+        if path == "" or not os.path.isdir(path):
+            return
+        path = path.replace("\\", "/")
+
+        text_file = open(templates[type], "r", encoding='utf-8')
+        lines = text_file.read()
+        text_file.close()
+
+        mybasename = type + "_" + labels + "-"+ values
+
+        print(path + "/" +  mybasename + ".csv")
+
+        self.CSVsaver(path + "/" +  mybasename + ".csv", True, customheader, onlycols)
+
+        plot = lines.replace("fullpath <- \"mytable.csv\";", "fullpath <- \"" + mybasename + ".csv\";")
+        plot = plot.replace("BranColonna0", str(customheader[0]))
+        plot = plot.replace("BranColonna1", str(customheader[1]))
+
+        text_file = open(path + "/" +  mybasename + ".R", "w", encoding='utf-8')
+        text_file.write(plot)
+        text_file.close()
+
+        #https://docs.python.org/3/library/subprocess.html#using-the-subprocess-module
+        #subprocess.Popen(r'c:\mytool\tool.exe', cwd=r'd:\test\local')
 
 
 class QTableNumberItem(QTableWidgetItem):

@@ -16,31 +16,31 @@ require(gridSVG);
 
 fullpath <- "mytable.csv";
 
-
 basename <- sub('\\.csv$', '', fullpath);
-file <- read.table(fullpath,header=FALSE, sep=",", col.names=c("Risposte" , "Utenti"), colClasses = c("character", "numeric"));
+file <- read.table(fullpath,header=TRUE, sep="\t", col.names=c("BranColonna0" , "BranColonna1"), colClasses = c("character", "numeric"));
+#file <- read.table(fullpath,header=FALSE, sep=",", col.names=c("BranColonna0" , "BranColonna1"), colClasses = c("character", "numeric"));
 # Pulisco la tabella
-file$Risposte <- as.character(file$Risposte);
-file$Risposte[file$Risposte==""] <- "NA";
-file$Risposte <- as.factor(file$Risposte);
+file$BranColonna0 <- as.character(file$BranColonna0);
+file$BranColonna0[file$BranColonna0==""] <- "NA";
+file$BranColonna0 <- as.factor(file$BranColonna0);
 #Ordino la tabella in funzione della colonna degli utenti
-file <- file[order(file$Utenti),];
+file <- file[order(file$BranColonna1),];
 # Scrivo i dati per debug
 print(basename)
 print(file);
 # Creo un barplot con legenda in ordine alfabetico
-#pie = ggplot(file, aes(x="", y=file$Utenti, fill=file$Risposte)) + geom_bar(stat="identity", width=1);
+#pie = ggplot(file, aes(x="", y=file$BranColonna1, fill=file$BranColonna0)) + geom_bar(stat="identity", width=1);
 # Creo un barplot seguendo l'ordine attuale della tabella ()
-pie = ggplot(file, aes(x="", y=file$Utenti, fill=factor(file$Risposte, levels = as.character(file$Risposte)))) + geom_bar(stat="identity", width=1);
+pie = ggplot(file, aes(x="", y=file$BranColonna1, fill=factor(file$BranColonna0, levels = as.character(file$BranColonna0)))) + geom_bar(stat="identity", width=1);
 # Trasforma in torta (coordinate polari invece che cartesiane)
 pie = pie + coord_polar("y", start=0);
 # Percentuale o numero puro nelle etichette?
-#mylabels = paste0(round(file$Utenti*100/sum(file$Utenti)), "%");
-mylabels = file$Utenti;
+#mylabels = paste0(round(file$BranColonna1*100/sum(file$BranColonna1)), "%");
+mylabels = file$BranColonna1;
 pie = pie + geom_text(aes(label = mylabels), position = position_stack(vjust = 0.5));
 # Abilita questa riga se vuoi specificare manualmente i colori
 #pie = pie + scale_fill_manual(values=c("#55DDE0", "#33658A", "#2F4858", "#F6AE2D", "#F26419", "#999999")) ;
-pie = pie + scale_fill_discrete(labels=paste0(file$Risposte, " (", file$Utenti, ")", sep=""));
+pie = pie + scale_fill_discrete(labels=paste0(file$BranColonna0, " (", file$BranColonna1, ")", sep=""));
 pie = pie + labs(x = NULL, y = NULL, fill = NULL, title = sub('-', ' ', basename));
 pie = pie + theme_classic() + theme(axis.line = element_blank(),
     axis.text = element_blank(),
