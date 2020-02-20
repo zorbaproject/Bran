@@ -113,13 +113,15 @@ class Form(QDialog):
                 if self.w.tableWidget.isRowHidden(row) == False or checkfilter == False:
                     csv = csv + "\n"
                     if len(onlycols) > 0:
+                        actCol= 0
                         for col in onlycols:
-                            if col > 0:
+                            if actCol > 0:
                                 csv = csv + self.separator
                             try:
                                 csv = csv + self.w.tableWidget.item(row,col).text()
                             except:
                                 csv = csv + ""
+                            actCol = actCol + 1
                     else:
                         for col in range(self.w.tableWidget.columnCount()):
                             if col > 0:
@@ -223,7 +225,10 @@ class Form(QDialog):
         tcount = 0
         for row in range(self.w.tableWidget.rowCount()):
             col = self.w.ccolumn.currentIndex()
-            ctext = self.w.tableWidget.item(row,col).text()
+            try:
+                ctext = self.w.tableWidget.item(row,col).text()
+            except:
+                ctext = ""
             ftext = self.w.cfilter.text()
             try:
                 if self.w.filtronumerico.isChecked():
@@ -287,7 +292,7 @@ class Form(QDialog):
         print("R path: " + self.Rpath)
         scriptdir = os.path.abspath(os.path.dirname(sys.argv[0]))
 
-        templates = {"Istogramma": scriptdir + "/R/istogramma.R", "Torta": scriptdir + "/R/torta.R"}
+        templates = {"Istogramma a identità": scriptdir + "/R/istogramma.R", "Istogramma a somma": scriptdir + "/R/istogramma-count.R", "Torta": scriptdir + "/R/torta.R", "Istogrammi a gruppi": scriptdir + "/R/istogramma-gruppi.R"}
 
         thisname = []
         for key in templates:
@@ -305,9 +310,17 @@ class Form(QDialog):
         notallowed = "[^0-9a-zA-Z]"
         customheader.append(re.sub(notallowed, "", labels))
 
-        values = QInputDialog.getItem(self.w.tableWidget, "Scegli la colonna", "Quale colonna della tabella contiene i valori numerici del grafico?",thisname,current=(len(thisname)-1),editable=False)[0]
-        onlycols.append(thisname.index(values))
-        customheader.append(re.sub(notallowed, "", values))
+        if type != "Istogramma a somma":
+            values = QInputDialog.getItem(self.w.tableWidget, "Scegli la colonna", "Quale colonna della tabella contiene i valori numerici del grafico?",thisname,current=(len(thisname)-1),editable=False)[0]
+            onlycols.append(thisname.index(values))
+            customheader.append(re.sub(notallowed, "", values))
+        else:
+            values = ""
+
+        if type == "Istogrammi a gruppi":
+            groups = QInputDialog.getItem(self.w.tableWidget, "Scegli la colonna", "Quale colonna della tabella contiene i valori per cui raggruppare i dati dei grafici?",thisname,current=0,editable=False)[0]
+            onlycols.append(thisname.index(groups))
+            customheader.append(re.sub(notallowed, "", groups))
 
         path = QFileDialog.getExistingDirectory(self, "Seleziona la cartella in cui salvare i file del grafico")
         if path == "" or not os.path.isdir(path):
@@ -327,7 +340,10 @@ class Form(QDialog):
 
         plot = lines.replace("fullpath <- \"mytable.csv\";", "fullpath <- \"" + mybasename + ".csv\";")
         plot = plot.replace("BranColonna0", str(customheader[0]))
-        plot = plot.replace("BranColonna1", str(customheader[1]))
+        if len(customheader)> 1:
+            plot = plot.replace("BranColonna1", str(customheader[1]))
+        if len(customheader)> 2:
+            plot = plot.replace("BranColonna2", str(customheader[2]))
 
         text_file = open(path + "/" +  mybasename + ".R", "w", encoding='utf-8')
         text_file.write(plot)
