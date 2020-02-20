@@ -18,6 +18,7 @@ import sys
 import os
 import math
 import mmap
+import subprocess
 
 from forms import progress
 from forms import texteditor
@@ -301,11 +302,12 @@ class Form(QDialog):
             thisname.append(self.w.tableWidget.horizontalHeaderItem(col).text())
         labels = QInputDialog.getItem(self.w.tableWidget, "Scegli la colonna", "Quale colonna della tabella contiene le etichette (testo) del grafico?",thisname,current=0,editable=False)[0]
         onlycols.append(thisname.index(labels))
-        customheader.append(labels)
+        notallowed = "[^0-9a-zA-Z]"
+        customheader.append(re.sub(notallowed, "", labels))
 
-        values = QInputDialog.getItem(self.w.tableWidget, "Scegli la colonna", "Quale colonna della tabella contiene i valori numerici del grafico?",thisname,current=0,editable=False)[0]
+        values = QInputDialog.getItem(self.w.tableWidget, "Scegli la colonna", "Quale colonna della tabella contiene i valori numerici del grafico?",thisname,current=(len(thisname)-1),editable=False)[0]
         onlycols.append(thisname.index(values))
-        customheader.append(values)
+        customheader.append(re.sub(notallowed, "", values))
 
         path = QFileDialog.getExistingDirectory(self, "Seleziona la cartella in cui salvare i file del grafico")
         if path == "" or not os.path.isdir(path):
@@ -317,6 +319,7 @@ class Form(QDialog):
         text_file.close()
 
         mybasename = type + "_" + labels + "-"+ values
+        mybasename = mybasename.replace(" ", "_")
 
         print(path + "/" +  mybasename + ".csv")
 
@@ -331,7 +334,13 @@ class Form(QDialog):
         text_file.close()
 
         #https://docs.python.org/3/library/subprocess.html#using-the-subprocess-module
-        #subprocess.Popen(r'c:\mytool\tool.exe', cwd=r'd:\test\local')
+        ret = QMessageBox.question(self.w.tableWidget,'Domanda', "Vuoi avviare automaticamente R per disegnare il grafico?", QMessageBox.Yes | QMessageBox.No)
+        if ret == QMessageBox.Yes:
+            process = subprocess.Popen([self.Rpath, mybasename + ".R"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=path)
+            outputbyte = process.communicate()[0]
+            process.stdin.close()
+            stroutput = outputbyte.decode(encoding='utf-8')
+            print(stroutput)
 
 
 class QTableNumberItem(QTableWidgetItem):
