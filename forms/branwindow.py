@@ -469,6 +469,7 @@ class MainWindow(QMainWindow):
     def filtriMultipli(self):
         self.Corpus.filtriMultipli()
         self.w.ccolumn.setCurrentText(self.filtrimultiplienabled)
+        self.w.cfilter.setText(self.Corpus.filter)
 
     def actionNumero_dipendenze_per_frase(self):
         self.Corpus.actionNumero_dipendenze_per_frase()

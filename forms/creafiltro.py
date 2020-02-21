@@ -13,6 +13,8 @@ from PySide2.QtWidgets import QTableWidget
 from PySide2.QtWidgets import QTableWidgetItem
 from PySide2.QtWidgets import QInputDialog
 from PySide2.QtWidgets import QFileDialog
+from PySide2.QtWidgets import QComboBox
+from PySide2.QtWidgets import QSpinBox
 
 import re
 import sys
@@ -35,6 +37,7 @@ class Form(QDialog):
         self.w.rejected.connect(self.isrejected)
         self.w.updateFilter.clicked.connect(self.updateFilter)
         self.w.filtroautomatico.clicked.connect(self.filtroautomatico)
+        self.w.tableWidget.cellClicked.connect(self.tbcellclicked)
         self.w.andbtn.clicked.connect(self.andbtn)
         self.w.orbtn.clicked.connect(self.orbtn)
         self.w.delbtn.clicked.connect(self.delbtn)
@@ -44,11 +47,19 @@ class Form(QDialog):
         self.corpuscols = cpcols
         self.fillautocombo()
         self.sessionDir = "."
+        self.usefulregexs = dict()
+        self.usefulregexs["Numero"] = "[0-9]*[\.\,]*[0-9]"
+        self.usefulregexs["Iniziale maiuscola"] = "[A-Z][a-z]*"
+        #Create an empty row initially
+        if self.w.tableWidget.rowCount() == 0:
+            self.andbtn()
         #self.w.filter.setMaxLength(sys.maxsize-1)
         self.w.filter.setMaxLength(2147483647)
 
     def isaccepted(self):
+        self.updateFilter()
         self.accept()
+
     def isrejected(self):
         self.reject()
         self.w.filter.setText("")
@@ -58,10 +69,39 @@ class Form(QDialog):
         self.w.autofiltercombo.addItem("Ogni elemento di una colonna")
         self.w.autofiltercombo.addItem("Su un dizionario")
 
+    def tbcellclicked(self, row, col):
+        if not self.w.tableWidget.item(row,col):
+            self.setcelltocorpus("", row, col)
+        mytxt = self.w.tableWidget.item(row,col).text()
+        if col == 0:
+            editor = QComboBox()
+            for key in self.corpuscols:
+                editor.addItem(key)
+            editor.setCurrentText(mytxt)
+            editor.activated.connect(lambda index: self.setcelltocorpus(editor.itemText(index),row, col))
+        elif col == 1:
+            editor = QSpinBox()
+            editor.setMaximum(1000)
+            editor.setMinimum(-1000)
+            editor.setValue(0)
+            editor.editingFinished.connect(lambda: self.setcelltocorpus(str(editor.value()),row, col))
+        elif col == 2:
+            editor = QComboBox()
+            for key in self.usefulregexs:
+                editor.addItem(key)
+            if editor.findText(mytxt) < 0:
+                editor.addItem(mytxt)
+            editor.setCurrentText(mytxt)
+            editor.setEditable(True)
+            #editor.activated.connect(lambda index: self.setcelltocorpus(self.usefulregexs[editor.itemText(index)],row, col))
+            editor.activated.connect(lambda index: self.setcelltocorpus(self.usefulregexs[editor.itemText(index)],row, col) if editor.itemText(index) in self.usefulregexs else self.setcelltocorpus(editor.itemText(index),row, col))
+        self.w.tableWidget.setCellWidget(row,col, editor)
+
     def updateFilter(self):
         self.sanitizeTable()
         myfilter = ""
         iand = 0
+        oldfilter = self.w.filter.text()
         for tbrow in range(self.w.tableWidget.rowCount()):
             if iand >0:
                 if self.w.tableWidget.item(tbrow,0).text() == "OR":
@@ -70,10 +110,14 @@ class Form(QDialog):
                     continue
                 else:
                     myfilter = myfilter + "&&"
-            myfilter = myfilter + self.w.tableWidget.item(tbrow,0).text()
+            colonna = self.w.tableWidget.item(tbrow,0).text()
+            myregex = self.w.tableWidget.item(tbrow,2).text()
+            if colonna == "" or myregex == "":
+                continue
+            myfilter = myfilter + colonna
             if self.w.tableWidget.item(tbrow,1).text() != "":
                 myfilter = myfilter + "[" + self.w.tableWidget.item(tbrow,1).text()+ "]"
-            myfilter = myfilter + "=" + self.w.tableWidget.item(tbrow,2).text()
+            myfilter = myfilter + "=" + myregex
             iand = iand+1
         self.w.filter.setText(myfilter)
 
@@ -100,6 +144,7 @@ class Form(QDialog):
                 iopt = iopt +1
         except:
             print("Filtro non valido")
+        self.sanitizeTable()
 
     def filterColElements(self, col):
         self.Progrdialog = progress.Form(self.w)
@@ -236,6 +281,11 @@ class Form(QDialog):
     def setcelltocorpus(self, text, row, column):
         titem = QTableWidgetItem()
         titem.setText(text)
+        if column == 1:
+            titem.setToolTip("La parola che vuoi cercare è la numero 0. Ma puoi porre condizioni per quella che la precede con -1 o per quella che segue con 1.")
+        if column == 2:
+            titem.setToolTip("Puoi digitare una espressione regolare, oppure scegliere una opzione dall'elenco.")
+        self.w.tableWidget.removeCellWidget(row, column)
         self.w.tableWidget.setItem(row, column, titem)
 
     def andbtn(self):
@@ -261,5 +311,10 @@ class Form(QDialog):
             for col in range(self.w.tableWidget.columnCount()):
                 if not self.w.tableWidget.item(row,col):
                     self.setcelltocorpus("", row, col)
+        if self.w.tableWidget.rowCount() > 1:
+            for row in range(self.w.tableWidget.rowCount()-1,-1,-1):
+                if self.w.tableWidget.item(row,0).text() == "":
+                    self.w.tableWidget.removeRow(row)
+
     def help(self):
-        QMessageBox.information(self, "Suggerimento", "Puoi indicare le parole rpecedenti e successive con il loro numero. Per esempio, -1 è la parola precedente a quella trovata, 1 è la parola successiva.")
+        QMessageBox.information(self, "Suggerimento", "Puoi indicare le parole precedenti e successive con il loro numero. Per esempio, -1 è la parola precedente a quella trovata, 1 è la parola successiva.")
