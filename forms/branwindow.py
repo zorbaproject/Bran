@@ -92,11 +92,13 @@ class MainWindow(QMainWindow):
         self.w.updateCorpus.clicked.connect(self.updateCorpus)
         self.w.actionRimuovi_righe_selezionate.triggered.connect(self.delselected)
         self.w.actionScarica_corpus_da_sito_web.triggered.connect(self.web2corpus)
+        self.w.actionConverti_vecchio_corpus.triggered.connect(self.convertiDaTint)
         self.w.actionEsporta_corpus_in_un_CSV_per_ogni_ID.triggered.connect(self.esportaCSVperID)
         self.w.actionConta_occorrenze.triggered.connect(self.contaoccorrenze)
         self.w.actionConta_occorrenze_filtrate.triggered.connect(self.contaoccorrenzefiltrate)
         self.w.actionEsporta_corpus_in_CSV_unico.triggered.connect(self.salvaCSV)
         self.w.actionEsporta_vista_attuale_in_CSV.triggered.connect(self.esportavistaCSV)
+        self.w.actionEsporta_subcorpus_in_base_a_filtro.triggered.connect(self.esportafiltroCSV)
         self.w.actionEsporta_in_formato_CoNNL_U.triggered.connect(self.connluexport)
         self.w.actionAggiungi_tag_in_corpus_in_base_a_RegEx.triggered.connect(self.addTagFromFilter)
         self.w.actionRimuovi_vista_attuale_dal_corpus.triggered.connect(self.removevisiblerows)
@@ -145,9 +147,9 @@ class MainWindow(QMainWindow):
         self.sessionDir = "."
         #self.w.cfilter.setMaxLength(sys.maxsize-1)
         self.w.cfilter.setMaxLength(2147483647)
-        self.mycfgfile = QDir.homePath() + "/.brancfg"
-        self.mycfg = json.loads('{"javapath": "", "tintpath": "", "tintaddr": "", "tintport": "", "sessions" : []}')
-        self.loadPersonalCFG()
+        #self.Corpus.mycfgfile = QDir.homePath() + "/.brancfg"
+        #self.mycfg = json.loads('{"javapath": "", "tintpath": "", "tintaddr": "", "tintport": "", "sessions" : []}')
+        #self.loadPersonalCFG()
         self.loadSession()
         self.TintAddr = ""
         #self.loadTintConfig()
@@ -177,7 +179,7 @@ class MainWindow(QMainWindow):
         print("Set language "+self.language)
 
     def loadTintConfig(self):
-        self.TintSetdialog = tint.Form(self, self.mycfg)
+        self.TintSetdialog = tint.Form(self, self.Corpus.mycfg)
         self.TintSetdialog.w.start.clicked.connect(self.runServer)
         self.TintSetdialog.w.check.clicked.connect(self.checkServer)
         self.TintSetdialog.exec()
@@ -187,15 +189,15 @@ class MainWindow(QMainWindow):
         self.TintAddr = "http://" + self.TintSetdialog.w.address.text() + ":" +self.TintPort +"/tint"
         #self.Java -classpath $_CLASSPATH eu.fbk.dh.tint.runner.TintServer -p self.TintPort
         if not self.TintSetdialog.notint:
-            self.mycfg["javapath"] = self.TintSetdialog.w.java.text()
-            self.mycfg["tintpath"] = self.TintSetdialog.w.tintlib.text()
-            self.mycfg["tintaddr"] = self.TintSetdialog.w.address.text()
-            self.mycfg["tintport"] = self.TintSetdialog.w.port.text()
-            self.savePersonalCFG()
+            self.Corpus.mycfg["javapath"] = self.TintSetdialog.w.java.text()
+            self.Corpus.mycfg["tintpath"] = self.TintSetdialog.w.tintlib.text()
+            self.Corpus.mycfg["tintaddr"] = self.TintSetdialog.w.address.text()
+            self.Corpus.mycfg["tintport"] = self.TintSetdialog.w.port.text()
+            self.Corpus.savePersonalCFG()
 
     def loadSession(self):
         seSdialog = sessione.Form(self)
-        seSdialog.loadhistory(self.mycfg["sessions"])
+        seSdialog.loadhistory(self.Corpus.mycfg["sessions"])
         seSdialog.exec()
         self.Corpus.sessionFile = seSdialog.filesessione
         self.setWindowTitle("Bran - "+self.Corpus.sessionFile)
@@ -203,14 +205,14 @@ class MainWindow(QMainWindow):
         if seSdialog.result():
             if os.path.isfile(self.Corpus.sessionFile):
                 tmpsess = [self.Corpus.sessionFile]
-                for i in range(len(self.mycfg["sessions"])-1,-1,-1):
-                    if not self.mycfg["sessions"][i] in tmpsess:
-                        tmpsess.append(self.mycfg["sessions"][i])
+                for i in range(len(self.Corpus.mycfg["sessions"])-1,-1,-1):
+                    if not self.Corpus.mycfg["sessions"][i] in tmpsess:
+                        tmpsess.append(self.Corpus.mycfg["sessions"][i])
                     if i > 10:
                         break
-                self.mycfg["sessions"] = tmpsess
+                self.Corpus.mycfg["sessions"] = tmpsess
                 #print(tmpsess)
-                self.savePersonalCFG()
+                self.Corpus.savePersonalCFG()
         else:
             print("Temporary folder")
         if self.Corpus.sessionFile == "":
@@ -218,26 +220,7 @@ class MainWindow(QMainWindow):
             sys.exit(0)
 
 
-    def loadPersonalCFG(self):
-        try:
-            text_file = open(self.mycfgfile, "r", encoding='utf-8')
-            lines = text_file.read()
-            text_file.close()
-            self.mycfg = json.loads(lines.replace("\n", "").replace("\r", ""))
-        except:
-            try:
-                text_file = open(self.mycfgfile, "r", encoding='ISO-8859-15')
-                lines = text_file.read()
-                text_file.close()
-                self.mycfg = json.loads(lines.replace("\n", "").replace("\r", ""))
-            except:
-                print("Creo il file di configurazione")
 
-    def savePersonalCFG(self):
-        cfgtxt = json.dumps(self.mycfg)
-        text_file = open(self.mycfgfile, "w", encoding='utf-8')
-        text_file.write(cfgtxt)
-        text_file.close()
 
     def apriProgetto(self):
         self.loadSession()
@@ -380,12 +363,15 @@ class MainWindow(QMainWindow):
                 toselect.append(row)
         self.Corpus.CSVsaver(fileName, self.Progrdialog, True, toselect)
 
+    def esportafiltroCSV(self):
+        self.Corpus.esportafiltroCSV()
+
     def esportaCSVperID(self):
         self.Corpus.esportaCSVperID()
 
     def web2corpus(self):
         w2Cdialog = url2corpus.Form(self)
-        w2Cdialog.setmycfgfile(self.mycfgfile)
+        w2Cdialog.setmycfgfile(self.Corpus.mycfgfile)
         w2Cdialog.exec()
 
     def visualizzafrasi(self):
@@ -496,6 +482,8 @@ class MainWindow(QMainWindow):
         self.Corpus.loadFromTint(self.TintAddr)
 
     def loadFromUDpipe(self):
+        if self.Corpus.mycfg["udpipe"] == "":
+            self.showbranconfig()
         self.Corpus.loadFromUDpipe()
 
     def loadTextFromCSV(self):
@@ -535,6 +523,9 @@ class MainWindow(QMainWindow):
 
     def loadCSV(self):
         self.Corpus.loadCSV()
+
+    def convertiDaTint(self):
+        self.Corpus.convertiDaTint()
 
     #def corpusCellChanged(self, row, col):
     #    if self.Corpus.ImportingFile:
@@ -604,18 +595,22 @@ class MainWindow(QMainWindow):
             self.TintSetdialog.accept()
 
     def showbranconfig(self):
-        self.BranSetdialog = settings.Form(self, self.mycfg)
+        self.BranSetdialog = settings.Form(self, self.Corpus)
         self.BranSetdialog.exec()
-        #self.Java = self.TintSetdialog.w.java.text()
-        #self.TintDir = self.TintSetdialog.w.tintlib.text()
-        #self.TintPort = self.TintSetdialog.w.port.text()
-        #self.TintAddr = "http://" + self.TintSetdialog.w.address.text() + ":" +self.TintPort +"/tint"
-        #if not self.TintSetdialog.notint:
-        #    self.mycfg["javapath"] = self.TintSetdialog.w.java.text()
-        #    self.mycfg["tintpath"] = self.TintSetdialog.w.tintlib.text()
-        #    self.mycfg["tintaddr"] = self.TintSetdialog.w.address.text()
-        #    self.mycfg["tintport"] = self.TintSetdialog.w.port.text()
-        #    self.savePersonalCFG()
+        if self.BranSetdialog.accepted:
+            self.Corpus.mycfg["javapath"] = self.BranSetdialog.w.java.text()
+            self.Corpus.mycfg["tintpath"] = self.BranSetdialog.w.tintlib.text()
+            self.Corpus.mycfg["tintaddr"] = self.BranSetdialog.w.address.text()
+            self.Corpus.mycfg["tintport"] = self.BranSetdialog.w.port.text()
+            self.Corpus.mycfg["udpipe"] = self.BranSetdialog.w.udpipe.text()
+            self.Corpus.mycfg["rscript"] = self.BranSetdialog.w.rscript.text()
+            self.Corpus.mycfg["sessions"] = json.loads(self.BranSetdialog.w.sessions.text())
+            self.Corpus.mycfg["udpipemodels"] = json.loads(self.BranSetdialog.w.udpipemodels.text())
+            self.Corpus.mycfg["facebook"] = json.loads(self.BranSetdialog.w.facebook.text())
+            self.Corpus.mycfg["twitter"] = json.loads(self.BranSetdialog.w.twitter.text())
+            print("Full config:")
+            print(self.Corpus.mycfg)
+        self.Corpus.savePersonalCFG()
 
     def addlinetocorpus(self, text, column):
         row = self.w.corpus.rowCount()

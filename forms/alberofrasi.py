@@ -115,15 +115,15 @@ class Form(QDialog):
                         gov[parolagov].append(idparola)
                     except:
                         gov[parolagov] = [idparola]
-                    if self.Corpus.corpus[row][self.Corpus.corpuscols["dep"][0]] == "ROOT":
+                    if self.Corpus.corpus[row][self.Corpus.corpuscols["dep"][0]].lower() == "root":
                         root = idparola
                     row = row + 1
             except:
                 row = 0
-            phtext = self.Corpus.rebuildText(self.Corpus.corpus, self.Progrdialog, self.Corpus.corpuscols['Orig'][0], [], startrow, endrow+1)
+            phtext = self.Corpus.rebuildText(self.Corpus.corpus, self.Progrdialog, self.Corpus.corpuscols['token'][0], [], startrow, endrow+1)
             self.w.fraseLabel.setText(phtext)
             rootitem = QTreeWidgetItem(self.w.treeWidget)
-            rootitem.setText(0,self.Corpus.corpus[int(words[root])][self.Corpus.corpuscols["Orig"][0]])
+            rootitem.setText(0,self.Corpus.corpus[int(words[root])][self.Corpus.corpuscols["token"][0]])
             rootitem.setText(1,self.Corpus.corpus[int(words[root])][self.Corpus.corpuscols["dep"][0]])
             rootitem.setText(2,self.Corpus.corpus[int(words[root])][self.Corpus.corpuscols["IDword"][0]])
             rootitem.setText(3,words[root])
@@ -143,7 +143,7 @@ class Form(QDialog):
                         continue
                     for elem in gov[parolagov]:
                         tritem = QTreeWidgetItem(olditems[pi])
-                        tritem.setText(0,self.Corpus.corpus[int(words[elem])][self.Corpus.corpuscols["Orig"][0]])
+                        tritem.setText(0,self.Corpus.corpus[int(words[elem])][self.Corpus.corpuscols["token"][0]])
                         tritem.setText(1,self.Corpus.corpus[int(words[elem])][self.Corpus.corpuscols["dep"][0]])
                         tritem.setText(2,self.Corpus.corpus[int(words[elem])][self.Corpus.corpuscols["IDword"][0]])
                         tritem.setText(3,words[elem])

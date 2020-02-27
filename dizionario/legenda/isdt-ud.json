@@ -5,7 +5,7 @@
  "B": ["ADV", ""],
  "B+PC": ["ADV+PRON", "/PronType=Clit"],
  "BN": ["ADV", "PronType=Neg"],
- "CC": ["CONJ", ""],
+ "CC": ["CCONJ", ""],
  "CS": ["SCONJ", ""],
  "DD": ["DET", "PronType=Dem"],
  "DE": ["DET", "PronType=Exc"],

@@ -741,21 +741,21 @@ def samplebigfile():
 
 if __name__ == "__main__":
     corpuscols = {
-                'IDcorpus': [0, "Tag corpus"],
-                'Orig': [1, "Forma grafica"],
-                'Lemma': [2, "Lemma"],
+                'TAGcorpus': [0, "Tag corpus"],
+                'token': [1, "Forma grafica"],
+                'lemma': [2, "Lemma"],
                 'pos': [3, "Tag PoS"],
-                'feat': [5, "Morfologia"],
                 'ner': [4, "Tag NER"],
-                'IDphrase': [7, "ID frase"],
+                'feat': [5, "Morfologia"],
                 'IDword': [6, "ID parola"],
+                'IDphrase': [7, "ID frase"],
                 'dep': [8, "Dep"],
                 'governor': [9, "Governor"]
     }
     ignoretext = "((?<=[^0-9])"+ re.escape(".")+ "|^" + re.escape(".")+ "|(?<= )"+ re.escape("-")+ "|^"+re.escape("-")+ "|"+re.escape(":")+"|(?<=[^0-9])"+re.escape(",")+"|^"+re.escape(",")+"|"+re.escape(";")+"|"+re.escape("?")+"|"+re.escape("!")+"|"+re.escape("«")+"|"+re.escape("»")+"|"+re.escape("\"")+"|"+re.escape("(")+"|"+re.escape(")")+"|^"+re.escape("'")+ "|" + re.escape("[PUNCT]") + "|" + re.escape("<unknown>") + ")"
     dimList = [100,1000,5000,10000,50000,100000,150000,200000,250000,300000,350000,400000,450000,500000,1000000]
     try:
-        filein = os.path.abspath(os.path.dirname(sys.argv[0]))+"/dizionario/legenda/isdt.json"
+        filein = os.path.abspath(os.path.dirname(sys.argv[0]))+"/dizionario/legenda/ud.json"
         text_file = open(filein, "r")
         myjson = text_file.read().replace("\n", "").replace("\r", "").split("####")[0]
         text_file.close()

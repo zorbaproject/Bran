@@ -129,7 +129,7 @@ class Confronto(QDialog):
         for key in self.corpora:
             self.w.with_corpora.addItem(key)
         self.w.sel_dict.setChecked(True)
-        self.datatype = ['Occorrenze Lemma', 'Occorrenze forma grafica','Occorrenze PoS', 'Statistiche VdB', 'Contaverbi', 'Densità lessicale', 'Segmenti ripetuti']
+        self.datatype = ['Occorrenze lemma', 'Occorrenze forma grafica','Occorrenze PoS', 'Statistiche VdB', 'Contaverbi', 'Densità lessicale', 'Segmenti ripetuti']
         for key in self.datatype:
             self.w.datatype.addItem(key)
         self.w.datatype.setCurrentIndex(0)
@@ -140,7 +140,7 @@ class Confronto(QDialog):
             fileName = self.dizionari[self.w.with_dict.currentText()]
         if self.w.sel_corpora.isChecked():
             fileName = self.corpora[self.w.with_corpora.currentText()]
-            if action == "Occorrenze Lemma":
+            if action == "Occorrenze lemma":
                 fileName = fileName + "-occorrenze-lemma.tsv"
             if action == "Occorrenze PoS":
                 fileName = fileName + "-occorrenze-pos.tsv"

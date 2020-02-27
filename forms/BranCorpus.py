@@ -91,7 +91,8 @@ class BranCorpus(QObject):
         self.legendaPos = legPos
         self.ignoretext = ignthis
         self.dimList = dimlst
-        self.ignorepos = ["punteggiatura - \"\" () «» - - ", "punteggiatura - : ;", "punteggiatura - ,", "altro"] # "punteggiatura - .?!"
+        #self.ignorepos = ["punteggiatura - \"\" () «» - - ", "punteggiatura - : ;", "punteggiatura - ,", "altro"] # "punteggiatura - .?!"
+        self.ignorepos = ["punteggiatura - .?!", "altro"]
         self.separator = "\t"
         self.language = "it-IT"
         self.filtrimultiplienabled = 10 #"Filtro multiplo"
@@ -103,7 +104,7 @@ class BranCorpus(QObject):
         self.sessionFile = ""
         self.sessionDir = "."
         self.mycfgfile = QDir.homePath() + "/.brancfg"
-        self.mycfg = json.loads('{"javapath": "", "tintpath": "", "tintaddr": "", "tintport": "", "sessions" : []}')
+        self.mycfg = json.loads('{"javapath": "", "tintpath": "", "tintaddr": "", "tintport": "", "udpipe": "", "rscript": "", "sessions" : []}')
         self.loadPersonalCFG()
         #TODO: Should we specify the session in the constructor?
         #self.txtloadingstopped()
@@ -169,15 +170,18 @@ class BranCorpus(QObject):
         #https://www.datacamp.com/community/tutorials/stemming-lemmatization-python
 
     def loadFromUDpipe(self):
-        self.TintAddr = tintaddr
         fileNames = QFileDialog.getOpenFileNames(self.corpuswidget, "Apri file TXT", self.sessionDir, "Text files (*.txt *.md)")[0]
         if len(fileNames)<1:
             return
-        if self.language == "it-IT":
-            self.TCThread = tint.TintCorpus(self.corpuswidget, fileNames, self.corpuscols, self.TintAddr)
-            self.TCThread.outputcsv = self.sessionFile
-            self.TCThread.finished.connect(self.txtloadingstopped)
-            self.TCThread.start()
+        if self.language != "it-IT" and self.language != "en-US":
+            print("Language "+ self.language +" not supported")
+            return
+        udpipe = self.mycfg["udpipe"]
+        model = self.mycfg["udpipemodels"][self.language]
+        self.UDThread = UDCorpus(self.corpuswidget, fileNames, self.corpuscols, udpipe, model, self.language)
+        self.UDThread.outputcsv = self.sessionFile
+        self.UDThread.finished.connect(self.txtloadingstopped)
+        self.UDThread.start()
         #else if self.language == "en-US":
         #https://www.datacamp.com/community/tutorials/stemming-lemmatization-python
 
@@ -259,8 +263,8 @@ class BranCorpus(QObject):
                     if cols[0] == "":
                         continue
                     tmpline = ['' for i in range(len(self.corpuscols))]  #Using list comprehension
-                    tmpline[self.corpuscols["Orig"][0]] = str(cols[0])
-                    tmpline[self.corpuscols["Lemma"][0]] = str(cols[2])
+                    tmpline[self.corpuscols["token"][0]] = str(cols[0])
+                    tmpline[self.corpuscols["lemma"][0]] = str(cols[2])
                     try:
                         tmpline[self.corpuscols["pos"][0]] = legendaTT[str(cols[1])]
                     except:
@@ -421,7 +425,7 @@ class BranCorpus(QObject):
             csv = ""
             if addcomments:
                 try:
-                    csv = "# newdoc id = " + self.corpus[0][self.corpuscols['IDcorpus'][0]]
+                    csv = "# newdoc id = " + self.corpus[0][self.corpuscols['TAGcorpus'][0]]
                 except:
                     csv = "# newdoc id = Corpus esportato da Bran"
                 csv = csv + "\n# newpar"
@@ -441,11 +445,11 @@ class BranCorpus(QObject):
                     return
                 Ucolumns = []
                 Ucolumns.append(self.corpus[row][self.corpuscols['IDword'][0]])
-                Ucolumns.append(self.corpus[row][self.corpuscols['Orig'][0]])
-                if "[PUNCT]" in self.corpus[row][self.corpuscols['Lemma'][0]]:
-                    Ucolumns.append(self.corpus[row][self.corpuscols['Orig'][0]])
+                Ucolumns.append(self.corpus[row][self.corpuscols['token'][0]])
+                if "[PUNCT]" in self.corpus[row][self.corpuscols['lemma'][0]]:
+                    Ucolumns.append(self.corpus[row][self.corpuscols['token'][0]])
                 else:
-                    Ucolumns.append(self.corpus[row][self.corpuscols['Lemma'][0]])
+                    Ucolumns.append(self.corpus[row][self.corpuscols['lemma'][0]])
                 mypos = self.corpus[row][self.corpuscols['pos'][0]]
                 myposU = legendaISDTUD["pos"][mypos][0]
                 Ucolumns.append(myposU)
@@ -502,7 +506,7 @@ class BranCorpus(QObject):
                     while self.corpus[row][self.corpuscols['IDphrase'][0]] == self.corpus[endrow][self.corpuscols['IDphrase'][0]] and endrow<(len(self.corpus)-1):
                         endrow = endrow +1
                     myignore = []
-                    phraseText = self.rebuildText(self.corpus, self.Progrdialog, self.corpuscols['Orig'][0], myignore, row, endrow)
+                    phraseText = self.rebuildText(self.corpus, self.Progrdialog, self.corpuscols['token'][0], myignore, row, endrow)
                     phraseText = self.remUselessSpaces(phraseText)
                     if phraseText[-1] == " ":
                         phraseText = phraseText[:-1]
@@ -516,6 +520,33 @@ class BranCorpus(QObject):
                 with open(fileName, "a", encoding='utf-8') as myfile:
                     myfile.write(csv+"\n")
             Progrdialog.accept()
+
+    def convertiDaTint(self):
+        fileName = QFileDialog.getOpenFileName(self.corpuswidget, "Salva file CSV", self.sessionDir, "Text files (*.tsv *.csv *.txt)")[0]
+        if not fileName == "":
+            newName = fileName
+            fileName = fileName.replace(".tsv","")+"-old.tsv"
+            os.rename(newName,fileName)
+            TestThread = tint.TintCorpus(self.corpuswidget, [], self.corpuscols, "localhost")
+            if os.path.isfile(fileName):
+                if not os.path.getsize(fileName) > 0:
+                    return
+                try:
+                    totallines = self.linescount(fileName)
+                    print(totallines)
+                except Exception as ex:
+                    print(ex)
+                    return
+                text_file = open(fileName, "r", encoding='utf-8')
+                lines = text_file.read()
+                text_file.close()
+                linesA = lines.split('\n')
+                for line in linesA:
+                    if line == "":
+                        continue
+                    fullline = TestThread.isdt_to_ud(line)
+                    with open(newName, "a", encoding='utf-8') as myfile:
+                        myfile.write(fullline+"\n")
 
     def esportavistaCSV(self):
         fileName = QFileDialog.getSaveFileName(self.corpuswidget, "Salva file CSV", self.sessionDir, "Text files (*.tsv *.csv *.txt)")[0]
@@ -533,6 +564,25 @@ class BranCorpus(QObject):
                 toselect.append(row)
         self.CSVsaver(fileName, self.Progrdialog, True, toselect)
 
+    def esportafiltroCSV(self):
+        fileName = QFileDialog.getSaveFileName(self.corpuswidget, "Salva file CSV", self.sessionDir, "Text files (*.tsv *.csv *.txt)")[0]
+        self.Progrdialog = progress.Form()
+        self.Progrdialog.show()
+        toselect = []
+        totallines = len(self.corpus)
+        startline = 0
+        for row in range(startline, totallines):
+            self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
+            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            QApplication.processEvents()
+            if self.Progrdialog.w.annulla.isChecked():
+                return
+            if not self.applicaFiltro(row, self.filtrimultiplienabled, self.filter):
+                continue
+            toselect.append(row)
+        self.Progrdialog.accept()
+        self.CSVsaver(fileName, self.Progrdialog, True, toselect)
+
     def esportaCSVperID(self):
         fileName = QFileDialog.getSaveFileName(self.corpuswidget, "Salva file CSV", self.sessionDir, "Text files (*.tsv *.csv *.txt)")[0]
         self.Progrdialog = progress.Form()
@@ -540,7 +590,7 @@ class BranCorpus(QObject):
         totallines = len(self.corpus)
         startline = 0
         IDs = []
-        col = self.corpuscols['IDcorpus'][0]
+        col = self.corpuscols['TAGcorpus'][0]
         for row in range(startline, totallines):
             self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
             self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
@@ -777,9 +827,50 @@ class BranCorpus(QObject):
         self.Progrdialog.accept()
         TBdialog.exec()
 
+    def orderVerbMorf(self, text, ignoreperson = False):
+        if not "VerbForm" in text:
+            return text
+        mytext = ""
+        #Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin
+        vform = ""
+        mood = ""
+        tense = ""
+        pers = ""
+        num = ""
+        gender = ""
+        for el in text.split("|"):
+            if "VerbForm" in el:
+                vform = re.sub(".*VerbForm\=(.*)","\g<1>",el)
+            if "Mood" in el:
+                mood = re.sub(".*Mood\=(.*)","\g<1>",el)
+            if "Tense" in el:
+                tense = re.sub(".*Tense\=(.*)","\g<1>",el)
+            if "Person" in el:
+                pers = re.sub(".*Person\=(.*)","\g<1>",el)
+            if "Number" in el:
+                num = re.sub(".*Number\=(.*)","\g<1>",el)
+            if "Gender" in el:
+                gender = re.sub(".*Gender\=(.*)","\g<1>",el)
+        mytext = "VerbForm=" + vform
+        if mood != "":
+            mytext = mytext + "|Mood=" + mood
+        if tense != "":
+            mytext = mytext + "|Tense=" + tense
+        if pers != "" and ignoreperson==False:
+            mytext = mytext + "|Person=" + pers
+        if num != "" and ignoreperson==False:
+            mytext = mytext + "|Number=" + num
+        if gender != "" and ignoreperson==False:
+            mytext = mytext + "|Gender=" + gender
+        return mytext
+
     def contaverbi(self):
         poscol = self.corpuscols["pos"][0] #thisname.index(column[0])
         morfcol = self.corpuscols["feat"][0]
+        ignoreperson = False
+        ret = QMessageBox.question(self.corpuswidget,'Domanda', "Vuoi ignorare persona, numero, e genere dei verbi?", QMessageBox.Yes | QMessageBox.No)
+        if ret == QMessageBox.Yes:
+            ignoreperson = True
         TBdialog = tableeditor.Form(self.corpuswidget)
         TBdialog.sessionDir = self.sessionDir
         TBdialog.addcolumn("Modo+Tempo", 0)
@@ -801,17 +892,18 @@ class BranCorpus(QObject):
             if self.Progrdialog.w.annulla.isChecked():
                 return
             try:
-                thispos = self.legendaPos[self.corpus[row][self.corpuscols['pos'][0]]][0]
+                thispos = self.legendaPos[self.corpus[row][poscol]][0]
             except:
                 thispos = ""
             thistext = ""
             thistext2 = ""
             if thispos.split(" ")[0] == "verbo":
                 thistext = self.corpus[row][morfcol]
+                thistext = self.orderVerbMorf(thistext, ignoreperson)
             if "ausiliare" in thispos:
                 for ind in range(1,4):
                     try:
-                        tmpos = self.legendaPos[self.corpus[row+ind][self.corpuscols['pos'][0]]][0]
+                        tmpos = self.legendaPos[self.corpus[row+ind][poscol]][0]
                     except:
                         tmpos = ""
                     if "verbo" in tmpos:
@@ -820,35 +912,39 @@ class BranCorpus(QObject):
             elif thispos.split(" ")[0] == "verbo":
                 for ind in range(1,4):
                     try:
-                        tmpos = self.legendaPos[self.corpus[row-ind][self.corpuscols['pos'][0]]][0]
+                        tmpos = self.legendaPos[self.corpus[row-ind][poscol]][0]
                     except:
                         tmpos = ""
-                    if "ausiliare" in tmpos and "v+part+pass" in thistext:
+                    if "ausiliare" in tmpos and "VerbForm=Part" in thistext and "Tense=Past" in thistext:
                         thistext2 = thistext2 + "/" + self.corpus[row-ind][morfcol]
                     if "verbo" in tmpos and not "ausiliare" in tmpos:
                         break
             if len(thistext2)>0:
                 if thistext2[0]=="/":
                     thistext2=thistext2[1:]
-            if bool(re.match('^v\+.*?$', thistext))==False:
+            if bool(re.match('.*?VerbForm\=.*?$', thistext))==False:
                 thistext = ""
-            if bool(re.match('^v\+.*?$', thistext2))==False:
+            if bool(re.match('.*?VerbForm\=.*?$', thistext2))==False:
                 thistext2 = ""
-            if len(thistext.split("+")) >= 3:
-                tmptext = thistext.split("+")[0] + "+" +thistext.split("+")[1] + "+" +thistext.split("+")[2]
-                thistext = tmptext
+            #if len(thistext.split("|")) >= 3:
+            #    tmptext = thistext.split("|")[0] + "|" +thistext.split("|")[1] + "|" +thistext.split("|")[2]
+            #    thistext = tmptext
             thistext3 = ""
             if len(thistext2.split("/"))>1:
                 thistext3 = thistext2.split("/")[1]
                 thistext2 = thistext2.split("/")[0]
-            if bool(re.match('^v\+.*?$', thistext3))==False:
+            if bool(re.match('^VerbForm\=.*?$', thistext3))==False:
                 thistext3 = ""
-            if len(thistext2.split("+")) >= 3:
-                tmptext = thistext2.split("+")[0] + "+" +thistext2.split("+")[1] + "+" +thistext2.split("+")[2]
-                thistext2 = tmptext + "/"
-            if len(thistext3.split("+")) >= 3:
-                tmptext = thistext3.split("+")[0] + "+" +thistext3.split("+")[1] + "+" +thistext3.split("+")[2]
-                thistext3 = tmptext + "/"
+            #if len(thistext2.split("|")) >= 3:
+                #tmptext = thistext2.split("|")[0] + "+" +thistext2.split("|")[1] + "+" +thistext2.split("|")[2]
+                #thistext2 = tmptext + "/"
+            if len(thistext2) >= 3:
+                thistext2 = self.orderVerbMorf(thistext2, ignoreperson) + "+"
+            #if len(thistext3.split("|")) >= 3:
+                #tmptext = thistext3.split("|")[0] + "+" +thistext3.split("|")[1] + "+" +thistext3.split("|")[2]
+                #thistext3 = tmptext + "/"
+            if len(thistext3) >= 3:
+                thistext3 = self.orderVerbMorf(thistext3, ignoreperson) + "+"
             if thistext != "":
                 thistext = thistext3 + thistext2 + thistext
             if thistext != "":
@@ -880,7 +976,7 @@ class BranCorpus(QObject):
         Repetdialog.loadipos(self.ignorepos)
         Repetdialog.loadallpos(self.legendaPos)
         self.enumeratecolumns(Repetdialog.w.colonna)
-        Repetdialog.w.colonna.setCurrentIndex(self.corpuscols['Orig'][0])
+        Repetdialog.w.colonna.setCurrentIndex(self.corpuscols['token'][0])
         Repetdialog.exec()
         if Repetdialog.result():
             tokenda = Repetdialog.w.tokenda.value()
@@ -973,7 +1069,7 @@ class BranCorpus(QObject):
     def rebuildText(self, table, Progrdialog, col = "", ipunct = [], startrow = 0, endrow = 0, filtercol = None):
         mycorpus = ""
         if col == "":
-            col = self.corpuscols['Orig'][0]
+            col = self.corpuscols['token'][0]
         totallines = len(table)
         if endrow == 0:
             endrow = totallines
@@ -1393,7 +1489,7 @@ class BranCorpus(QObject):
                 myflags=re.DOTALL
         else:
             return
-        col = self.corpuscols['IDcorpus'][0]
+        col = self.corpuscols['TAGcorpus'][0]
         self.Progrdialog = progress.Form()
         self.Progrdialog.show()
         totallines = len(self.corpus)
@@ -1436,7 +1532,7 @@ class BranCorpus(QObject):
         fcol = self.filtrimultiplienabled
         Fildialog = creafiltro.Form(self.corpus, self.corpuscols, self.corpuswidget)
         Fildialog.sessionDir = self.sessionDir
-        Fildialog.w.filter.setText(myfilter) #"Lemma=essere&&pos[1,-1]=SP||Lemma[-1]=essere&&pos=S"
+        Fildialog.w.filter.setText(myfilter) #"lemma=essere&&pos[1,-1]=SP||lemma[-1]=essere&&pos=S"
         Fildialog.updateTable()
         Fildialog.exec()
         if Fildialog.w.filter.text() != "":
@@ -1487,7 +1583,7 @@ class BranCorpus(QObject):
         fcol = self.filtrimultiplienabled
         Fildialog = creafiltro.Form(self.corpus, self.corpuscols, self.corpuswidget)
         Fildialog.sessionDir = self.sessionDir
-        Fildialog.w.filter.setText(myfilter) #"Lemma=essere&&pos[1,-1]=SP||Lemma[-1]=essere&&pos=S"
+        Fildialog.w.filter.setText(myfilter) #"lemma=essere&&pos[1,-1]=SP||lemma[-1]=essere&&pos=S"
         Fildialog.updateTable()
         Fildialog.exec()
         if Fildialog.w.filter.text() != "":
@@ -1630,7 +1726,7 @@ class BranCorpus(QObject):
                 if colN == 0:
                     if line[colN] == "":
                         break
-                    TBrow = self.addlinetocorpus(str(line[colN]), 0) #self.corpuscols["IDcorpus"][0]
+                    TBrow = self.addlinetocorpus(str(line[colN]), 0) #self.corpuscols["TAGcorpus"][0]
                 self.setcelltocorpus(str(line[colN]), TBrow, colN)
 
     def visualizzafrasi(self):
@@ -1749,7 +1845,7 @@ class BranCorpus(QObject):
         thisname = []
         for col in self.corpuscols:
             thisname.append(self.corpuscols[col][1])
-        column = QInputDialog.getItem(self.corpuswidget, "Scegli la colonna", "Se vuoi estrarre il dizionario devi cercare nella colonna dei lemmi. Ma puoi anche scegliere di ottenere le statistiche su altre colonne, come la Forma grafica.",thisname,current=self.corpuscols['Orig'][0],editable=False)
+        column = QInputDialog.getItem(self.corpuswidget, "Scegli la colonna", "Se vuoi estrarre il dizionario devi cercare nella colonna dei lemmi. Ma puoi anche scegliere di ottenere le statistiche su altre colonne, come la Forma grafica.",thisname,current=self.corpuscols['token'][0],editable=False)
         col = thisname.index(column[0])
         ret = QMessageBox.question(self.corpuswidget,'Domanda', "Vuoi ignorare la punteggiatura?", QMessageBox.Yes | QMessageBox.No)
         TBdialog = tableeditor.Form(self.corpuswidget)
@@ -1882,3 +1978,304 @@ class BranCorpus(QObject):
         #mostro i risultati
         self.Progrdialog.accept()
         TBdialog.exec()
+
+#
+class UDCorpus(QThread):
+    dataReceived = Signal(bool)
+    updated = Signal(int)
+
+    def __init__(self, widget, fnames, corpcol, udpipe, udpipemodel, lang):
+        QThread.__init__(self)
+        self.corpuswidget = widget
+        self.fileNames = fnames
+        self.corpuscols = corpcol
+        self.udpipe = udpipe
+        self.udpipemodel = udpipemodel
+        self.language = lang
+        self.outputcsv = ""
+        self.csvIDcolumn = -1
+        self.csvTextcolumn = -1
+        self.loadvariables()
+        self.setTerminationEnabled(True)
+        self.iscli = False
+        try:
+            if self.corpuswidget == "cli":
+                self.iscli = True
+        except:
+            self.iscli = False
+        self.alwaysyes = False
+        self.rowfilename = ""
+
+    def loadvariables(self):
+        self.useragent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
+
+    def __del__(self):
+        print("Shutting down thread")
+
+    def run(self):
+        self.loadtxt()
+        return
+
+    def loadtxt(self):
+        fileID = 0
+        self.Progrdialog = progress.Form()
+        if not self.iscli:
+            self.updated.connect(self.Progrdialog.setValue)
+            self.Progrdialog.show()
+        for fileName in self.fileNames:
+            if not fileName == "":
+                if os.path.isfile(fileName):
+                    try:
+                        if self.corpuswidget.rowCount() >0:
+                            fileID = int(self.corpuswidget.item(self.corpuswidget.rowCount()-1,0).text().split("_")[0])
+                    except:
+                        fileID = 0
+                    #QApplication.processEvents()
+                    fileID = fileID+1
+                    lines = ""
+                    try:
+                        text_file = open(fileName, "r", encoding='utf-8')
+                        lines = text_file.read()
+                        text_file.close()
+                    except:
+                        myencoding = "ISO-8859-15"
+                        #https://pypi.org/project/chardet/
+                        gotEncoding = False
+                        while gotEncoding == False:
+                            try:
+                                myencoding = QInputDialog.getText(self.corpuswidget, "Scegli la codifica", "Sembra che questo file non sia codificato in UTF-8. Vuoi provare a specificare una codifica diversa? (Es: cp1252 oppure ISO-8859-15)", QLineEdit.Normal, myencoding)
+                            except:
+                                print("Sembra che questo file non sia codificato in UTF-8. Vuoi provare a specificare una codifica diversa? (Es: cp1252 oppure ISO-8859-15)")
+                                myencoding = [input()]
+                            try:
+                                text_file = open(fileName, "r", encoding=myencoding[0])
+                                lines = text_file.read()
+                                text_file.close()
+                                gotEncoding = True
+                            except:
+                                gotEncoding = False
+                    self.rowfilename = fileName + ".tmp"
+                    if self.iscli:
+                        self.outputcsv = fileName + ".tsv"
+                    print(fileName + " -> " + self.outputcsv)
+                    if self.csvIDcolumn <0 or self.csvTextcolumn <0:
+                        try:
+                            corpusID = str(fileID)+"_"+os.path.basename(fileName)+",lang:"+self.language+",tagger:udpipe"
+                            corpusID = QInputDialog.getText(self.corpuswidget, "Scegli il tag", "Indica il tag di questo file nel corpus:", QLineEdit.Normal, corpusID)[0]
+                        except:
+                            corpusID = str(fileID)+"_"+os.path.basename(fileName)+",lang:"+self.language+",tagger:udpipe"
+                        self.text2corpusUD(lines, corpusID)
+                    else:
+                        try:
+                            sep = QInputDialog.getText(self.corpuswidget, "Scegli il separatore", "Indica il carattere che separa le colonne (\\t è la tabulazione):", QLineEdit.Normal, "\\t")[0]
+                            if sep == "\\t":
+                                sep = "\t"
+                            textID = QInputDialog.getInt(self.corpuswidget, "Scegli il testo", "Indica la colonna della tabella che contiene il testo di questo sottocorpus:")[0]
+                            corpusIDtext = QInputDialog.getText(self.corpuswidget, "Scegli il tag", "Indica il tag di questo file nel corpus. Puoi usare [filename] per indicare il nome del file e [numeroColonna] per indicare la colonna da cui estrarre un tag.", QLineEdit.Normal, "[filename], [0]"+",tagger:udpipe")[0]
+                            textID = int(textID)
+                            for line in lines.split("\n"):
+                                corpusID = corpusIDtext.replace("[filename]", os.path.basename(fileName))
+                                indexes = [(m.start(0), m.end(0)) for m in re.finditer('\[[0-9]*\]', corpusID)]
+                                for n in range(len(indexes)):
+                                    start = indexes[n][0]
+                                    end = indexes[n][1]
+                                    try:
+                                        strCol = corpusID[start:end]
+                                        intCol = int(corpusID[start+1:end-1])
+                                        corpusID = corpusID.replace(strCol, line.split(sep)[intCol])
+                                    except:
+                                        print("Impossibile trovare la colonna nel CSV")
+                                print(corpusID)
+                                self.text2corpusUD(line.split(sep)[textID], corpusID)
+                        except:
+                            try:
+                                textID = int(self.csvTextcolumn)
+                                colID = int(self.csvIDcolumn)
+                                if textID != colID:
+                                    for line in lines.split("\n"):
+                                        corpusID = line.split("\t")[colID]+",lang:"+self.language+",tagger:udpipe"
+                                        self.text2corpusUD(line.split("\t")[textID], corpusID)
+                            except:
+                                continue
+        if self.fileNames == []:
+            testline = "Il gatto è sopra al tetto."
+            myres = self.getUDTable(testline)
+            try:
+                self.dataReceived.emit(True)
+            except:
+                self.dataReceived.emit(False)
+        self.Progrdialog.accept()
+
+
+    def addlinetocorpus(self, text, column):
+        row = self.corpuswidget.rowCount()
+        self.corpuswidget.insertRow(row)
+        titem = QTableWidgetItem()
+        titem.setText(text)
+        self.corpuswidget.setItem(row, column, titem)
+        self.corpuswidget.setCurrentCell(row, column)
+        return row
+
+    def setcelltocorpus(self, text, row, column):
+        titem = QTableWidgetItem()
+        titem.setText(text)
+        self.corpuswidget.setItem(row, column, titem)
+        #self.corpuswidget.setCurrentCell(row, column)
+
+    def text2corpusUD(self, text, TAGcorpus):
+        itext = text.replace('.','. \n')
+        itext = itext.replace('?','? \n')
+        #merge phrases in paragraphs to optimize loading time for udpipe
+        print("Lines before optimization: " + str(len(itext.split('\n'))))
+        frasiInParagrafo = 50
+        count = 0
+        itext = itext.split('\n')
+        ntext = []
+        temp = ""
+        for f in range(len(itext)):
+            if count != frasiInParagrafo and f<(len(itext)-1):
+                temp = temp + " " + itext[f]
+                count = count + 1
+            else:
+                ntext.append(temp)
+                count = 0
+                temp = ""
+        itext = ntext
+        del ntext
+        totallines = len(itext)
+        print("Total lines: "+str(totallines))
+        self.Progrdialog.setBasetext("Sto lavorando sul paragrafo numero ")
+        self.Progrdialog.setTotal(totallines)
+        startatrow = -1
+        try:
+            if os.path.isfile(self.rowfilename):
+                ch = "Y"
+                if self.iscli:
+                    if self.alwaysyes:
+                        ch = "y"
+                    else:
+                        print("Ho trovato un file di ripristino, lo devo usare? [Y/N]")
+                        ch = input()
+                    if ch == "Y" or ch == "y":
+                        with open(self.rowfilename, "r", encoding='utf-8') as tempfile:
+                           lastline = (list(tempfile)[-1])
+                        startatrow = int(lastline)
+                        print("Comincio dalla riga " + str(startatrow))
+        except:
+            startatrow = -1
+        #
+        try:
+            IDphrase = -1
+            if self.outputcsv == "":
+                for crow in range(self.corpuswidget.rowCount()):
+                    if int(self.corpuswidget.item(crow, self.corpuscols["IDphrase"][0]).text()) > IDphrase:
+                        IDphrase = int(self.corpuswidget.item(crow, self.corpuscols["IDphrase"][0]).text())
+            else:
+                with open(self.rowfilename, "r", encoding='utf-8') as ins:
+                    for line in ins:
+                        if int(line.split("\t")[self.corpuscols["IDphrase"][0]]) > IDphrase:
+                            IDphrase = int(line.split("\t")[self.corpuscols["IDphrase"][0]])
+        except:
+            IDphrase = -1
+        row = 0
+        dct = {"ID" : 0, "FORM" : 1, "LEMMA" : 2, "UPOS" : 3, "XPOS" : 4, "FEATS" : 5 , "HEAD": 6, "DEPREL": 7, "DEPS": 8, "MISC": 9}
+        for line in itext:
+            row = row + 1
+            if row > startatrow:
+                #self.Progrdialog.w.testo.setText("Sto lavorando sulla frase numero "+str(row))
+                #self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+                self.updated.emit(row)
+                if not self.iscli and row % 20 == 0:
+                    QApplication.processEvents()
+                if self.Progrdialog.w.annulla.isChecked():
+                    return
+                myres = []
+                if line != "":
+                    myres = self.getUDTable(line)
+                for sentence in myres:
+                    IDphrase = IDphrase +1
+                    skipT = -1
+                    for t in range(len(sentence)):
+                        token = sentence[t]
+                        fullline = ""
+                        if "-" in str(token[dct["ID"]]):
+                            fullline = str(TAGcorpus) + "\t"
+                            fullline = fullline + str(sentence[t][dct["FORM"]]) + "\t"
+                            lemma = ""
+                            for el in range(len(str(token[dct["ID"]]).split("-"))):
+                                templemma = str(sentence[t+el+1][dct["LEMMA"]])
+                                if len(templemma)>len(lemma):
+                                    lemma = templemma
+                            fullline = fullline + lemma + "\t"
+                            pos = ""
+                            for el in range(len(str(token[dct["ID"]]).split("-"))):
+                                if el > 0:
+                                    pos = pos + "+"
+                                pos = pos + str(sentence[t+el+1][dct["UPOS"]])
+                            fullline = fullline + pos + "\t"
+                            ner = "_"
+                            fullline = fullline + str(ner) + "\t"
+                            morf = ""
+                            for el in range(len(str(token[dct["ID"]]).split("-"))):
+                                if el > 0:
+                                    morf = morf + "/"
+                                morf = morf + str(sentence[t+el+1][dct["FEATS"]])
+                            fullline = fullline + str(morf) + "\t"
+                            fullline = fullline + str(str(sentence[t][dct["ID"]]).split("-")[0]) + "\t"
+                            fullline = fullline + str(IDphrase)
+                            #for el in range(len(str(token[dct["ID"]]).split("-"))):
+                            fullline = fullline + "\t" + str(sentence[t+1][dct["DEPREL"]]) + "\t"
+                            governor = str(sentence[t+1][dct["HEAD"]])
+                            for el in range(len(str(token[dct["ID"]]).split("-"))):
+                                tmpgov = str(sentence[t+el+1][dct["HEAD"]])
+                                if not tmpgov in str(token[dct["ID"]]).split("-"):
+                                    governor = tmpgov
+                            fullline = fullline + governor
+                            skipT = t + len(str(token[dct["ID"]]).split("-"))
+                        elif t > skipT:
+                            fullline = str(TAGcorpus) + "\t"
+                            fullline = fullline + str(token[dct["FORM"]]) + "\t"
+                            fullline = fullline + str(token[dct["LEMMA"]]) + "\t"
+                            fullline = fullline + str(token[dct["UPOS"]]) + "\t"
+                            ner = "O"
+                            fullline = fullline + str(ner) + "\t"
+                            morf = str(token[dct["FEATS"]])
+                            fullline = fullline + str(morf) + "\t"
+                            fullline = fullline + str(token[dct["ID"]]) + "\t"
+                            fullline = fullline + str(IDphrase)
+                            fullline = fullline + "\t" + str(token[dct["DEPREL"]]) + "\t"
+                            fullline = fullline + str(token[dct["HEAD"]])
+                        if fullline != "":
+                            fdatefile = self.outputcsv
+                            with open(fdatefile, "a", encoding='utf-8') as myfile:
+                                myfile.write(fullline+"\n")
+                if self.iscli:
+                    with open(self.rowfilename, "a", encoding='utf-8') as rowfile:
+                        rowfile.write(str(row)+"\n")
+        if self.iscli:
+            print("Done")
+
+    def getUDTable(self, text):
+        process = subprocess.Popen([self.udpipe, "--tokenize", "--tag", "--parse", self.udpipemodel], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        testobyte = text.encode(encoding='utf-8')
+        outputbyte = process.communicate(testobyte)[0]
+        process.stdin.close()
+        stroutput = outputbyte.decode(encoding='utf-8')
+        #print(stroutput)
+        mytable = stroutput.split("\n")
+        myres = []
+        sentence = []
+        sentid = 0
+        for row in range(len(mytable)):
+            if row == (len(mytable)-1) or bool("sent_id" in mytable[row] and row > 5):
+                try:
+                    newsentid = int(mytable[row].replace("# sent_id = ", ""))
+                except:
+                    newsentid = sentid +1
+                myres.append(sentence)
+                sentence = []
+                sentid = newsentid
+            if len(mytable[row].split("\t")) > 8:
+                sentence.append(mytable[row].split("\t"))
+        #print(myres)
+        return myres

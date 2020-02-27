@@ -127,6 +127,7 @@ class TintCorpus(QThread):
         self.corpuscols = corpcol
         self.Tintaddr = myTintAddr
         self.outputcsv = ""
+        self.language = "it-IT"
         self.csvIDcolumn = -1
         self.csvTextcolumn = -1
         self.loadvariables()
@@ -196,10 +197,10 @@ class TintCorpus(QThread):
                     print(fileName + " -> " + self.outputcsv)
                     if self.csvIDcolumn <0 or self.csvTextcolumn <0:
                         try:
-                            corpusID = str(fileID)+"_"+os.path.basename(fileName)
+                            corpusID = str(fileID)+"_"+os.path.basename(fileName)+",lang:"+self.language+",tagger:tint"
                             corpusID = QInputDialog.getText(self.corpuswidget, "Scegli il tag", "Indica il tag di questo file nel corpus:", QLineEdit.Normal, corpusID)[0]
                         except:
-                            corpusID = str(fileID)+"_"+os.path.basename(fileName)
+                            corpusID = str(fileID)+"_"+os.path.basename(fileName)+",lang:"+self.language+",tagger:tint"
                         self.text2corpusTINT(lines, corpusID)
                     else:
                         try:
@@ -207,7 +208,7 @@ class TintCorpus(QThread):
                             if sep == "\\t":
                                 sep = "\t"
                             textID = QInputDialog.getInt(self.corpuswidget, "Scegli il testo", "Indica la colonna della tabella che contiene il testo di questo sottocorpus:")[0]
-                            corpusIDtext = QInputDialog.getText(self.corpuswidget, "Scegli il tag", "Indica il tag di questo file nel corpus. Puoi usare [filename] per indicare il nome del file e [numeroColonna] per indicare la colonna da cui estrarre un tag.", QLineEdit.Normal, "[filename], [0]")[0]
+                            corpusIDtext = QInputDialog.getText(self.corpuswidget, "Scegli il tag", "Indica il tag di questo file nel corpus. Puoi usare [filename] per indicare il nome del file e [numeroColonna] per indicare la colonna da cui estrarre un tag.", QLineEdit.Normal, "[filename], [0]"+",tagger:tint")[0]
                             textID = int(textID)
                             for line in lines.split("\n"):
                                 corpusID = corpusIDtext.replace("[filename]", os.path.basename(fileName))
@@ -218,7 +219,7 @@ class TintCorpus(QThread):
                                     try:
                                         strCol = corpusID[start:end]
                                         intCol = int(corpusID[start+1:end-1])
-                                        corpusID = corpusID.replace(strCol, line.split(sep)[intCol])
+                                        corpusID = corpusID.replace(strCol, line.split(sep)[intCol])+",lang:"+self.language+",tagger:tint"
                                     except:
                                         print("Impossibile trovare la colonna nel CSV")
                                 print(corpusID)
@@ -229,7 +230,7 @@ class TintCorpus(QThread):
                                 colID = int(self.csvIDcolumn)
                                 if textID != colID:
                                     for line in lines.split("\n"):
-                                        corpusID = line.split("\t")[colID]
+                                        corpusID = line.split("\t")[colID]+",lang:"+self.language+",tagger:tint"
                                         self.text2corpusTINT(line.split("\t")[textID], corpusID)
                             except:
                                 continue
@@ -259,7 +260,7 @@ class TintCorpus(QThread):
         self.corpuswidget.setItem(row, column, titem)
         #self.corpuswidget.setCurrentCell(row, column)
 
-    def text2corpusTINT(self, text, IDcorpus):
+    def text2corpusTINT(self, text, TAGcorpus):
         #process
         itext = text.replace('.','.\n')
         itext = itext.replace('?','?\n')
@@ -387,7 +388,7 @@ class TintCorpus(QThread):
                             print("You don't have a session. Tint is not going to run.")
                             return
                         else:
-                            fullline = str(IDcorpus) + "\t"
+                            fullline = str(TAGcorpus) + "\t"
                             fullline = fullline + str(token["originalText"]) + "\t"
                             fullline = fullline + str(token["lemma"]) + "\t"
                             fullline = fullline + str(token["pos"]) + "\t"
@@ -401,6 +402,7 @@ class TintCorpus(QThread):
                                     fullline = fullline + str(mydep["governor"])
                                     break
                             fdatefile = self.outputcsv
+                            fullline = self.isdt_to_ud(fullline)
                             with open(fdatefile, "a", encoding='utf-8') as myfile:
                                 myfile.write(fullline+"\n")
                 if self.iscli:
@@ -444,6 +446,93 @@ class TintCorpus(QThread):
             thishtml = str(ft)
         return thishtml
 
+    #
+    def isdt_to_ud(self, fullline):
+        filein = os.path.abspath(os.path.dirname(sys.argv[0]))+"/dizionario/legenda/isdt-ud.json"
+        text_file = open(filein, "r")
+        myjson = text_file.read().replace("\n", "").replace("\r", "").split("####")[0]
+        text_file.close()
+        legendaISDTUD = json.loads(myjson)
+        thisline = fullline.split("\t")
+        Ucolumns = []
+        for key in self.corpuscols:
+            #TAGcorpus
+            if key == "TAGcorpus":
+                tags = thisline[self.corpuscols[key][0]]
+                if not "lang:" in tags:
+                    tags = tags+",lang:"+self.language
+                if not "tagger:tint" in tags:
+                    tags = tags+",tagger:tint"
+                Ucolumns.append(tags)
+            if key == "IDword":
+                Ucolumns.append(thisline[self.corpuscols['IDword'][0]])
+            if key == "IDphrase":
+                Ucolumns.append(thisline[self.corpuscols['IDphrase'][0]])
+            if key == "token":
+                Ucolumns.append(thisline[self.corpuscols['token'][0]])
+            if key == "lemma":
+                if "[PUNCT]" in thisline[self.corpuscols['lemma'][0]]:
+                    Ucolumns.append(thisline[self.corpuscols['token'][0]])
+                else:
+                    Ucolumns.append(thisline[self.corpuscols['lemma'][0]])
+            if key == "pos":
+                mypos = thisline[self.corpuscols['pos'][0]]
+                myposU = legendaISDTUD["pos"][mypos][0]
+                Ucolumns.append(myposU)
+            if key == "feat":
+                myfeat = thisline[self.corpuscols['feat'][0]]
+                myfeatU = ""
+                for featpart in myfeat.split("/"):
+                    tmpfeat = ""
+                    for featel in featpart.split("+"):
+                        try:
+                            translated = legendaISDTUD["feat"][featel]
+                        except:
+                            #print("IGNORED: "+featel)
+                            translated = ""
+                        for trelem in translated.split("|"):
+                            if not trelem in tmpfeat:
+                                tmpfeat = tmpfeat + "|" + trelem
+                    myfeatU = myfeatU + tmpfeat + "/"
+                #add from pos
+                myfeatU = re.sub("^\|*", "", myfeatU, flags=re.IGNORECASE|re.DOTALL)
+                myfeatU = re.sub("[^a-z]*$", "", myfeatU, flags=re.IGNORECASE|re.DOTALL)
+                tmpmorf = legendaISDTUD["pos"][mypos][1].split("/")
+                myfeatUtotal = ""
+                for tmppart in range(len(myfeatU.split("/"))):
+                    myfeatUtotal = myfeatUtotal + myfeatU.split("/")[tmppart]
+                    try:
+                        for tmpelem in tmpmorf[tmppart].split("|"):
+                            if not tmpelem in myfeatU.split("/")[tmppart]:
+                                myfeatUtotal = myfeatUtotal + "|" + tmpelem
+                    except:
+                        continue
+                    myfeatUtotal = myfeatUtotal + "/"
+                myfeatU = myfeatUtotal
+                #clean double chars
+                while "||" in myfeatU or "/|" in myfeatU:
+                    myfeatU = myfeatU.replace("||","|")
+                    myfeatU = myfeatU.replace("/|","/")
+                myfeatU = re.sub("^[\|]*", "", myfeatU, flags=re.IGNORECASE|re.DOTALL)
+                myfeatU = re.sub("[^a-z]*$", "", myfeatU, flags=re.IGNORECASE|re.DOTALL)
+                if myfeatU == "":
+                    myfeatU = "_"
+                Ucolumns.append(myfeatU)
+            if key == "governor":
+                Ucolumns.append(thisline[self.corpuscols['governor'][0]])
+            if key == "dep":
+                Ucolumns.append(thisline[self.corpuscols['dep'][0]])
+            if key == "ner":
+                Ucolumns.append(thisline[self.corpuscols['ner'][0]])
+        #print(Ucolumns)
+        csv = ""
+        for col in range(len(Ucolumns)):
+            if Ucolumns[col] == "":
+                Ucolumns[col] = "_"
+            if col > 0:
+                csv = csv + "\t"
+            csv = csv + Ucolumns[col]
+        return csv
 
 
 class Form(QDialog):

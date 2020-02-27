@@ -1,0 +1,24 @@
+{
+ "ADJ": ["aggettivo", "aggettivi", "piene"],
+ "DET": ["det. coll.)", "aggettivi", "piene"],
+ "ADV": ["avv, negazione", "avverbi", "piene"],
+ "ADV+PRON": ["avverbio+pron. clit. ", "avverbi", "piene"],
+ "CCONJ": ["cong. coord", "congiunzioni", "vuote"],
+ "SCONJ": ["cong. sub.", "congiunzioni", "vuote"],
+ "ADP": ["preposizione", "preposizioni", "vuote"],
+ "ADP+DET": ["prep. art. ", "preposizioni", "vuote"],
+ "PUNCT": ["punteggiatura - .?!", "punteggiatura", "none"],
+ "INTJ": ["interiezione", "interiezioni", "vuote"],
+ "NUM": ["numero", "altro", "none"],
+ "PRON": ["pron. rel.", "pronomi", "vuote"],
+ "PRON+PRON": ["pron. clitico+clitico", "pronomi", "vuote"],
+ "NOUN": ["sost.", "sostantivi", "piene"],
+ "PROPN": ["nome proprio", "sostantivi", "piene"],
+ "X": ["altro", "altro", "none"],
+ "VERB": ["verbo", "verbi", "piene"],
+ "VERB+PRON": ["verbo + pron. clitico", "verbi", "piene"],
+ "VERB+PRON+PRON": ["verbo + pron. clitico + pron clitico", "verbi", "piene"],
+ "AUX": ["verbo ausiliare", "verbi", "piene"],
+ "AUX+PRON": ["verbo ausiliare + pron. clitico", "verbi", "piene"]
+}
+#### https://universaldependencies.org/u/pos/

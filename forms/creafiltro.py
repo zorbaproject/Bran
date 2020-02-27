@@ -264,7 +264,7 @@ class Form(QDialog):
             thisname = []
             for col in range(self.mycorpus.columnCount()):
                 thisname.append(self.mycorpus.horizontalHeaderItem(col).text())
-            column = QInputDialog.getItem(self, "Scegli la colonna", "In quale colonna del corpus devo cercare i valori del dizionario?",thisname,current=self.corpuscols['Lemma'][0],editable=False)
+            column = QInputDialog.getItem(self, "Scegli la colonna", "In quale colonna del corpus devo cercare i valori del dizionario?",thisname,current=self.corpuscols['lemma'][0],editable=False)
             col = thisname.index(column[0])
             self.filterDizionario(col, fileName, dizcol)
         self.updateFilter()

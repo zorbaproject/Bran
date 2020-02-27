@@ -230,6 +230,7 @@
      <addaction name="actionEsporta_corpus_in_CSV_unico"/>
      <addaction name="actionEsporta_vista_attuale_in_CSV"/>
      <addaction name="actionEsporta_corpus_in_un_CSV_per_ogni_ID"/>
+     <addaction name="actionEsporta_subcorpus_in_base_a_filtro"/>
      <addaction name="actionEsporta_in_formato_CoNNL_U"/>
     </widget>
     <widget class="QMenu" name="menuImposta_lingua">
@@ -271,6 +272,7 @@
     <addaction name="separator"/>
     <addaction name="actionConfigurazione_Tint"/>
     <addaction name="actionConfigurazione_di_Bran"/>
+    <addaction name="actionConverti_vecchio_corpus"/>
    </widget>
    <widget class="QMenu" name="menuAbout">
     <property name="title">
@@ -552,6 +554,16 @@
   <action name="actionConfigurazione_di_Bran">
    <property name="text">
     <string>Configurazione di Bran</string>
+   </property>
+  </action>
+  <action name="actionEsporta_subcorpus_in_base_a_filtro">
+   <property name="text">
+    <string>Esporta subcorpus in base a filtro</string>
+   </property>
+  </action>
+  <action name="actionConverti_vecchio_corpus">
+   <property name="text">
+    <string>Converti vecchio corpus</string>
    </property>
   </action>
  </widget>
