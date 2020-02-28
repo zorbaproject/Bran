@@ -127,7 +127,19 @@ class Form(QDialog):
             self.Corpus.mycfg["rscript"] = ""
             print("Error reading Bran config")
             if platform.system() == "Windows":
-                self.w.rscript.setText("C:\\Program Files\\R\\Rscript.exe")
+                rdir = "C:/Program Files/R/"
+                try:
+                    rfiles = os.listdir(rdir)
+                except:
+                    rfiles = []
+                rs = ""
+                for fil in rfiles:
+                    if "R-" in fil:
+                        rs = fil
+                if rs == "":
+                    self.w.rscript.setText("C:\\Program Files\\R\\Rscript.exe")
+                else:
+                    self.w.rscript.setText(rdir+rs+"/bin/Rscript.exe")
             else:
                 self.w.rscript.setText("/usr/bin/Rscript")
         try:
@@ -195,7 +207,7 @@ class Form(QDialog):
             self.w.tintlib.setText(fileName)
 
     def loadrscript(self):
-        QMessageBox.information(self, "Hai già RScript?", "Se non hai Java puoi scaricarlo da qui per Windows: <a href=\"https://download.java.net/java/GA/jdk10/10.0.1/fb4372174a714e6b8c52526dc134031e/10//openjdk-10.0.1_windows-x64_bin.tar.gz\">https://download.java.net/java/GA/jdk10/10.0.1/fb4372174a714e6b8c52526dc134031e/10//openjdk-10.0.1_windows-x64_bin.tar.gz</a>. Devi solo estrarre il file con 7Zip, non servono privilegi di amministrazione. Poi, indica la posizione del file java.exe (di solito nella cartella bin).")
+        QMessageBox.information(self, "Hai già RScript?", "Se non hai Rscript puoi scaricarlo da qui per Windows: <a href=\"https://cran.r-project.org/bin/windows/base/\">https://cran.r-project.org/bin/windows/base/</a>. Scarica il file di setup e installalo. Poi, indica la posizione del file RScript.exe (di solito nella cartella bin).")
         filter = ""
         if platform.system() == "Windows":
             filter = "RScript (*.exe)"

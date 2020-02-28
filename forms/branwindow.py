@@ -657,7 +657,7 @@ class MainWindow(QMainWindow):
         TBdialog = tableeditor.Form(self.w.corpus)
         TBdialog.sessionDir = self.sessionDir
         TBdialog.w.apricsv.show()
-        TBdialog.exec()
+        TBdialog.show()
 
     def confronto(self):
         cf = confronto.Confronto(self.sessionDir)

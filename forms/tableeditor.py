@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
-from PySide2.QtWidgets import QApplication, QDialog, QLineEdit, QPushButton, QVBoxLayout
+from PySide2.QtWidgets import QApplication, QDialog, QLineEdit, QPushButton, QVBoxLayout, QMainWindow
 from PySide2.QtUiTools import QUiLoader
 from PySide2.QtWidgets import QLabel
 from PySide2.QtWidgets import QFileDialog
@@ -24,16 +24,17 @@ from forms import progress
 from forms import texteditor
 
 
-class Form(QDialog):
+class Form(QMainWindow):
     def __init__(self, parent=None):
         super(Form, self).__init__(parent)
         file = QFile(os.path.abspath(os.path.dirname(sys.argv[0]))+"/forms/tableeditor.ui")
         file.open(QFile.ReadOnly)
         loader = QUiLoader()
         self.w = loader.load(file)
-        layout = QVBoxLayout()
-        layout.addWidget(self.w)
-        self.setLayout(layout)
+        #layout = QVBoxLayout()
+        #layout.addWidget(self.w)
+        #self.setLayout(layout)
+        self.setCentralWidget(self.w)
         self.w.accepted.connect(self.isaccepted)
         self.w.rejected.connect(self.isrejected)
         self.w.apricsv.clicked.connect(self.apriCSV)

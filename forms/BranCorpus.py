@@ -771,7 +771,8 @@ class BranCorpus(QObject):
                 tbrow = TBdialog.w.tableWidget.rowCount()-1
                 TBdialog.setcelltotable("1", tbrow, 1)
         self.Progrdialog.accept()
-        TBdialog.exec()
+        #TBdialog.exec()
+        TBdialog.show()
 
     def contaoccorrenzefiltrate(self):
         thisname = []
@@ -832,7 +833,7 @@ class BranCorpus(QObject):
                         tbrow = TBdialog.w.tableWidget.rowCount()-1
                         TBdialog.setcelltotable("1", tbrow, ifilter+1)
         self.Progrdialog.accept()
-        TBdialog.exec()
+        TBdialog.show()
 
     def orderVerbMorf(self, text, ignoreperson = False):
         if not "VerbForm" in text:
@@ -964,7 +965,7 @@ class BranCorpus(QObject):
             ratios = f'{ratio:.3f}'
             TBdialog.setcelltotable(ratios, row, 2)
         self.Progrdialog.accept()
-        TBdialog.exec()
+        TBdialog.show()
 
     def trovaripetizioni(self):
         Repetdialog = ripetizioni.Form(self.corpuswidget)
@@ -1044,7 +1045,7 @@ class BranCorpus(QObject):
                     tmpstring = self.remUselessSpaces(tmpstring)
                     TBdialog.setcelltotable(tmpstring, row, 0)
             self.Progrdialog.accept()
-            TBdialog.exec()
+            TBdialog.show()
 
     def ricostruisciTesto(self):
         thisname = []
@@ -1293,7 +1294,7 @@ class BranCorpus(QObject):
             TBdialog.setcelltotable(ratios, row, 3)
         #mostro i risultati
         self.Progrdialog.accept()
-        TBdialog.exec()
+        TBdialog.show()
 
 
     def delselected(self):
@@ -1461,7 +1462,7 @@ class BranCorpus(QObject):
                         tbrow = TBdialog.w.tableWidget.rowCount()-1
                         TBdialog.setcelltotable("1", tbrow, ifilter+1)
         self.Progrdialog.accept()
-        TBdialog.exec()
+        TBdialog.show()
 
     def addTagFromFilter(self):
         QMessageBox.information(self.corpuswidget, "Istruzioni", "Crea il filtro per selezionare gli elementi a cui vuoi aggiungere un tag.")
@@ -1567,7 +1568,7 @@ class BranCorpus(QObject):
                 tbrow = TBdialog.w.tableWidget.rowCount()-1
                 TBdialog.setcelltotable("1", tbrow, 1)
         self.Progrdialog.accept()
-        TBdialog.exec()
+        TBdialog.show()
 
     def coOccorrenze(self):
         parola = QInputDialog.getText(self.corpuswidget, "Scegli la parola", "Indica la parola che vuoi cercare:", QLineEdit.Normal, "")[0]
@@ -1644,7 +1645,7 @@ class BranCorpus(QObject):
                         tbrow = TBdialog.w.tableWidget.rowCount()-1
                         TBdialog.setcelltotable("1", tbrow, 1)
         self.Progrdialog.accept()
-        TBdialog.exec()
+        TBdialog.show()
 
     def removevisiblerows(self):
         self.Progrdialog = progress.Form()
@@ -1976,7 +1977,7 @@ class BranCorpus(QObject):
         TBdialog.setcelltotable(str(ratios), tbrow, 1)
         #mostro i risultati
         self.Progrdialog.accept()
-        TBdialog.exec()
+        TBdialog.show()
 
 #
 class UDCorpus(QThread):
