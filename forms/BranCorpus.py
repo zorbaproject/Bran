@@ -1367,9 +1367,9 @@ class BranCorpus(QObject):
             for option in filtro.split("||"):
                 for andcond in option.split("&&"):
                     res = False
-                    cellname = andcond.split("=")[0]
+                    cellname = andcond.split("=", 1)[0]
                     try:
-                        ftext = andcond.split("=")[1]
+                        ftext = andcond.split("=", 1)[1]
                     except:
                         continue
                     colname = cellname.split("[")[0]

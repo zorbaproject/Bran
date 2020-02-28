@@ -132,8 +132,8 @@ class Form(QDialog):
                     tmpcol = ""
                     tmprows = ""
                     tmpregex = ""
-                    cellname = andcond.split("=")[0]
-                    tmpregex = andcond.split("=")[1]
+                    cellname = andcond.split("=", 1)[0]
+                    tmpregex = andcond.split("=", 1)[1]
                     tmpcol = cellname.split("[")[0]
                     if "[" in cellname.replace("]",""):
                         tmprows = cellname.replace("]","").split("[")[1]
