@@ -207,7 +207,7 @@ class Form(QDialog):
             self.w.tintlib.setText(fileName)
 
     def loadrscript(self):
-        QMessageBox.information(self, "Hai già RScript?", "Se non hai Rscript puoi scaricarlo da qui per Windows: <a href=\"https://cran.r-project.org/bin/windows/base/\">https://cran.r-project.org/bin/windows/base/</a>. Scarica il file di setup e installalo. Poi, indica la posizione del file RScript.exe (di solito nella cartella bin).")
+        QMessageBox.information(self, "Hai già RScript?", "Se non hai Rscript puoi scaricarlo da qui per Windows: <a href=\"https://cran.r-project.org/bin/windows/base/\">https://cran.r-project.org/bin/windows/base/</a>. Scarica il file di setup e installalo. Poi, indica la posizione del file RScript.exe (di solito nella cartella bin). Dovranno essere installati anche i pacchetti ggplot2 e gridSVG. Puoi farlo automaticamente eseguendo lo script creato da Bran come amministratore, oppure manualmente con il gestore pacchetti di R.")
         filter = ""
         if platform.system() == "Windows":
             filter = "RScript (*.exe)"

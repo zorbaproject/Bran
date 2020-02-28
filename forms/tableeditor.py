@@ -51,12 +51,16 @@ class Form(QMainWindow):
         self.separator = "\t"
         self.mycfg = mycfg
         self.w.filterWidget.hide()
-        self.Rpath = "/usr/bin/Rscript"
+        self.accepted = False
+        self.Rpath = self.mycfg["rscript"] #"/usr/bin/Rscript"
 
     def isaccepted(self):
-        self.accept()
+        #self.accept()
+        self.accepted = True
+        self.close()
     def isrejected(self):
-        self.reject()
+        #self.reject()
+        self.close()
 
     def addcolumn(self, text, column):
         cols = self.w.tableWidget.columnCount()
@@ -294,7 +298,7 @@ class Form(QMainWindow):
         print("R path: " + self.Rpath)
         scriptdir = os.path.abspath(os.path.dirname(sys.argv[0]))
 
-        templates = {"Istogramma a identità": scriptdir + "/R/istogramma.R", "Istogramma a somma": scriptdir + "/R/istogramma-count.R", "Torta": scriptdir + "/R/torta.R", "Istogrammi a gruppi": scriptdir + "/R/istogramma-gruppi.R"}
+        templates = {"Istogramma semplice": scriptdir + "/R/istogramma.R", "Istogramma a somma": scriptdir + "/R/istogramma-count.R", "Torta": scriptdir + "/R/torta.R", "Istogrammi a gruppi": scriptdir + "/R/istogramma-gruppi.R"}
 
         thisname = []
         for key in templates:
