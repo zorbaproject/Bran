@@ -29,7 +29,7 @@ from forms import tableeditor
 
 class Confronto(QDialog):
 
-    def __init__(self, sessionDir, parent=None):
+    def __init__(self, parent=None, mycfg=None, sessionDir = ""):
         super(Confronto, self).__init__(parent)
         file = QFile(os.path.abspath(os.path.dirname(sys.argv[0]))+"/forms/confronto.ui")
         file.open(QFile.ReadOnly)
@@ -38,6 +38,7 @@ class Confronto(QDialog):
         layout = QVBoxLayout()
         layout.addWidget(self.w)
         self.setLayout(layout)
+        self.mycfg = mycfg
         #self.w.accepted.connect(self.isaccepted)
         #self.w.rejected.connect(self.isrejected)
         self.setWindowTitle("Confronta dati estratti dai corpora")
@@ -204,7 +205,7 @@ class Confronto(QDialog):
                   return
             else:
                 return
-        TBdialog = tableeditor.Form(self)
+        TBdialog = tableeditor.Form(self, self.mycfg)
         TBdialog.sessionDir = self.sessionDir
         TBdialog.addcolumn(context, 0)
         self.Progrdialog = progress.Form(self)
@@ -435,4 +436,4 @@ class Confronto(QDialog):
             else:
                 col = col + 1
         self.Progrdialog.accept()
-        TBdialog.exec()
+        TBdialog.show()

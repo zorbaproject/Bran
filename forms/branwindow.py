@@ -650,17 +650,17 @@ class MainWindow(QMainWindow):
     #                self.corpus[row][col] = ""
 
     def texteditor(self):
-        te = texteditor.TextEditor()
+        te = texteditor.TextEditor(self.w.corpus, self.Corpus.mycfg)
         te.exec()
 
     def tableeditor(self):
-        TBdialog = tableeditor.Form(self.w.corpus)
+        TBdialog = tableeditor.Form(self.w.corpus, self.Corpus.mycfg)
         TBdialog.sessionDir = self.sessionDir
         TBdialog.w.apricsv.show()
         TBdialog.show()
 
     def confronto(self):
-        cf = confronto.Confronto(self.sessionDir)
+        cf = confronto.Confronto(self.w.corpus, self.Corpus.mycfg, self.sessionDir)
         cf.legendaPos = self.legendaPos
         cf.ignoretext = self.ignoretext
         cf.dimList = self.dimList

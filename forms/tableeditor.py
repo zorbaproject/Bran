@@ -25,7 +25,7 @@ from forms import texteditor
 
 
 class Form(QMainWindow):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, mycfg=None):
         super(Form, self).__init__(parent)
         file = QFile(os.path.abspath(os.path.dirname(sys.argv[0]))+"/forms/tableeditor.ui")
         file.open(QFile.ReadOnly)
@@ -49,6 +49,7 @@ class Form(QMainWindow):
         self.setWindowTitle("Visualizzazione tabella")
         self.sessionDir = "."
         self.separator = "\t"
+        self.mycfg = mycfg
         self.w.filterWidget.hide()
         self.Rpath = "/usr/bin/Rscript"
 

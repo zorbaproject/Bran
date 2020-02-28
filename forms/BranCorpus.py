@@ -728,7 +728,7 @@ class BranCorpus(QObject):
             thisname.append(self.corpuscols[col][1])
         column = QInputDialog.getItem(self.corpuswidget, "Scegli la colonna", "Su quale colonna devo contare le occorrenze?",thisname,current=0,editable=False)
         col = thisname.index(column[0])
-        TBdialog = tableeditor.Form(self.corpuswidget)
+        TBdialog = tableeditor.Form(self.corpuswidget, self.mycfg)
         TBdialog.sessionDir = self.sessionDir
         TBdialog.addcolumn(column[0], 0)
         TBdialog.addcolumn("Occorrenze", 1)
@@ -790,7 +790,7 @@ class BranCorpus(QObject):
         if Fildialog.w.filter.text() == "":
             return
         allfilters = Fildialog.w.filter.text().split("||")
-        TBdialog = tableeditor.Form(self.corpuswidget)
+        TBdialog = tableeditor.Form(self.corpuswidget, self.mycfg)
         TBdialog.sessionDir = self.sessionDir
         TBdialog.addcolumn(column[0], 0)
         self.Progrdialog = progress.Form()
@@ -880,7 +880,7 @@ class BranCorpus(QObject):
         ret = QMessageBox.question(self.corpuswidget,'Domanda', "Vuoi ignorare persona, numero, genere, e caratteristica clitica dei verbi?", QMessageBox.Yes | QMessageBox.No)
         if ret == QMessageBox.Yes:
             ignoreperson = True
-        TBdialog = tableeditor.Form(self.corpuswidget)
+        TBdialog = tableeditor.Form(self.corpuswidget, self.mycfg)
         TBdialog.sessionDir = self.sessionDir
         TBdialog.addcolumn("Modo+Tempo", 0)
         TBdialog.addcolumn("Occorrenze", 1)
@@ -993,7 +993,7 @@ class BranCorpus(QObject):
                 for i in range(Repetdialog.w.vuoteF.count()):
                     vuoteF.append(Repetdialog.w.vuoteF.item(i).text())
             charNotWord = Repetdialog.w.charNotWord.isChecked()
-            TBdialog = tableeditor.Form(self.corpuswidget)
+            TBdialog = tableeditor.Form(self.corpuswidget, self.mycfg)
             TBdialog.sessionDir = self.sessionDir
             TBdialog.addcolumn("nGram", 0)
             TBdialog.addcolumn("Occorrenze", 1)
@@ -1198,7 +1198,7 @@ class BranCorpus(QObject):
 
     def densitalessico(self):
         col = self.corpuscols['pos'][0]
-        TBdialog = tableeditor.Form(self.corpuswidget)
+        TBdialog = tableeditor.Form(self.corpuswidget, self.mycfg)
         TBdialog.sessionDir = self.sessionDir
         TBdialog.addcolumn("Part of Speech", 0)
         TBdialog.addcolumn("Macrocategoria", 1)
@@ -1421,7 +1421,7 @@ class BranCorpus(QObject):
         if Fildialog.w.filter.text() != "":
             self.filter = Fildialog.w.filter.text()
         allfilters = Fildialog.w.filter.text().split("||")
-        TBdialog = tableeditor.Form(self.corpuswidget)
+        TBdialog = tableeditor.Form(self.corpuswidget, self.mycfg)
         TBdialog.sessionDir = self.sessionDir
         TBdialog.addcolumn("Dependency", 0)
         self.Progrdialog = progress.Form()
@@ -1538,7 +1538,7 @@ class BranCorpus(QObject):
         if Fildialog.w.filter.text() != "":
             self.filter = Fildialog.w.filter.text()
         #self.dofiltra()
-        TBdialog = tableeditor.Form(self.corpuswidget)
+        TBdialog = tableeditor.Form(self.corpuswidget, self.mycfg)
         TBdialog.sessionDir = self.sessionDir
         TBdialog.addcolumn("Segmento", 0)
         TBdialog.addcolumn("Occorrenze", 1)
@@ -1589,7 +1589,7 @@ class BranCorpus(QObject):
         if Fildialog.w.filter.text() != "":
             self.filter = Fildialog.w.filter.text()
         #self.dofiltra()
-        TBdialog = tableeditor.Form(self.corpuswidget)
+        TBdialog = tableeditor.Form(self.corpuswidget, self.mycfg)
         TBdialog.sessionDir = self.sessionDir
         TBdialog.addcolumn("Segmento", 0)
         TBdialog.addcolumn("Occorrenze", 1)
@@ -1848,7 +1848,7 @@ class BranCorpus(QObject):
         column = QInputDialog.getItem(self.corpuswidget, "Scegli la colonna", "Se vuoi estrarre il dizionario devi cercare nella colonna dei lemmi. Ma puoi anche scegliere di ottenere le statistiche su altre colonne, come la Forma grafica.",thisname,current=self.corpuscols['token'][0],editable=False)
         col = thisname.index(column[0])
         ret = QMessageBox.question(self.corpuswidget,'Domanda', "Vuoi ignorare la punteggiatura?", QMessageBox.Yes | QMessageBox.No)
-        TBdialog = tableeditor.Form(self.corpuswidget)
+        TBdialog = tableeditor.Form(self.corpuswidget, self.mycfg)
         TBdialog.sessionDir = self.sessionDir
         TBdialog.addcolumn("Token", 0)
         TBdialog.addcolumn("Occorrenze", 1)

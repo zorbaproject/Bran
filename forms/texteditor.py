@@ -31,7 +31,7 @@ from forms import tableeditor
 
 class TextEditor(QDialog):
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, mycfg=None):
         super(TextEditor, self).__init__(parent)
         file = QFile(os.path.abspath(os.path.dirname(sys.argv[0]))+"/forms/texteditor.ui")
         file.open(QFile.ReadOnly)
@@ -40,6 +40,7 @@ class TextEditor(QDialog):
         layout = QVBoxLayout()
         layout.addWidget(self.w)
         self.setLayout(layout)
+        self.mycfg = mycfg
         self.w.actionConta_occorrenze.triggered.connect(self.contaoccorrenze)
         self.w.actionRimuovi_frasi_ripetute.triggered.connect(self.rm_doublephrases)
         self.w.actionCerca_e_sostituisci.triggered.connect(self.searchreplace)
@@ -133,7 +134,7 @@ class TextEditor(QDialog):
         parola = QInputDialog.getText(self.w, "Scegli la parola", "Indica la parola che vuoi cercare (come RegEx):", QLineEdit.Normal, "")[0]
         myrange = int(QInputDialog.getInt(self.w, "Indica il range", "Quante parole, prima e dopo, vuoi leggere?")[0])
         rangestr = str(myrange)
-        TBdialog = tableeditor.Form(self)
+        TBdialog = tableeditor.Form(self, self.mycfg)
         TBdialog.sessionDir = self.sessionDir
         TBdialog.addcolumn("Segmento", 0)
         TBdialog.addcolumn("Occorrenze", 1)
@@ -191,7 +192,7 @@ class TextEditor(QDialog):
                         tbrow = TBdialog.w.tableWidget.rowCount()-1
                         TBdialog.setcelltotable("1", tbrow, 1)
         self.Progrdialog.accept()
-        TBdialog.exec()
+        TBdialog.show()
 
     def salva(self, onlycurrent = ""):
         if self.currentFilename == "":
