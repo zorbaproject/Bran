@@ -135,6 +135,7 @@ class MainWindow(QMainWindow):
         self.Corpus.sizeChanged.connect(self.corpusSizeChanged)
         self.w.allToken.toggled.connect(lambda: self.Corpus.setAllTokens(self.w.allToken.isChecked()))
         self.w.actionEsegui_calcoli_solo_su_righe_visibili.toggled.connect(lambda: self.Corpus.setOnlyVisible(self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked()))
+        self.w.cfilter.textChanged.connect(lambda text: self.Corpus.setFilter(text))
         self.w.daToken.valueChanged.connect(self.Corpus.setStart)
         self.w.aToken.valueChanged.connect(self.Corpus.setEnd)
         self.enumeratecolumns(self.w.ccolumn)
@@ -398,8 +399,10 @@ class MainWindow(QMainWindow):
                 self.dofiltra2()
                 return
         tcount = 0
-        totallines = self.w.aToken.value()
-        startline = self.w.daToken.value()
+        totallines = self.Corpus.aToken
+        startline = self.Corpus.daToken
+        if (totallines-startline) != self.w.corpus.rowCount():
+            self.updateCorpus()
         for row in range(startline, totallines):
             fcol = self.w.ccolumn.currentIndex()
             #ctext = self.w.corpus.item(row,col).text()

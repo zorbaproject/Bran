@@ -118,12 +118,19 @@ class BranCorpus(QObject):
 
     def setStart(self, value):
         self.daToken = value
+        #print("Set start: " +str(value))
 
     def setEnd(self, value):
         self.aToken = value
+        #print("Set end: " +str(value))
 
     def setAllTokens(self, value):
         self.allToken = value
+        self.setStart(0)
+        self.setEnd(len(self.corpus))
+
+    def setFilter(self, text):
+        self.filter = text
 
     def loadPersonalCFG(self):
         try:
@@ -867,8 +874,9 @@ class BranCorpus(QObject):
     def contaverbi(self):
         poscol = self.corpuscols["pos"][0] #thisname.index(column[0])
         morfcol = self.corpuscols["feat"][0]
+        frasecol = self.corpuscols["IDphrase"][0]
         ignoreperson = False
-        ret = QMessageBox.question(self.corpuswidget,'Domanda', "Vuoi ignorare persona, numero, e genere dei verbi?", QMessageBox.Yes | QMessageBox.No)
+        ret = QMessageBox.question(self.corpuswidget,'Domanda', "Vuoi ignorare persona, numero, genere, e caratteristica clitica dei verbi?", QMessageBox.Yes | QMessageBox.No)
         if ret == QMessageBox.Yes:
             ignoreperson = True
         TBdialog = tableeditor.Form(self.corpuswidget)
@@ -891,62 +899,49 @@ class BranCorpus(QObject):
             QApplication.processEvents()
             if self.Progrdialog.w.annulla.isChecked():
                 return
+            if row < startline:
+                continue
             try:
                 thispos = self.legendaPos[self.corpus[row][poscol]][0]
+                thisphrase = self.corpus[row][frasecol]
             except:
-                thispos = ""
+                thispos = ""    
+                thisphrase = "0"
             thistext = ""
             thistext2 = ""
-            if thispos.split(" ")[0] == "verbo":
+            thistext3 = ""
+            #Filtro per trovare i verbi a 3 come "è stato fatto": feat=.*VerbForm.*Part.*&&feat[1]=.*VerbForm.*Part.*||feat=.*VerbForm.*Part.*&&feat[-1]=.*VerbForm.*Part.*||feat=.*VerbForm.*&&feat[1]=.*VerbForm.*Part.*&&feat[2]=.*VerbForm.*Part.*
+            if "verbo" in thispos:
                 thistext = self.corpus[row][morfcol]
-                thistext = self.orderVerbMorf(thistext, ignoreperson)
             if "ausiliare" in thispos:
                 for ind in range(1,4):
                     try:
                         tmpos = self.legendaPos[self.corpus[row+ind][poscol]][0]
+                        tmpphrase = self.corpus[row+ind][frasecol]
                     except:
                         tmpos = ""
+                        tmpphrase = "0"
+                    #i verbi consecutivi vanno bene finché sono nella stessa frase
+                    if tmpphrase != thisphrase:
+                        break
                     if "verbo" in tmpos:
-                        thistext = ""
-                        break
-            elif thispos.split(" ")[0] == "verbo":
-                for ind in range(1,4):
-                    try:
-                        tmpos = self.legendaPos[self.corpus[row-ind][poscol]][0]
-                    except:
-                        tmpos = ""
-                    if "ausiliare" in tmpos and "VerbForm=Part" in thistext and "Tense=Past" in thistext:
-                        thistext2 = thistext2 + "/" + self.corpus[row-ind][morfcol]
-                    if "verbo" in tmpos and not "ausiliare" in tmpos:
-                        break
-            if len(thistext2)>0:
-                if thistext2[0]=="/":
-                    thistext2=thistext2[1:]
-            if bool(re.match('.*?VerbForm\=.*?$', thistext))==False:
-                thistext = ""
-            if bool(re.match('.*?VerbForm\=.*?$', thistext2))==False:
-                thistext2 = ""
-            #if len(thistext.split("|")) >= 3:
-            #    tmptext = thistext.split("|")[0] + "|" +thistext.split("|")[1] + "|" +thistext.split("|")[2]
-            #    thistext = tmptext
-            thistext3 = ""
-            if len(thistext2.split("/"))>1:
-                thistext3 = thistext2.split("/")[1]
-                thistext2 = thistext2.split("/")[0]
-            if bool(re.match('^VerbForm\=.*?$', thistext3))==False:
-                thistext3 = ""
-            #if len(thistext2.split("|")) >= 3:
-                #tmptext = thistext2.split("|")[0] + "+" +thistext2.split("|")[1] + "+" +thistext2.split("|")[2]
-                #thistext2 = tmptext + "/"
+                        thistext2 = thistext2 + self.corpus[row+ind][morfcol] + "+"
+                    startline = row+ind+1
+                if len(thistext2.split("+"))>1:
+                    thistext3 = thistext2.split("+")[1]
+                    thistext2 = thistext2.split("+")[0]
+            if len(thistext) >= 3:
+                thistext = self.orderVerbMorf(thistext, ignoreperson) + "+"
             if len(thistext2) >= 3:
                 thistext2 = self.orderVerbMorf(thistext2, ignoreperson) + "+"
-            #if len(thistext3.split("|")) >= 3:
-                #tmptext = thistext3.split("|")[0] + "+" +thistext3.split("|")[1] + "+" +thistext3.split("|")[2]
-                #thistext3 = tmptext + "/"
             if len(thistext3) >= 3:
-                thistext3 = self.orderVerbMorf(thistext3, ignoreperson) + "+"
+                thistext3 = self.orderVerbMorf(thistext3, ignoreperson) #+ "+"
             if thistext != "":
-                thistext = thistext3 + thistext2 + thistext
+                thistext = thistext + thistext2 + thistext3
+                if ignoreperson:
+                    thistext = thistext.replace("/Clitic=Yes", "")
+            if thistext.endswith("+"):
+                thistext = thistext[0:-1]
             if thistext != "":
                 tbrow = TBdialog.finditemincolumn(thistext, col=0, matchexactly = True, escape = True)
                 if tbrow>=0:
@@ -1391,9 +1386,13 @@ class BranCorpus(QObject):
                                 ctext = table[tmprow][col]
                         except:
                             ctext = ""
-                        if bool(re.match(ftext, ctext)):
-                            res = True
-                            break
+                        try:
+                            if bool(re.match(ftext, ctext)):
+                                res = True
+                                break
+                        except:
+                            print("Error in regex")
+                            pass
                     if res == False:
                         break
                 if res == True:

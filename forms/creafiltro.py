@@ -77,6 +77,7 @@ class Form(QDialog):
             editor = QComboBox()
             for key in self.corpuscols:
                 editor.addItem(key)
+            editor.addItem("OR")
             editor.setCurrentText(mytxt)
             editor.activated.connect(lambda index: self.setcelltocorpus(editor.itemText(index),row, col))
         elif col == 1:
