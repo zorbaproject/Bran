@@ -269,10 +269,10 @@
     <addaction name="actionConfronta_corpora"/>
     <addaction name="actionEditor_tabelle"/>
     <addaction name="actionEditor_di_testo"/>
+    <addaction name="actionConverti_vecchio_corpus"/>
     <addaction name="separator"/>
     <addaction name="actionConfigurazione_Tint"/>
     <addaction name="actionConfigurazione_di_Bran"/>
-    <addaction name="actionConverti_vecchio_corpus"/>
    </widget>
    <widget class="QMenu" name="menuAbout">
     <property name="title">
@@ -412,7 +412,7 @@
   </action>
   <action name="actionConfigurazione_Tint">
    <property name="text">
-    <string>Avvia Tint</string>
+    <string>&amp;Avvia Tint</string>
    </property>
   </action>
   <action name="actionTraduci_i_tag_PoS_in_forma_leggibile">
@@ -548,22 +548,22 @@
   </action>
   <action name="actionEditor_tabelle">
    <property name="text">
-    <string>Editor tabelle</string>
+    <string>E&amp;ditor tabelle</string>
    </property>
   </action>
   <action name="actionConfigurazione_di_Bran">
    <property name="text">
-    <string>Configurazione di Bran</string>
+    <string>&amp;Configurazione di Bran</string>
    </property>
   </action>
   <action name="actionEsporta_subcorpus_in_base_a_filtro">
    <property name="text">
-    <string>Esporta subcorpus in base a filtro</string>
+    <string>Esporta &amp;subcorpus in base a filtro</string>
    </property>
   </action>
   <action name="actionConverti_vecchio_corpus">
    <property name="text">
-    <string>Converti vecchio corpus</string>
+    <string>Converti &amp;vecchio corpus</string>
    </property>
   </action>
  </widget>

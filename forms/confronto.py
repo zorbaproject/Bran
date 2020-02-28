@@ -8,7 +8,7 @@ import csv
 import re
 import math
 
-from PySide2.QtWidgets import QApplication, QDialog, QLineEdit, QPushButton, QVBoxLayout
+from PySide2.QtWidgets import QApplication, QDialog, QLineEdit, QPushButton, QVBoxLayout, QMainWindow
 from PySide2.QtUiTools import QUiLoader
 from PySide2.QtCore import QFile
 from PySide2.QtCore import QDir
@@ -27,7 +27,7 @@ from PySide2.QtCore import QThread
 from forms import progress
 from forms import tableeditor
 
-class Confronto(QDialog):
+class Confronto(QMainWindow):
 
     def __init__(self, parent=None, mycfg=None, sessionDir = ""):
         super(Confronto, self).__init__(parent)
@@ -35,9 +35,10 @@ class Confronto(QDialog):
         file.open(QFile.ReadOnly)
         loader = QUiLoader()
         self.w = loader.load(file)
-        layout = QVBoxLayout()
-        layout.addWidget(self.w)
-        self.setLayout(layout)
+        #layout = QVBoxLayout()
+        #layout.addWidget(self.w)
+        #self.setLayout(layout)
+        self.setCentralWidget(self.w)
         self.mycfg = mycfg
         #self.w.accepted.connect(self.isaccepted)
         #self.w.rejected.connect(self.isrejected)

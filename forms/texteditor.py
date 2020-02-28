@@ -11,7 +11,7 @@ import re
 import mmap
 import json
 
-from PySide2.QtWidgets import QApplication, QDialog, QLineEdit, QPushButton, QVBoxLayout
+from PySide2.QtWidgets import QApplication, QDialog, QLineEdit, QPushButton, QVBoxLayout, QMainWindow
 from PySide2.QtUiTools import QUiLoader
 from PySide2.QtWidgets import QLabel
 from PySide2.QtWidgets import QInputDialog
@@ -29,7 +29,7 @@ from forms import progress
 from forms import about
 from forms import tableeditor
 
-class TextEditor(QDialog):
+class TextEditor(QMainWindow):
 
     def __init__(self, parent=None, mycfg=None):
         super(TextEditor, self).__init__(parent)
@@ -37,9 +37,10 @@ class TextEditor(QDialog):
         file.open(QFile.ReadOnly)
         loader = QUiLoader()
         self.w = loader.load(file)
-        layout = QVBoxLayout()
-        layout.addWidget(self.w)
-        self.setLayout(layout)
+        #layout = QVBoxLayout()
+        #layout.addWidget(self.w)
+        #self.setLayout(layout)
+        self.setCentralWidget(self.w)
         self.mycfg = mycfg
         self.w.actionConta_occorrenze.triggered.connect(self.contaoccorrenze)
         self.w.actionRimuovi_frasi_ripetute.triggered.connect(self.rm_doublephrases)

@@ -651,7 +651,7 @@ class MainWindow(QMainWindow):
 
     def texteditor(self):
         te = texteditor.TextEditor(self.w.corpus, self.Corpus.mycfg)
-        te.exec()
+        te.show()
 
     def tableeditor(self):
         TBdialog = tableeditor.Form(self.w.corpus, self.Corpus.mycfg)
@@ -664,7 +664,7 @@ class MainWindow(QMainWindow):
         cf.legendaPos = self.legendaPos
         cf.ignoretext = self.ignoretext
         cf.dimList = self.dimList
-        cf.exec()
+        cf.show()
 
     def aboutbran(self):
         aw = about.Form(self)

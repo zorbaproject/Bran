@@ -92,7 +92,7 @@ class BranCorpus(QObject):
         self.ignoretext = ignthis
         self.dimList = dimlst
         #self.ignorepos = ["punteggiatura - \"\" () «» - - ", "punteggiatura - : ;", "punteggiatura - ,", "altro"] # "punteggiatura - .?!"
-        self.ignorepos = ["punteggiatura - .?!", "altro"]
+        self.ignorepos = ["punteggiatura - .?!", "simboli", "altro"]
         self.separator = "\t"
         self.language = "it-IT"
         self.filtrimultiplienabled = 10 #"Filtro multiplo"
@@ -1058,9 +1058,9 @@ class BranCorpus(QObject):
         mycorpus = self.rebuildText(self.corpus, self.Progrdialog, col)
         mycorpus = self.remUselessSpaces(mycorpus)
         self.Progrdialog.accept()
-        te = texteditor.TextEditor()
+        te = texteditor.TextEditor(self.corpuswidget, self.mycfg)
         te.w.plainTextEdit.setPlainText(mycorpus)
-        te.exec()
+        te.show()
 
     def rebuildText(self, table, Progrdialog, col = "", ipunct = [], startrow = 0, endrow = 0, filtercol = None):
         mycorpus = ""
@@ -1815,15 +1815,15 @@ class BranCorpus(QObject):
                     self.corpus[row][col] = ""
 
     def texteditor(self):
-        te = texteditor.TextEditor()
-        te.exec()
+        te = texteditor.TextEditor(self.corpuswidget, self.mycfg)
+        te.show()
 
     def confronto(self):
-        cf = confronto.Confronto(self.sessionDir)
+        cf = confronto.Confronto(self.corpuswidget, self.mycfg, self.sessionDir)
         cf.legendaPos = self.legendaPos
         cf.ignoretext = self.ignoretext
         cf.dimList = self.dimList
-        cf.exec()
+        cf.show()
 
     #def aboutbran(self):
     #    aw = about.Form(self.corpuswidget)
