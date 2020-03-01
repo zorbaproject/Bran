@@ -109,7 +109,7 @@ class Form(QDialog):
                     if self.Progrdialog.w.annulla.isChecked():
                         return
                     idparola = self.Corpus.corpus[row][self.Corpus.corpuscols["IDword"][0]]
-                    parolagov = self.Corpus.corpus[row][self.Corpus.corpuscols["governor"][0]]
+                    parolagov = self.Corpus.corpus[row][self.Corpus.corpuscols["head"][0]]
                     words[idparola] = str(row)
                     try:
                         gov[parolagov].append(idparola)

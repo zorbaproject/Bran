@@ -499,7 +499,7 @@ class BranCorpus(QObject):
                 if myfeatU == "":
                     myfeatU = "_"
                 Ucolumns.append(myfeatU)
-                Ucolumns.append(self.corpus[row][self.corpuscols['governor'][0]])
+                Ucolumns.append(self.corpus[row][self.corpuscols['head'][0]])
                 Ucolumns.append(self.corpus[row][self.corpuscols['dep'][0]])
                 Ucolumns.append("_")
                 Ucolumns.append("_")
