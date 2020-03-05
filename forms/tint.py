@@ -399,7 +399,7 @@ class TintCorpus(QThread):
                             for mydep in sentence["basic-dependencies"]:
                                 if mydep["dependent"] == token["index"]:
                                     fullline = fullline + "\t" + str(mydep["dep"]) + "\t"
-                                    fullline = fullline + str(mydep["governor"])
+                                    fullline = fullline + str(mydep["head"])
                                     break
                             fdatefile = self.outputcsv
                             fullline = self.isdt_to_ud(fullline)
@@ -518,8 +518,8 @@ class TintCorpus(QThread):
                 if myfeatU == "":
                     myfeatU = "_"
                 Ucolumns.append(myfeatU)
-            if key == "governor":
-                Ucolumns.append(thisline[self.corpuscols['governor'][0]])
+            if key == "head":
+                Ucolumns.append(thisline[self.corpuscols['head'][0]])
             if key == "dep":
                 Ucolumns.append(thisline[self.corpuscols['dep'][0]])
             if key == "ner":

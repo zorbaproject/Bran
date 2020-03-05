@@ -35,6 +35,7 @@ class TXTdownloader(QThread):
         self.loadvariables()
         self.setTerminationEnabled(True)
         self.stopme = False
+        self.disqusPreset = dict()
 
     def importLibs(self):
         #TODO: this should be more user friendly
@@ -96,6 +97,8 @@ class TXTdownloader(QThread):
             self.dotwitter()
         if self.whattodo == "dofb":
             self.dofb()
+        if self.whattodo == "dodisqus":
+            self.dodisqus()
         return
 
     def find_between(self, s, first, last ):
@@ -690,6 +693,136 @@ class TXTdownloader(QThread):
         self.scrapefacebook(fbname)
         self.w.resultsgrp.setTitle("In attesa")
 
+    def dodisqus(self):
+        #origurl = "https://downdetector.it/problemi/fastweb/"
+        #now we need to extract info
+        self.w.resultsgrp.setTitle("STO LAVORANDO:")
+        name = ""
+        if self.w.disqusCombo.currentText() != "":
+            name = self.w.disqusCombo.currentText()
+            mythread = self.disqusPreset[name]["thread"]
+            apikey = self.disqusPreset[name]["apikey"]
+            forum = self.disqusPreset[name]["forum"]
+            cursor = self.disqusPreset[name]["cursor"]
+        else:
+            mythread = self.w.disqusthread.text()
+            apikey = self.w.disqusapikey.text()
+            forum = self.w.disqusforum.text()
+            cursor = self.w.disquscursor.text()
+        #mythread = '5167561544'
+        #apikey = "E8Uh5l5fHZ6gD8U3KycjAIAk46f68Zw7C6eW8WSjZvCLXebZ7p0r1yrYDrLilk2F"
+        #forum = "downdetector"
+        #cursor = "0%3A0%3A0"
+        if mythread == "" or apikey == "" or forum == "" or cursor == "":
+            self.w.resultsgrp.setTitle("In attesa")
+            return
+        #Now we retrieve comments
+        START_PAGE = "https://disqus.com/api/3.0/threads/listPostsThreaded?limit=50&thread="+mythread+"&forum="+forum+"&order=desc&cursor="+cursor+"&mode=0&api_key=" + apikey
+        ascsv = False
+        if self.w.disquscsv.isChecked():
+            ascsv = True
+        outputfolder = ""
+        if os.path.isdir(self.w.folder.text()):
+            outputfolder = self.w.folder.text()
+        else:
+            self.w.resultsgrp.setTitle("In attesa")
+            return
+        self.disqus(START_PAGE, outputfolder, ascsv, name)
+        self.w.resultsgrp.setTitle("In attesa")
+
+    def disqus(self, START_PAGE, output, ascsv = True, myname = ""):
+        start = START_PAGE.index('&thread=')
+        end = START_PAGE.index('&',start+2)
+        mythread = START_PAGE[start+8:end]
+        start = START_PAGE.index('&forum=')
+        end = START_PAGE.index('&',start+2)
+        myforum = START_PAGE[start+7:end]
+        start = START_PAGE.index('&cursor=')
+        end = START_PAGE.index('&',start+2)
+        mycursor = START_PAGE[start+8:end]
+        #mycursor = "2%3A0%3A0"
+        #mycursor = urllib.parse.unquote(mycursor)
+        if myname == "":
+            myname = myforum + "-" + mythread
+        myname = myname.replace(" ", "_")
+        fname = output + "/disqus_" + myname + ".csv"
+        print(fname)
+        start = START_PAGE.index('&api_key=')
+        try:
+            end = START_PAGE.index('&',start+2)
+        except:
+            end = len(START_PAGE)
+        mykey = START_PAGE[start+9:end]
+        active = True
+        firstrun = True
+        messagekeys = []
+        doneIDs = []
+        while active:
+            myurl = "https://disqus.com/api/3.0/threads/listPostsThreaded?limit=100&thread=" + mythread + "&forum=" + myforum + "&order=desc&cursor=" + mycursor +"&mode=0&api_key=" + mykey
+            #print(myurl)
+            newjson = self.geturl(myurl)
+            response = json.loads(newjson)
+            mycursor = response["cursor"]["next"]
+            mycursor = urllib.parse.quote(mycursor)
+            print(mycursor)
+            self.w.results.addItem(myurl)
+            self.w.results.setCurrentRow(self.w.results.count()-1)
+            if self.w.stopall.isChecked():
+                active = False
+                self.quit()
+                return
+            if len(response["response"]) == 0:
+                active = False
+                self.quit()
+                return
+            if firstrun:
+                for key in response["response"][0]:
+                    if isinstance(response["response"][0][key], dict):
+                        for skey in response["response"][0][key]:
+                            messagekeys.append(key+":"+skey)
+                    else:
+                        messagekeys.append(key)
+                #print(messagekeys)
+                header = ""
+                for key in range(len(messagekeys)):
+                    if key >0:
+                        header = header +"\t"
+                    header = header + messagekeys[key]
+                text_file = open(fname, "w", encoding='utf-8')
+                text_file.write(header)
+                text_file.close()
+            firstrun = False
+            for msg in response["response"]:
+                #print(msg["message"])
+                if str(msg["id"]) in doneIDs:
+                    continue
+                with open(fname, "a", encoding='utf-8') as myfile:
+                    myfile.write("\n")
+                for key in messagekeys:
+                    try:
+                        if ":" in key:
+                            one = key.split(":")[0]
+                            two = key.split(":")[1]
+                            myvalue = msg[one][two]
+                        else:
+                            myvalue = msg[key]
+                    except:
+                        myvalue = ""
+                    mytext = ""
+                    if isinstance(myvalue, list):
+                        for myel in myvalue:
+                            mytext = mytext + str(myel) + "; "
+                    else:
+                        mytext = str(myvalue)
+                    #print(mytext)
+                    mytext = mytext.replace("\n", "\\n").replace("\r", "\\r")
+                    with open(fname, "a", encoding='utf-8') as myfile:
+                        myfile.write(mytext + "\t")
+                    doneIDs.append(str(msg["id"]))
+            if not response["cursor"]["hasNext"]:
+                active = False
+            #active = False
+
 
 class Form(QDialog):
     def __init__(self, parent=None):
@@ -710,6 +843,7 @@ class Form(QDialog):
         self.w.searchrep.clicked.connect(self.searchrep)
         self.w.dotwitter.clicked.connect(self.dotwitter)
         self.w.dofb.clicked.connect(self.dofb)
+        self.w.dodisqus.clicked.connect(self.dodisqus)
         #self.w.stopall.clicked.connect(self.stopall)
         self.w.choosefolder.clicked.connect(self.choosefolder)
         self.w.ignoreext.setText(".*(\.zip|\.xml|\.pdf|\.avi|\.gif|\.jpeg|\.jpg|\.ico|\.png|\.wav|\.mp3|\.mp4|\.mpg|\.mpeg|\.tif|\.tiff|\.css|\.json|\.rar)$")
@@ -719,6 +853,31 @@ class Form(QDialog):
         self.w.agiorno.setValue(int(todate.split('-')[2]))
         self.mycfgfile = ""
         self.mycfg = json.loads('{"javapath": "", "tintpath": "", "tintaddr": "", "tintport": "", "sessions" : []}')
+        self.disqusPreset = {"Downdetector Fastweb":
+            {"apikey": "E8Uh5l5fHZ6gD8U3KycjAIAk46f68Zw7C6eW8WSjZvCLXebZ7p0r1yrYDrLilk2F", "cursor": "0%3A0%3A0", "forum": "downdetector", "thread": "5167561544"},
+            "Downdetector Iliad":
+            {"apikey": "E8Uh5l5fHZ6gD8U3KycjAIAk46f68Zw7C6eW8WSjZvCLXebZ7p0r1yrYDrLilk2F", "cursor": "0%3A0%3A0", "forum": "downdetector", "thread": "6702494318"},
+            "Downdetector Infostrada":
+            {"apikey": "E8Uh5l5fHZ6gD8U3KycjAIAk46f68Zw7C6eW8WSjZvCLXebZ7p0r1yrYDrLilk2F", "cursor": "0%3A0%3A0", "forum": "downdetector", "thread": "5167780116"},
+            "Downdetector TIM":
+            {"apikey": "E8Uh5l5fHZ6gD8U3KycjAIAk46f68Zw7C6eW8WSjZvCLXebZ7p0r1yrYDrLilk2F", "cursor": "0%3A0%3A0", "forum": "downdetector", "thread": "5167557342"},
+            "Downdetector Tiscali":
+            {"apikey": "E8Uh5l5fHZ6gD8U3KycjAIAk46f68Zw7C6eW8WSjZvCLXebZ7p0r1yrYDrLilk2F", "cursor": "0%3A0%3A0", "forum": "downdetector", "thread": "5167563615"},
+            "Downdetector Tre":
+            {"apikey": "E8Uh5l5fHZ6gD8U3KycjAIAk46f68Zw7C6eW8WSjZvCLXebZ7p0r1yrYDrLilk2F", "cursor": "0%3A0%3A0", "forum": "downdetector", "thread": "5167549122"},
+            "Downdetector Vodafone":
+            {"apikey": "E8Uh5l5fHZ6gD8U3KycjAIAk46f68Zw7C6eW8WSjZvCLXebZ7p0r1yrYDrLilk2F", "cursor": "0%3A0%3A0", "forum": "downdetector", "thread": "5167549976"},
+            "Downdetector Wind":
+            {"apikey": "E8Uh5l5fHZ6gD8U3KycjAIAk46f68Zw7C6eW8WSjZvCLXebZ7p0r1yrYDrLilk2F", "cursor": "0%3A0%3A0", "forum": "downdetector", "thread": "5167552427"},
+            "Downdetector Wikipedia":
+            {"apikey": "E8Uh5l5fHZ6gD8U3KycjAIAk46f68Zw7C6eW8WSjZvCLXebZ7p0r1yrYDrLilk2F", "cursor": "0%3A0%3A0", "forum": "downdetector", "thread": "5167531666"},
+            "Downdetector Whatsapp":
+            {"apikey": "E8Uh5l5fHZ6gD8U3KycjAIAk46f68Zw7C6eW8WSjZvCLXebZ7p0r1yrYDrLilk2F", "cursor": "0%3A0%3A0", "forum": "downdetector", "thread": "5167495954"}
+            }
+            #Look for requests like this: https://referrer.disqus.com/juggler/event.js?experiment=network_default_hidden&variant=fallthrough&page_referrer=direct&product=embed&thread=5167531666&thread_id=5167531666&forum=downdetector&forum_id=3548655&zone=thread&page_url=https%3A%2F%2Fdowndetector.it%2Fproblemi%2Fwikipedia%2F&service=dynamic&verb=open&object_type=section&object_id=thread%2Fpage-2&event=activity&imp=2rcqscjug28as&section=default&area=n%2Fa
+        self.w.disqusCombo.addItem("")
+        for key in self.disqusPreset:
+            self.w.disqusCombo.addItem(key)
 
     def loadPersonalCFG(self):
         try:
@@ -761,6 +920,12 @@ class Form(QDialog):
         #self.mycfg["facebook"] = tmpfb
         self.savePersonalCFG()
         self.myThread = TXTdownloader(self.w, "dofb")
+        self.myThread.finished.connect(self.threadstopped)
+        self.myThread.start()
+
+    def dodisqus(self):
+        self.myThread = TXTdownloader(self.w, "dodisqus")
+        self.myThread.disqusPreset = self.disqusPreset
         self.myThread.finished.connect(self.threadstopped)
         self.myThread.start()
 

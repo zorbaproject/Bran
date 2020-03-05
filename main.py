@@ -753,8 +753,8 @@ if __name__ == "__main__":
                 'feat': [5, "Morfologia"],
                 'IDword': [6, "ID parola"],
                 'IDphrase': [7, "ID frase"],
-                'dep': [8, "Dep"],
-                'governor': [9, "Governor"]
+                'dep': [8, "Tag Dep"],
+                'head': [9, "Head"]
     }
     ignoretext = "((?<=[^0-9])"+ re.escape(".")+ "|^" + re.escape(".")+ "|(?<= )"+ re.escape("-")+ "|^"+re.escape("-")+ "|"+re.escape(":")+"|(?<=[^0-9])"+re.escape(",")+"|^"+re.escape(",")+"|"+re.escape(";")+"|"+re.escape("?")+"|"+re.escape("!")+"|"+re.escape("«")+"|"+re.escape("»")+"|"+re.escape("\"")+"|"+re.escape("(")+"|"+re.escape(")")+"|^"+re.escape("'")+ "|" + re.escape("[PUNCT]") + "|" + re.escape("<unknown>") + ")"
     dimList = [100,1000,5000,10000,50000,100000,150000,200000,250000,300000,350000,400000,450000,500000,1000000]
