@@ -146,6 +146,11 @@ class BranCorpus(QObject):
                 self.mycfg = json.loads(lines.replace("\n", "").replace("\r", ""))
             except:
                 print("Creo il file di configurazione")
+        cfgtemplate = {'javapath': '', 'tintpath': '', 'tintaddr': '', '': '', 'sessions': [], 'udpipe': '', 'udpipemodels': {'it-IT': ''}, 'rscript': '', 'facebook': [], 'twitter': []}
+        for key in cfgtemplate:
+            if key not in self.mycfg:
+                self.mycfg[key] = cfgtemplate[key]
+                self.savePersonalCFG()
 
     def savePersonalCFG(self):
         cfgtxt = json.dumps(self.mycfg)
