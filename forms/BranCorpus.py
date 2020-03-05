@@ -85,7 +85,10 @@ class BranCorpus(QObject):
         self.daToken = 0
         self.aToken = 100
         self.allToken = False
-        self.corpuswidget.cellChanged.connect(self.corpusCellChanged)
+        try:
+            self.corpuswidget.cellChanged.connect(self.corpusCellChanged)
+        except:
+            pass
         #self.setWindowTitle("Bran")
         self.corpuscols = corpcol
         self.legendaPos = legPos
@@ -146,6 +149,11 @@ class BranCorpus(QObject):
                 self.mycfg = json.loads(lines.replace("\n", "").replace("\r", ""))
             except:
                 print("Creo il file di configurazione")
+        cfgtemplate = {'javapath': '', 'tintpath': '', 'tintaddr': '', '': '', 'sessions': [], 'udpipe': '', 'udpipemodels': {'it-IT': ''}, 'rscript': '', 'facebook': [], 'twitter': []}
+        for key in cfgtemplate:
+            if key not in self.mycfg:
+                self.mycfg[key] = cfgtemplate[key]
+                self.savePersonalCFG()
 
     def savePersonalCFG(self):
         cfgtxt = json.dumps(self.mycfg)
@@ -2043,7 +2051,9 @@ class UDCorpus(QThread):
                         gotEncoding = False
                         while gotEncoding == False:
                             try:
+                                self.Progrdialog.hide()
                                 myencoding = QInputDialog.getText(self.corpuswidget, "Scegli la codifica", "Sembra che questo file non sia codificato in UTF-8. Vuoi provare a specificare una codifica diversa? (Es: cp1252 oppure ISO-8859-15)", QLineEdit.Normal, myencoding)
+                                self.Progrdialog.show()
                             except:
                                 print("Sembra che questo file non sia codificato in UTF-8. Vuoi provare a specificare una codifica diversa? (Es: cp1252 oppure ISO-8859-15)")
                                 myencoding = [input()]
@@ -2060,8 +2070,10 @@ class UDCorpus(QThread):
                     print(fileName + " -> " + self.outputcsv)
                     if self.csvIDcolumn <0 or self.csvTextcolumn <0:
                         try:
+                            self.Progrdialog.hide()
                             corpusID = str(fileID)+"_"+os.path.basename(fileName)+",lang:"+self.language+",tagger:udpipe"
                             corpusID = QInputDialog.getText(self.corpuswidget, "Scegli il tag", "Indica il tag di questo file nel corpus:", QLineEdit.Normal, corpusID)[0]
+                            self.Progrdialog.show()
                         except:
                             corpusID = str(fileID)+"_"+os.path.basename(fileName)+",lang:"+self.language+",tagger:udpipe"
                         self.text2corpusUD(lines, corpusID)
@@ -2070,8 +2082,10 @@ class UDCorpus(QThread):
                             sep = QInputDialog.getText(self.corpuswidget, "Scegli il separatore", "Indica il carattere che separa le colonne (\\t è la tabulazione):", QLineEdit.Normal, "\\t")[0]
                             if sep == "\\t":
                                 sep = "\t"
+                            self.Progrdialog.hide()
                             textID = QInputDialog.getInt(self.corpuswidget, "Scegli il testo", "Indica la colonna della tabella che contiene il testo di questo sottocorpus:")[0]
                             corpusIDtext = QInputDialog.getText(self.corpuswidget, "Scegli il tag", "Indica il tag di questo file nel corpus. Puoi usare [filename] per indicare il nome del file e [numeroColonna] per indicare la colonna da cui estrarre un tag.", QLineEdit.Normal, "[filename], [0]"+",tagger:udpipe")[0]
+                            self.Progrdialog.show()
                             textID = int(textID)
                             for line in lines.split("\n"):
                                 corpusID = corpusIDtext.replace("[filename]", os.path.basename(fileName))
