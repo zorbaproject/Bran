@@ -485,7 +485,10 @@ class MainWindow(QMainWindow):
         self.Corpus.loadFromTint(self.TintAddr)
 
     def loadFromUDpipe(self):
-        if self.Corpus.mycfg["udpipe"] == "":
+        try:
+            if self.Corpus.mycfg["udpipe"] == "":
+                self.showbranconfig()
+        except:
             self.showbranconfig()
         self.Corpus.loadFromUDpipe()
 
