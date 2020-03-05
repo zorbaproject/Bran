@@ -83,7 +83,11 @@ from PySide2.QtCore import QThread
 
 
 from forms import branwindow
-
+from forms import tint
+from forms import BranCorpus
+from forms import texteditor
+from forms import tableeditor
+from forms import confronto
 
 
 def findintable(table, stringa, col=0):
@@ -765,6 +769,9 @@ if __name__ == "__main__":
     if len(sys.argv)>1:
         w = "cli"
         app = QApplication(sys.argv)
+        Corpus = BranCorpus.BranCorpus(corpuscols, legendaPos, ignoretext, dimList, tablewidget=w)
+        Corpus.loadPersonalCFG()
+        #print(Corpus.mycfg)
         if sys.argv[1] == "help" or sys.argv[1] == "aiuto":
             print("Le colonne di un corpus sono le seguenti:\n")
             print(corpuscols)
@@ -815,6 +822,9 @@ if __name__ == "__main__":
                 lines = text_file.read()
                 text_file.close()
                 mycfg = json.loads(lines.replace("\n", "").replace("\r", ""))
+            except:
+                mycfg = Corpus.mycfg
+            try:
                 Java = mycfg["javapath"]
                 TintDir = mycfg["tintpath"]
                 TintPort = mycfg["tintport"]
@@ -828,7 +838,7 @@ if __name__ == "__main__":
             print("\nNON CHIUDERE QUESTA FINESTRA:  Tint è eseguito dentro questa finestra. Avvia di nuovo Bran.")
             print("\n\nNON CHIUDERE QUESTA FINESTRA")
         if sys.argv[1] == "texteditor":
-            te = texteditor.TextEditor()
+            te = texteditor.TextEditor(None, Corpus.mycfg)
             if len(sys.argv)>2:
                 fileNames = []
                 for i in range(2, len(sys.argv)):
@@ -839,10 +849,10 @@ if __name__ == "__main__":
                             if tfile[-4:] == ".txt":
                                 fileNames.append(os.path.join(sys.argv[i],tfile))
                     te.aprilista(fileNames)
-            te.exec()
+            te.show()
             print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
         if sys.argv[1] == "confronto":
-            cf = confronto.Confronto(os.path.abspath(os.path.dirname(sys.argv[0])))
+            cf = confronto.Confronto(None, Corpus.mycfg, os.path.abspath(os.path.dirname(sys.argv[0])))
             cf.legendaPos = legendaPos
             cf.ignoretext = ignoretext
             cf.dimList = dimList
@@ -854,7 +864,7 @@ if __name__ == "__main__":
                         for tfile in os.listdir(sys.argv[i]):
                             if tfile[-4:] == ".tsv" or tfile[-4:] == ".csv":
                                 cf.w.corpora.addItem(os.path.join(sys.argv[i],tfile))
-            cf.exec()
+            cf.show()
             print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
         if sys.argv[1] == "occorrenze":
             calcola_occorrenze()

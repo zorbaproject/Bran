@@ -85,7 +85,10 @@ class BranCorpus(QObject):
         self.daToken = 0
         self.aToken = 100
         self.allToken = False
-        self.corpuswidget.cellChanged.connect(self.corpusCellChanged)
+        try:
+            self.corpuswidget.cellChanged.connect(self.corpusCellChanged)
+        except:
+            pass
         #self.setWindowTitle("Bran")
         self.corpuscols = corpcol
         self.legendaPos = legPos
