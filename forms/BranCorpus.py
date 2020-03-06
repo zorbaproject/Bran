@@ -1830,6 +1830,7 @@ class BranCorpus(QObject):
         cf = confronto.Confronto(self.corpuswidget, self.mycfg, self.sessionDir)
         cf.legendaPos = self.legendaPos
         cf.ignoretext = self.ignoretext
+        cf.corpuscols = self.corpuscols
         cf.dimList = self.dimList
         cf.show()
 

@@ -851,9 +851,11 @@ if __name__ == "__main__":
                     te.aprilista(fileNames)
             te.show()
             print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
+            sys.exit(app.exec_())
         if sys.argv[1] == "confronto":
             cf = confronto.Confronto(None, Corpus.mycfg, os.path.abspath(os.path.dirname(sys.argv[0])))
             cf.legendaPos = legendaPos
+            cf.corpuscols = corpuscols
             cf.ignoretext = ignoretext
             cf.dimList = dimList
             if len(sys.argv)>2:
@@ -866,6 +868,7 @@ if __name__ == "__main__":
                                 cf.w.corpora.addItem(os.path.join(sys.argv[i],tfile))
             cf.show()
             print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
+            sys.exit(app.exec_())
         if sys.argv[1] == "occorrenze":
             calcola_occorrenze()
             print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")

@@ -54,6 +54,7 @@ class Confronto(QMainWindow):
         self.w.with_dict.currentIndexChanged.connect(self.dictselect)
         self.w.with_corpora.currentIndexChanged.connect(self.corporaselect)
         self.fillcombos()
+        self.corpuscols = {}
         self.legendaPos = []
         self.ignoretext = ""
         self.dimList = []
@@ -131,7 +132,7 @@ class Confronto(QMainWindow):
         for key in self.corpora:
             self.w.with_corpora.addItem(key)
         self.w.sel_dict.setChecked(True)
-        self.datatype = ['Occorrenze lemma', 'Occorrenze forma grafica','Occorrenze PoS', 'Statistiche VdB', 'Contaverbi', 'Densità lessicale', 'Segmenti ripetuti']
+        self.datatype = ['Occorrenze lemma', 'Occorrenze forma grafica','Occorrenze PoS', 'Statistiche VdB', 'Contaverbi', 'Densità lessicale', 'Segmenti ripetuti', 'Corpus intero']
         for key in self.datatype:
             self.w.datatype.addItem(key)
         self.w.datatype.setCurrentIndex(0)
@@ -156,13 +157,18 @@ class Confronto(QMainWindow):
                 fileName = fileName + "-densita.tsv"
             if action == "Segmenti ripetuti":
                 fileName = fileName + "-ngrams.tsv"
+            if action == "Corpus intero":
+                fileName = fileName + "-bran.tsv"
         if self.w.altrofile.isChecked():
             fileName = self.w.altrofilename.text()
         return fileName
 
     def do_occ(self):
         context = self.w.datatype.currentText()
-        self.do_confronta(context)
+        if context == "Corpus intero":
+            self.filediff()
+        else:
+            self.do_confronta(context)
 
     def do_gen(self):
         context = "generico"
@@ -183,6 +189,69 @@ class Confronto(QMainWindow):
                 else:
                     dimCorpus = self.dimList[i+1]
         return dimCorpus
+
+    def filediff(self):
+        #columns = range(self.corpusCol)
+        columns = ""
+        for colkey in self.corpuscols:
+            coldata = self.corpuscols[colkey]
+            columns = columns + str(coldata[0]) + ","
+        columns = columns[0:-1]
+        columnsRes = myencoding = QInputDialog.getText(self.w, "Scegli le colonne", "Indica le colonne da controllare separate da virgole", QLineEdit.Normal, columns)[0]
+        columns = columnsRes.split(",")
+        filterdifferent = False
+        ret = QMessageBox.question(self.w,'Domanda', "Vuoi selezionare le righe diverse? Se scegli no, verranno estratte solo le righe uguali", QMessageBox.Yes | QMessageBox.No)
+        if ret == QMessageBox.Yes:
+            filterdifferent = True
+        riferimento = self.readcsv(self.w.altrofilename.text())
+        corpus = self.readcsv(self.w.corpora.item(0).text())
+        TBdialog = tableeditor.Form(self, self.mycfg)
+        TBdialog.sessionDir = self.sessionDir
+        for colkey in self.corpuscols:
+            coldata = self.corpuscols[colkey]
+            TBdialog.addcolumn(coldata[1], coldata[0])
+        self.Progrdialog = progress.Form(self)
+        self.Progrdialog.show()
+        totallines = len(corpus)
+        print("Corpus lines:")
+        print(len(corpus))
+        print("Riferimento lines:")
+        print(len(riferimento))
+        rrow = 0
+        for crow in range(totallines):
+            if len(corpus[crow])<len(self.corpuscols):
+                continue
+            else:
+                rrow = crow
+            if rrow > len(riferimento)-1:
+                rrow = len(riferimento)-1
+            while len(riferimento[rrow])<len(self.corpuscols):
+                rrow = rrow+1
+                if rrow > len(riferimento)-1:
+                    rrow = len(riferimento)-1
+                    break
+            if crow<100 or crow%100==0:
+                self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(crow))
+                self.Progrdialog.w.progressBar.setValue(int((crow/totallines)*100))
+                QApplication.processEvents()
+            if self.Progrdialog.w.annulla.isChecked():
+                return
+            for cl in columns:
+                col = int(cl)
+                if col > len(riferimento[rrow])-1 or col > len(corpus[rrow])-1:
+                    continue
+                if bool(corpus[crow][col] != riferimento[rrow][col]) == filterdifferent:
+                    print(corpus[crow][col] +":"+ riferimento[rrow][col])
+                    tbrow = TBdialog.addlinetotable(str(corpus[crow][0]), 0)
+                    for colkey in self.corpuscols:
+                        coldata = self.corpuscols[colkey]
+                        if coldata[0] == 0:
+                            continue
+                        TBdialog.setcelltotable(str(corpus[crow][coldata[0]]), tbrow, coldata[0])
+                    break
+        self.Progrdialog.accept()
+        TBdialog.show()
+
 
     def do_confronta(self, context):
         ignorethis = QInputDialog.getText(self.w, "Devo ignorare qualcosa?", "Se devo ignorare delle parole, scrivi qui l'espressione regolare. Altrimenti, lascia la casella vuota.", QLineEdit.Normal, self.ignoretext)[0]
@@ -294,9 +363,10 @@ class Confronto(QMainWindow):
                 TBdialog.addcolumn(colname+" TF-IDF", outputcol+1)
             totallines = len(corpus)
             for row in range(startrow, len(corpus)):
-                self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
-                self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
-                QApplication.processEvents()
+                if row<100 or row%100==0:
+                    self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
+                    self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+                    QApplication.processEvents()
                 if self.Progrdialog.w.annulla.isChecked():
                     return
                 try:
@@ -349,9 +419,10 @@ class Confronto(QMainWindow):
             for col in range(1,TBdialog.w.tableWidget.columnCount()):
                 thistotal = 0.0
                 for row in range(totallines):
-                    self.Progrdialog.w.testo.setText("Sto sommando la riga numero "+str(row))
-                    self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
-                    QApplication.processEvents()
+                    if row<100 or row%100==0:
+                        self.Progrdialog.w.testo.setText("Sto sommando la riga numero "+str(row))
+                        self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+                        QApplication.processEvents()
                     if self.Progrdialog.w.annulla.isChecked():
                         return
                     try:
@@ -369,9 +440,10 @@ class Confronto(QMainWindow):
         col = 0
         while col < TBdialog.w.tableWidget.columnCount():
             for row in range(totallines):
-                self.Progrdialog.w.testo.setText("Sto controllando la riga numero "+str(row))
-                self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
-                QApplication.processEvents()
+                if row<100 or row%100==0:
+                    self.Progrdialog.w.testo.setText("Sto controllando la riga numero "+str(row))
+                    self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+                    QApplication.processEvents()
                 if self.Progrdialog.w.annulla.isChecked():
                     return
                 try:
