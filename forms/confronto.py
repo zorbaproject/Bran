@@ -210,6 +210,8 @@ class Confronto(QMainWindow):
         for colkey in self.corpuscols:
             coldata = self.corpuscols[colkey]
             TBdialog.addcolumn(coldata[1], coldata[0])
+        TBdialog.addcolumn("Riga", len(self.corpuscols))
+        TBdialog.addcolumn("Differenza", len(self.corpuscols)+1)
         self.Progrdialog = progress.Form(self)
         self.Progrdialog.show()
         totallines = len(corpus)
@@ -218,11 +220,20 @@ class Confronto(QMainWindow):
         print("Riferimento lines:")
         print(len(riferimento))
         rrow = 0
-        for crow in range(totallines):
+        crow = 0
+        while crow < totallines:
+            if crow<100 or crow%100==0:
+                self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(crow))
+                self.Progrdialog.w.progressBar.setValue(int((crow/totallines)*100))
+                QApplication.processEvents()
+            if self.Progrdialog.w.annulla.isChecked():
+                return
+            mydiff = "="
             if len(corpus[crow])<len(self.corpuscols):
+                crow = crow +1
                 continue
-            else:
-                rrow = crow
+            #else:
+                #rrow = crow
             if rrow > len(riferimento)-1:
                 rrow = len(riferimento)-1
             while len(riferimento[rrow])<len(self.corpuscols):
@@ -230,28 +241,62 @@ class Confronto(QMainWindow):
                 if rrow > len(riferimento)-1:
                     rrow = len(riferimento)-1
                     break
-            if crow<100 or crow%100==0:
-                self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(crow))
-                self.Progrdialog.w.progressBar.setValue(int((crow/totallines)*100))
-                QApplication.processEvents()
-            if self.Progrdialog.w.annulla.isChecked():
-                return
             for cl in columns:
                 col = int(cl)
-                if col > len(riferimento[rrow])-1 or col > len(corpus[rrow])-1:
+                if col > len(riferimento[rrow])-1 or col > len(corpus[crow])-1:
                     continue
-                if bool(corpus[crow][col] != riferimento[rrow][col]) == filterdifferent:
-                    print(corpus[crow][col] +":"+ riferimento[rrow][col])
-                    tbrow = TBdialog.addlinetotable(str(corpus[crow][0]), 0)
-                    for colkey in self.corpuscols:
-                        coldata = self.corpuscols[colkey]
-                        if coldata[0] == 0:
-                            continue
-                        TBdialog.setcelltotable(str(corpus[crow][coldata[0]]), tbrow, coldata[0])
+                if bool(corpus[crow][col] != riferimento[rrow][col]):
+                    tcrow = crow+1
+                    try:
+                        while bool(corpus[tcrow][col] != riferimento[rrow][col]) and tcrow<len(corpus):
+                            tcrow = tcrow+1
+                    except:
+                        pass
+                    trrow = rrow+1
+                    try:
+                        while bool(corpus[crow][col] != riferimento[trrow][col])and trrow<len(riferimento):
+                            trrow = trrow+1
+                    except:
+                        pass
+                    if (tcrow-crow) < (trrow-rrow) and tcrow < len(corpus)-1:
+                        for r in range(crow,tcrow):
+                            riga = corpus[r]
+                            rigan = str(r)
+                            mydiff = "-"
+                            self.addcorpusline(TBdialog, riga, rigan, mydiff)
+                        crow = tcrow
+                    elif (tcrow-crow) > (trrow-rrow) and trrow < len(riferimento)-1:
+                        for r in range(rrow,trrow):
+                            riga = riferimento[r]
+                            rigan = str(r)
+                            mydiff = "+"
+                            self.addcorpusline(TBdialog, riga, rigan, mydiff)
+                        rrow = trrow
+                    else:
+                        riga = corpus[crow]
+                        rigan = str(crow)
+                        mydiff = "!"
+                        print(corpus[crow][col]+":"+riferimento[rrow][col])
+                        self.addcorpusline(TBdialog, riga, rigan, mydiff)
                     break
+            if bool(not filterdifferent and mydiff == "="):
+                self.addcorpusline(TBdialog, riga, rigan, mydiff)
+            crow = crow +1
+            rrow = rrow+1
         self.Progrdialog.accept()
         TBdialog.show()
 
+    def addcorpusline(self, TBdialog, riga, el2 = "", el3 = ""):
+        tbrow = TBdialog.addlinetotable(str(riga[0]), 0)
+        for colkey in self.corpuscols:
+            coldata = self.corpuscols[colkey]
+            if coldata[0] == 0:
+                continue
+            TBdialog.setcelltotable(str(riga[coldata[0]]), tbrow, coldata[0])
+        if el2 != "":
+            TBdialog.setcelltotable(str(el2), tbrow, len(self.corpuscols))
+        if el3 != "":
+            TBdialog.setcelltotable(str(el3), tbrow, len(self.corpuscols)+1)
 
     def do_confronta(self, context):
         ignorethis = QInputDialog.getText(self.w, "Devo ignorare qualcosa?", "Se devo ignorare delle parole, scrivi qui l'espressione regolare. Altrimenti, lascia la casella vuota.", QLineEdit.Normal, self.ignoretext)[0]
