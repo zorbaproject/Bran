@@ -44,13 +44,20 @@ class Confronto(QMainWindow):
         #self.w.rejected.connect(self.isrejected)
         self.setWindowTitle("Confronta dati estratti dai corpora")
         self.w.do_occ.clicked.connect(self.do_occ)
+        self.w.do_corpus_diff.clicked.connect(self.filediff)
         self.w.do_gen.clicked.connect(self.do_gen)
         self.w.do_multi.clicked.connect(self.do_multi)
         #self.w.actionConta_occorrenze.triggered.connect(self.contaoccorrenze)
         self.sessionDir = sessionDir
         self.w.addfile.clicked.connect(self.addfile)
         self.w.rmfile.clicked.connect(self.rmfile)
+        self.w.gen_addfile.clicked.connect(self.gen_addfile)
+        self.w.gen_rmfile.clicked.connect(self.gen_rmfile)
         self.w.altrofileselect.clicked.connect(self.altrofileselect)
+        self.w.gen_riferimento_sel.clicked.connect(lambda: self.genfileselect(self.w.gen_riferimento))
+        self.w.multi_filename_sel.clicked.connect(lambda: self.genfileselect(self.w.multi_filename))
+        self.w.corpus1_sel.clicked.connect(lambda: self.genfileselect(self.w.corpus1))
+        self.w.corpus2_sel.clicked.connect(lambda: self.genfileselect(self.w.corpus2))
         self.w.with_dict.currentIndexChanged.connect(self.dictselect)
         self.w.with_corpora.currentIndexChanged.connect(self.corporaselect)
         self.fillcombos()
@@ -68,11 +75,25 @@ class Confronto(QMainWindow):
         for i in self.w.corpora.selectedItems():
             self.w.corpora.takeItem(self.w.corpora.row(i))
 
+    def gen_addfile(self):
+        fileNames = QFileDialog.getOpenFileNames(self, "Apri file CSV", self.sessionDir, "CSV files (*.tsv *.csv *.txt)")[0]
+        for fileName in fileNames:
+            self.w.gen_corpora.addItem(fileName)
+
+    def gen_rmfile(self):
+        for i in self.w.gen_corpora.selectedItems():
+            self.w.gen_corpora.takeItem(self.w.gen_corpora.row(i))
+
     def altrofileselect(self):
         fileNames = QFileDialog.getOpenFileNames(self, "Apri file CSV", self.sessionDir, "CSV files (*.tsv *.csv *.txt)")[0]
         for fileName in fileNames:
             self.w.altrofilename.setText(fileName)
             self.w.altrofile.setChecked(True)
+
+    def genfileselect(self, linedit):
+        fileNames = QFileDialog.getOpenFileNames(self, "Apri file CSV", self.sessionDir, "CSV files (*.tsv *.csv *.txt)")[0]
+        for fileName in fileNames:
+            linedit.setText(fileName)
 
     def dictselect(self):
         self.w.sel_dict.setChecked(True)
@@ -132,7 +153,7 @@ class Confronto(QMainWindow):
         for key in self.corpora:
             self.w.with_corpora.addItem(key)
         self.w.sel_dict.setChecked(True)
-        self.datatype = ['Occorrenze lemma', 'Occorrenze forma grafica','Occorrenze PoS', 'Statistiche VdB', 'Contaverbi', 'Densità lessicale', 'Segmenti ripetuti', 'Corpus intero']
+        self.datatype = ['Occorrenze lemma', 'Occorrenze forma grafica','Occorrenze PoS', 'Statistiche VdB', 'Contaverbi', 'Densità lessicale', 'Segmenti ripetuti']
         for key in self.datatype:
             self.w.datatype.addItem(key)
         self.w.datatype.setCurrentIndex(0)
@@ -157,18 +178,13 @@ class Confronto(QMainWindow):
                 fileName = fileName + "-densita.tsv"
             if action == "Segmenti ripetuti":
                 fileName = fileName + "-ngrams.tsv"
-            if action == "Corpus intero":
-                fileName = fileName + "-bran.tsv"
         if self.w.altrofile.isChecked():
             fileName = self.w.altrofilename.text()
         return fileName
 
     def do_occ(self):
         context = self.w.datatype.currentText()
-        if context == "Corpus intero":
-            self.filediff()
-        else:
-            self.do_confronta(context)
+        self.do_confronta(context)
 
     def do_gen(self):
         context = "generico"
@@ -203,8 +219,8 @@ class Confronto(QMainWindow):
         ret = QMessageBox.question(self.w,'Domanda', "Vuoi selezionare le righe diverse? Se scegli no, verranno estratte solo le righe uguali", QMessageBox.Yes | QMessageBox.No)
         if ret == QMessageBox.Yes:
             filterdifferent = True
-        riferimento = self.readcsv(self.w.altrofilename.text())
-        corpus = self.readcsv(self.w.corpora.item(0).text())
+        riferimento = self.readcsv(self.w.corpus1.text())
+        corpus = self.readcsv(self.w.corpus2.text())
         TBdialog = tableeditor.Form(self, self.mycfg)
         TBdialog.sessionDir = self.sessionDir
         for colkey in self.corpuscols:
@@ -276,7 +292,9 @@ class Confronto(QMainWindow):
                         riga = corpus[crow]
                         rigan = str(crow)
                         mydiff = "!"
-                        print(corpus[crow][col]+":"+riferimento[rrow][col])
+                        self.addcorpusline(TBdialog, riga, rigan, mydiff)
+                        riga = riferimento[rrow]
+                        rigan = str(rrow)
                         self.addcorpusline(TBdialog, riga, rigan, mydiff)
                     break
             if bool(not filterdifferent and mydiff == "="):
@@ -304,10 +322,18 @@ class Confronto(QMainWindow):
         if self.w.occ_ds.isChecked():
             normalizzazionecorpus = int(QInputDialog.getInt(self.w, "Normalizzazione", "Puoi indicare il numero di token in base al quale standardizzare i corpora. Se lasci questo valore a zero, Bran calcolerà automaticamente la dimensione adeguata per ciascun corpus.")[0])
         thisname = []
+        dopercent = self.w.dopercent.isChecked()
+        ignorefirstrow = self.w.ignorefirstrow.isChecked()
         if context != "generico" and context != "multicolonna":
             riferimentoName = self.getRiferimento(context)
-        else:
-            riferimentoName = self.w.altrofilename.text()
+        elif context == "generico":
+            riferimentoName = self.w.gen_riferimento.text()
+            dopercent = self.w.dopercent_gen.isChecked()
+            ignorefirstrow = self.w.ignorefirstrow_gen.isChecked()
+        elif context == "multicolonna":
+            riferimentoName = self.w.multi_filename.text()
+            dopercent = self.w.dopercent_multi.isChecked()
+            ignorefirstrow = self.w.ignorefirstrow_multi.isChecked()
         riferimento = ""
         try:
             riferimento = self.readcsv(riferimentoName)
@@ -315,7 +341,7 @@ class Confronto(QMainWindow):
             print("Impossibile leggere la tabella di riferimento")
             if context == "multicolonna":
                 try:
-                    riferimento = self.readcsv(self.w.corpora.item(0).text())
+                    riferimento = self.readcsv(self.w.multi_filename.text())
                 except:
                   return
             else:
@@ -331,11 +357,12 @@ class Confronto(QMainWindow):
         multivalcols = []
         if context == "multicolonna":
             if self.w.multi_all.isChecked():
-                if self.w.corpora.count() == 0:
-                    multivalcols = list(range(len(riferimento[0])))
-                else:
-                    corpus = self.readcsv(self.w.corpora.item(0).text())
-                    multivalcols = list(range(len(corpus[0])))
+                multivalcols = list(range(len(riferimento[0])))
+                #if self.w.corpora.count() == 0:
+                #    multivalcols = list(range(len(riferimento[0])))
+                #else:
+                #    corpus = self.readcsv(self.w.corpora.item(0).text())
+                #    multivalcols = list(range(len(corpus[0])))
                 multivalcols.remove(self.w.multiRifValue.value())
                 multivalcols.remove(self.w.multiConfKey.value())
             else:
@@ -360,7 +387,7 @@ class Confronto(QMainWindow):
                 if self.w.gen_tfidf.isChecked():
                     self.w.tfidf.setChecked(True)
             startrow = 0
-            if self.w.ignorefirstrow.isChecked():
+            if ignorefirstrow:
                 startrow = 1
             if i == 0:
                 corpus = riferimento
@@ -382,10 +409,7 @@ class Confronto(QMainWindow):
                     corpus = riferimento
                     corpValueCol = self.w.multiRifValue.value()
                 else:
-                    if self.w.corpora.count() == 0:
-                        corpus = riferimento
-                    else:
-                        corpus = self.readcsv(self.w.corpora.item(0).text())
+                    corpus = riferimento
                     corpValueCol = int(multivalcols[i-1])
                 tempcrp = []
                 for row in range(len(corpus)):
@@ -397,7 +421,7 @@ class Confronto(QMainWindow):
                 corpKeyCol = 0
                 corpValueCol = 1
                 colname = str(i-1)
-                if self.w.ignorefirstrow.isChecked():
+                if ignorefirstrow:
                     colname = corpus[0][corpValueCol]
             TBdialog.addcolumn(colname, i+1)
             if self.w.occ_ds.isChecked():
@@ -460,7 +484,7 @@ class Confronto(QMainWindow):
         totallines = TBdialog.w.tableWidget.rowCount()
         coltotal = []
         dimcorp = []
-        if self.w.dopercent.isChecked() or self.w.occ_ds.isChecked() or self.w.tfidf.isChecked():
+        if dopercent or self.w.occ_ds.isChecked() or self.w.tfidf.isChecked():
             for col in range(1,TBdialog.w.tableWidget.columnCount()):
                 thistotal = 0.0
                 for row in range(totallines):
@@ -499,14 +523,14 @@ class Confronto(QMainWindow):
                         except:
                             TBdialog.setcelltotable("0", row, col)
                         teststring = TBdialog.w.tableWidget.item(row,col).text()
-                        if self.w.dopercent.isChecked():
+                        if dopercent:
                             thisvalue = str(float((float(teststring)/coltotal[col-1])*100.0))
                             TBdialog.setcelltotable(thisvalue, row, col)
                             teststring = thisvalue
                         if self.w.occ_ds.isChecked() and i>0:
                             try:
                                 rifval = float(TBdialog.w.tableWidget.item(row,1).text())
-                                if not self.w.dopercent.isChecked():
+                                if not dopercent:
                                     teststring = str(float((float(teststring)/coltotal[col-1])*100.0))
                                     rifval = str(float((float(rifval)/coltotal[0])*100.0))
                                 rifval = float(rifval)/100.0
@@ -529,7 +553,7 @@ class Confronto(QMainWindow):
                             TBdialog.setcelltotable(str(tbval), row, col+1)
                         if self.w.tfidf.isChecked() and i>0:
                             N = float(TBdialog.w.tableWidget.columnCount()-1)/2
-                            if not self.w.dopercent.isChecked():
+                            if not dopercent:
                                 teststring = str(float((float(teststring)/coltotal[col-1])*100.0))
                             tfval = float(float(teststring)/100.0)
                             wINd = 0
