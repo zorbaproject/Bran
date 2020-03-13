@@ -180,7 +180,9 @@ class TintCorpus(QThread):
                         gotEncoding = False
                         while gotEncoding == False:
                             try:
+                                self.Progrdialog.hide()
                                 myencoding = QInputDialog.getText(self.corpuswidget, "Scegli la codifica", "Sembra che questo file non sia codificato in UTF-8. Vuoi provare a specificare una codifica diversa? (Es: cp1252 oppure ISO-8859-15)", QLineEdit.Normal, myencoding)
+                                self.Progrdialog.show()
                             except:
                                 print("Sembra che questo file non sia codificato in UTF-8. Vuoi provare a specificare una codifica diversa? (Es: cp1252 oppure ISO-8859-15)")
                                 myencoding = [input()]
@@ -198,7 +200,9 @@ class TintCorpus(QThread):
                     if self.csvIDcolumn <0 or self.csvTextcolumn <0:
                         try:
                             corpusID = str(fileID)+"_"+os.path.basename(fileName)+",lang:"+self.language+",tagger:tint"
+                            self.Progrdialog.hide()
                             corpusID = QInputDialog.getText(self.corpuswidget, "Scegli il tag", "Indica il tag di questo file nel corpus:", QLineEdit.Normal, corpusID)[0]
+                            self.Progrdialog.show()
                         except:
                             corpusID = str(fileID)+"_"+os.path.basename(fileName)+",lang:"+self.language+",tagger:tint"
                         self.text2corpusTINT(lines, corpusID)
@@ -207,8 +211,10 @@ class TintCorpus(QThread):
                             sep = QInputDialog.getText(self.corpuswidget, "Scegli il separatore", "Indica il carattere che separa le colonne (\\t è la tabulazione):", QLineEdit.Normal, "\\t")[0]
                             if sep == "\\t":
                                 sep = "\t"
+                            self.Progrdialog.hide()
                             textID = QInputDialog.getInt(self.corpuswidget, "Scegli il testo", "Indica la colonna della tabella che contiene il testo di questo sottocorpus:")[0]
                             corpusIDtext = QInputDialog.getText(self.corpuswidget, "Scegli il tag", "Indica il tag di questo file nel corpus. Puoi usare [filename] per indicare il nome del file e [numeroColonna] per indicare la colonna da cui estrarre un tag.", QLineEdit.Normal, "[filename], [0]"+",tagger:tint")[0]
+                            self.Progrdialog.show()
                             textID = int(textID)
                             for line in lines.split("\n"):
                                 corpusID = corpusIDtext.replace("[filename]", os.path.basename(fileName))
@@ -399,7 +405,7 @@ class TintCorpus(QThread):
                             for mydep in sentence["basic-dependencies"]:
                                 if mydep["dependent"] == token["index"]:
                                     fullline = fullline + "\t" + str(mydep["dep"]) + "\t"
-                                    fullline = fullline + str(mydep["head"])
+                                    fullline = fullline + str(mydep["governor"])
                                     break
                             fdatefile = self.outputcsv
                             fullline = self.isdt_to_ud(fullline)
