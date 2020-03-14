@@ -181,7 +181,7 @@ class TintCorpus(QThread):
                         while gotEncoding == False:
                             try:
                                 self.Progrdialog.hide()
-                                myencoding = QInputDialog.getText(self.corpuswidget, "Scegli la codifica", "Sembra che questo file non sia codificato in UTF-8. Vuoi provare a specificare una codifica diversa? (Es: cp1252 oppure ISO-8859-15)", QLineEdit.Normal, myencoding)
+                                myencoding = QInputDialog.getText(None, "Scegli la codifica", "Sembra che questo file non sia codificato in UTF-8. Vuoi provare a specificare una codifica diversa? (Es: cp1252 oppure ISO-8859-15)", QLineEdit.Normal, myencoding)
                                 self.Progrdialog.show()
                             except:
                                 print("Sembra che questo file non sia codificato in UTF-8. Vuoi provare a specificare una codifica diversa? (Es: cp1252 oppure ISO-8859-15)")
@@ -199,21 +199,25 @@ class TintCorpus(QThread):
                     print(fileName + " -> " + self.outputcsv)
                     if self.csvIDcolumn <0 or self.csvTextcolumn <0:
                         try:
+                            if self.iscli:
+                                err = 0/0
                             corpusID = str(fileID)+"_"+os.path.basename(fileName)+",lang:"+self.language+",tagger:tint"
                             self.Progrdialog.hide()
-                            corpusID = QInputDialog.getText(self.corpuswidget, "Scegli il tag", "Indica il tag di questo file nel corpus:", QLineEdit.Normal, corpusID)[0]
+                            corpusID = QInputDialog.getText(None, "Scegli il tag", "Indica il tag di questo file nel corpus:", QLineEdit.Normal, corpusID)[0]
                             self.Progrdialog.show()
                         except:
                             corpusID = str(fileID)+"_"+os.path.basename(fileName)+",lang:"+self.language+",tagger:tint"
                         self.text2corpusTINT(lines, corpusID)
                     else:
                         try:
-                            sep = QInputDialog.getText(self.corpuswidget, "Scegli il separatore", "Indica il carattere che separa le colonne (\\t è la tabulazione):", QLineEdit.Normal, "\\t")[0]
+                            if self.iscli:
+                                err = 0/0
+                            sep = QInputDialog.getText(None, "Scegli il separatore", "Indica il carattere che separa le colonne (\\t è la tabulazione):", QLineEdit.Normal, "\\t")[0]
                             if sep == "\\t":
                                 sep = "\t"
                             self.Progrdialog.hide()
-                            textID = QInputDialog.getInt(self.corpuswidget, "Scegli il testo", "Indica la colonna della tabella che contiene il testo di questo sottocorpus:")[0]
-                            corpusIDtext = QInputDialog.getText(self.corpuswidget, "Scegli il tag", "Indica il tag di questo file nel corpus. Puoi usare [filename] per indicare il nome del file e [numeroColonna] per indicare la colonna da cui estrarre un tag.", QLineEdit.Normal, "[filename], [0]"+",tagger:tint")[0]
+                            textID = QInputDialog.getInt(None, "Scegli il testo", "Indica la colonna della tabella che contiene il testo di questo sottocorpus:")[0]
+                            corpusIDtext = QInputDialog.getText(None, "Scegli il tag", "Indica il tag di questo file nel corpus. Puoi usare [filename] per indicare il nome del file e [numeroColonna] per indicare la colonna da cui estrarre un tag.", QLineEdit.Normal, "[filename], [0]"+",tagger:tint")[0]
                             self.Progrdialog.show()
                             textID = int(textID)
                             for line in lines.split("\n"):
@@ -319,6 +323,7 @@ class TintCorpus(QThread):
                 if self.Progrdialog.w.annulla.isChecked():
                     return
                 myres = ""
+                print(row)
                 if line != "":
                     myres = self.getJson(line)
                 try:
