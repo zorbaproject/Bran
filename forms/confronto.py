@@ -462,7 +462,76 @@ class Confronto(QMainWindow):
         fileName = QFileDialog.getSaveFileName(self, "Salva file CSV", self.sessionDir, "Text files (*.tsv *.csv *.txt)")[0]
         corpus1 = self.readcsv(self.w.corpus1.text())
         corpus2 = self.readcsv(self.w.corpus2.text())
-        print(fileName)
+        text_file = open(fileName, "w", encoding='utf-8')
+        text_file.write("")
+        text_file.close()
+        self.Progrdialog = progress.Form(self)
+        self.Progrdialog.show()
+        totallines = len(corpus1)
+        for row in range(len(corpus1)):
+            if row<100 or row%100==0:
+                self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
+                self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+                QApplication.processEvents()
+            if self.Progrdialog.w.annulla.isChecked():
+                return
+            if len(corpus1[row])<len(self.corpuscols):
+                continue
+            fullline = []
+            for colkey in self.corpuscols:
+                coldata = self.corpuscols[colkey]
+                if coldata[0] == 0:
+                    if self.w.corpuscol_cmb_0.currentIndex() == 0:
+                        fullline.append(corpus1[row][coldata[0]])
+                    else:
+                        fullline.append(corpus2[row][coldata[0]])
+                if coldata[0] == 1:
+                    if self.w.corpuscol_cmb_1.currentIndex() == 0:
+                        fullline.append(corpus1[row][coldata[0]])
+                    else:
+                        fullline.append(corpus2[row][coldata[0]])
+                if coldata[0] == 2:
+                    if self.w.corpuscol_cmb_2.currentIndex() == 0:
+                        fullline.append(corpus1[row][coldata[0]])
+                    else:
+                        fullline.append(corpus2[row][coldata[0]])
+                if coldata[0] == 3:
+                    if self.w.corpuscol_cmb_3.currentIndex() == 0:
+                        fullline.append(corpus1[row][coldata[0]])
+                    else:
+                        fullline.append(corpus2[row][coldata[0]])
+                if coldata[0] == 4:
+                    if self.w.corpuscol_cmb_4.currentIndex() == 0:
+                        fullline.append(corpus1[row][coldata[0]])
+                    else:
+                        fullline.append(corpus2[row][coldata[0]])
+                if coldata[0] == 5:
+                    if self.w.corpuscol_cmb_5.currentIndex() == 0:
+                        fullline.append(corpus1[row][coldata[0]])
+                    else:
+                        fullline.append(corpus2[row][coldata[0]])
+                if coldata[0] == 6:
+                    if self.w.corpuscol_cmb_6.currentIndex() == 0:
+                        fullline.append(corpus1[row][coldata[0]])
+                    else:
+                        fullline.append(corpus2[row][coldata[0]])
+                if coldata[0] == 7:
+                    if self.w.corpuscol_cmb_7.currentIndex() == 0:
+                        fullline.append(corpus1[row][coldata[0]])
+                    else:
+                        fullline.append(corpus2[row][coldata[0]])
+                if coldata[0] == 8:
+                    if self.w.corpuscol_cmb_8.currentIndex() == 0:
+                        fullline.append(corpus1[row][coldata[0]])
+                    else:
+                        fullline.append(corpus2[row][coldata[0]])
+                if coldata[0] == 9:
+                    if self.w.corpuscol_cmb_9.currentIndex() == 0:
+                        fullline.append(corpus1[row][coldata[0]])
+                    else:
+                        fullline.append(corpus2[row][coldata[0]])
+            self.addlinetoCSV(fileName, fullline)
+        self.Progrdialog.accept()
 
     def do_confronta(self, context):
         ignorethis = QInputDialog.getText(self.w, "Devo ignorare qualcosa?", "Se devo ignorare delle parole, scrivi qui l'espressione regolare. Altrimenti, lascia la casella vuota.", QLineEdit.Normal, self.ignoretext)[0]
