@@ -29,7 +29,7 @@ from forms import tableeditor
 
 class Confronto(QMainWindow):
 
-    def __init__(self, parent=None, mycfg=None, sessionDir = ""):
+    def __init__(self, parent=None, mycfg=None, sessionDir = "", corpuscols = {}):
         super(Confronto, self).__init__(parent)
         file = QFile(os.path.abspath(os.path.dirname(sys.argv[0]))+"/forms/confronto.ui")
         file.open(QFile.ReadOnly)
@@ -44,9 +44,11 @@ class Confronto(QMainWindow):
         #self.w.rejected.connect(self.isrejected)
         self.setWindowTitle("Confronta dati estratti dai corpora")
         self.w.do_occ.clicked.connect(self.do_occ)
-        self.w.do_corpus_diff.clicked.connect(self.filediff)
+        self.w.do_corpus_diff.clicked.connect(self.do_filediff)
         self.w.do_gen.clicked.connect(self.do_gen)
         self.w.do_multi.clicked.connect(self.do_multi)
+        self.w.do_corpus_merge.clicked.connect(self.do_corpus_merge)
+        self.w.applydiff.clicked.connect(self.applicamodifiche)
         #self.w.actionConta_occorrenze.triggered.connect(self.contaoccorrenze)
         self.sessionDir = sessionDir
         self.w.addfile.clicked.connect(self.addfile)
@@ -61,10 +63,68 @@ class Confronto(QMainWindow):
         self.w.with_dict.currentIndexChanged.connect(self.dictselect)
         self.w.with_corpora.currentIndexChanged.connect(self.corporaselect)
         self.fillcombos()
-        self.corpuscols = {}
+        self.corpuscols = corpuscols
         self.legendaPos = []
         self.ignoretext = ""
         self.dimList = []
+        self.fill_corpuscol_labels()
+
+
+    def fill_corpuscol_labels(self):
+        for colkey in self.corpuscols:
+            coldata = self.corpuscols[colkey]
+            if coldata[0] == 0:
+                print(coldata[1])
+                self.w.corpuscol_0.setText(coldata[1])
+                self.w.corpuscol_lbl_0.setText(coldata[1])
+                self.w.corpuscol_cmb_0.addItem("Corpus 1")
+                self.w.corpuscol_cmb_0.addItem("Corpus 2")
+            if coldata[0] == 1:
+                self.w.corpuscol_1.setText(coldata[1])
+                self.w.corpuscol_1.setChecked(True)
+                self.w.corpuscol_lbl_1.setText(coldata[1])
+                self.w.corpuscol_cmb_1.addItem("Corpus 1")
+                self.w.corpuscol_cmb_1.addItem("Corpus 2")
+            if coldata[0] == 2:
+                self.w.corpuscol_2.setText(coldata[1])
+                self.w.corpuscol_lbl_2.setText(coldata[1])
+                self.w.corpuscol_cmb_2.addItem("Corpus 1")
+                self.w.corpuscol_cmb_2.addItem("Corpus 2")
+            if coldata[0] == 3:
+                self.w.corpuscol_3.setText(coldata[1])
+                self.w.corpuscol_lbl_3.setText(coldata[1])
+                self.w.corpuscol_cmb_3.addItem("Corpus 1")
+                self.w.corpuscol_cmb_3.addItem("Corpus 2")
+            if coldata[0] == 4:
+                self.w.corpuscol_4.setText(coldata[1])
+                self.w.corpuscol_lbl_4.setText(coldata[1])
+                self.w.corpuscol_cmb_4.addItem("Corpus 1")
+                self.w.corpuscol_cmb_4.addItem("Corpus 2")
+            if coldata[0] == 5:
+                self.w.corpuscol_5.setText(coldata[1])
+                self.w.corpuscol_lbl_5.setText(coldata[1])
+                self.w.corpuscol_cmb_5.addItem("Corpus 1")
+                self.w.corpuscol_cmb_5.addItem("Corpus 2")
+            if coldata[0] == 6:
+                self.w.corpuscol_6.setText(coldata[1])
+                self.w.corpuscol_lbl_6.setText(coldata[1])
+                self.w.corpuscol_cmb_6.addItem("Corpus 1")
+                self.w.corpuscol_cmb_6.addItem("Corpus 2")
+            if coldata[0] == 7:
+                self.w.corpuscol_7.setText(coldata[1])
+                self.w.corpuscol_lbl_7.setText(coldata[1])
+                self.w.corpuscol_cmb_7.addItem("Corpus 1")
+                self.w.corpuscol_cmb_7.addItem("Corpus 2")
+            if coldata[0] == 8:
+                self.w.corpuscol_8.setText(coldata[1])
+                self.w.corpuscol_lbl_8.setText(coldata[1])
+                self.w.corpuscol_cmb_8.addItem("Corpus 1")
+                self.w.corpuscol_cmb_8.addItem("Corpus 2")
+            if coldata[0] == 9:
+                self.w.corpuscol_9.setText(coldata[1])
+                self.w.corpuscol_lbl_9.setText(coldata[1])
+                self.w.corpuscol_cmb_9.addItem("Corpus 1")
+                self.w.corpuscol_cmb_9.addItem("Corpus 2")
 
     def addfile(self):
         fileNames = QFileDialog.getOpenFileNames(self, "Apri file CSV", self.sessionDir, "CSV files (*.tsv *.csv *.txt)")[0]
@@ -206,18 +266,97 @@ class Confronto(QMainWindow):
                     dimCorpus = self.dimList[i+1]
         return dimCorpus
 
-    def filediff(self):
-        #columns = range(self.corpusCol)
-        columns = ""
-        for colkey in self.corpuscols:
-            coldata = self.corpuscols[colkey]
-            columns = columns + str(coldata[0]) + ","
-        columns = columns[0:-1]
-        columnsRes = myencoding = QInputDialog.getText(self.w, "Scegli le colonne", "Indica le colonne da controllare separate da virgole", QLineEdit.Normal, columns)[0]
-        columns = columnsRes.split(",")
+    def do_filediff(self):
+        self.filediff(True)
+
+    def applicamodifiche(self):
+        fileName = QFileDialog.getSaveFileName(self, "Salva file CSV", self.sessionDir, "Text files (*.tsv *.csv *.txt)")[0]
+        if fileName == "":
+            return
+        text_file = open(fileName, "w", encoding='utf-8')
+        text_file.write("")
+        text_file.close()
+        mydiff = self.filediff(False)
+        print(mydiff)
+        corpus1 = self.readcsv(self.w.corpus1.text())
+        corpus2 = self.readcsv(self.w.corpus2.text())
+        self.Progrdialog = progress.Form(self)
+        self.Progrdialog.show()
+        totallines = len(corpus2)
+        drow = 0
+        for row in range(len(corpus2)):
+            if row<100 or row%100==0:
+                self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
+                self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+                QApplication.processEvents()
+            if self.Progrdialog.w.annulla.isChecked():
+                return
+            fullline = []
+            if drow > len(mydiff)-1:
+                break
+            if row < mydiff[drow][0]:
+                fullline = corpus2[row]
+            elif mydiff[drow][2] == "+":
+                fullline = corpus2[row]
+                self.addlinetoCSV(fileName, fullline)
+                while mydiff[drow][2] == "+":
+                    fullline = corpus1[mydiff[drow][1]]
+                    drow = drow + 1
+            elif mydiff[drow][2] == "!":
+                fullline = corpus1[mydiff[drow][1]]
+                drow = drow + 1
+            elif mydiff[drow][2] == "-":
+                drow = drow + 1
+            if len(fullline) != 0:
+                self.addlinetoCSV(fileName, fullline)
+        while drow < len(mydiff):
+            if mydiff[drow][2] == "+":
+                fullline = corpus1[mydiff[drow][1]]
+            else:
+                print("Error in merging")
+                print(mydiff)
+            drow = drow + 1
+        self.Progrdialog.accept()
+
+    def addlinetoCSV(self, fileName, fullline):
+        fullrow = ""
+        sep = '\t'
+        for i in range(len(fullline)):
+            if i != 0:
+                fullrow = fullrow + sep
+            fullrow = fullrow + fullline[i]
+        with open(fileName, "a", encoding='utf-8') as myfile:
+            myfile.write(fullrow+"\n")
+
+    def filediff(self, showresults = True):
+        simpleres = []
+        columns = []
+        if self.w.corpuscol_0.isChecked():
+            columns.append(0)
+        if self.w.corpuscol_1.isChecked():
+            columns.append(1)
+        if self.w.corpuscol_2.isChecked():
+            columns.append(2)
+        if self.w.corpuscol_3.isChecked():
+            columns.append(3)
+        if self.w.corpuscol_4.isChecked():
+            columns.append(4)
+        if self.w.corpuscol_5.isChecked():
+            columns.append(5)
+        if self.w.corpuscol_6.isChecked():
+            columns.append(6)
+        if self.w.corpuscol_7.isChecked():
+            columns.append(7)
+        if self.w.corpuscol_8.isChecked():
+            columns.append(8)
+        if self.w.corpuscol_9.isChecked():
+            columns.append(9)
         filterdifferent = False
-        ret = QMessageBox.question(self.w,'Domanda', "Vuoi selezionare le righe diverse? Se scegli no, verranno estratte solo le righe uguali", QMessageBox.Yes | QMessageBox.No)
-        if ret == QMessageBox.Yes:
+        if showresults:
+            ret = QMessageBox.question(self.w,'Domanda', "Vuoi estrarre solo le righe diverse? Se scegli no, verranno presentate anche le righe invariate.", QMessageBox.Yes | QMessageBox.No)
+            if ret == QMessageBox.Yes:
+                filterdifferent = True
+        else:
             filterdifferent = True
         riferimento = self.readcsv(self.w.corpus1.text())
         corpus = self.readcsv(self.w.corpus2.text())
@@ -231,10 +370,6 @@ class Confronto(QMainWindow):
         self.Progrdialog = progress.Form(self)
         self.Progrdialog.show()
         totallines = len(corpus)
-        print("Corpus lines:")
-        print(len(corpus))
-        print("Riferimento lines:")
-        print(len(riferimento))
         rrow = 0
         crow = 0
         while crow < totallines:
@@ -280,6 +415,7 @@ class Confronto(QMainWindow):
                             rigan = str(r)
                             mydiff = "-"
                             self.addcorpusline(TBdialog, riga, rigan, mydiff)
+                            simpleres.append([r,r,mydiff])
                         crow = tcrow
                     elif (tcrow-crow) > (trrow-rrow) and trrow < len(riferimento)-1:
                         for r in range(rrow,trrow):
@@ -287,22 +423,28 @@ class Confronto(QMainWindow):
                             rigan = str(r)
                             mydiff = "+"
                             self.addcorpusline(TBdialog, riga, rigan, mydiff)
+                            simpleres.append([crow-1,r,mydiff])
                         rrow = trrow
                     else:
                         riga = corpus[crow]
                         rigan = str(crow)
                         mydiff = "!"
                         self.addcorpusline(TBdialog, riga, rigan, mydiff)
+                        simpleres.append([crow,rrow,mydiff])
                         riga = riferimento[rrow]
                         rigan = str(rrow)
                         self.addcorpusline(TBdialog, riga, rigan, mydiff)
                     break
             if bool(not filterdifferent and mydiff == "="):
+                riga = corpus[crow]
+                rigan = str(crow)
                 self.addcorpusline(TBdialog, riga, rigan, mydiff)
             crow = crow +1
             rrow = rrow+1
         self.Progrdialog.accept()
-        TBdialog.show()
+        if showresults:
+            TBdialog.show()
+        return simpleres
 
     def addcorpusline(self, TBdialog, riga, el2 = "", el3 = ""):
         tbrow = TBdialog.addlinetotable(str(riga[0]), 0)
@@ -315,6 +457,12 @@ class Confronto(QMainWindow):
             TBdialog.setcelltotable(str(el2), tbrow, len(self.corpuscols))
         if el3 != "":
             TBdialog.setcelltotable(str(el3), tbrow, len(self.corpuscols)+1)
+
+    def do_corpus_merge(self):
+        fileName = QFileDialog.getSaveFileName(self, "Salva file CSV", self.sessionDir, "Text files (*.tsv *.csv *.txt)")[0]
+        corpus1 = self.readcsv(self.w.corpus1.text())
+        corpus2 = self.readcsv(self.w.corpus2.text())
+        print(fileName)
 
     def do_confronta(self, context):
         ignorethis = QInputDialog.getText(self.w, "Devo ignorare qualcosa?", "Se devo ignorare delle parole, scrivi qui l'espressione regolare. Altrimenti, lascia la casella vuota.", QLineEdit.Normal, self.ignoretext)[0]

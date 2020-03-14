@@ -853,9 +853,8 @@ if __name__ == "__main__":
             print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
             sys.exit(app.exec_())
         if sys.argv[1] == "confronto":
-            cf = confronto.Confronto(None, Corpus.mycfg, os.path.abspath(os.path.dirname(sys.argv[0])))
+            cf = confronto.Confronto(None, Corpus.mycfg, os.path.abspath(os.path.dirname(sys.argv[0])), corpuscols)
             cf.legendaPos = legendaPos
-            cf.corpuscols = corpuscols
             cf.ignoretext = ignoretext
             cf.dimList = dimList
             if len(sys.argv)>2:

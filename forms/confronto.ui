@@ -211,6 +211,16 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_8">
         <item>
+         <widget class="QLabel" name="label_18">
+          <property name="styleSheet">
+           <string notr="true">color: rgb(255, 0, 0);</string>
+          </property>
+          <property name="text">
+           <string>Puoi confrontare qualsiasi tipo di tabella, basta indicare le colonne (chiavi e valori, es: lemmi e occorrenze) che vuoi comparare.</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QGroupBox" name="groupBox_2">
           <property name="title">
            <string>File da confrontare</string>
@@ -588,8 +598,8 @@
            <string notr="true">color: rgb(255, 0, 0);</string>
           </property>
           <property name="text">
-           <string>Nota: Il corpus 1 viene confrontato con il corpus 2, per trovare gli elementi cancellati, aggiunti, o modificati rispetto all'originale (corpus 1). 
-È possibile fondere assieme solo corpora della stessa dimensione.</string>
+           <string>Il corpus 1 viene confrontato con il corpus 2, per trovare gli elementi cancellati, aggiunti, o modificati rispetto all'originale (corpus 1). 
+È possibile fondere assieme solo corpora della stessa dimensione: le colonne della forma grafica dovrebbero coincidere.</string>
           </property>
          </widget>
         </item>
@@ -632,11 +642,230 @@
          </layout>
         </item>
         <item>
+         <layout class="QGridLayout" name="gridLayout_10">
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="corpuscol_1">
+            <property name="text">
+             <string>CheckBox</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QCheckBox" name="corpuscol_2">
+            <property name="text">
+             <string>CheckBox</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <widget class="QCheckBox" name="corpuscol_8">
+            <property name="text">
+             <string>CheckBox</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QCheckBox" name="corpuscol_6">
+            <property name="text">
+             <string>CheckBox</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QCheckBox" name="corpuscol_4">
+            <property name="text">
+             <string>CheckBox</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QCheckBox" name="corpuscol_7">
+            <property name="text">
+             <string>CheckBox</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="corpuscol_0">
+            <property name="text">
+             <string>CheckBox</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QCheckBox" name="corpuscol_3">
+            <property name="text">
+             <string>CheckBox</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="2">
+           <widget class="QCheckBox" name="corpuscol_9">
+            <property name="text">
+             <string>CheckBox</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QCheckBox" name="corpuscol_5">
+            <property name="text">
+             <string>CheckBox</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
          <widget class="QPushButton" name="do_corpus_diff">
           <property name="text">
            <string>Confronta</string>
           </property>
          </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <item>
+           <widget class="QCheckBox" name="aggiunte">
+            <property name="text">
+             <string>Aggiunte (+)</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="modifiche">
+            <property name="text">
+             <string>Modifiche (!)</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="rimozioni">
+            <property name="text">
+             <string>Rimozioni (-)</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QPushButton" name="applydiff">
+          <property name="text">
+           <string>Applica modifiche</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QGridLayout" name="gridLayout_11">
+          <item row="2" column="0">
+           <widget class="QLabel" name="corpuscol_lbl_2">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QLabel" name="corpuscol_lbl_5">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="corpuscol_lbl_1">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLabel" name="corpuscol_lbl_4">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="4">
+           <widget class="QLabel" name="corpuscol_lbl_6">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QComboBox" name="corpuscol_cmb_0"/>
+          </item>
+          <item row="1" column="3">
+           <widget class="QComboBox" name="corpuscol_cmb_5"/>
+          </item>
+          <item row="0" column="3">
+           <widget class="QComboBox" name="corpuscol_cmb_4"/>
+          </item>
+          <item row="3" column="4">
+           <widget class="QLabel" name="corpuscol_lbl_9">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="corpuscol_lbl_0">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="4">
+           <widget class="QLabel" name="corpuscol_lbl_8">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QComboBox" name="corpuscol_cmb_1"/>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="corpuscol_lbl_3">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QComboBox" name="corpuscol_cmb_3"/>
+          </item>
+          <item row="2" column="1">
+           <widget class="QComboBox" name="corpuscol_cmb_2"/>
+          </item>
+          <item row="1" column="4">
+           <widget class="QLabel" name="corpuscol_lbl_7">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="5">
+           <widget class="QComboBox" name="corpuscol_cmb_6"/>
+          </item>
+          <item row="1" column="5">
+           <widget class="QComboBox" name="corpuscol_cmb_7"/>
+          </item>
+          <item row="2" column="5">
+           <widget class="QComboBox" name="corpuscol_cmb_8"/>
+          </item>
+          <item row="3" column="5">
+           <widget class="QComboBox" name="corpuscol_cmb_9"/>
+          </item>
+         </layout>
         </item>
         <item>
          <widget class="QPushButton" name="do_corpus_merge">
