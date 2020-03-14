@@ -323,7 +323,7 @@ class TintCorpus(QThread):
                 if self.Progrdialog.w.annulla.isChecked():
                     return
                 myres = ""
-                print(row)
+                #print(row)
                 if line != "":
                     myres = self.getJson(line)
                 try:
