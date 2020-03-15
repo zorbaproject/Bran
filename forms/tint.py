@@ -180,6 +180,8 @@ class TintCorpus(QThread):
                         gotEncoding = False
                         while gotEncoding == False:
                             try:
+                                if self.iscli:
+                                    temp = 0/0
                                 self.Progrdialog.hide()
                                 myencoding = QInputDialog.getText(None, "Scegli la codifica", "Sembra che questo file non sia codificato in UTF-8. Vuoi provare a specificare una codifica diversa? (Es: cp1252 oppure ISO-8859-15)", QLineEdit.Normal, myencoding)
                                 self.Progrdialog.show()
@@ -305,7 +307,7 @@ class TintCorpus(QThread):
                     if int(self.corpuswidget.item(crow, self.corpuscols["IDphrase"][0]).text()) > IDphrase:
                         IDphrase = int(self.corpuswidget.item(crow, self.corpuscols["IDphrase"][0]).text())
             else:
-                with open(self.rowfilename, "r", encoding='utf-8') as ins:
+                with open(self.outputcsv, "r", encoding='utf-8') as ins:
                     for line in ins:
                         if int(line.split("\t")[self.corpuscols["IDphrase"][0]]) > IDphrase:
                             IDphrase = int(line.split("\t")[self.corpuscols["IDphrase"][0]])
@@ -488,7 +490,21 @@ class TintCorpus(QThread):
                     Ucolumns.append(thisline[self.corpuscols['lemma'][0]])
             if key == "pos":
                 mypos = thisline[self.corpuscols['pos'][0]]
-                myposU = legendaISDTUD["pos"][mypos][0]
+                try:
+                    myposU = legendaISDTUD["pos"][mypos][0]
+                except:
+                    try:
+                        myposU = ""
+                        tc = 0
+                        tp = mypos.split("+")[tc]
+                        while tp in legendaISDTUD["pos"]:
+                            myposU = legendaISDTUD["pos"][tp][0]
+                            tc = tc+1
+                            tp = tp + "+" + mypos.split("+")[tc]
+                        if myposU == "":
+                            tc = 0/0
+                    except:
+                        myposU = mypos
                 Ucolumns.append(myposU)
             if key == "feat":
                 myfeat = thisline[self.corpuscols['feat'][0]]
@@ -508,7 +524,13 @@ class TintCorpus(QThread):
                 #add from pos
                 myfeatU = re.sub("^\|*", "", myfeatU, flags=re.IGNORECASE|re.DOTALL)
                 myfeatU = re.sub("[^a-z]*$", "", myfeatU, flags=re.IGNORECASE|re.DOTALL)
-                tmpmorf = legendaISDTUD["pos"][mypos][1].split("/")
+                try:
+                    tmpmorf = legendaISDTUD["pos"][mypos][1].split("/")
+                except:
+                    try:
+                        tmpmorf = legendaISDTUD["pos"][mypos.split("+")[0]][1].split("/")
+                    except:
+                        tmpmorf = myposU
                 myfeatUtotal = ""
                 for tmppart in range(len(myfeatU.split("/"))):
                     myfeatUtotal = myfeatUtotal + myfeatU.split("/")[tmppart]
