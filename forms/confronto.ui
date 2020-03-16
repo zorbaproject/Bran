@@ -466,6 +466,27 @@
          <layout class="QHBoxLayout" name="horizontalLayout_7">
           <item>
            <layout class="QGridLayout" name="gridLayout_7">
+            <item row="1" column="1">
+             <layout class="QHBoxLayout" name="horizontalLayout_10">
+              <item>
+               <widget class="QLineEdit" name="multi_filename"/>
+              </item>
+              <item>
+               <widget class="QPushButton" name="multi_filename_sel">
+                <property name="text">
+                 <string>...</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="5" column="0">
+             <widget class="Line" name="line_2">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
             <item row="1" column="0">
              <widget class="QLabel" name="label_13">
               <property name="text">
@@ -480,31 +501,24 @@
               </property>
              </widget>
             </item>
-            <item row="4" column="0">
+            <item row="6" column="0">
              <widget class="QLabel" name="label_11">
               <property name="text">
                <string>Colonne da confrontare</string>
               </property>
              </widget>
             </item>
-            <item row="3" column="0">
+            <item row="4" column="0">
              <widget class="QLabel" name="label_10">
               <property name="text">
-               <string>Colonna del riferimento</string>
+               <string>Riferimento</string>
               </property>
              </widget>
             </item>
             <item row="2" column="1">
              <widget class="QSpinBox" name="multiConfKey"/>
             </item>
-            <item row="3" column="1">
-             <widget class="QSpinBox" name="multiRifValue">
-              <property name="value">
-               <number>1</number>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="1">
+            <item row="6" column="1">
              <layout class="QVBoxLayout" name="verticalLayout_4">
               <item>
                <widget class="QLineEdit" name="multiConfValue">
@@ -530,6 +544,9 @@
                   <property name="text">
                    <string>TF-IDF</string>
                   </property>
+                  <attribute name="buttonGroup">
+                   <string notr="true">buttonGroup</string>
+                  </attribute>
                  </widget>
                 </item>
                 <item row="0" column="1">
@@ -537,6 +554,9 @@
                   <property name="text">
                    <string>Root Mean S&amp;quare</string>
                   </property>
+                  <attribute name="buttonGroup">
+                   <string notr="true">buttonGroup</string>
+                  </attribute>
                  </widget>
                 </item>
                 <item row="0" column="0">
@@ -547,6 +567,9 @@
                   <property name="checked">
                    <bool>true</bool>
                   </property>
+                  <attribute name="buttonGroup">
+                   <string notr="true">buttonGroup</string>
+                  </attribute>
                  </widget>
                 </item>
                 <item row="1" column="0">
@@ -554,25 +577,97 @@
                   <property name="text">
                    <string>Scarto standardizzato</string>
                   </property>
+                  <attribute name="buttonGroup">
+                   <string notr="true">buttonGroup</string>
+                  </attribute>
                  </widget>
                 </item>
                </layout>
               </item>
              </layout>
             </item>
-            <item row="1" column="1">
-             <layout class="QHBoxLayout" name="horizontalLayout_10">
+            <item row="4" column="1">
+             <layout class="QVBoxLayout" name="verticalLayout_11">
               <item>
-               <widget class="QLineEdit" name="multi_filename"/>
+               <layout class="QHBoxLayout" name="horizontalLayout_15">
+                <item>
+                 <widget class="QRadioButton" name="sametb_multi">
+                  <property name="text">
+                   <string>Nella stessa tabella</string>
+                  </property>
+                  <property name="checked">
+                   <bool>true</bool>
+                  </property>
+                  <attribute name="buttonGroup">
+                   <string notr="true">buttonGroup_2</string>
+                  </attribute>
+                 </widget>
+                </item>
+                <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout_14"/>
+                </item>
+                <item>
+                 <widget class="QRadioButton" name="otherfile_multi">
+                  <property name="text">
+                   <string>In altro file</string>
+                  </property>
+                  <attribute name="buttonGroup">
+                   <string notr="true">buttonGroup_2</string>
+                  </attribute>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="rif_multi"/>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="loadrif_multi">
+                  <property name="text">
+                   <string>...</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
               </item>
               <item>
-               <widget class="QPushButton" name="multi_filename_sel">
-                <property name="text">
-                 <string>...</string>
-                </property>
-               </widget>
+               <layout class="QHBoxLayout" name="horizontalLayout_13">
+                <item>
+                 <widget class="QLabel" name="label_19">
+                  <property name="text">
+                   <string>Colonna del riferimento:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QSpinBox" name="multiRifValue">
+                  <property name="value">
+                   <number>1</number>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
               </item>
              </layout>
+            </item>
+            <item row="5" column="1">
+             <widget class="Line" name="line_3">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="Line" name="line_4">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="Line" name="line_5">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
@@ -894,4 +989,8 @@
  </widget>
  <resources/>
  <connections/>
+ <buttongroups>
+  <buttongroup name="buttonGroup"/>
+  <buttongroup name="buttonGroup_2"/>
+ </buttongroups>
 </ui>

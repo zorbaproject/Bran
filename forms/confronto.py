@@ -56,6 +56,7 @@ class Confronto(QMainWindow):
         self.w.gen_addfile.clicked.connect(self.gen_addfile)
         self.w.gen_rmfile.clicked.connect(self.gen_rmfile)
         self.w.altrofileselect.clicked.connect(self.altrofileselect)
+        self.w.loadrif_multi.clicked.connect(self.loadrif_multi)
         self.w.gen_riferimento_sel.clicked.connect(lambda: self.genfileselect(self.w.gen_riferimento))
         self.w.multi_filename_sel.clicked.connect(lambda: self.genfileselect(self.w.multi_filename))
         self.w.corpus1_sel.clicked.connect(lambda: self.genfileselect(self.w.corpus1))
@@ -149,6 +150,12 @@ class Confronto(QMainWindow):
         for fileName in fileNames:
             self.w.altrofilename.setText(fileName)
             self.w.altrofile.setChecked(True)
+
+    def loadrif_multi(self):
+        fileNames = QFileDialog.getOpenFileNames(self, "Apri file CSV", self.sessionDir, "CSV files (*.tsv *.csv *.txt)")[0]
+        for fileName in fileNames:
+            self.w.rif_multi.setText(fileName)
+            self.w.otherfile_multi.setChecked(True)
 
     def genfileselect(self, linedit):
         fileNames = QFileDialog.getOpenFileNames(self, "Apri file CSV", self.sessionDir, "CSV files (*.tsv *.csv *.txt)")[0]
@@ -549,6 +556,9 @@ class Confronto(QMainWindow):
             ignorefirstrow = self.w.ignorefirstrow_gen.isChecked()
         elif context == "multicolonna":
             riferimentoName = self.w.multi_filename.text()
+            multicorpusName = self.w.multi_filename.text()
+            if self.w.otherfile_multi.isChecked():
+                riferimentoName = self.w.rif_multi.text()
             dopercent = self.w.dopercent_multi.isChecked()
             ignorefirstrow = self.w.ignorefirstrow_multi.isChecked()
         riferimento = ""
@@ -558,7 +568,8 @@ class Confronto(QMainWindow):
             print("Impossibile leggere la tabella di riferimento")
             if context == "multicolonna":
                 try:
-                    riferimento = self.readcsv(self.w.multi_filename.text())
+                    riferimento = self.readcsv(riferimentoName)
+                    multicorpus = self.readcsv(multicorpusName)
                 except:
                   return
             else:
@@ -574,13 +585,9 @@ class Confronto(QMainWindow):
         multivalcols = []
         if context == "multicolonna":
             if self.w.multi_all.isChecked():
-                multivalcols = list(range(len(riferimento[0])))
-                #if self.w.corpora.count() == 0:
-                #    multivalcols = list(range(len(riferimento[0])))
-                #else:
-                #    corpus = self.readcsv(self.w.corpora.item(0).text())
-                #    multivalcols = list(range(len(corpus[0])))
-                multivalcols.remove(self.w.multiRifValue.value())
+                multivalcols = list(range(len(multicorpus[0])))
+                if riferimentoName == multicorpusName:
+                    multivalcols.remove(self.w.multiRifValue.value())
                 multivalcols.remove(self.w.multiConfKey.value())
             else:
                 multivalcols = self.w.multiConfValue.text().split(",")
@@ -626,13 +633,18 @@ class Confronto(QMainWindow):
                     corpus = riferimento
                     corpValueCol = self.w.multiRifValue.value()
                 else:
-                    corpus = riferimento
+                    multicorpus = self.readcsv(multicorpusName)
+                    corpus = multicorpus
                     corpValueCol = int(multivalcols[i-1])
                 tempcrp = []
                 for row in range(len(corpus)):
                     try:
                         tempcrp.append([corpus[row][corpKeyCol], corpus[row][corpValueCol]])
                     except:
+                        if row == 0 and ignorefirstrow:
+                            tempcrp.append([corpus[row][corpKeyCol], corpus[row][corpKeyCol]])
+                        else:
+                            tempcrp.append([corpus[row][corpKeyCol], 1])
                         continue
                 corpus = tempcrp
                 corpKeyCol = 0
