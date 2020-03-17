@@ -398,6 +398,7 @@ class BranCorpus(QObject):
                         csv = csv + self.separator
                     csv = csv + self.corpuscols[key][1]
                     col = col +1
+                csv = csv + "\n"
             totallines = len(self.corpus)
             text_file = open(fileName, "w", encoding='utf-8')
             text_file.write(csv)

@@ -180,7 +180,11 @@ class TintCorpus(QThread):
                         gotEncoding = False
                         while gotEncoding == False:
                             try:
-                                myencoding = QInputDialog.getText(self.corpuswidget, "Scegli la codifica", "Sembra che questo file non sia codificato in UTF-8. Vuoi provare a specificare una codifica diversa? (Es: cp1252 oppure ISO-8859-15)", QLineEdit.Normal, myencoding)
+                                if self.iscli:
+                                    temp = 0/0
+                                self.Progrdialog.hide()
+                                myencoding = QInputDialog.getText(None, "Scegli la codifica", "Sembra che questo file non sia codificato in UTF-8. Vuoi provare a specificare una codifica diversa? (Es: cp1252 oppure ISO-8859-15)", QLineEdit.Normal, myencoding)
+                                self.Progrdialog.show()
                             except:
                                 print("Sembra che questo file non sia codificato in UTF-8. Vuoi provare a specificare una codifica diversa? (Es: cp1252 oppure ISO-8859-15)")
                                 myencoding = [input()]
@@ -197,18 +201,26 @@ class TintCorpus(QThread):
                     print(fileName + " -> " + self.outputcsv)
                     if self.csvIDcolumn <0 or self.csvTextcolumn <0:
                         try:
+                            if self.iscli:
+                                err = 0/0
                             corpusID = str(fileID)+"_"+os.path.basename(fileName)+",lang:"+self.language+",tagger:tint"
-                            corpusID = QInputDialog.getText(self.corpuswidget, "Scegli il tag", "Indica il tag di questo file nel corpus:", QLineEdit.Normal, corpusID)[0]
+                            self.Progrdialog.hide()
+                            corpusID = QInputDialog.getText(None, "Scegli il tag", "Indica il tag di questo file nel corpus:", QLineEdit.Normal, corpusID)[0]
+                            self.Progrdialog.show()
                         except:
                             corpusID = str(fileID)+"_"+os.path.basename(fileName)+",lang:"+self.language+",tagger:tint"
                         self.text2corpusTINT(lines, corpusID)
                     else:
                         try:
-                            sep = QInputDialog.getText(self.corpuswidget, "Scegli il separatore", "Indica il carattere che separa le colonne (\\t è la tabulazione):", QLineEdit.Normal, "\\t")[0]
+                            if self.iscli:
+                                err = 0/0
+                            sep = QInputDialog.getText(None, "Scegli il separatore", "Indica il carattere che separa le colonne (\\t è la tabulazione):", QLineEdit.Normal, "\\t")[0]
                             if sep == "\\t":
                                 sep = "\t"
-                            textID = QInputDialog.getInt(self.corpuswidget, "Scegli il testo", "Indica la colonna della tabella che contiene il testo di questo sottocorpus:")[0]
-                            corpusIDtext = QInputDialog.getText(self.corpuswidget, "Scegli il tag", "Indica il tag di questo file nel corpus. Puoi usare [filename] per indicare il nome del file e [numeroColonna] per indicare la colonna da cui estrarre un tag.", QLineEdit.Normal, "[filename], [0]"+",tagger:tint")[0]
+                            self.Progrdialog.hide()
+                            textID = QInputDialog.getInt(None, "Scegli il testo", "Indica la colonna della tabella che contiene il testo di questo sottocorpus:")[0]
+                            corpusIDtext = QInputDialog.getText(None, "Scegli il tag", "Indica il tag di questo file nel corpus. Puoi usare [filename] per indicare il nome del file e [numeroColonna] per indicare la colonna da cui estrarre un tag.", QLineEdit.Normal, "[filename], [0]"+",tagger:tint")[0]
+                            self.Progrdialog.show()
                             textID = int(textID)
                             for line in lines.split("\n"):
                                 corpusID = corpusIDtext.replace("[filename]", os.path.basename(fileName))
@@ -295,7 +307,7 @@ class TintCorpus(QThread):
                     if int(self.corpuswidget.item(crow, self.corpuscols["IDphrase"][0]).text()) > IDphrase:
                         IDphrase = int(self.corpuswidget.item(crow, self.corpuscols["IDphrase"][0]).text())
             else:
-                with open(self.rowfilename, "r", encoding='utf-8') as ins:
+                with open(self.outputcsv, "r", encoding='utf-8') as ins:
                     for line in ins:
                         if int(line.split("\t")[self.corpuscols["IDphrase"][0]]) > IDphrase:
                             IDphrase = int(line.split("\t")[self.corpuscols["IDphrase"][0]])
@@ -313,6 +325,7 @@ class TintCorpus(QThread):
                 if self.Progrdialog.w.annulla.isChecked():
                     return
                 myres = ""
+                #print(row)
                 if line != "":
                     myres = self.getJson(line)
                 try:
@@ -399,7 +412,7 @@ class TintCorpus(QThread):
                             for mydep in sentence["basic-dependencies"]:
                                 if mydep["dependent"] == token["index"]:
                                     fullline = fullline + "\t" + str(mydep["dep"]) + "\t"
-                                    fullline = fullline + str(mydep["head"])
+                                    fullline = fullline + str(mydep["governor"])
                                     break
                             fdatefile = self.outputcsv
                             fullline = self.isdt_to_ud(fullline)
@@ -477,7 +490,21 @@ class TintCorpus(QThread):
                     Ucolumns.append(thisline[self.corpuscols['lemma'][0]])
             if key == "pos":
                 mypos = thisline[self.corpuscols['pos'][0]]
-                myposU = legendaISDTUD["pos"][mypos][0]
+                try:
+                    myposU = legendaISDTUD["pos"][mypos][0]
+                except:
+                    try:
+                        myposU = ""
+                        tc = 0
+                        tp = mypos.split("+")[tc]
+                        while tp in legendaISDTUD["pos"]:
+                            myposU = legendaISDTUD["pos"][tp][0]
+                            tc = tc+1
+                            tp = tp + "+" + mypos.split("+")[tc]
+                        if myposU == "":
+                            tc = 0/0
+                    except:
+                        myposU = mypos
                 Ucolumns.append(myposU)
             if key == "feat":
                 myfeat = thisline[self.corpuscols['feat'][0]]
@@ -497,7 +524,13 @@ class TintCorpus(QThread):
                 #add from pos
                 myfeatU = re.sub("^\|*", "", myfeatU, flags=re.IGNORECASE|re.DOTALL)
                 myfeatU = re.sub("[^a-z]*$", "", myfeatU, flags=re.IGNORECASE|re.DOTALL)
-                tmpmorf = legendaISDTUD["pos"][mypos][1].split("/")
+                try:
+                    tmpmorf = legendaISDTUD["pos"][mypos][1].split("/")
+                except:
+                    try:
+                        tmpmorf = legendaISDTUD["pos"][mypos.split("+")[0]][1].split("/")
+                    except:
+                        tmpmorf = myposU
                 myfeatUtotal = ""
                 for tmppart in range(len(myfeatU.split("/"))):
                     myfeatUtotal = myfeatUtotal + myfeatU.split("/")[tmppart]
