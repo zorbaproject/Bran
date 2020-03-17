@@ -1828,7 +1828,7 @@ class BranCorpus(QObject):
         te.show()
 
     def confronto(self):
-        cf = confronto.Confronto(self.corpuswidget, self.mycfg, self.sessionDir)
+        cf = confronto.Confronto(self.corpuswidget, self.mycfg, self.sessionDir, self.corpuscols)
         cf.legendaPos = self.legendaPos
         cf.ignoretext = self.ignoretext
         cf.dimList = self.dimList

@@ -653,8 +653,7 @@ class MainWindow(QMainWindow):
     #                self.corpus[row][col] = ""
 
     def texteditor(self):
-        te = texteditor.TextEditor(self.w.corpus, self.Corpus.mycfg)
-        te.show()
+        self.Corpus.texteditor()
 
     def tableeditor(self):
         TBdialog = tableeditor.Form(self.w.corpus, self.Corpus.mycfg)
@@ -663,11 +662,7 @@ class MainWindow(QMainWindow):
         TBdialog.show()
 
     def confronto(self):
-        cf = confronto.Confronto(self.w.corpus, self.Corpus.mycfg, self.sessionDir)
-        cf.legendaPos = self.legendaPos
-        cf.ignoretext = self.ignoretext
-        cf.dimList = self.dimList
-        cf.show()
+        self.Corpus.confronto()
 
     def aboutbran(self):
         aw = about.Form(self)
