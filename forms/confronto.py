@@ -7,6 +7,7 @@ import os
 import csv
 import re
 import math
+import subprocess
 
 from PySide2.QtWidgets import QApplication, QDialog, QLineEdit, QPushButton, QVBoxLayout, QMainWindow
 from PySide2.QtUiTools import QUiLoader
@@ -49,26 +50,34 @@ class Confronto(QMainWindow):
         self.w.do_multi.clicked.connect(self.do_multi)
         self.w.do_corpus_merge.clicked.connect(self.do_corpus_merge)
         self.w.applydiff.clicked.connect(self.applicamodifiche)
+        self.w.creagrafici.clicked.connect(self.creagrafici)
         #self.w.actionConta_occorrenze.triggered.connect(self.contaoccorrenze)
         self.sessionDir = sessionDir
         self.w.addfile.clicked.connect(self.addfile)
         self.w.rmfile.clicked.connect(self.rmfile)
         self.w.gen_addfile.clicked.connect(self.gen_addfile)
         self.w.gen_rmfile.clicked.connect(self.gen_rmfile)
+        self.w.plot_addfile.clicked.connect(self.plot_addfile)
+        self.w.plot_rmfile.clicked.connect(self.plot_rmfile)
+        self.w.plot_groupfile.clicked.connect(self.plot_groupfile)
         self.w.altrofileselect.clicked.connect(self.altrofileselect)
         self.w.loadrif_multi.clicked.connect(self.loadrif_multi)
+        self.w.plotselectoutput.clicked.connect(self.loadplotfolder)
         self.w.gen_riferimento_sel.clicked.connect(lambda: self.genfileselect(self.w.gen_riferimento))
         self.w.multi_filename_sel.clicked.connect(lambda: self.genfileselect(self.w.multi_filename))
         self.w.corpus1_sel.clicked.connect(lambda: self.genfileselect(self.w.corpus1))
         self.w.corpus2_sel.clicked.connect(lambda: self.genfileselect(self.w.corpus2))
         self.w.with_dict.currentIndexChanged.connect(self.dictselect)
         self.w.with_corpora.currentIndexChanged.connect(self.corporaselect)
+        self.w.plotData.itemChanged.connect(lambda: self.getNamesFromTable("data"))
+        self.w.plotGroup.textChanged.connect(lambda: self.getNamesFromTable("group"))
         self.fillcombos()
         self.corpuscols = corpuscols
         self.legendaPos = []
         self.ignoretext = ""
         self.dimList = []
         self.fill_corpuscol_labels()
+        self.Rpath = self.mycfg["rscript"]
 
 
     def fill_corpuscol_labels(self):
@@ -144,6 +153,22 @@ class Confronto(QMainWindow):
     def gen_rmfile(self):
         for i in self.w.gen_corpora.selectedItems():
             self.w.gen_corpora.takeItem(self.w.gen_corpora.row(i))
+
+    def plot_addfile(self):
+        fileNames = QFileDialog.getOpenFileNames(self, "Apri file CSV", self.sessionDir, "CSV files (*.tsv *.csv *.txt)")[0]
+        for fileName in fileNames:
+            self.w.plotData.addItem(fileName)
+        self.getNamesFromTable("data")
+
+    def plot_rmfile(self):
+        for i in self.w.plotData.selectedItems():
+            self.w.plotData.takeItem(self.w.plotData.row(i))
+        self.getNamesFromTable("data")
+
+    def plot_groupfile(self):
+        fileNames = QFileDialog.getOpenFileNames(self, "Apri file CSV", self.sessionDir, "CSV files (*.tsv *.csv *.txt)")[0]
+        for fileName in fileNames:
+            self.w.plotGroup.setText(fileName)
 
     def altrofileselect(self):
         fileNames = QFileDialog.getOpenFileNames(self, "Apri file CSV", self.sessionDir, "CSV files (*.tsv *.csv *.txt)")[0]
@@ -808,3 +833,103 @@ class Confronto(QMainWindow):
                 col = col + 1
         self.Progrdialog.accept()
         TBdialog.show()
+
+    def loadplotfolder(self):
+        fileName = QFileDialog.getExistingDirectory(self, "Seleziona la cartella in cui salvare i grafici")
+        if not fileName == "":
+            if os.path.isdir(fileName):
+                self.w.plotoutputdir.setText(fileName)
+
+    def getNamesFromTable(self, table = ""):
+        head = "TRUE"
+        if not self.w.plotHeader.isChecked():
+            head = "FALSE"
+        sep = "\t"
+        if self.w.sepPer.isChecked():
+            sep = self.w.sepText.text()
+        myfile = ""
+        if table == "data":
+            myfile = self.w.plotData.item(0).text()
+        if table == "group":
+            myfile = self.w.plotGroup.text()
+        if myfile == "" or not os.path.isfile(myfile):
+            return
+        #TODO: if possibile run R to get names()
+        #plot = "names(read.table(\""+self.w.plotData.item(0).text()+"\",header="+head+", sep=\""+sep+"\"));"
+        with open(myfile, "r", encoding='utf-8') as f:
+            first_line = f.readline().strip()
+        mylist = first_line.split(sep)
+        c = 0
+        for i in range(len(mylist)):
+            mylist[i] = re.sub("[^A-Za-z0-9\.\_]", ".", mylist[i], flags=re.DOTALL)
+            mylist[i] = re.sub("^([0-9])", "X\g<1>", mylist[i], flags=re.DOTALL)
+            if mylist[i] == "":
+                mylist[i] = "X."+str(c)
+                if c== 0:
+                    mylist[i] = "X"
+                c = c+1
+            #https://stackoverflow.com/questions/9195718/variable-name-restrictions-in-r
+        if table == "data":
+            self.w.plotDataID.clear()
+            self.w.plotDataCol.clear()
+            for i in range(len(mylist)):
+                self.w.plotDataID.addItem(mylist[i])
+                self.w.plotDataCol.addItem(mylist[i])
+        if table == "group":
+            self.w.plotGroupID.clear()
+            self.w.plotGroupCol.clear()
+            for i in range(len(mylist)):
+                self.w.plotGroupID.addItem(mylist[i])
+                self.w.plotGroupCol.addItem(mylist[i])
+
+    def creagrafici(self):
+        print("R path: " + self.Rpath)
+        scriptdir = os.path.abspath(os.path.dirname(sys.argv[0]))
+
+        text_file = open(scriptdir + "/R/correlazione.R", "r", encoding='utf-8')
+        lines = text_file.read()
+        text_file.close()
+
+        for i in range(self.w.plotData.count()):
+            plot = lines
+
+            head = "TRUE"
+            if not self.w.plotHeader.isChecked():
+                head = "FALSE"
+            sep = "\t"
+            if self.w.sepPer.isChecked():
+                sep = self.w.sepText.text()
+            plot = plot + "tmpdatatable <- read.table(\""+self.w.plotData.item(i).text()+"\",header="+head+", sep=\""+sep+"\");\n"
+            plot = plot + "tmpgrouptable <- read.table(\""+self.w.plotGroup.text()+"\",header="+head+", sep=\""+sep+"\");\n"
+
+            plot = plot + "tmpname <- \""+self.w.plotTitle.text()+"\";\n"
+            plot = plot + "tmpdata <- \""+self.w.plotDataCol.currentText()+"\";\n"
+            plot = plot + "tmpdataid <- \""+self.w.plotDataID.currentText()+"\";\n"
+            plot = plot + "tmpgroup <- \""+self.w.plotGroupCol.currentText()+"\";\n"
+            plot = plot + "tmpgroupid <- \""+self.w.plotGroupID.currentText()+"\";\n"
+            plot = plot + "tmpregex <- \""+self.w.plotRegex.text()+"\";\n"
+            case = "TRUE"
+            if not self.w.plotCase.isChecked():
+                case = "FALSE"
+            plot = plot + "tmpcase <- "+case+";\n"
+            plot = plot + "histogramsByGroup(tmpname, tmpgrouptable, tmpgroup, tmpgroupid, tmpdatatable, tmpdata, tmpdataid, tmpregex, tmpcase);\n"
+
+            path = self.w.plotoutputdir.text()
+            if path == "" or not os.path.isdir(path):
+                return
+            path = path.replace("\\", "/")
+
+            mybasename = os.path.basename(self.w.plotData.item(i).text())[:-4]+ "_" + os.path.basename(self.w.plotGroup.text())[:-4] + "_" +self.w.plotTitle.text() + "_" + self.w.plotDataCol.currentText() + "-"+ self.w.plotGroupCol.currentText()
+            mybasename = mybasename.replace(" ", "_")
+            mybasename = mybasename.replace(".", "_")
+
+            text_file = open(path + "/" +  mybasename + ".R", "w", encoding='utf-8')
+            text_file.write(plot)
+            text_file.close()
+
+            if self.w.runR.isChecked():
+                process = subprocess.Popen([self.Rpath, mybasename + ".R"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=path)
+                outputbyte = process.communicate()[0]
+                process.stdin.close()
+                stroutput = outputbyte.decode(encoding='utf-8')
+                print(stroutput)
