@@ -189,6 +189,42 @@ def calcola_occorrenze():
             with open(recovery, "a", encoding='utf-8') as rowfile:
                 rowfile.write(str(row)+"\n")
 
+def orderVerbMorf(text, ignoreperson = False):
+    if not "VerbForm" in text:
+        return text
+    mytext = ""
+    #Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin
+    vform = ""
+    mood = ""
+    tense = ""
+    pers = ""
+    num = ""
+    gender = ""
+    for el in text.split("|"):
+        if "VerbForm" in el:
+            vform = re.sub(".*VerbForm\=(.*)","\g<1>",el)
+        if "Mood" in el:
+            mood = re.sub(".*Mood\=(.*)","\g<1>",el)
+        if "Tense" in el:
+            tense = re.sub(".*Tense\=(.*)","\g<1>",el)
+        if "Person" in el:
+            pers = re.sub(".*Person\=(.*)","\g<1>",el)
+        if "Number" in el:
+            num = re.sub(".*Number\=(.*)","\g<1>",el)
+        if "Gender" in el:
+            gender = re.sub(".*Gender\=(.*)","\g<1>",el)
+    mytext = "VerbForm=" + vform
+    if mood != "":
+        mytext = mytext + "|Mood=" + mood
+    if tense != "":
+        mytext = mytext + "|Tense=" + tense
+    if pers != "" and ignoreperson==False:
+        mytext = mytext + "|Person=" + pers
+    if num != "" and ignoreperson==False:
+        mytext = mytext + "|Number=" + num
+    if gender != "" and ignoreperson==False:
+        mytext = mytext + "|Gender=" + gender
+    return mytext
 
 def contaverbi(corpuscols, legendaPos):
     poscol = corpuscols["pos"][0] #thisname.index(column[0])
@@ -237,62 +273,61 @@ def contaverbi(corpuscols, legendaPos):
         with open(fileName, "r", encoding='utf-8') as ins:
             for line in ins:
                 corpus.append(line.replace("\n","").replace("\r","").split(separator))
+        poscol = corpuscols["pos"][0] #thisname.index(column[0])
+        morfcol = corpuscols["feat"][0]
+        frasecol = corpuscols["IDphrase"][0]
+        ignoreperson = False
+        try:
+            if sys.argv[3] == "y" or sys.argv[3] == "Y":
+                ignoreperson = True
+        except:
+            print("Vuoi ignorare persona, numero, genere, e caratteristica clitica dei verbi? [Y/N]")
+            ch = input()
+            if ch == "Y" or ch == "y":
+                ignoreperson = True
         for row in range(len(corpus)):
             if row > startatrow:
                 try:
                     thispos = legendaPos[corpus[row][poscol]][0]
+                    thisphrase = corpus[row][frasecol]
                 except:
                     thispos = ""
+                    thisphrase = "0"
                 thistext = ""
                 thistext2 = ""
-                if thispos.split(" ")[0] == "verbo":
-                    try:
-                        thistext = corpus[row][morfcol]
-                    except:
-                        thistext = ""
+                thistext3 = ""
+                #Filtro per trovare i verbi a 3 come "è stato fatto": feat=.*VerbForm.*Part.*&&feat[1]=.*VerbForm.*Part.*||feat=.*VerbForm.*Part.*&&feat[-1]=.*VerbForm.*Part.*||feat=.*VerbForm.*&&feat[1]=.*VerbForm.*Part.*&&feat[2]=.*VerbForm.*Part.*
+                if "verbo" in thispos:
+                    thistext = corpus[row][morfcol]
                 if "ausiliare" in thispos:
                     for ind in range(1,4):
                         try:
                             tmpos = legendaPos[corpus[row+ind][poscol]][0]
+                            tmpphrase = corpus[row+ind][frasecol]
                         except:
                             tmpos = ""
+                            tmpphrase = "0"
+                        #i verbi consecutivi vanno bene finché sono nella stessa frase
+                        if tmpphrase != thisphrase:
+                            break
                         if "verbo" in tmpos:
-                            thistext = ""
-                            break
-                elif thispos.split(" ")[0] == "verbo":
-                    for ind in range(1,4):
-                        try:
-                            tmpos = legendaPos[corpus[row-ind][poscol]][0]
-                        except:
-                            tmpos = ""
-                        if "ausiliare" in tmpos and "v+part+pass" in thistext:
-                            thistext2 = thistext2 + "/" + corpus[row-ind][morfcol]
-                        if "verbo" in tmpos and not "ausiliare" in tmpos:
-                            break
-                if len(thistext2)>0:
-                    if thistext2[0]=="/":
-                        thistext2=thistext2[1:]
-                if bool(re.match('^v\+.*?$', thistext))==False:
-                    thistext = ""
-                if bool(re.match('^v\+.*?$', thistext2))==False:
-                    thistext2 = ""
-                if len(thistext.split("+")) >= 3:
-                    tmptext = thistext.split("+")[0] + "+" +thistext.split("+")[1] + "+" +thistext.split("+")[2]
-                    thistext = tmptext
-                thistext3 = ""
-                if len(thistext2.split("/"))>1:
-                    thistext3 = thistext2.split("/")[1]
-                    thistext2 = thistext2.split("/")[0]
-                if bool(re.match('^v\+.*?$', thistext3))==False:
-                    thistext3 = ""
-                if len(thistext2.split("+")) >= 3:
-                    tmptext = thistext2.split("+")[0] + "+" +thistext2.split("+")[1] + "+" +thistext2.split("+")[2]
-                    thistext2 = tmptext + "/"
-                if len(thistext3.split("+")) >= 3:
-                    tmptext = thistext3.split("+")[0] + "+" +thistext3.split("+")[1] + "+" +thistext3.split("+")[2]
-                    thistext3 = tmptext + "/"
+                            thistext2 = thistext2 + corpus[row+ind][morfcol] + "+"
+                        startline = row+ind+1
+                    if len(thistext2.split("+"))>1:
+                        thistext3 = thistext2.split("+")[1]
+                        thistext2 = thistext2.split("+")[0]
+                if len(thistext) >= 3:
+                    thistext = orderVerbMorf(thistext, ignoreperson) + "+"
+                if len(thistext2) >= 3:
+                    thistext2 = orderVerbMorf(thistext2, ignoreperson) + "+"
+                if len(thistext3) >= 3:
+                    thistext3 = orderVerbMorf(thistext3, ignoreperson) #+ "+"
                 if thistext != "":
-                    thistext = thistext3 + thistext2 + thistext
+                    thistext = thistext + thistext2 + thistext3
+                    if ignoreperson:
+                        thistext = thistext.replace("/Clitic=Yes", "")
+                if thistext.endswith("+"):
+                    thistext = thistext[0:-1]
                 if thistext != "":
                     tbrow = findintable(table, thistext, 0)
                     if tbrow>=0:
@@ -756,7 +791,7 @@ if __name__ == "__main__":
                 'dep': [8, "Tag Dep"],
                 'head': [9, "Head"]
     }
-    ignoretext = "((?<=[^0-9])"+ re.escape(".")+ "|^" + re.escape(".")+ "|(?<= )"+ re.escape("-")+ "|^"+re.escape("-")+ "|"+re.escape(":")+"|(?<=[^0-9])"+re.escape(",")+"|^"+re.escape(",")+"|"+re.escape(";")+"|"+re.escape("?")+"|"+re.escape("!")+"|"+re.escape("«")+"|"+re.escape("»")+"|"+re.escape("\"")+"|"+re.escape("(")+"|"+re.escape(")")+"|^"+re.escape("'")+ "|" + re.escape("[PUNCT]") + "|" + re.escape("<unknown>") + ")"
+    ignoretext = "((?<=[^0-9])"+ re.escape(".")+ "|^" + re.escape(".")+ "|(?<= )"+ re.escape("-")+ "|^"+re.escape("-")+ "|"+re.escape(":")+"|(?<=[^0-9])"+re.escape(",")+"|^"+re.escape(",")+"|"+re.escape(";")+"|"+re.escape("?")+"|"+re.escape("!")+"|"+re.escape("«")+"|"+re.escape("»")+"|"+re.escape("\"")+"|"+re.escape("(")+"|"+re.escape(")")+"|^"+re.escape("'")+ "|" + re.escape("[PUNCT]") + "|" + re.escape("[SYMBOL]") + "|" + re.escape("<unknown>") + ")"
     dimList = [100,1000,5000,10000,50000,100000,150000,200000,250000,300000,350000,400000,450000,500000,1000000]
     try:
         filein = os.path.abspath(os.path.dirname(sys.argv[0]))+"/dizionario/legenda/ud.json"
@@ -783,7 +818,7 @@ if __name__ == "__main__":
             print("python3 main.py samplebigfile file.txt [maxnumberoflines] [.]\n")
             print("python3 main.py occorrenze file.tsv|cartella [colonna] [y]\n")
             print("python3 main.py extractcolumn file.tsv|cartella colonna\n")
-            print("python3 main.py contaverbi file.tsv|cartella\n")
+            print("python3 main.py contaverbi file.tsv|cartella [y (ignore person)] [y]\n")
             print("python3 main.py misurelessico file.tsv|cartella [colonna] [y]\n")
             print("python3 main.py mergetables cartella colonnaChiave [sum|mean|diff,sum|mean|diff] [1] [y]\n")
             print("python3 main.py texteditor file.tsv|cartella\n")
