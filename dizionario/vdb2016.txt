@@ -1847,6 +1847,7 @@ cuscino
 custode
 custodia
 custodire
+da
 dado
 danese
 dannato
@@ -3591,6 +3592,7 @@ lupo
 lussemburghese
 lusso
 lutto
+ma
 maccherone
 macchia
 macchina
