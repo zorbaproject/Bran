@@ -59,9 +59,17 @@ histogramsByGroup <- function(tmpname, mygrouptable, mygroup, mygroupid, mydatat
                 axis.ticks = element_blank(),
                 plot.title = element_text(hjust = 0.5, color = "#666666"));
                 
+            fncount <- 1;
+            myfilename <- paste("./", tmpname, "-", sub('[^A-Za-z0-9]', '', i), ".svg", sep="");
+            while (file.exists(myfilename)) {
+                myfilename <- paste("./", tmpname, "-", sub('[^A-Za-z0-9]', '', i), "_", fncount, ".svg", sep="");
+                fncount <- fncount +1;
+            }
+        
             #Esporto il grafico in un file SVG
             print(histogram);
-            grid.export(paste("./", tmpname, "-", sub('[^A-Za-z0-9]', '', i), ".svg", sep=""),addClasses=TRUE);
+            grid.export(myfilename,addClasses=TRUE);
+            grid.export(,addClasses=TRUE);
             }
         }
     } else {
@@ -81,9 +89,16 @@ histogramsByGroup <- function(tmpname, mygrouptable, mygroup, mygroupid, mydatat
             axis.ticks = element_blank(),
             plot.title = element_text(hjust = 0.5, color = "#666666"));
         
+        fncount <- 1;
+        myfilename <- paste("./", tmpname, "-", sub('[^A-Za-z0-9\\[\\]]', '_', myregex), ".svg", sep="");
+        while (file.exists(myfilename)) {
+            myfilename <- paste("./", tmpname, "-", sub('[^A-Za-z0-9\\[\\]]', '_', myregex), "_", fncount, ".svg", sep="");
+            fncount <- fncount +1;
+        }
+        
         #Esporto il grafico in un file SVG
         print(histogram);
-        grid.export(paste("./", tmpname, "-", sub('[^A-Za-z0-9\\[\\]]', '_', myregex), ".svg", sep=""),addClasses=TRUE);
+        grid.export(myfilename,addClasses=TRUE);
     }
     
 }

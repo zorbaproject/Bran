@@ -919,7 +919,7 @@ class Confronto(QMainWindow):
                 return
             path = path.replace("\\", "/")
 
-            mybasename = self.w.plotTitle.text() + "_" + self.w.plotDataCol.currentText() + "-"+ self.w.plotGroupCol.currentText()
+            mybasename = os.path.basename(self.w.plotData.item(i).text())[:-4]+ "_" + os.path.basename(self.w.plotGroup.text())[:-4] + "_" +self.w.plotTitle.text() + "_" + self.w.plotDataCol.currentText() + "-"+ self.w.plotGroupCol.currentText()
             mybasename = mybasename.replace(" ", "_")
             mybasename = mybasename.replace(".", "_")
 
