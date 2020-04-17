@@ -227,8 +227,6 @@ def orderVerbMorf(text, ignoreperson = False):
     return mytext
 
 def contaverbi(corpuscols, legendaPos):
-    poscol = corpuscols["pos"][0] #thisname.index(column[0])
-    morfcol = corpuscols["feat"][0]
     separator = '\t'
     fileNames = []
     if os.path.isfile(sys.argv[2]):
@@ -242,7 +240,7 @@ def contaverbi(corpuscols, legendaPos):
         table = []
         output = fileName + "-contaverbi.tsv"
         recovery = output + ".tmp"
-        startatrow = -1
+        startline = -1
         print(fileName + " -> " + output)
         try:
             if os.path.isfile(recovery):
@@ -256,18 +254,18 @@ def contaverbi(corpuscols, legendaPos):
                 if ch == "Y" or ch == "y":
                     with open(recovery, "r", encoding='utf-8') as tempfile:
                        lastline = (list(tempfile)[-1])
-                    startatrow = int(lastline)
+                    startline = int(lastline)
                     print("Carico la tabella")
                     with open(output, "r", encoding='utf-8') as ins:
                         for line in ins:
                             table.append(line.replace("\n","").replace("\r","").split(separator))
-                    print("Comincio dalla riga " + str(startatrow))
+                    print("Comincio dalla riga " + str(startline))
                 else:
                     table.append(["Modo+Tempo", "Occorrenze", "Percentuali"])
             else:
                 table.append(["Modo+Tempo", "Occorrenze", "Percentuali"])
         except:
-            startatrow = -1
+            startline = -1
             table.append(["Modo+Tempo", "Occorrenze", "Percentuali"])
         corpus = []
         with open(fileName, "r", encoding='utf-8') as ins:
@@ -276,6 +274,7 @@ def contaverbi(corpuscols, legendaPos):
         poscol = corpuscols["pos"][0] #thisname.index(column[0])
         morfcol = corpuscols["feat"][0]
         frasecol = corpuscols["IDphrase"][0]
+        lemmacol = corpuscols["lemma"][0]
         ignoreperson = False
         try:
             if sys.argv[3] == "y" or sys.argv[3] == "Y":
@@ -286,21 +285,27 @@ def contaverbi(corpuscols, legendaPos):
             if ch == "Y" or ch == "y":
                 ignoreperson = True
         for row in range(len(corpus)):
-            if row > startatrow:
+            if row > startline:
                 try:
                     thispos = legendaPos[corpus[row][poscol]][0]
                     thisphrase = corpus[row][frasecol]
+                    thislemma = corpus[row][lemmacol]
                 except:
                     thispos = ""
                     thisphrase = "0"
+                    thislemma = ""
                 thistext = ""
                 thistext2 = ""
                 thistext3 = ""
                 #Filtro per trovare i verbi a 3 come "è stato fatto": feat=.*VerbForm.*Part.*&&feat[1]=.*VerbForm.*Part.*||feat=.*VerbForm.*Part.*&&feat[-1]=.*VerbForm.*Part.*||feat=.*VerbForm.*&&feat[1]=.*VerbForm.*Part.*&&feat[2]=.*VerbForm.*Part.*
                 if "verbo" in thispos:
                     thistext = corpus[row][morfcol]
-                if "ausiliare" in thispos:
-                    for ind in range(1,4):
+                try:
+                    mydbg = corpus[row][1]
+                except:
+                    pass
+                if "avere" in thislemma or "essere" in thislemma:
+                    for ind in range(1,4): #range(1,3):
                         try:
                             tmpos = legendaPos[corpus[row+ind][poscol]][0]
                             tmpphrase = corpus[row+ind][frasecol]
@@ -312,7 +317,11 @@ def contaverbi(corpuscols, legendaPos):
                             break
                         if "verbo" in tmpos:
                             thistext2 = thistext2 + corpus[row+ind][morfcol] + "+"
-                        startline = row+ind+1
+                            try:
+                                mydbg = mydbg + " " + corpus[row+ind][1]
+                            except:
+                                pass
+                            startline = row+ind+1
                     if len(thistext2.split("+"))>1:
                         thistext3 = thistext2.split("+")[1]
                         thistext2 = thistext2.split("+")[0]
@@ -336,6 +345,11 @@ def contaverbi(corpuscols, legendaPos):
                     else:
                         newrow = [thistext, "1"]
                         table.append(newrow)
+                        try:
+                            #print([thistext,mydbg])
+                            pass
+                        except:
+                            pass
             if row % 500 == 0 or row == len(corpus)-1:
                 savetable(table, output)
                 with open(recovery, "a", encoding='utf-8') as rowfile:

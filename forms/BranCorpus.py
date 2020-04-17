@@ -885,6 +885,7 @@ class BranCorpus(QObject):
         poscol = self.corpuscols["pos"][0] #thisname.index(column[0])
         morfcol = self.corpuscols["feat"][0]
         frasecol = self.corpuscols["IDphrase"][0]
+        lemmacol = self.corpuscols["lemma"][0]
         ignoreperson = False
         ret = QMessageBox.question(self.corpuswidget,'Domanda', "Vuoi ignorare persona, numero, genere, e caratteristica clitica dei verbi?", QMessageBox.Yes | QMessageBox.No)
         if ret == QMessageBox.Yes:
@@ -914,16 +915,18 @@ class BranCorpus(QObject):
             try:
                 thispos = self.legendaPos[self.corpus[row][poscol]][0]
                 thisphrase = self.corpus[row][frasecol]
+                thislemma = self.corpus[row][lemmacol]
             except:
-                thispos = ""    
+                thispos = ""
                 thisphrase = "0"
+                thislemma = ""
             thistext = ""
             thistext2 = ""
             thistext3 = ""
             #Filtro per trovare i verbi a 3 come "è stato fatto": feat=.*VerbForm.*Part.*&&feat[1]=.*VerbForm.*Part.*||feat=.*VerbForm.*Part.*&&feat[-1]=.*VerbForm.*Part.*||feat=.*VerbForm.*&&feat[1]=.*VerbForm.*Part.*&&feat[2]=.*VerbForm.*Part.*
             if "verbo" in thispos:
                 thistext = self.corpus[row][morfcol]
-            if "ausiliare" in thispos:
+            if "avere" in thislemma or "essere" in thislemma:
                 for ind in range(1,4):
                     try:
                         tmpos = self.legendaPos[self.corpus[row+ind][poscol]][0]
@@ -936,7 +939,7 @@ class BranCorpus(QObject):
                         break
                     if "verbo" in tmpos:
                         thistext2 = thistext2 + self.corpus[row+ind][morfcol] + "+"
-                    startline = row+ind+1
+                        startline = row+ind+1
                 if len(thistext2.split("+"))>1:
                     thistext3 = thistext2.split("+")[1]
                     thistext2 = thistext2.split("+")[0]
