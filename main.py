@@ -227,8 +227,15 @@ def orderVerbMorf(text, ignoreperson = False):
     return mytext
 
 def contaverbi(corpuscols, legendaPos):
+    debug = False
     separator = '\t'
     fileNames = []
+    try:
+        if sys.argv[4] == "y" or sys.argv[4] == "Y":
+            contigui = "Y"
+    except:
+        print("Vuoi che i verbi composti siano contigui? [Y/N]")
+        contigui = input()
     if os.path.isfile(sys.argv[2]):
         fileNames = [sys.argv[2]]
     if os.path.isdir(sys.argv[2]):
@@ -246,7 +253,7 @@ def contaverbi(corpuscols, legendaPos):
             if os.path.isfile(recovery):
                 ch = "Y"
                 try:
-                    if sys.argv[4] == "y" or sys.argv[4] == "Y":
+                    if sys.argv[5] == "y" or sys.argv[5] == "Y":
                         ch = "Y"
                 except:
                     print("Ho trovato un file di ripristino, lo devo usare? [Y/N]")
@@ -301,7 +308,8 @@ def contaverbi(corpuscols, legendaPos):
                 if "verbo" in thispos:
                     thistext = corpus[row][morfcol]
                 try:
-                    mydbg = corpus[row][1]
+                    if (debug):
+                        mydbg = corpus[row][1]
                 except:
                     pass
                 if "avere" in thislemma or "essere" in thislemma:
@@ -318,10 +326,13 @@ def contaverbi(corpuscols, legendaPos):
                         if "verbo" in tmpos:
                             thistext2 = thistext2 + corpus[row+ind][morfcol] + "+"
                             try:
-                                mydbg = mydbg + " " + corpus[row+ind][1]
+                                if (debug):
+                                    mydbg = mydbg + " " + corpus[row+ind][1]
                             except:
                                 pass
                             startline = row+ind+1
+                        elif contigui=="y" or contigui=="Y":
+                            break
                     if len(thistext2.split("+"))>1:
                         thistext3 = thistext2.split("+")[1]
                         thistext2 = thistext2.split("+")[0]
@@ -346,8 +357,8 @@ def contaverbi(corpuscols, legendaPos):
                         newrow = [thistext, "1"]
                         table.append(newrow)
                         try:
-                            #print([thistext,mydbg])
-                            pass
+                            if (debug):
+                                print([thistext,mydbg])
                         except:
                             pass
             if row % 500 == 0 or row == len(corpus)-1:
