@@ -165,10 +165,13 @@ class BranCorpus(QObject):
         self.sessionFile = ""
         self.sessionDir = "."
         self.corpus = []
-        for row in range(self.corpuswidget.rowCount()):
-            self.corpuswidget.removeRow(0)
-            if row<100 or row%100==0:
-                QApplication.processEvents()
+        try:
+            for row in range(self.corpuswidget.rowCount()):
+                self.corpuswidget.removeRow(0)
+                if row<100 or row%100==0:
+                    QApplication.processEvents()
+        except:
+            print("Session closed")
         #self.setWindowTitle("Bran")
 
     def loadFromTint(self, tintaddr = "localhost"):
@@ -1702,6 +1705,11 @@ class BranCorpus(QObject):
             self.updateCorpus()
 
     def updateCorpus(self):
+        try:
+            tempccount = self.corpuswidget.columnCount()
+        except:
+            print("Running in cli, ignore table widget")
+            return
         Progrdialog = progress.Form() #self.Progrdialog = progress.Form()
         Progrdialog.show() #self.Progrdialog.show()
         # Clear table before adding new lines
@@ -1991,7 +1999,682 @@ class BranCorpus(QObject):
         self.Progrdialog.accept()
         TBdialog.show()
 
-#
+
+
+    ####################################################################################################################
+    #CORE FUNCTIONS
+    ####################################################################################################################
+
+
+
+
+    def core_findintable(self, table, stringa, col=0):
+        resrow = -1
+        for row in range(len(table)):
+            if table[row][col] == stringa:
+                resrow = row
+                break
+        return resrow
+
+    def core_linescount(self, filename):
+        f = open(filename, "r+", encoding='utf-8')
+        buf = mmap.mmap(f.fileno(), 0)
+        lines = 0
+        readline = buf.readline
+        while readline():
+            lines += 1
+        return lines
+
+    def core_savetable(self, table, output):
+        tabletext = ""
+        for row in table:
+            coln = 0
+            for col in row:
+                if coln > 0:
+                    tabletext = tabletext + '\t'
+                tabletext = tabletext + str(col)
+                coln = coln + 1
+            tabletext = tabletext + "\n"
+        file = open(output,"w", encoding='utf-8')
+        file.write(tabletext)
+        file.close()
+
+    def core_calcola_occorrenze(self, mycol, myrecovery = False):
+        fileName = self.sessionFile
+        table = []
+        try:
+            col = int(mycol)
+        except:
+            col = 0
+        output = fileName + "-occorrenze-" + str(col) + ".tsv"
+        recovery = output + ".tmp"
+        totallines = len(self.corpus)
+        startatrow = -1
+        print(fileName + " -> " + output)
+        try:
+            if os.path.isfile(recovery) and myrecovery:
+                with open(recovery, "r", encoding='utf-8') as tempfile:
+                   lastline = (list(tempfile)[-1])
+                startatrow = int(lastline)
+                print("Carico la tabella")
+                with open(output, "r", encoding='utf-8') as ins:
+                    for line in ins:
+                        table.append(line.replace("\n","").replace("\r","").split(separator))
+                print("Comincio dalla riga " + str(startatrow))
+            else:
+                exception = 0/0
+        except:
+            startatrow = -1
+            table.append([os.path.basename(fileName)+"-"+str(col),"Occorrenze"])
+        if self.OnlyVisibleRows:
+            totallines = self.aToken
+            if bool(myrecovery == "y" or myrecovery == "Y") and self.daToken > startatrow:
+                startatrow = self.daToken
+        for row in range(startatrow, totallines):
+            if row > startatrow:
+                try:
+                    thistext = self.corpus[row][col]
+                except:
+                    thistext = ""
+                tbrow = self.core_findintable(table, thistext, 0)
+                if tbrow>=0:
+                    tbval = int(table[tbrow][1])+1
+                    table[tbrow][1] = tbval
+                else:
+                    newrow = [thistext, "1"]
+                    table.append(newrow)
+                if row % 500 == 0:
+                    self.core_savetable(table, output)
+                    with open(recovery, "a", encoding='utf-8') as rowfile:
+                        rowfile.write(str(row)+"\n")
+            row = row + 1
+        self.core_savetable(table, output)
+        with open(recovery, "a", encoding='utf-8') as rowfile:
+            rowfile.write(str(row)+"\n")
+
+    def core_orderVerbMorf(self, text, ignoreperson = False):
+        if not "VerbForm" in text:
+            return text
+        mytext = ""
+        #Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin
+        vform = ""
+        mood = ""
+        tense = ""
+        pers = ""
+        num = ""
+        gender = ""
+        for el in text.split("|"):
+            if "VerbForm" in el:
+                vform = re.sub(".*VerbForm\=(.*)","\g<1>",el)
+            if "Mood" in el:
+                mood = re.sub(".*Mood\=(.*)","\g<1>",el)
+            if "Tense" in el:
+                tense = re.sub(".*Tense\=(.*)","\g<1>",el)
+            if "Person" in el:
+                pers = re.sub(".*Person\=(.*)","\g<1>",el)
+            if "Number" in el:
+                num = re.sub(".*Number\=(.*)","\g<1>",el)
+            if "Gender" in el:
+                gender = re.sub(".*Gender\=(.*)","\g<1>",el)
+        mytext = "VerbForm=" + vform
+        if mood != "":
+            mytext = mytext + "|Mood=" + mood
+        if tense != "":
+            mytext = mytext + "|Tense=" + tense
+        if pers != "" and ignoreperson==False:
+            mytext = mytext + "|Person=" + pers
+        if num != "" and ignoreperson==False:
+            mytext = mytext + "|Number=" + num
+        if gender != "" and ignoreperson==False:
+            mytext = mytext + "|Gender=" + gender
+        return mytext
+
+    def core_contaverbi(self, ignoreperson = True, contigui = False, myrecovery = False):
+        debug = False
+        poscol = self.corpuscols["pos"][0] #thisname.index(column[0])
+        morfcol = self.corpuscols["feat"][0]
+        frasecol = self.corpuscols["IDphrase"][0]
+        lemmacol = self.corpuscols["lemma"][0]
+        fileName = self.sessionFile
+        table = []
+        output = fileName + "-contaverbi.tsv"
+        recovery = output + ".tmp"
+        totallines = len(self.corpus)
+        startatrow = -1
+        print(fileName + " -> " + output)
+        try:
+            if os.path.isfile(recovery) and myrecovery:
+                with open(recovery, "r", encoding='utf-8') as tempfile:
+                   lastline = (list(tempfile)[-1])
+                startatrow = int(lastline)
+                print("Carico la tabella")
+                with open(output, "r", encoding='utf-8') as ins:
+                    for line in ins:
+                        table.append(line.replace("\n","").replace("\r","").split(separator))
+                print("Comincio dalla riga " + str(startatrow))
+            else:
+                exception = 0/0
+        except:
+            startatrow = -1
+            table.append(["Modo+Tempo", "Occorrenze", "Percentuali"])
+        if self.OnlyVisibleRows:
+            totallines = self.aToken
+            if bool(myrecovery == "y" or myrecovery == "Y") and self.daToken > startatrow:
+                startatrow = self.daToken
+        for row in range(startatrow, totallines):
+            if row > startatrow:
+                try:
+                    thispos = self.legendaPos[self.corpus[row][poscol]][0]
+                    thisphrase = self.corpus[row][frasecol]
+                    thislemma = self.corpus[row][lemmacol]
+                except:
+                    thispos = ""
+                    thisphrase = "0"
+                    thislemma = ""
+                thistext = ""
+                thistext2 = ""
+                thistext3 = ""
+                #Filtro per trovare i verbi a 3 come "è stato fatto": feat=.*VerbForm.*Part.*&&feat[1]=.*VerbForm.*Part.*||feat=.*VerbForm.*Part.*&&feat[-1]=.*VerbForm.*Part.*||feat=.*VerbForm.*&&feat[1]=.*VerbForm.*Part.*&&feat[2]=.*VerbForm.*Part.*
+                if "verbo" in thispos:
+                    thistext = self.corpus[row][morfcol]
+                try:
+                    if (debug):
+                        mydbg = self.corpus[row][1]
+                except:
+                    pass
+                if "avere" in thislemma or "essere" in thislemma:
+                    for ind in range(1,4): #range(1,3):
+                        try:
+                            tmpos = self.legendaPos[self.corpus[row+ind][poscol]][0]
+                            tmpphrase = self.corpus[row+ind][frasecol]
+                        except:
+                            tmpos = ""
+                            tmpphrase = "0"
+                        #i verbi consecutivi vanno bene finché sono nella stessa frase
+                        if tmpphrase != thisphrase:
+                            break
+                        if "verbo" in tmpos:
+                            thistext2 = thistext2 + self.corpus[row+ind][morfcol] + "+"
+                            try:
+                                if (debug):
+                                    mydbg = mydbg + " " + self.corpus[row+ind][1]
+                            except:
+                                pass
+                            startline = row+ind+1
+                        elif contigui=="y" or contigui=="Y":
+                            break
+                    if len(thistext2.split("+"))>1:
+                        thistext3 = thistext2.split("+")[1]
+                        thistext2 = thistext2.split("+")[0]
+                if len(thistext) >= 3:
+                    thistext = self.core_orderVerbMorf(thistext, ignoreperson) + "+"
+                if len(thistext2) >= 3:
+                    thistext2 = self.core_orderVerbMorf(thistext2, ignoreperson) + "+"
+                if len(thistext3) >= 3:
+                    thistext3 = self.core_orderVerbMorf(thistext3, ignoreperson) #+ "+"
+                if thistext != "":
+                    thistext = thistext + thistext2 + thistext3
+                    if ignoreperson:
+                        thistext = thistext.replace("/Clitic=Yes", "")
+                if thistext.endswith("+"):
+                    thistext = thistext[0:-1]
+                if thistext != "":
+                    tbrow = self.core_findintable(table, thistext, 0)
+                    if tbrow>=0:
+                        tbval = int(table[tbrow][1])+1
+                        table[tbrow][1] = tbval
+                    else:
+                        newrow = [thistext, "1"]
+                        table.append(newrow)
+                        try:
+                            if (debug):
+                                print([thistext,mydbg])
+                        except:
+                            pass
+            if row % 500 == 0 or row == len(self.corpus)-1:
+                self.core_savetable(table, output)
+                with open(recovery, "a", encoding='utf-8') as rowfile:
+                    rowfile.write(str(row)+"\n")
+        #calcolo le percentuali
+        print("Calcolo le percentuali")
+        totallines = len(table)
+        verbitotali = 0
+        for row in range(len(table)):
+            try:
+                tval = int(table[row][1])
+            except:
+                tval = 0
+            verbitotali = verbitotali + tval
+        for row in range(len(table)):
+            try:
+                ratio = (float(table[row][1])/float(verbitotali)*100)
+                ratios = f'{ratio:.3f}'
+            except:
+                ratios = table[row][1]
+            if len(table[row])>2:
+                table[row][2] = ratios
+            else:
+                table[row].append(ratios)
+        self.core_savetable(table, output)
+
+    def core_misure_lessicometriche(self, ignoretext, dimList):
+        separator = '\t'
+        fileNames = []
+        if os.path.isfile(sys.argv[2]):
+            fileNames = [sys.argv[2]]
+        if os.path.isdir(sys.argv[2]):
+            for tfile in os.listdir(sys.argv[2]):
+                if tfile[-4:] == ".csv" or tfile[-4:] == ".tsv":
+                    fileNames.append(os.path.join(sys.argv[2],tfile))
+        try:
+            col = int(sys.argv[3])
+        except:
+            col = 0
+        for fileName in fileNames:
+            #totallines = self.w.corpus.rowCount()
+            table = []
+            output = fileName + "-" + str(col)+ "-misure_lessicometriche.tsv"
+            recovery = output + ".tmp"
+            startatrow = -1
+            print(fileName + " -> " + output)
+            try:
+                if os.path.isfile(recovery):
+                    ch = "Y"
+                    try:
+                        if sys.argv[4] == "y" or sys.argv[4] == "Y":
+                            ch = "Y"
+                    except:
+                        print("Ho trovato un file di ripristino, lo devo usare? [Y/N]")
+                        ch = input()
+                    if ch == "Y" or ch == "y":
+                        with open(recovery, "r", encoding='utf-8') as tempfile:
+                           lastline = (list(tempfile)[-1])
+                        startatrow = int(lastline)
+                        print("Carico la tabella")
+                        with open(output, "r", encoding='utf-8') as ins:
+                            for line in ins:
+                                table.append(line.replace("\n","").replace("\r","").split(separator))
+                        print("Comincio dalla riga " + str(startatrow))
+            except:
+                startatrow = -1
+            corpus = []
+            with open(fileName, "r", encoding='utf-8') as ins:
+                for line in ins:
+                    corpus.append(line.replace("\n","").replace("\r","").split(separator))
+            totallines = len(corpus)
+            totaltypes = 0
+            mytypes = {}
+            if startatrow >= (len(corpus)-1):
+                continue
+            for row in range(len(corpus)):
+                if row > startatrow:
+                    thisposc = "False"
+                    try:
+                        thistext = self.corpus[row][col]
+                        if ignoretext != "":
+                            thistext = re.sub(ignoretext, "", thistext)
+                    except:
+                        thistext = ""
+                    if thistext != "":
+                        tbrow = self.core_findintable(table, thistext, 0)
+                        if tbrow>=0:
+                            tbval = int(table[tbrow][1])+1
+                            table[tbrow][1] = tbval
+                        else:
+                            newrow = [thistext, "1"]
+                            table.append(newrow)
+                            totaltypes = totaltypes + 1
+                        if row % 500 == 0:
+                            self.core_savetable(table, output)
+                            with open(recovery, "a", encoding='utf-8') as rowfile:
+                                rowfile.write(str(row)+"\n")
+            hapax = 0
+            classifrequenza = []
+            occClassifrequenza = []
+            totallines = len(table)
+            paroletotali = 0
+            for row in range(len(table)):
+                if int(table[row][1]) == 1:
+                    hapax = hapax + 1
+                if table[row][1] in classifrequenza:
+                    ind = classifrequenza.index(table[row][1])
+                    occClassifrequenza[ind] = occClassifrequenza[ind] + 1
+                else:
+                    classifrequenza.append(table[row][1])
+                    occClassifrequenza.append(1)
+                paroletotali = paroletotali + int(table[row][1])
+            dimCorpus = dimList[0]
+            for i in range(len(dimList)-1):
+                if dimList[i] <= paroletotali and dimList[i+1] >= paroletotali:
+                    lower = paroletotali - dimList[i]
+                    upper = dimList[i+1] - paroletotali
+                    if lower < upper:
+                        dimCorpus = dimList[i]
+                    else:
+                        dimCorpus = dimList[i+1]
+            for row in range(len(table)):
+                thistext = table[row][0]
+                ratio = (float(table[row][1])/float(paroletotali)*dimCorpus)
+                ratios = f'{ratio:.3f}'
+                table[row].append(str(ratios))
+                ratio = math.log10(float(table[row][1])/float(paroletotali))
+                ratios = f'{ratio:.3f}'
+                table[row].append(str(ratios))
+            table.append(["Tokens", str(paroletotali)])
+            table.append(["Types", str(totaltypes)])
+            ratio = (float(totaltypes)/float(paroletotali))*100.0
+            ratios = f'{ratio:.3f}'
+            table.append(["(Types/Tokens)*100", str(ratios)])
+            ratio = (float(paroletotali)/float(totaltypes))
+            ratios = f'{ratio:.3f}'
+            table.append(["Tokens/Types", str(ratios)])
+            table.append(["Hapax", str(hapax)])
+            ratio = (float(hapax)/float(paroletotali))*100.0
+            ratios = f'{ratio:.3f}'
+            table.append(["(Hapax/Tokens)*100", str(ratios)])
+            ratio = float(totaltypes)/float(math.sqrt(paroletotali))
+            ratios = f'{ratio:.3f}'
+            table.append(["Types/sqrt(Tokens)", str(ratios)])
+            ratio = (float(math.log10(totaltypes))/float(math.log10(paroletotali)))
+            ratios = f'{ratio:.3f}'
+            table.append(["log(Types)/log(Tokens)", str(ratios)])
+            YuleSum = 0
+            for cfi in range(len(classifrequenza)):
+                YuleSum = YuleSum + ( math.pow(int(classifrequenza[cfi]),2) * occClassifrequenza[cfi] )
+            ratio = float(math.pow(10,4)) * ((float(YuleSum) - float(paroletotali))/ float(math.pow(paroletotali, 2)) )
+            ratios = f'{ratio:.3f}'
+            table.append(["Caratteristica di Yule (K)", str(ratios)])
+            ratio = math.pow(float(paroletotali), (1.0/math.pow(float(totaltypes), 0.172)))
+            ratios = f'{ratio:.3f}'
+            table.append(["W", str(ratios)])
+            ratio =  math.pow(float(math.log10(paroletotali)), 2.0)/(float(math.log10(paroletotali)) - float(math.log10(totaltypes)) )
+            ratios = f'{ratio:.3f}'
+            table.append(["U", str(ratios)])
+            table.insert(0,["Token", "Occorrenze", "Frequenza in " + str(dimCorpus) + " parole", "Ordine di grandezza (log10)"])
+            self.core_savetable(table, output)
+
+
+    def core_estrai_colonna(self):
+        separator = '\t'
+        fileNames = []
+        if os.path.isfile(sys.argv[2]):
+            fileNames = [sys.argv[2]]
+        if os.path.isdir(sys.argv[2]):
+            for tfile in os.listdir(sys.argv[2]):
+                fileNames.append(os.path.join(sys.argv[2],tfile))
+        try:
+            col = int(sys.argv[3])
+        except:
+            col = 0
+        for fileName in fileNames:
+            row = 0
+            output = fileName + "-colonna-" + str(col) + ".tsv"
+            recovery = output + ".tmp"
+            startatrow = -1
+            try:
+                if os.path.isfile(recovery):
+                    ch = "Y"
+                    print("Ho trovato un file di ripristino, lo devo usare? [Y/N]")
+                    ch = input()
+                    if ch == "Y" or ch == "y":
+                        with open(recovery, "r", encoding='utf-8') as tempfile:
+                           lastline = (list(tempfile)[-1])
+                        startatrow = int(lastline)
+                        print("Comincio dalla riga " + str(startatrow))
+            except:
+                startatrow = -1
+            with open(fileName, "r", encoding='utf-8') as ins:
+                for line in ins:
+                    if row > startatrow:
+                        try:
+                            thistext = line.replace("\n","").replace("\r","").split(separator)[col]
+                        except:
+                            thistext = ""
+                        with open(output, "a", encoding='utf-8') as outfile:
+                            outfile.write(thistext+"\n")
+                        with open(recovery, "a", encoding='utf-8') as rowfile:
+                            rowfile.write(str(row)+"\n")
+                    row = row + 1
+
+
+    def core_mergetables(self):
+        separator = '\t'
+        fileNames = []
+        if os.path.isdir(sys.argv[2]):
+            for tfile in os.listdir(sys.argv[2]):
+                if bool(tfile[-4:] == ".tsv" or tfile[-4:] == ".tsv") and tfile[-11:] != "-merged.tsv" and tfile[-11:] != "-merged.csv":
+                    fileNames.append(os.path.join(sys.argv[2],tfile))
+        else:
+            return
+        dirName = os.path.basename(os.path.dirname(sys.argv[2]))
+        try:
+            col = int(sys.argv[3])
+        except:
+            col = 0
+        output = os.path.join(sys.argv[2],dirName + "-merged.tsv")
+        with open(fileNames[0], "r", encoding='utf-8') as f:
+            first_line = f.readline().replace("\n","").replace("\r","")
+        try:
+            opstr = str(sys.argv[4])
+            opers = opstr.split(",")
+        except:
+            opers = ["sum"]
+        try:
+            startatrow = int(sys.argv[5])-1
+            useheader = True
+        except:
+            startatrow = -1
+            useheader = False
+        table = []
+        firstfile = -1
+        for fileName in fileNames:
+            firstfile = firstfile + 1
+            row = 0
+            recovery = fileName + ".tmp"
+            print(fileName + " -> " + output)
+            totallines = linescount(fileName)
+            ch = "N"
+            try:
+                if os.path.isfile(recovery):
+                    try:
+                        if sys.argv[6] == "y" or sys.argv[6] == "Y":
+                            ch = "Y"
+                    except:
+                        print("Ho trovato un file di ripristino, lo devo usare? [Y/N]")
+                        ch = input()
+                    if ch == "Y" or ch == "y":
+                        with open(recovery, "r", encoding='utf-8') as tempfile:
+                           lastline = (list(tempfile)[-1])
+                        startatrow = int(lastline)
+                        print("Carico la tabella")
+                        with open(output, "r", encoding='utf-8') as ins:
+                            for line in ins:
+                                table.append(line.replace("\n","").replace("\r","").split(separator))
+                        print("Comincio dalla riga " + str(startatrow))
+                        useheader = False
+                else:
+                    if useheader:
+                        table.append(first_line.split(separator))
+                        useheader = False
+            except:
+                if useheader:
+                    table.append(first_line.split(separator))
+                    useheader = False
+            with open(fileName, "r", encoding='utf-8') as ins:
+                for line in ins:
+                    if row > startatrow:
+                        try:
+                            thislist = line.split(separator)
+                            thistext = thislist[col].replace("\n","").replace("\r","")
+                        except:
+                            thislist = []
+                            thistext = ""
+                        thisvalues = []
+                        for valcol in range(len(thislist)):
+                            if valcol != col:
+                                try:
+                                    thisvalues.append(thislist[valcol].replace("\n", ""))
+                                except:
+                                    thisvalues.append("")
+                        while len(thisvalues)<len(opers):
+                            thisvalues.append("")
+                        tbrow = self.core_findintable(table, thistext, 0)
+                        if tbrow>=0:
+                            for valind in range(len(opers)):
+                                tbval = float(table[tbrow][valind+1])
+                                if opers[valind] == "sum":
+                                    tbval = float(tbval) + float(thisvalues[valind])
+                                if opers[valind] == "mean":
+                                    tbval = (float(tbval) + float(thisvalues[valind]))
+                                if opers[valind] == "diff":
+                                    tbval = float(tbval) - float(thisvalues[valind])
+                                table[tbrow][valind+1] = tbval
+                        else:
+                            newrow = [thistext]
+                            for valind in range(len(thisvalues)):
+                                newrow.append(thisvalues[valind])
+                            table.append(newrow)
+                        if row % 500 == 0:
+                            self.core_savetable(table, output)
+                            with open(recovery, "a", encoding='utf-8') as rowfile:
+                                rowfile.write(str(row)+"\n")
+                    row = row + 1
+        if "mean" in opers and firstfile > 0 and row == totallines and startatrow < totallines:
+            for mrow in range(len(table)):
+                for valind in range(len(opers)):
+                    if opers[valind] == "mean":
+                        try:
+                            table[mrow][valind+1] = float(table[mrow][valind+1])/len(fileNames)
+                        except:
+                            err = True
+        self.core_savetable(table, output)
+        print("Done")
+
+
+    def core_splitbigfile(self):
+        separator = '\t'
+        if os.path.isfile(sys.argv[2]):
+            fileName = sys.argv[2]
+            ext = fileName[-3:]
+        try:
+            maxrow = int(sys.argv[3])
+        except:
+            maxrow = 20000
+            if ext == "csv":
+                maxrow = 500000
+        splitdot = False
+        try:
+            if sys.argv[3] == "." and ext == "txt":
+                splitdot = True
+        except:
+            splitdot = False
+        part = 0
+        row = 0
+        partrow = 0
+        output = fileName + "-part" + str(part) + "." + ext
+        recovery = output + ".tmp"
+        startatrow = -1
+        try:
+            if os.path.isfile(recovery):
+                ch = "Y"
+                print("Ho trovato un file di ripristino, lo devo usare? [Y/N]")
+                ch = input()
+                if ch == "Y" or ch == "y":
+                    with open(recovery, "r", encoding='utf-8') as tempfile:
+                       lastline = (list(tempfile)[-1].split(",")[0])
+                    startatrow = int(lastline)
+                    part = int(list(tempfile)[-1].split(",")[1])
+                    partrow = int(list(tempfile)[-1].split(",")[2])
+                    print("Comincio dalla riga " + str(startatrow))
+        except:
+            startatrow = -1
+            part = 0
+        with open(fileName, "r", encoding='utf-8') as ins:
+            for line in ins:
+                if row > startatrow:
+                    try:
+                        thistext = line
+                        if ext == "txt" and splitdot:
+                            partrow = partrow + len(line.split(".")) -1
+                    except:
+                        thistext = ""
+                    if partrow > (maxrow-1):
+                        partrow = 0
+                        part = part + 1
+                    output = fileName + "-part" + str(part) + "." + ext
+                    with open(output, "a", encoding='utf-8') as outfile:
+                        outfile.write(thistext)
+                    with open(recovery, "a", encoding='utf-8') as rowfile:
+                        rowfile.write(str(row)+","+str(part)+","+str(partrow)+"\n")
+                    partrow = partrow + 1
+                row = row + 1
+
+    def core_samplebigfile(self):
+        separator = '\t'
+        if os.path.isfile(sys.argv[2]):
+            fileName = sys.argv[2]
+            ext = fileName[-3:]
+        try:
+            maxrow = int(sys.argv[3])
+        except:
+            maxrow = 20000
+            if ext == "csv":
+                maxrow = 500000
+        splitdot = False
+        try:
+            if sys.argv[3] == "." and ext == "txt":
+                splitdot = True
+        except:
+            splitdot = False
+        if splitdot == True:
+            with open(fileName, "r", encoding='utf-8') as ins:
+                for line in ins:
+                    thistext = line.replace('.','.\n')
+                    with open(fileName + "-splitondot.txt", "a", encoding='utf-8') as outfile:
+                        outfile.write(thistext)
+            fileName = fileName + "-splitondot.txt"
+        row = 0
+        output = fileName + "-estratto." + ext
+        startatrow = -1
+        totallines = linescount(fileName)
+        print("Total Lines: " + str(totallines))
+        #ripristino impossibile, è un sistema casuale
+        chunkf = float(totallines)/float(maxrow)
+        chunk = int(math.floor(chunkf))
+        if chunk < 2:
+            print("Non ci sono abbastanza righe nel file")
+            return
+        getrows = []
+        start = 0
+        print("Calcolo le righe da selezionare")
+        for i in range(maxrow):
+            end = start+chunk -1
+            if start >= totallines-1:
+                start = totallines -2
+            if end >= totallines:
+                end = totallines -1
+            trow = random.randint(start, end)
+            getrows.append(trow)
+            start = end + 1
+        print("Estraggo le righe in un nuovo file")
+        ir = 0
+        with open(fileName, "r", encoding='utf-8') as ins:
+            for line in ins:
+                if row == getrows[ir]:
+                    try:
+                        thistext = line
+                    except:
+                        thistext = ""
+                    ir = ir + 1
+                    if ir == len(getrows):
+                        break
+                    with open(output, "a", encoding='utf-8') as outfile:
+                        outfile.write(thistext)
+                row = row + 1
+
+
+########### UDPIPE INTEGRATION
+
 class UDCorpus(QThread):
     dataReceived = Signal(bool)
     updated = Signal(int)
