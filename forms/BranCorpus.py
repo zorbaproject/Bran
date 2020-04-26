@@ -757,7 +757,6 @@ class BranCorpus(QObject):
         self.core_calcola_occorrenze(mycol, myrecovery)
         self.Progrdialog.cancelled = True
         self.core_killswitch = False
-        #calcolo le percentuali
         TBdialog = tableeditor.Form(self.corpuswidget, self.mycfg)
         TBdialog.sessionDir = self.sessionDir
         lineI = 0
@@ -836,6 +835,51 @@ class BranCorpus(QObject):
                         tbrow = TBdialog.w.tableWidget.rowCount()-1
                         TBdialog.setcelltotable("1", tbrow, ifilter+1)
         self.Progrdialog.accept()
+        TBdialog.show()
+
+    def occorrenzenormalizzate(self):
+        thisname = []
+        for col in self.corpuscols:
+            thisname.append(self.corpuscols[col][1])
+        column = QInputDialog.getItem(self.corpuswidget, "Scegli la colonna", "Se vuoi estrarre il dizionario devi cercare nella colonna dei lemmi. Ma puoi anche scegliere di ottenere le statistiche su altre colonne, come la Forma grafica.",thisname,current=self.corpuscols['token'][0],editable=False)
+        mycol = thisname.index(column[0])
+        ret = QMessageBox.question(self.corpuswidget,'Domanda', "Vuoi ignorare la punteggiatura?", QMessageBox.Yes | QMessageBox.No)
+        doignorepunct = False
+        if ret == QMessageBox.Yes:
+            doignorepunct = True
+        myrecovery = False
+        hname = str(mycol)
+        hkey = str(mycol)
+        for key in self.corpuscols:
+            if mycol == self.corpuscols[key][0]:
+                hname = self.corpuscols[key][1]
+                hkey = key
+        output = self.sessionFile + "-occorrenze_normalizzate-" + hkey + ".tsv"
+        recovery = output + ".tmp"
+        totallines = self.core_linescount(self.sessionFile)
+        self.core_killswitch = False
+        self.Progrdialog = progress.ProgressDialog(self, recovery, totallines)
+        self.Progrdialog.start()
+        self.core_occorrenze_normalizzate(mycol, myrecovery, doignorepunct)
+        self.Progrdialog.cancelled = True
+        self.core_killswitch = False
+        TBdialog = tableeditor.Form(self.corpuswidget, self.mycfg)
+        TBdialog.sessionDir = self.sessionDir
+        lineI = 0
+        with open(output, "r", encoding='utf-8') as ins:
+            for line in ins:
+                colI = 0
+                for col in line.replace("\n","").replace("\r","").split(self.separator):
+                    if lineI == 0:
+                        TBdialog.addcolumn(col, colI)
+                    else:
+                        if colI == 0:
+                            TBdialog.addlinetotable(col, 0)
+                        else:
+                            TBdialog.setcelltotable(col, lineI-1, colI)
+                    colI = colI +1
+                lineI = lineI +1
+        #self.Progrdialog.accept()
         TBdialog.show()
 
     def orderVerbMorf(self, text, ignoreperson = False):
@@ -2107,6 +2151,112 @@ class BranCorpus(QObject):
                 table[row].append(ratios)
         self.core_savetable(table, output)
 
+    def core_occorrenze_normalizzate(self, mycol, myrecovery, doignorepunct = True):
+        fileName = self.sessionFile
+        table = []
+        try:
+            col = int(mycol)
+        except:
+            col = 0
+        hname = str(col)
+        hkey = str(col)
+        for key in self.corpuscols:
+            if col == self.corpuscols[key][0]:
+                hname = self.corpuscols[key][1]
+                hkey = key
+        output = fileName + "-occorrenze_normalizzate-" + hkey + ".tsv"
+        recovery = output + ".tmp"
+        totallines = len(self.corpus)
+        startatrow = -1
+        print(fileName + " -> " + output)
+        try:
+            if os.path.isfile(recovery) and myrecovery:
+                with open(recovery, "r", encoding='utf-8') as tempfile:
+                   lastline = (list(tempfile)[-1])
+                startatrow = int(lastline)
+                print("Carico la tabella")
+                with open(output, "r", encoding='utf-8') as ins:
+                    for line in ins:
+                        table.append(line.replace("\n","").replace("\r","").split(separator))
+                print("Comincio dalla riga " + str(startatrow))
+            else:
+                exception = 0/0
+        except:
+            startatrow = -1
+            table.append([hname,"Occorrenze", "Frequenza in parole", "Ordine (log10) della frequenza"]) #L'ordine di grandezza è log10(occorrenzeParola/occorrenzeTotali)
+        if self.OnlyVisibleRows:
+            totallines = self.aToken
+            if bool(myrecovery == "y" or myrecovery == "Y") and self.daToken > startatrow:
+                startatrow = self.daToken
+        totaltypes = 0
+        mytypes = {}
+        #if startatrow >= (len(self.corpus)-1):
+        #    return
+        for row in range(startatrow, totallines):
+            if self.core_killswitch:
+                break
+            if row > startatrow:
+                thisposc = "False"
+                try:
+                    thistext = self.corpus[row][col]
+                    if self.ignoretext != "" and doignorepunct:
+                        thistext = re.sub(self.ignoretext, "", thistext)
+                except:
+                    thistext = ""
+                if thistext != "":
+                    tbrow = self.core_findintable(table, thistext, 0)
+                    if tbrow>=0:
+                        tbval = int(table[tbrow][1])+1
+                        table[tbrow][1] = tbval
+                    else:
+                        newrow = [thistext, "1"]
+                        table.append(newrow)
+                        totaltypes = totaltypes + 1
+                    if row % 500 == 0:
+                        self.core_savetable(table, output)
+                        with open(recovery, "a", encoding='utf-8') as rowfile:
+                            rowfile.write(str(row)+"\n")
+        hapax = 0
+        classifrequenza = []
+        occClassifrequenza = []
+        totallines = len(table)
+        paroletotali = 0
+        for row in range(len(table)):
+            try:
+                if int(table[row][1]) == 1:
+                    hapax = hapax + 1
+            except:
+                continue
+            if table[row][1] in classifrequenza:
+                ind = classifrequenza.index(table[row][1])
+                occClassifrequenza[ind] = occClassifrequenza[ind] + 1
+            else:
+                classifrequenza.append(table[row][1])
+                occClassifrequenza.append(1)
+            paroletotali = paroletotali + int(table[row][1])
+        dimCorpus = self.dimList[0]
+        for i in range(len(self.dimList)-1):
+            if self.dimList[i] <= paroletotali and self.dimList[i+1] >= paroletotali:
+                lower = paroletotali - self.dimList[i]
+                upper = self.dimList[i+1] - paroletotali
+                if lower < upper:
+                    dimCorpus = self.dimList[i]
+                else:
+                    dimCorpus = self.dimList[i+1]
+        for row in range(len(table)):
+            thistext = table[row][0]
+            try:
+                ratio = (float(table[row][1])/float(paroletotali)*dimCorpus)
+            except:
+                continue
+            ratios = f'{ratio:.3f}'
+            table[row].append(str(ratios))
+            ratio = math.log10(float(table[row][1])/float(paroletotali))
+            ratios = f'{ratio:.3f}'
+            table[row].append(str(ratios))
+        table[0][2] = "Frequenza in " + str(dimCorpus) + " parole"
+        self.core_savetable(table, output)
+
     def core_misure_lessicometriche(self, mycol, myrecovery, doignorepunct = True):
         fileName = self.sessionFile
         table = []
@@ -2210,6 +2360,8 @@ class BranCorpus(QObject):
             ratio = math.log10(float(table[row][1])/float(paroletotali))
             ratios = f'{ratio:.3f}'
             table[row].append(str(ratios))
+        table = []
+        table.append(["Misura lessicometrica", "Valore"])
         table.append(["Tokens", str(paroletotali)])
         table.append(["Types", str(totaltypes)])
         ratio = (float(totaltypes)/float(paroletotali))*100.0
@@ -2240,8 +2392,6 @@ class BranCorpus(QObject):
         ratio =  math.pow(float(math.log10(paroletotali)), 2.0)/(float(math.log10(paroletotali)) - float(math.log10(totaltypes)) )
         ratios = f'{ratio:.3f}'
         table.append(["U", str(ratios)])
-        table[0][2] = "Frequenza in " + str(dimCorpus) + " parole"
-        #table.insert(0,["Token", "Occorrenze", "Frequenza in " + str(dimCorpus) + " parole", "Ordine di grandezza (log10)"])
         self.core_savetable(table, output)
 
 

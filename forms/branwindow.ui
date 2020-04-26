@@ -290,6 +290,7 @@
       <string>&amp;Occorrenze</string>
      </property>
      <addaction name="actionConta_occorrenze"/>
+     <addaction name="actionConta_occorrenze_normalizzate"/>
      <addaction name="actionConta_occorrenze_filtrate"/>
      <addaction name="actionCo_occorrenze"/>
     </widget>
@@ -564,6 +565,11 @@
   <action name="actionConverti_vecchio_corpus">
    <property name="text">
     <string>Converti &amp;vecchio corpus</string>
+   </property>
+  </action>
+  <action name="actionConta_occorrenze_normalizzate">
+   <property name="text">
+    <string>Conta occorrenze normalizzate</string>
    </property>
   </action>
  </widget>

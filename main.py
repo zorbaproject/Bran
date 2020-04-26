@@ -228,15 +228,16 @@ if __name__ == "__main__":
             print("\n")
             print("Elenco dei comandi:\n")
             print("python3 main.py tintstart [brancfg]\n")
-            print("python3 main.py txt2corpus file.txt|cartella [indirizzoServerTint] [y]\n")
+            print("python3 main.py txt2corpus file.txt|cartella [indirizzoServerTint] [ripristino (y/n)]\n")
             print("python3 main.py splitbigfile file.txt [maxnumberoflines] [.]\n")
             print("python3 main.py samplebigfile file.txt [maxnumberoflines] [.]\n")
-            print("python3 main.py occorrenze file.tsv|cartella [colonna] [y]\n")
-            print("python3 main.py occorrenzeNonBran file.tsv|cartella [colonna] [separator] [y]\n")
+            print("python3 main.py occorrenze file.tsv|cartella [colonna] [ripristino (y/n)]\n")
+            print("python3 main.py occorrenzeNonBran file.tsv|cartella [colonna] [separatore] [ripristino (y/n)]\n")
+            print("python3 main.py occorrenzeNormalizzate file.tsv|cartella [colonna] [ripristino (y/n)]\n")
             print("python3 main.py extractcolumn file.tsv|cartella colonna\n")
-            print("python3 main.py contaverbi file.tsv|cartella [y (ignore person)] [y]\n")
-            print("python3 main.py misurelessico file.tsv|cartella [colonna] [y]\n")
-            print("python3 main.py mergetables cartella colonnaChiave [sum|mean|diff,sum|mean|diff] [1] [y]\n")
+            print("python3 main.py contaverbi file.tsv|cartella [ignora persona (y/n)] [ripristino (y/n)]\n")
+            print("python3 main.py misurelessico file.tsv|cartella [colonna] [ripristino (y/n)]\n")
+            print("python3 main.py mergetables cartella colonnaChiave [sum|mean|diff,sum|mean|diff] [1] [ripristino (y/n)]\n")
             print("python3 main.py texteditor file.tsv|cartella\n")
             print("python3 main.py confronto file.tsv|cartella\n")
             print("Gli argomenti tra parentesi [] sono facoltativi.")
@@ -439,6 +440,38 @@ if __name__ == "__main__":
                 Corpus.CSVloader([fileName])
                 Corpus.sessionFile = fileName
                 Corpus.core_misure_lessicometriche(mycol, myrecovery)
+                Corpus.chiudiProgetto()
+            print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
+        if sys.argv[1] == "occorrenzeNormalizzate":
+            try:
+                myfiles = sys.argv[2]
+            except:
+                sys.exit()
+            try:
+                mycol = sys.argv[3]
+            except:
+                mycol = 0
+            try:
+                rch = sys.argv[4]
+            except:
+                print("Vuoi usare un file di ripristino? [Y/N]")
+                rch = input()
+            if rch == "Y" or rch == "y":
+                myrecovery = True
+            else:
+                myrecovery = False
+            #Corpus.separator = '\t'
+            fileNames = []
+            if os.path.isfile(myfiles):
+                fileNames = [myfiles]
+            if os.path.isdir(myfiles):
+                for tfile in os.listdir(myfiles):
+                    if tfile[-4:] == ".csv" or tfile[-4:] == ".tsv":
+                        fileNames.append(os.path.join(myfiles,tfile))
+            for fileName in fileNames:
+                Corpus.CSVloader([fileName])
+                Corpus.sessionFile = fileName
+                Corpus.core_occorrenze_normalizzate(mycol, myrecovery)
                 Corpus.chiudiProgetto()
             print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
         sys.exit(0)
