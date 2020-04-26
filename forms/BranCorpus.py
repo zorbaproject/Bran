@@ -1798,137 +1798,45 @@ class BranCorpus(QObject):
         for col in self.corpuscols:
             thisname.append(self.corpuscols[col][1])
         column = QInputDialog.getItem(self.corpuswidget, "Scegli la colonna", "Se vuoi estrarre il dizionario devi cercare nella colonna dei lemmi. Ma puoi anche scegliere di ottenere le statistiche su altre colonne, come la Forma grafica.",thisname,current=self.corpuscols['token'][0],editable=False)
-        col = thisname.index(column[0])
+        mycol = thisname.index(column[0])
         ret = QMessageBox.question(self.corpuswidget,'Domanda', "Vuoi ignorare la punteggiatura?", QMessageBox.Yes | QMessageBox.No)
+        doignorepunct = False
+        if ret == QMessageBox.Yes:
+            doignorepunct = True
+        myrecovery = False
+        hname = str(mycol)
+        hkey = str(mycol)
+        for key in self.corpuscols:
+            if mycol == self.corpuscols[key][0]:
+                hname = self.corpuscols[key][1]
+                hkey = key
+        output = self.sessionFile + "-misure_lessicometriche-" + hkey + ".tsv"
+        recovery = output + ".tmp"
+        totallines = self.core_linescount(self.sessionFile)
+        self.core_killswitch = False
+        self.Progrdialog = progress.ProgressDialog(self, recovery, totallines)
+        self.Progrdialog.start()
+        self.core_misure_lessicometriche(mycol, myrecovery, doignorepunct)
+        self.Progrdialog.cancelled = True
+        self.core_killswitch = False
+        #calcolo le percentuali
         TBdialog = tableeditor.Form(self.corpuswidget, self.mycfg)
         TBdialog.sessionDir = self.sessionDir
-        TBdialog.addcolumn("Token", 0)
-        TBdialog.addcolumn("Occorrenze", 1)
-        #calcolo le occorrenze del pos
-        self.Progrdialog = progress.Form()
-        self.Progrdialog.show()
-        totaltypes = 0
-        mytypes = {}
-        totallines = len(self.corpus)
-        startline = 0
-        if self.OnlyVisibleRows:
-            totallines = self.aToken
-            startline = self.daToken
-        for row in range(startline, totallines):
-            if self.OnlyVisibleRows and self.corpuswidget.isRowHidden(row-startline):
-                continue
-            self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
-            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
-            QApplication.processEvents()
-            if self.Progrdialog.w.annulla.isChecked():
-                return
-            thisposc = "False"
-            try:
-                thistext = self.corpus[row][col]
-            except:
-                thistext = ""
-            if ret == QMessageBox.Yes:
-                thistext = re.sub(self.ignoretext, "", thistext)
-            if thistext != "":
-                tbrow = TBdialog.finditemincolumn(thistext, col=0, matchexactly = True, escape = True)
-                if tbrow>=0:
-                    tbval = int(TBdialog.w.tableWidget.item(tbrow,1).text())+1
-                    TBdialog.setcelltotable(str(tbval), tbrow, 1)
-                else:
-                    TBdialog.addlinetotable(thistext, 0)
-                    tbrow = TBdialog.w.tableWidget.rowCount()-1
-                    TBdialog.setcelltotable("1", tbrow, 1)
-                    totaltypes = totaltypes + 1
-        hapax = 0
-        classifrequenza = []
-        occClassifrequenza = []
-        for row in range(TBdialog.w.tableWidget.rowCount()):
-            self.Progrdialog.w.testo.setText("Sto cercando gli hapax su "+str(row))
-            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
-            QApplication.processEvents()
-            if int(TBdialog.w.tableWidget.item(row,1).text()) == 1:
-                hapax = hapax + 1
-            if TBdialog.w.tableWidget.item(row,1).text() in classifrequenza:
-                ind = classifrequenza.index(TBdialog.w.tableWidget.item(row,1).text())
-                occClassifrequenza[ind] = occClassifrequenza[ind] + 1
-            else:
-                classifrequenza.append(TBdialog.w.tableWidget.item(row,1).text())
-                occClassifrequenza.append(1)
-        totallines = TBdialog.w.tableWidget.rowCount()
-        paroletotali = 0
-        for row in range(TBdialog.w.tableWidget.rowCount()):
-            self.Progrdialog.w.testo.setText("Sto calcolando le somme su "+str(row))
-            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
-            QApplication.processEvents()
-            paroletotali = paroletotali + int(TBdialog.w.tableWidget.item(row,1).text())
-        dimCorpus = self.getCorpusDim(paroletotali)
-        TBdialog.addcolumn("Frequenza in " + str(dimCorpus) + " parole", 2)
-        TBdialog.addcolumn("Ordine di grandezza (log10)", 3)
-        for row in range(TBdialog.w.tableWidget.rowCount()):
-            self.Progrdialog.w.testo.setText("Sto controllando la riga numero "+str(row))
-            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
-            QApplication.processEvents()
-            thistext = TBdialog.w.tableWidget.item(row,0).text()
-            ratio = (float(TBdialog.w.tableWidget.item(row,1).text())/float(paroletotali)*dimCorpus)
-            ratios = f'{ratio:.3f}'
-            TBdialog.setcelltotable(str(ratios), row, 2)
-            ratio = math.log10(float(TBdialog.w.tableWidget.item(row,1).text())/float(paroletotali))
-            ratios = f'{ratio:.3f}'
-            TBdialog.setcelltotable(str(ratios), row, 3)
-        TBdialog.addlinetotable("Tokens", 0)
-        tbrow = TBdialog.w.tableWidget.rowCount()-1
-        TBdialog.setcelltotable(str(paroletotali), tbrow, 1)
-        TBdialog.addlinetotable("Types", 0)
-        tbrow = TBdialog.w.tableWidget.rowCount()-1
-        TBdialog.setcelltotable(str(totaltypes), tbrow, 1)
-        TBdialog.addlinetotable("(Types/Tokens)*100", 0)
-        tbrow = TBdialog.w.tableWidget.rowCount()-1
-        ratio = (float(totaltypes)/float(paroletotali))*100.0
-        ratios = f'{ratio:.3f}'
-        TBdialog.setcelltotable(str(ratios), tbrow, 1)
-        TBdialog.addlinetotable("Tokens/Types", 0)
-        tbrow = TBdialog.w.tableWidget.rowCount()-1
-        ratio = (float(paroletotali)/float(totaltypes))
-        ratios = f'{ratio:.3f}'
-        TBdialog.setcelltotable(str(ratios), tbrow, 1)
-        TBdialog.addlinetotable("Hapax", 0)
-        tbrow = TBdialog.w.tableWidget.rowCount()-1
-        TBdialog.setcelltotable(str(hapax), tbrow, 1)
-        TBdialog.addlinetotable("(Hapax/Tokens)*100", 0)
-        tbrow = TBdialog.w.tableWidget.rowCount()-1
-        ratio = (float(hapax)/float(paroletotali))*100.0
-        ratios = f'{ratio:.3f}'
-        TBdialog.setcelltotable(str(ratios), tbrow, 1)
-        TBdialog.addlinetotable("Types/sqrt(Tokens)", 0)
-        tbrow = TBdialog.w.tableWidget.rowCount()-1
-        ratio = float(totaltypes)/float(math.sqrt(paroletotali))
-        ratios = f'{ratio:.3f}'
-        TBdialog.setcelltotable(str(ratios), tbrow, 1)
-        TBdialog.addlinetotable("log(Types)/log(Tokens)", 0)
-        tbrow = TBdialog.w.tableWidget.rowCount()-1
-        ratio = (float(math.log10(totaltypes))/float(math.log10(paroletotali)))
-        ratios = f'{ratio:.3f}'
-        TBdialog.setcelltotable(str(ratios), tbrow, 1)
-        YuleSum = 0
-        for cfi in range(len(classifrequenza)):
-            YuleSum = YuleSum + ( math.pow(int(classifrequenza[cfi]),2) * occClassifrequenza[cfi] )
-        TBdialog.addlinetotable("Caratteristica di Yule (K)", 0)
-        tbrow = TBdialog.w.tableWidget.rowCount()-1
-        ratio = float(math.pow(10,4)) * ((float(YuleSum) - float(paroletotali))/ float(math.pow(paroletotali, 2)) )
-        ratios = f'{ratio:.3f}'
-        TBdialog.setcelltotable(str(ratios), tbrow, 1)
-        TBdialog.addlinetotable("W", 0)
-        tbrow = TBdialog.w.tableWidget.rowCount()-1
-        ratio = math.pow(float(paroletotali), (1.0/math.pow(float(totaltypes), 0.172)))
-        ratios = f'{ratio:.3f}'
-        TBdialog.setcelltotable(str(ratios), tbrow, 1)
-        TBdialog.addlinetotable("U", 0)
-        tbrow = TBdialog.w.tableWidget.rowCount()-1
-        ratio =  math.pow(float(math.log10(paroletotali)), 2.0)/(float(math.log10(paroletotali)) - float(math.log10(totaltypes)) )
-        ratios = f'{ratio:.3f}'
-        TBdialog.setcelltotable(str(ratios), tbrow, 1)
-        #mostro i risultati
-        self.Progrdialog.accept()
+        lineI = 0
+        with open(output, "r", encoding='utf-8') as ins:
+            for line in ins:
+                colI = 0
+                for col in line.replace("\n","").replace("\r","").split(self.separator):
+                    if lineI == 0:
+                        TBdialog.addcolumn(col, colI)
+                    else:
+                        if colI == 0:
+                            TBdialog.addlinetotable(col, 0)
+                        else:
+                            TBdialog.setcelltotable(col, lineI-1, colI)
+                    colI = colI +1
+                lineI = lineI +1
+        #self.Progrdialog.accept()
         TBdialog.show()
 
 
@@ -2009,6 +1917,8 @@ class BranCorpus(QObject):
             if bool(myrecovery == "y" or myrecovery == "Y") and self.daToken > startatrow:
                 startatrow = self.daToken
         for row in range(startatrow, totallines):
+            if self.core_killswitch:
+                break
             if row > startatrow:
                 try:
                     thistext = self.corpus[row][col]
@@ -2100,7 +2010,9 @@ class BranCorpus(QObject):
             if bool(myrecovery == "y" or myrecovery == "Y") and self.daToken > startatrow:
                 startatrow = self.daToken
         for row in range(startatrow, totallines):
-            if row > startatrow and self.core_killswitch==False:
+            if self.core_killswitch:
+                break
+            if row > startatrow:
                 try:
                     thispos = self.legendaPos[self.corpus[row][poscol]][0]
                     thisphrase = self.corpus[row][frasecol]
@@ -2194,143 +2106,147 @@ class BranCorpus(QObject):
             else:
                 table[row].append(ratios)
         self.core_savetable(table, output)
-        killswitch = True
 
-    def core_misure_lessicometriche(self, ignoretext, dimList):
-        separator = '\t'
-        fileNames = []
-        if os.path.isfile(sys.argv[2]):
-            fileNames = [sys.argv[2]]
-        if os.path.isdir(sys.argv[2]):
-            for tfile in os.listdir(sys.argv[2]):
-                if tfile[-4:] == ".csv" or tfile[-4:] == ".tsv":
-                    fileNames.append(os.path.join(sys.argv[2],tfile))
+    def core_misure_lessicometriche(self, mycol, myrecovery, doignorepunct = True):
+        fileName = self.sessionFile
+        table = []
         try:
-            col = int(sys.argv[3])
+            col = int(mycol)
         except:
             col = 0
-        for fileName in fileNames:
-            #totallines = self.w.corpus.rowCount()
-            table = []
-            output = fileName + "-" + str(col)+ "-misure_lessicometriche.tsv"
-            recovery = output + ".tmp"
+        hname = str(col)
+        hkey = str(col)
+        for key in self.corpuscols:
+            if col == self.corpuscols[key][0]:
+                hname = self.corpuscols[key][1]
+                hkey = key
+        output = fileName + "-misure_lessicometriche-" + hkey + ".tsv"
+        recovery = output + ".tmp"
+        totallines = len(self.corpus)
+        startatrow = -1
+        print(fileName + " -> " + output)
+        try:
+            if os.path.isfile(recovery) and myrecovery:
+                with open(recovery, "r", encoding='utf-8') as tempfile:
+                   lastline = (list(tempfile)[-1])
+                startatrow = int(lastline)
+                print("Carico la tabella")
+                with open(output, "r", encoding='utf-8') as ins:
+                    for line in ins:
+                        table.append(line.replace("\n","").replace("\r","").split(separator))
+                print("Comincio dalla riga " + str(startatrow))
+            else:
+                exception = 0/0
+        except:
             startatrow = -1
-            print(fileName + " -> " + output)
+            table.append([hname,"Occorrenze", "Frequenza in parole", "Ordine di grandezza (log10)"])
+        if self.OnlyVisibleRows:
+            totallines = self.aToken
+            if bool(myrecovery == "y" or myrecovery == "Y") and self.daToken > startatrow:
+                startatrow = self.daToken
+        totaltypes = 0
+        mytypes = {}
+        #if startatrow >= (len(self.corpus)-1):
+        #    return
+        for row in range(startatrow, totallines):
+            if self.core_killswitch:
+                break
+            if row > startatrow:
+                thisposc = "False"
+                try:
+                    thistext = self.corpus[row][col]
+                    if self.ignoretext != "" and doignorepunct:
+                        thistext = re.sub(self.ignoretext, "", thistext)
+                except:
+                    thistext = ""
+                if thistext != "":
+                    tbrow = self.core_findintable(table, thistext, 0)
+                    if tbrow>=0:
+                        tbval = int(table[tbrow][1])+1
+                        table[tbrow][1] = tbval
+                    else:
+                        newrow = [thistext, "1"]
+                        table.append(newrow)
+                        totaltypes = totaltypes + 1
+                    if row % 500 == 0:
+                        self.core_savetable(table, output)
+                        with open(recovery, "a", encoding='utf-8') as rowfile:
+                            rowfile.write(str(row)+"\n")
+        hapax = 0
+        classifrequenza = []
+        occClassifrequenza = []
+        totallines = len(table)
+        paroletotali = 0
+        for row in range(len(table)):
             try:
-                if os.path.isfile(recovery):
-                    ch = "Y"
-                    try:
-                        if sys.argv[4] == "y" or sys.argv[4] == "Y":
-                            ch = "Y"
-                    except:
-                        print("Ho trovato un file di ripristino, lo devo usare? [Y/N]")
-                        ch = input()
-                    if ch == "Y" or ch == "y":
-                        with open(recovery, "r", encoding='utf-8') as tempfile:
-                           lastline = (list(tempfile)[-1])
-                        startatrow = int(lastline)
-                        print("Carico la tabella")
-                        with open(output, "r", encoding='utf-8') as ins:
-                            for line in ins:
-                                table.append(line.replace("\n","").replace("\r","").split(separator))
-                        print("Comincio dalla riga " + str(startatrow))
-            except:
-                startatrow = -1
-            corpus = []
-            with open(fileName, "r", encoding='utf-8') as ins:
-                for line in ins:
-                    corpus.append(line.replace("\n","").replace("\r","").split(separator))
-            totallines = len(corpus)
-            totaltypes = 0
-            mytypes = {}
-            if startatrow >= (len(corpus)-1):
-                continue
-            for row in range(len(corpus)):
-                if row > startatrow:
-                    thisposc = "False"
-                    try:
-                        thistext = self.corpus[row][col]
-                        if ignoretext != "":
-                            thistext = re.sub(ignoretext, "", thistext)
-                    except:
-                        thistext = ""
-                    if thistext != "":
-                        tbrow = self.core_findintable(table, thistext, 0)
-                        if tbrow>=0:
-                            tbval = int(table[tbrow][1])+1
-                            table[tbrow][1] = tbval
-                        else:
-                            newrow = [thistext, "1"]
-                            table.append(newrow)
-                            totaltypes = totaltypes + 1
-                        if row % 500 == 0:
-                            self.core_savetable(table, output)
-                            with open(recovery, "a", encoding='utf-8') as rowfile:
-                                rowfile.write(str(row)+"\n")
-            hapax = 0
-            classifrequenza = []
-            occClassifrequenza = []
-            totallines = len(table)
-            paroletotali = 0
-            for row in range(len(table)):
                 if int(table[row][1]) == 1:
                     hapax = hapax + 1
-                if table[row][1] in classifrequenza:
-                    ind = classifrequenza.index(table[row][1])
-                    occClassifrequenza[ind] = occClassifrequenza[ind] + 1
+            except:
+                continue
+            if table[row][1] in classifrequenza:
+                ind = classifrequenza.index(table[row][1])
+                occClassifrequenza[ind] = occClassifrequenza[ind] + 1
+            else:
+                classifrequenza.append(table[row][1])
+                occClassifrequenza.append(1)
+            paroletotali = paroletotali + int(table[row][1])
+        dimCorpus = self.dimList[0]
+        for i in range(len(self.dimList)-1):
+            if self.dimList[i] <= paroletotali and self.dimList[i+1] >= paroletotali:
+                lower = paroletotali - self.dimList[i]
+                upper = self.dimList[i+1] - paroletotali
+                if lower < upper:
+                    dimCorpus = self.dimList[i]
                 else:
-                    classifrequenza.append(table[row][1])
-                    occClassifrequenza.append(1)
-                paroletotali = paroletotali + int(table[row][1])
-            dimCorpus = dimList[0]
-            for i in range(len(dimList)-1):
-                if dimList[i] <= paroletotali and dimList[i+1] >= paroletotali:
-                    lower = paroletotali - dimList[i]
-                    upper = dimList[i+1] - paroletotali
-                    if lower < upper:
-                        dimCorpus = dimList[i]
-                    else:
-                        dimCorpus = dimList[i+1]
-            for row in range(len(table)):
-                thistext = table[row][0]
+                    dimCorpus = self.dimList[i+1]
+        for row in range(len(table)):
+            thistext = table[row][0]
+            try:
                 ratio = (float(table[row][1])/float(paroletotali)*dimCorpus)
-                ratios = f'{ratio:.3f}'
-                table[row].append(str(ratios))
-                ratio = math.log10(float(table[row][1])/float(paroletotali))
-                ratios = f'{ratio:.3f}'
-                table[row].append(str(ratios))
-            table.append(["Tokens", str(paroletotali)])
-            table.append(["Types", str(totaltypes)])
-            ratio = (float(totaltypes)/float(paroletotali))*100.0
+            except:
+                continue
             ratios = f'{ratio:.3f}'
-            table.append(["(Types/Tokens)*100", str(ratios)])
-            ratio = (float(paroletotali)/float(totaltypes))
+            table[row].append(str(ratios))
+            ratio = math.log10(float(table[row][1])/float(paroletotali))
             ratios = f'{ratio:.3f}'
-            table.append(["Tokens/Types", str(ratios)])
-            table.append(["Hapax", str(hapax)])
-            ratio = (float(hapax)/float(paroletotali))*100.0
-            ratios = f'{ratio:.3f}'
-            table.append(["(Hapax/Tokens)*100", str(ratios)])
-            ratio = float(totaltypes)/float(math.sqrt(paroletotali))
-            ratios = f'{ratio:.3f}'
-            table.append(["Types/sqrt(Tokens)", str(ratios)])
-            ratio = (float(math.log10(totaltypes))/float(math.log10(paroletotali)))
-            ratios = f'{ratio:.3f}'
-            table.append(["log(Types)/log(Tokens)", str(ratios)])
-            YuleSum = 0
-            for cfi in range(len(classifrequenza)):
-                YuleSum = YuleSum + ( math.pow(int(classifrequenza[cfi]),2) * occClassifrequenza[cfi] )
-            ratio = float(math.pow(10,4)) * ((float(YuleSum) - float(paroletotali))/ float(math.pow(paroletotali, 2)) )
-            ratios = f'{ratio:.3f}'
-            table.append(["Caratteristica di Yule (K)", str(ratios)])
-            ratio = math.pow(float(paroletotali), (1.0/math.pow(float(totaltypes), 0.172)))
-            ratios = f'{ratio:.3f}'
-            table.append(["W", str(ratios)])
-            ratio =  math.pow(float(math.log10(paroletotali)), 2.0)/(float(math.log10(paroletotali)) - float(math.log10(totaltypes)) )
-            ratios = f'{ratio:.3f}'
-            table.append(["U", str(ratios)])
-            table.insert(0,["Token", "Occorrenze", "Frequenza in " + str(dimCorpus) + " parole", "Ordine di grandezza (log10)"])
-            self.core_savetable(table, output)
+            table[row].append(str(ratios))
+        table.append(["Tokens", str(paroletotali)])
+        table.append(["Types", str(totaltypes)])
+        ratio = (float(totaltypes)/float(paroletotali))*100.0
+        ratios = f'{ratio:.3f}'
+        table.append(["(Types/Tokens)*100", str(ratios)])
+        ratio = (float(paroletotali)/float(totaltypes))
+        ratios = f'{ratio:.3f}'
+        table.append(["Tokens/Types", str(ratios)])
+        table.append(["Hapax", str(hapax)])
+        ratio = (float(hapax)/float(paroletotali))*100.0
+        ratios = f'{ratio:.3f}'
+        table.append(["(Hapax/Tokens)*100", str(ratios)])
+        ratio = float(totaltypes)/float(math.sqrt(paroletotali))
+        ratios = f'{ratio:.3f}'
+        table.append(["Types/sqrt(Tokens)", str(ratios)])
+        ratio = (float(math.log10(totaltypes))/float(math.log10(paroletotali)))
+        ratios = f'{ratio:.3f}'
+        table.append(["log(Types)/log(Tokens)", str(ratios)])
+        YuleSum = 0
+        for cfi in range(len(classifrequenza)):
+            YuleSum = YuleSum + ( math.pow(int(classifrequenza[cfi]),2) * occClassifrequenza[cfi] )
+        ratio = float(math.pow(10,4)) * ((float(YuleSum) - float(paroletotali))/ float(math.pow(paroletotali, 2)) )
+        ratios = f'{ratio:.3f}'
+        table.append(["Caratteristica di Yule (K)", str(ratios)])
+        ratio = math.pow(float(paroletotali), (1.0/math.pow(float(totaltypes), 0.172)))
+        ratios = f'{ratio:.3f}'
+        table.append(["W", str(ratios)])
+        ratio =  math.pow(float(math.log10(paroletotali)), 2.0)/(float(math.log10(paroletotali)) - float(math.log10(totaltypes)) )
+        ratios = f'{ratio:.3f}'
+        table.append(["U", str(ratios)])
+        table[0][2] = "Frequenza in " + str(dimCorpus) + " parole"
+        #table.insert(0,["Token", "Occorrenze", "Frequenza in " + str(dimCorpus) + " parole", "Ordine di grandezza (log10)"])
+        self.core_savetable(table, output)
+
+
+
+
 
 
     def core_estrai_colonna(self):

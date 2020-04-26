@@ -410,7 +410,36 @@ if __name__ == "__main__":
             mergetables()
             print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
         if sys.argv[1] == "misurelessico":
-            misure_lessicometriche(ignoretext, dimList)
+            try:
+                myfiles = sys.argv[2]
+            except:
+                sys.exit()
+            try:
+                mycol = sys.argv[3]
+            except:
+                mycol = 0
+            try:
+                rch = sys.argv[4]
+            except:
+                print("Vuoi usare un file di ripristino? [Y/N]")
+                rch = input()
+            if rch == "Y" or rch == "y":
+                myrecovery = True
+            else:
+                myrecovery = False
+            #Corpus.separator = '\t'
+            fileNames = []
+            if os.path.isfile(myfiles):
+                fileNames = [myfiles]
+            if os.path.isdir(myfiles):
+                for tfile in os.listdir(myfiles):
+                    if tfile[-4:] == ".csv" or tfile[-4:] == ".tsv":
+                        fileNames.append(os.path.join(myfiles,tfile))
+            for fileName in fileNames:
+                Corpus.CSVloader([fileName])
+                Corpus.sessionFile = fileName
+                Corpus.core_misure_lessicometriche(mycol, myrecovery)
+                Corpus.chiudiProgetto()
             print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
         sys.exit(0)
     else:
