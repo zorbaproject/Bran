@@ -104,6 +104,7 @@ class BranCorpus(QObject):
         self.alreadyChecked = False
         self.ImportingFile = False
         self.OnlyVisibleRows = False
+        self.core_killswitch = False
         self.sessionFile = ""
         self.sessionDir = "."
         self.mycfgfile = QDir.homePath() + "/.brancfg"
@@ -739,51 +740,41 @@ class BranCorpus(QObject):
         for col in self.corpuscols:
             thisname.append(self.corpuscols[col][1])
         column = QInputDialog.getItem(self.corpuswidget, "Scegli la colonna", "Su quale colonna devo contare le occorrenze?",thisname,current=0,editable=False)
-        col = thisname.index(column[0])
+        mycol = thisname.index(column[0])
+        myrecovery = False
+        hname = str(mycol)
+        hkey = str(mycol)
+        for key in self.corpuscols:
+            if mycol == self.corpuscols[key][0]:
+                hname = self.corpuscols[key][1]
+                hkey = key
+        output = self.sessionFile + "-occorrenze-" + hkey + ".tsv"
+        recovery = output + ".tmp"
+        totallines = self.core_linescount(self.sessionFile)
+        self.core_killswitch = False
+        self.Progrdialog = progress.ProgressDialog(self, recovery, totallines)
+        self.Progrdialog.start()
+        self.core_calcola_occorrenze(mycol, myrecovery)
+        self.Progrdialog.cancelled = True
+        self.core_killswitch = False
+        #calcolo le percentuali
         TBdialog = tableeditor.Form(self.corpuswidget, self.mycfg)
         TBdialog.sessionDir = self.sessionDir
-        TBdialog.addcolumn(column[0], 0)
-        TBdialog.addcolumn("Occorrenze", 1)
-        self.Progrdialog = progress.Form()
-        self.Progrdialog.show()
-        totallines = len(self.corpus)
-        startline = 0
-        if self.OnlyVisibleRows:
-            totallines = self.aToken
-            startline = self.daToken
-        self.progressUpdated.connect(self.Progrdialog.setValue)
-        self.Progrdialog.setBasetext("Sto conteggiando la riga numero ")
-        self.Progrdialog.setTotal(totallines)
-        for row in range(startline, totallines):
-            if self.OnlyVisibleRows and self.corpuswidget.isRowHidden(row-startline):
-                continue
-            #self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
-            #self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
-            #QApplication.processEvents()
-            self.progressUpdated.emit(row)
-            if row<100 or row % 100 == 0:
-                QApplication.processEvents()
-            if self.Progrdialog.w.annulla.isChecked():
-                return
-            try:
-                thistext = self.corpus[row][col]
-                try:
-                    if col == self.corpuscols["pos"][0]:
-                        thistext = self.legendaPos[thistext][0]
-                except:
-                    thistext = self.corpus[row][col]
-            except:
-                thistext = ""
-            tbrow = TBdialog.finditemincolumn(thistext, col=0, matchexactly = True, escape = True)
-            if tbrow>=0:
-                tbval = int(TBdialog.w.tableWidget.item(tbrow,1).text())+1
-                TBdialog.setcelltotable(str(tbval), tbrow, 1)
-            else:
-                TBdialog.addlinetotable(thistext, 0)
-                tbrow = TBdialog.w.tableWidget.rowCount()-1
-                TBdialog.setcelltotable("1", tbrow, 1)
-        self.Progrdialog.accept()
-        #TBdialog.exec()
+        lineI = 0
+        with open(output, "r", encoding='utf-8') as ins:
+            for line in ins:
+                colI = 0
+                for col in line.replace("\n","").replace("\r","").split(self.separator):
+                    if lineI == 0:
+                        TBdialog.addcolumn(col, colI)
+                    else:
+                        if colI == 0:
+                            TBdialog.addlinetotable(col, 0)
+                        else:
+                            TBdialog.setcelltotable(col, lineI-1, colI)
+                    colI = colI +1
+                lineI = lineI +1
+        #self.Progrdialog.accept()
         TBdialog.show()
 
     def contaoccorrenzefiltrate(self):
@@ -885,101 +876,42 @@ class BranCorpus(QObject):
         return mytext
 
     def contaverbi(self):
-        poscol = self.corpuscols["pos"][0] #thisname.index(column[0])
-        morfcol = self.corpuscols["feat"][0]
-        frasecol = self.corpuscols["IDphrase"][0]
-        lemmacol = self.corpuscols["lemma"][0]
         ignoreperson = False
         ret = QMessageBox.question(self.corpuswidget,'Domanda', "Vuoi ignorare persona, numero, genere, e caratteristica clitica dei verbi?", QMessageBox.Yes | QMessageBox.No)
         if ret == QMessageBox.Yes:
             ignoreperson = True
+        contigui = False
+        ret = QMessageBox.question(self.corpuswidget,'Domanda', "Vuoi che i verbi composti siano sempre contigui (es: \"è anche stato\" non è contiguo)?", QMessageBox.Yes | QMessageBox.No)
+        if ret == QMessageBox.Yes:
+            contigui = True
+        myrecovery = False
+        output = self.sessionFile + "-contaverbi.tsv"
+        recovery = output + ".tmp"
+        totallines = self.core_linescount(self.sessionFile)
+        self.core_killswitch = False
+        self.Progrdialog = progress.ProgressDialog(self, recovery, totallines)
+        self.Progrdialog.start()
+        self.core_contaverbi(ignoreperson, contigui, myrecovery)
+        self.Progrdialog.cancelled = True
+        self.core_killswitch = False
+        #calcolo le percentuali
         TBdialog = tableeditor.Form(self.corpuswidget, self.mycfg)
         TBdialog.sessionDir = self.sessionDir
-        TBdialog.addcolumn("Modo+Tempo", 0)
-        TBdialog.addcolumn("Occorrenze", 1)
-        TBdialog.addcolumn("Percentuali", 1)
-        self.Progrdialog = progress.Form()
-        self.Progrdialog.show()
-        totallines = len(self.corpus)
-        startline = 0
-        if self.OnlyVisibleRows:
-            totallines = self.aToken
-            startline = self.daToken
-        for row in range(startline, totallines):
-            if self.OnlyVisibleRows and self.corpuswidget.isRowHidden(row-startline):
-                continue
-            self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
-            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
-            QApplication.processEvents()
-            if self.Progrdialog.w.annulla.isChecked():
-                return
-            if row < startline:
-                continue
-            try:
-                thispos = self.legendaPos[self.corpus[row][poscol]][0]
-                thisphrase = self.corpus[row][frasecol]
-                thislemma = self.corpus[row][lemmacol]
-            except:
-                thispos = ""
-                thisphrase = "0"
-                thislemma = ""
-            thistext = ""
-            thistext2 = ""
-            thistext3 = ""
-            #Filtro per trovare i verbi a 3 come "è stato fatto": feat=.*VerbForm.*Part.*&&feat[1]=.*VerbForm.*Part.*||feat=.*VerbForm.*Part.*&&feat[-1]=.*VerbForm.*Part.*||feat=.*VerbForm.*&&feat[1]=.*VerbForm.*Part.*&&feat[2]=.*VerbForm.*Part.*
-            if "verbo" in thispos:
-                thistext = self.corpus[row][morfcol]
-            if "avere" in thislemma or "essere" in thislemma:
-                for ind in range(1,4):
-                    try:
-                        tmpos = self.legendaPos[self.corpus[row+ind][poscol]][0]
-                        tmpphrase = self.corpus[row+ind][frasecol]
-                    except:
-                        tmpos = ""
-                        tmpphrase = "0"
-                    #i verbi consecutivi vanno bene finché sono nella stessa frase
-                    if tmpphrase != thisphrase:
-                        break
-                    if "verbo" in tmpos:
-                        thistext2 = thistext2 + self.corpus[row+ind][morfcol] + "+"
-                        startline = row+ind+1
-                if len(thistext2.split("+"))>1:
-                    thistext3 = thistext2.split("+")[1]
-                    thistext2 = thistext2.split("+")[0]
-            if len(thistext) >= 3:
-                thistext = self.orderVerbMorf(thistext, ignoreperson) + "+"
-            if len(thistext2) >= 3:
-                thistext2 = self.orderVerbMorf(thistext2, ignoreperson) + "+"
-            if len(thistext3) >= 3:
-                thistext3 = self.orderVerbMorf(thistext3, ignoreperson) #+ "+"
-            if thistext != "":
-                thistext = thistext + thistext2 + thistext3
-                if ignoreperson:
-                    thistext = thistext.replace("/Clitic=Yes", "")
-            if thistext.endswith("+"):
-                thistext = thistext[0:-1]
-            if thistext != "":
-                tbrow = TBdialog.finditemincolumn(thistext, col=0, matchexactly = True, escape = True)
-                if tbrow>=0:
-                    tbval = int(TBdialog.w.tableWidget.item(tbrow,1).text())+1
-                    TBdialog.setcelltotable(str(tbval), tbrow, 1)
-                else:
-                    TBdialog.addlinetotable(thistext, 0)
-                    tbrow = TBdialog.w.tableWidget.rowCount()-1
-                    TBdialog.setcelltotable("1", tbrow, 1)
-        #calcolo le percentuali
-        totallines = TBdialog.w.tableWidget.rowCount()
-        verbitotali = 0
-        for row in range(TBdialog.w.tableWidget.rowCount()):
-            verbitotali = verbitotali + int(TBdialog.w.tableWidget.item(row,1).text())
-        for row in range(TBdialog.w.tableWidget.rowCount()):
-            self.Progrdialog.w.testo.setText("Sto calcolando le percentuali su "+str(row))
-            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
-            QApplication.processEvents()
-            ratio = (float(TBdialog.w.tableWidget.item(row,1).text())/float(verbitotali)*100)
-            ratios = f'{ratio:.3f}'
-            TBdialog.setcelltotable(ratios, row, 2)
-        self.Progrdialog.accept()
+        lineI = 0
+        with open(output, "r", encoding='utf-8') as ins:
+            for line in ins:
+                colI = 0
+                for col in line.replace("\n","").replace("\r","").split(self.separator):
+                    if lineI == 0:
+                        TBdialog.addcolumn(col, colI)
+                    else:
+                        if colI == 0:
+                            TBdialog.addlinetotable(col, 0)
+                        else:
+                            TBdialog.setcelltotable(col, lineI-1, colI)
+                    colI = colI +1
+                lineI = lineI +1
+        #self.Progrdialog.accept()
         TBdialog.show()
 
     def trovaripetizioni(self):
@@ -2046,7 +1978,13 @@ class BranCorpus(QObject):
             col = int(mycol)
         except:
             col = 0
-        output = fileName + "-occorrenze-" + str(col) + ".tsv"
+        hname = str(col)
+        hkey = str(col)
+        for key in self.corpuscols:
+            if col == self.corpuscols[key][0]:
+                hname = self.corpuscols[key][1]
+                hkey = key
+        output = fileName + "-occorrenze-" + hkey + ".tsv"
         recovery = output + ".tmp"
         totallines = len(self.corpus)
         startatrow = -1
@@ -2065,7 +2003,7 @@ class BranCorpus(QObject):
                 exception = 0/0
         except:
             startatrow = -1
-            table.append([os.path.basename(fileName)+"-"+str(col),"Occorrenze"])
+            table.append([hname,"Occorrenze"])
         if self.OnlyVisibleRows:
             totallines = self.aToken
             if bool(myrecovery == "y" or myrecovery == "Y") and self.daToken > startatrow:
@@ -2162,7 +2100,7 @@ class BranCorpus(QObject):
             if bool(myrecovery == "y" or myrecovery == "Y") and self.daToken > startatrow:
                 startatrow = self.daToken
         for row in range(startatrow, totallines):
-            if row > startatrow:
+            if row > startatrow and self.core_killswitch==False:
                 try:
                     thispos = self.legendaPos[self.corpus[row][poscol]][0]
                     thisphrase = self.corpus[row][frasecol]
@@ -2239,7 +2177,7 @@ class BranCorpus(QObject):
         print("Calcolo le percentuali")
         totallines = len(table)
         verbitotali = 0
-        for row in range(len(table)):
+        for row in range(1,len(table)):
             try:
                 tval = int(table[row][1])
             except:
@@ -2256,6 +2194,7 @@ class BranCorpus(QObject):
             else:
                 table[row].append(ratios)
         self.core_savetable(table, output)
+        killswitch = True
 
     def core_misure_lessicometriche(self, ignoretext, dimList):
         separator = '\t'
