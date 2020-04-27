@@ -1923,6 +1923,17 @@ class BranCorpus(QObject):
         file.write(tabletext)
         file.close()
 
+    def core_fileappend(self, output, line):
+        permission = False
+        while not permission:
+            try:
+                with open(output, "a", encoding='utf-8') as rowfile:
+                    rowfile.write(line)
+                permission = True
+            except:
+                permission = False
+        return permission
+
     def core_calcola_occorrenze(self, mycol, myrecovery = False):
         fileName = self.sessionFile
         table = []
@@ -1983,6 +1994,7 @@ class BranCorpus(QObject):
         self.core_savetable(table, output)
         with open(recovery, "a", encoding='utf-8') as rowfile:
             rowfile.write(str(row)+"\n")
+        return output
 
     def core_orderVerbMorf(self, text, ignoreperson = False):
         if not "VerbForm" in text:
@@ -2150,6 +2162,7 @@ class BranCorpus(QObject):
             else:
                 table[row].append(ratios)
         self.core_savetable(table, output)
+        return output
 
     def core_occorrenze_normalizzate(self, mycol, myrecovery, doignorepunct = True):
         fileName = self.sessionFile
@@ -2256,6 +2269,7 @@ class BranCorpus(QObject):
             table[row].append(str(ratios))
         table[0][2] = "Frequenza in " + str(dimCorpus) + " parole"
         self.core_savetable(table, output)
+        return output
 
     def core_misure_lessicometriche(self, mycol, myrecovery, doignorepunct = True):
         fileName = self.sessionFile
@@ -2393,22 +2407,11 @@ class BranCorpus(QObject):
         ratios = f'{ratio:.3f}'
         table.append(["U", str(ratios)])
         self.core_savetable(table, output)
+        return output
 
-
-
-
-
-
-    def core_estrai_colonna(self):
-        separator = '\t'
-        fileNames = []
-        if os.path.isfile(sys.argv[2]):
-            fileNames = [sys.argv[2]]
-        if os.path.isdir(sys.argv[2]):
-            for tfile in os.listdir(sys.argv[2]):
-                fileNames.append(os.path.join(sys.argv[2],tfile))
+    def core_estrai_colonna(self, fileNames, mycol, myrecovery, separator = '\t'):
         try:
-            col = int(sys.argv[3])
+            col = int(mycol)
         except:
             col = 0
         for fileName in fileNames:
@@ -2417,15 +2420,11 @@ class BranCorpus(QObject):
             recovery = output + ".tmp"
             startatrow = -1
             try:
-                if os.path.isfile(recovery):
-                    ch = "Y"
-                    print("Ho trovato un file di ripristino, lo devo usare? [Y/N]")
-                    ch = input()
-                    if ch == "Y" or ch == "y":
-                        with open(recovery, "r", encoding='utf-8') as tempfile:
-                           lastline = (list(tempfile)[-1])
-                        startatrow = int(lastline)
-                        print("Comincio dalla riga " + str(startatrow))
+                if os.path.isfile(recovery) and myrecovery:
+                    with open(recovery, "r", encoding='utf-8') as tempfile:
+                       lastline = (list(tempfile)[-1])
+                    startatrow = int(lastline)
+                    print("Comincio dalla riga " + str(startatrow))
             except:
                 startatrow = -1
             with open(fileName, "r", encoding='utf-8') as ins:
@@ -2440,32 +2439,38 @@ class BranCorpus(QObject):
                         with open(recovery, "a", encoding='utf-8') as rowfile:
                             rowfile.write(str(row)+"\n")
                     row = row + 1
+        return output
 
-
-    def core_mergetables(self):
+    def core_mergetables(self, mydir, mycol, opstr, headerlines, myrecovery):
         separator = '\t'
         fileNames = []
-        if os.path.isdir(sys.argv[2]):
-            for tfile in os.listdir(sys.argv[2]):
-                if bool(tfile[-4:] == ".tsv" or tfile[-4:] == ".tsv") and tfile[-11:] != "-merged.tsv" and tfile[-11:] != "-merged.csv":
-                    fileNames.append(os.path.join(sys.argv[2],tfile))
-        else:
-            return
-        dirName = os.path.basename(os.path.dirname(sys.argv[2]))
         try:
-            col = int(sys.argv[3])
+            if os.path.isdir(mydir):
+                for tfile in os.listdir(mydir):
+                    if bool(tfile[-4:] == ".tsv" or tfile[-4:] == ".tsv") and tfile[-11:] != "-merged.tsv" and tfile[-11:] != "-merged.csv":
+                        fileNames.append(os.path.join(mydir,tfile))
+            else:
+                return
+        except:
+            try:
+                if os.path.isfile(mydir[0]):
+                    fileNames = mydir
+            except:
+                return
+        dirName = os.path.basename(os.path.dirname(fileNames[0]))
+        try:
+            col = int(mycol)
         except:
             col = 0
-        output = os.path.join(sys.argv[2],dirName + "-merged.tsv")
+        output = os.path.join(os.path.dirname(fileNames[0]),dirName + "-merged.tsv")
         with open(fileNames[0], "r", encoding='utf-8') as f:
             first_line = f.readline().replace("\n","").replace("\r","")
         try:
-            opstr = str(sys.argv[4])
             opers = opstr.split(",")
         except:
             opers = ["sum"]
         try:
-            startatrow = int(sys.argv[5])-1
+            startatrow = int(headerlines)-1
             useheader = True
         except:
             startatrow = -1
@@ -2477,17 +2482,10 @@ class BranCorpus(QObject):
             row = 0
             recovery = fileName + ".tmp"
             print(fileName + " -> " + output)
-            totallines = linescount(fileName)
+            totallines = self.core_linescount(fileName)
             ch = "N"
             try:
-                if os.path.isfile(recovery):
-                    try:
-                        if sys.argv[6] == "y" or sys.argv[6] == "Y":
-                            ch = "Y"
-                    except:
-                        print("Ho trovato un file di ripristino, lo devo usare? [Y/N]")
-                        ch = input()
-                    if ch == "Y" or ch == "y":
+                if os.path.isfile(recovery) and myrecovery:
                         with open(recovery, "r", encoding='utf-8') as tempfile:
                            lastline = (list(tempfile)[-1])
                         startatrow = int(lastline)
@@ -2498,9 +2496,7 @@ class BranCorpus(QObject):
                         print("Comincio dalla riga " + str(startatrow))
                         useheader = False
                 else:
-                    if useheader:
-                        table.append(first_line.split(separator))
-                        useheader = False
+                    exc = 1/0
             except:
                 if useheader:
                     table.append(first_line.split(separator))
@@ -2553,23 +2549,23 @@ class BranCorpus(QObject):
                         except:
                             err = True
         self.core_savetable(table, output)
-        print("Done")
+        return output
 
 
-    def core_splitbigfile(self):
+    def core_splitbigfile(self, myfile, mymaxrow, mysplit, myrecovery):
         separator = '\t'
-        if os.path.isfile(sys.argv[2]):
-            fileName = sys.argv[2]
+        if os.path.isfile(myfile):
+            fileName = myfile
             ext = fileName[-3:]
         try:
-            maxrow = int(sys.argv[3])
+            maxrow = int(mymaxrow)
         except:
             maxrow = 20000
-            if ext == "csv":
+            if ext == "csv" or ext=="tsv":
                 maxrow = 500000
         splitdot = False
         try:
-            if sys.argv[3] == "." and ext == "txt":
+            if mysplit == "." and ext == "txt":
                 splitdot = True
         except:
             splitdot = False
@@ -2580,20 +2576,17 @@ class BranCorpus(QObject):
         recovery = output + ".tmp"
         startatrow = -1
         try:
-            if os.path.isfile(recovery):
-                ch = "Y"
-                print("Ho trovato un file di ripristino, lo devo usare? [Y/N]")
-                ch = input()
-                if ch == "Y" or ch == "y":
-                    with open(recovery, "r", encoding='utf-8') as tempfile:
-                       lastline = (list(tempfile)[-1].split(",")[0])
-                    startatrow = int(lastline)
-                    part = int(list(tempfile)[-1].split(",")[1])
-                    partrow = int(list(tempfile)[-1].split(",")[2])
-                    print("Comincio dalla riga " + str(startatrow))
+            if os.path.isfile(recovery) and myrecovery:
+                with open(recovery, "r", encoding='utf-8') as tempfile:
+                   lastline = (list(tempfile)[-1].split(",")[0])
+                startatrow = int(lastline)
+                part = int(list(tempfile)[-1].split(",")[1])
+                partrow = int(list(tempfile)[-1].split(",")[2])
+                print("Comincio dalla riga " + str(startatrow))
         except:
             startatrow = -1
             part = 0
+        oldoutput = ""
         with open(fileName, "r", encoding='utf-8') as ins:
             for line in ins:
                 if row > startatrow:
@@ -2607,27 +2600,31 @@ class BranCorpus(QObject):
                         partrow = 0
                         part = part + 1
                     output = fileName + "-part" + str(part) + "." + ext
+                    if output != oldoutput:
+                        print(output)
+                        oldoutput = output
                     with open(output, "a", encoding='utf-8') as outfile:
                         outfile.write(thistext)
                     with open(recovery, "a", encoding='utf-8') as rowfile:
                         rowfile.write(str(row)+","+str(part)+","+str(partrow)+"\n")
                     partrow = partrow + 1
                 row = row + 1
+        return output
 
-    def core_samplebigfile(self):
+    def core_samplebigfile(self, myfile, mymaxrow, mysplit, myrecovery = False):
         separator = '\t'
-        if os.path.isfile(sys.argv[2]):
-            fileName = sys.argv[2]
+        if os.path.isfile(myfile):
+            fileName = myfile
             ext = fileName[-3:]
         try:
-            maxrow = int(sys.argv[3])
+            maxrow = int(mymaxrow)
         except:
             maxrow = 20000
             if ext == "csv":
                 maxrow = 500000
         splitdot = False
         try:
-            if sys.argv[3] == "." and ext == "txt":
+            if mysplit == "." and ext == "txt":
                 splitdot = True
         except:
             splitdot = False
@@ -2641,7 +2638,7 @@ class BranCorpus(QObject):
         row = 0
         output = fileName + "-estratto." + ext
         startatrow = -1
-        totallines = linescount(fileName)
+        totallines = self.core_linescount(fileName)
         print("Total Lines: " + str(totallines))
         #ripristino impossibile, è un sistema casuale
         chunkf = float(totallines)/float(maxrow)
@@ -2676,6 +2673,8 @@ class BranCorpus(QObject):
                     with open(output, "a", encoding='utf-8') as outfile:
                         outfile.write(thistext)
                 row = row + 1
+        print(myfile +" -> "+ output)
+        return output
 
 
 ########### UDPIPE INTEGRATION

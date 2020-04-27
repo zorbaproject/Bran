@@ -237,7 +237,7 @@ if __name__ == "__main__":
             print("python3 main.py extractcolumn file.tsv|cartella colonna\n")
             print("python3 main.py contaverbi file.tsv|cartella [ignora persona (y/n)] [ripristino (y/n)]\n")
             print("python3 main.py misurelessico file.tsv|cartella [colonna] [ripristino (y/n)]\n")
-            print("python3 main.py mergetables cartella colonnaChiave [sum|mean|diff,sum|mean|diff] [1] [ripristino (y/n)]\n")
+            print("python3 main.py mergetables file1,file2|cartella colonnaChiave [sum|mean|diff,sum|mean|diff] [1] [ripristino (y/n)]\n")
             print("python3 main.py texteditor file.tsv|cartella\n")
             print("python3 main.py confronto file.tsv|cartella\n")
             print("Gli argomenti tra parentesi [] sono facoltativi.")
@@ -399,16 +399,114 @@ if __name__ == "__main__":
                 Corpus.chiudiProgetto()
             print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
         if sys.argv[1] == "extractcolumn":
-            estrai_colonna()
+            try:
+                myfiles = sys.argv[2]
+            except:
+                sys.exit()
+            try:
+                mycol = sys.argv[3]
+            except:
+                mycol = 0
+            try:
+                rch = sys.argv[4]
+            except:
+                print("Vuoi usare un file di ripristino? [Y/N]")
+                rch = input()
+            if rch == "Y" or rch == "y":
+                myrecovery = True
+            else:
+                myrecovery = False
+            #Corpus.separator = '\t'
+            fileNames = []
+            if os.path.isfile(myfiles):
+                fileNames = [myfiles]
+            if os.path.isdir(myfiles):
+                for tfile in os.listdir(myfiles):
+                    if tfile[-4:] == ".csv" or tfile[-4:] == ".tsv":
+                        fileNames.append(os.path.join(myfiles,tfile))
+            Corpus.core_estrai_colonna(fileNames, mycol, myrecovery)
             print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
         if sys.argv[1] == "splitbigfile":
-            splitbigfile()
+            try:
+                myfiles = sys.argv[2]
+            except:
+                sys.exit()
+            try:
+                maxrow = sys.argv[3]
+            except:
+                maxrow = 0
+            try:
+                mysplit = sys.argv[4]
+            except:
+                mysplit = "."
+            try:
+                rch = sys.argv[5]
+            except:
+                print("Vuoi usare un file di ripristino? [Y/N]")
+                rch = input()
+            if rch == "Y" or rch == "y":
+                myrecovery = True
+            else:
+                myrecovery = False
+            Corpus.core_splitbigfile(myfiles, maxrow, mysplit, myrecovery)
             print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
         if sys.argv[1] == "samplebigfile":
-            samplebigfile()
+            try:
+                myfiles = sys.argv[2]
+            except:
+                sys.exit()
+            try:
+                maxrow = sys.argv[3]
+            except:
+                maxrow = 0
+            try:
+                mysplit = sys.argv[4]
+            except:
+                mysplit = "."
+            try:
+                rch = sys.argv[5]
+            except:
+                #print("Vuoi usare un file di ripristino? [Y/N]")
+                #rch = input()
+                rch = "N"
+            if rch == "Y" or rch == "y":
+                myrecovery = True
+            else:
+                myrecovery = False
+            Corpus.core_samplebigfile(myfiles, maxrow, mysplit, myrecovery)
             print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
         if sys.argv[1] == "mergetables":
-            mergetables()
+            try:
+                if os.path.isdir(sys.argv[2]):
+                    mydir = sys.argv[2]
+                elif os.path.isfile(sys.argv[2].split(",")[0]):
+                    mydir = sys.argv[2].split(",")
+                else :
+                    mydir = 0/0
+            except:
+                sys.exit()
+            try:
+                mycol = sys.argv[3]
+            except:
+                mycol = 1
+            try:
+                opstr = str(sys.argv[4])
+            except:
+                opstr = "sum"
+            try:
+                headerlines = str(sys.argv[5])
+            except:
+                headerlines = "1"
+            try:
+                rch = sys.argv[6]
+            except:
+                print("Vuoi usare un file di ripristino? [Y/N]")
+                rch = input()
+            if rch == "Y" or rch == "y":
+                myrecovery = True
+            else:
+                myrecovery = False
+            Corpus.core_mergetables(mydir, mycol, opstr, headerlines, myrecovery)
             print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
         if sys.argv[1] == "misurelessico":
             try:
@@ -418,7 +516,7 @@ if __name__ == "__main__":
             try:
                 mycol = sys.argv[3]
             except:
-                mycol = 0
+                mycol = 1
             try:
                 rch = sys.argv[4]
             except:
