@@ -1919,18 +1919,34 @@ class BranCorpus(QObject):
                 tabletext = tabletext + str(col)
                 coln = coln + 1
             tabletext = tabletext + "\n"
-        file = open(output,"w", encoding='utf-8')
-        file.write(tabletext)
-        file.close()
-
-    def core_fileappend(self, output, line):
+        #save writing
         permission = False
+        first_run = True
+        while not permission:
+            try:
+                file = open(output,"w", encoding='utf-8')
+                file.write(tabletext)
+                file.close()
+                permission = True
+            except:
+                if first_run:
+                    print("Waiting for permission to write file "+ output + "...")
+                    first_run = False
+                permission = False
+        return permission
+
+    def core_fileappend(self, line, output):
+        permission = False
+        first_run = True
         while not permission:
             try:
                 with open(output, "a", encoding='utf-8') as rowfile:
                     rowfile.write(line)
                 permission = True
             except:
+                if first_run:
+                    print("Waiting for permission to write file "+ output + "...")
+                    first_run = False
                 permission = False
         return permission
 
@@ -1988,12 +2004,14 @@ class BranCorpus(QObject):
                     table.append(newrow)
                 if row % 500 == 0:
                     self.core_savetable(table, output)
-                    with open(recovery, "a", encoding='utf-8') as rowfile:
-                        rowfile.write(str(row)+"\n")
+                    self.core_fileappend(str(row)+"\n", recovery)
+                    #with open(recovery, "a", encoding='utf-8') as rowfile:
+                    #    rowfile.write(str(row)+"\n")
             row = row + 1
         self.core_savetable(table, output)
-        with open(recovery, "a", encoding='utf-8') as rowfile:
-            rowfile.write(str(row)+"\n")
+        #with open(recovery, "a", encoding='utf-8') as rowfile:
+        #    rowfile.write(str(row)+"\n")
+        self.core_fileappend(str(row)+"\n", recovery)
         return output
 
     def core_orderVerbMorf(self, text, ignoreperson = False):
@@ -2139,8 +2157,10 @@ class BranCorpus(QObject):
                             pass
             if row % 500 == 0 or row == len(self.corpus)-1:
                 self.core_savetable(table, output)
-                with open(recovery, "a", encoding='utf-8') as rowfile:
-                    rowfile.write(str(row)+"\n")
+                #with open(recovery, "a", encoding='utf-8') as rowfile:
+                #    rowfile.write(str(row)+"\n")
+                self.core_fileappend(str(row)+"\n", recovery)
+        self.core_fileappend(str(row)+"\n", recovery)
         #calcolo le percentuali
         print("Calcolo le percentuali")
         totallines = len(table)
@@ -2225,10 +2245,12 @@ class BranCorpus(QObject):
                         newrow = [thistext, "1"]
                         table.append(newrow)
                         totaltypes = totaltypes + 1
-                    if row % 500 == 0:
+                    if row % 500 == 0 or row == len(self.corpus)-1:
                         self.core_savetable(table, output)
-                        with open(recovery, "a", encoding='utf-8') as rowfile:
-                            rowfile.write(str(row)+"\n")
+                        #with open(recovery, "a", encoding='utf-8') as rowfile:
+                        #    rowfile.write(str(row)+"\n")
+                        self.core_fileappend(str(row)+"\n", recovery)
+        self.core_fileappend(str(row)+"\n", recovery)
         hapax = 0
         classifrequenza = []
         occClassifrequenza = []
@@ -2332,10 +2354,12 @@ class BranCorpus(QObject):
                         newrow = [thistext, "1"]
                         table.append(newrow)
                         totaltypes = totaltypes + 1
-                    if row % 500 == 0:
+                    if row % 500 == 0 or row == len(self.corpus)-1:
                         self.core_savetable(table, output)
-                        with open(recovery, "a", encoding='utf-8') as rowfile:
-                            rowfile.write(str(row)+"\n")
+                        #with open(recovery, "a", encoding='utf-8') as rowfile:
+                        #    rowfile.write(str(row)+"\n")
+                        self.core_fileappend(str(row)+"\n", recovery)
+        self.core_fileappend(str(row)+"\n", recovery)
         hapax = 0
         classifrequenza = []
         occClassifrequenza = []
@@ -2434,10 +2458,12 @@ class BranCorpus(QObject):
                             thistext = line.replace("\n","").replace("\r","").split(separator)[col]
                         except:
                             thistext = ""
-                        with open(output, "a", encoding='utf-8') as outfile:
-                            outfile.write(thistext+"\n")
-                        with open(recovery, "a", encoding='utf-8') as rowfile:
-                            rowfile.write(str(row)+"\n")
+                        #with open(output, "a", encoding='utf-8') as outfile:
+                        #    outfile.write(thistext+"\n")
+                        self.core_fileappend(thistext+"\n", output)
+                        #with open(recovery, "a", encoding='utf-8') as rowfile:
+                        #    rowfile.write(str(row)+"\n")
+                        self.core_fileappend(str(row)+"\n", recovery)
                     row = row + 1
         return output
 
@@ -2535,11 +2561,13 @@ class BranCorpus(QObject):
                             for valind in range(len(thisvalues)):
                                 newrow.append(thisvalues[valind])
                             table.append(newrow)
-                        if row % 500 == 0:
+                        if row % 500 == 0 or row == totallines:
                             self.core_savetable(table, output)
-                            with open(recovery, "a", encoding='utf-8') as rowfile:
-                                rowfile.write(str(row)+"\n")
+                            #with open(recovery, "a", encoding='utf-8') as rowfile:
+                            #    rowfile.write(str(row)+"\n")
+                            self.core_fileappend(str(row)+"\n", recovery)
                     row = row + 1
+            self.core_fileappend(str(row)+"\n", recovery)
         if "mean" in opers and firstfile > 0 and row == totallines and startatrow < totallines:
             for mrow in range(len(table)):
                 for valind in range(len(opers)):
@@ -2603,10 +2631,12 @@ class BranCorpus(QObject):
                     if output != oldoutput:
                         print(output)
                         oldoutput = output
-                    with open(output, "a", encoding='utf-8') as outfile:
-                        outfile.write(thistext)
-                    with open(recovery, "a", encoding='utf-8') as rowfile:
-                        rowfile.write(str(row)+","+str(part)+","+str(partrow)+"\n")
+                    #with open(output, "a", encoding='utf-8') as outfile:
+                    #    outfile.write(thistext)
+                    self.core_fileappend(thistext, output)
+                    #with open(recovery, "a", encoding='utf-8') as rowfile:
+                    #    rowfile.write(str(row)+","+str(part)+","+str(partrow)+"\n")
+                    self.core_fileappend(str(row)+","+str(part)+","+str(partrow)+"\n", recovery)
                     partrow = partrow + 1
                 row = row + 1
         return output
@@ -2670,8 +2700,9 @@ class BranCorpus(QObject):
                     ir = ir + 1
                     if ir == len(getrows):
                         break
-                    with open(output, "a", encoding='utf-8') as outfile:
-                        outfile.write(thistext)
+                    #with open(output, "a", encoding='utf-8') as outfile:
+                    #    outfile.write(thistext)
+                    self.core_fileappend(thistext, output)
                 row = row + 1
         print(myfile +" -> "+ output)
         return output
