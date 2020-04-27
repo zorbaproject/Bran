@@ -42,6 +42,7 @@ class Form(QDialog):
         self.w.orbtn.clicked.connect(self.orbtn)
         self.w.delbtn.clicked.connect(self.delbtn)
         self.w.help.clicked.connect(self.help)
+        self.w.filter.editingFinished.connect(self.updateTable)
         self.setWindowTitle("Crea filtro multiplo")
         self.mycorpus = corpus
         self.corpuscols = cpcols
@@ -123,6 +124,8 @@ class Form(QDialog):
         self.w.filter.setText(myfilter)
 
     def updateTable(self):
+        for row in range(self.w.tableWidget.rowCount()):
+            self.w.tableWidget.removeRow(0)
         iopt = 0
         try:
             for option in self.w.filter.text().split("||"):
@@ -295,6 +298,7 @@ class Form(QDialog):
     def orbtn(self):
         if self.w.tableWidget.rowCount() > 0:
             tbrow = self.addlinetotable("OR", 0)
+            self.andbtn()
 
     def delbtn(self):
         self.sanitizeTable()

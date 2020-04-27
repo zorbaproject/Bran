@@ -786,55 +786,49 @@ class BranCorpus(QObject):
         fcol = self.filtrimultiplienabled
         Fildialog = creafiltro.Form(self.corpus, self.corpuscols, self.corpuswidget)
         Fildialog.sessionDir = self.sessionDir
-        Fildialog.w.filter.setText("pos=A.*||pos=S.*")
+        Fildialog.w.filter.setText("pos=AD.*||pos=NOUN")
         Fildialog.updateTable()
         Fildialog.exec()
         if Fildialog.w.filter.text() == "":
             return
-        allfilters = Fildialog.w.filter.text().split("||")
+        filtertext = Fildialog.w.filter.text()
+        #allfilters = filtertext.split("||")
+        mycol = thisname.index(column[0])
+        myrecovery = False
+        hname = str(mycol)
+        hkey = str(mycol)
+        for key in self.corpuscols:
+            if col == self.corpuscols[key][0]:
+                hname = self.corpuscols[key][1]
+                hkey = key
+        cleanedfilter = re.sub("[^a-zA-Z0-9]", "", filtertext)
+        fcol = self.filtrimultiplienabled
+        output = self.sessionFile + "-occorrenze_filtrate-" + hkey + "-" + cleanedfilter + ".tsv"
+        recovery = output + ".tmp"
+        totallines = self.core_linescount(self.sessionFile)
+        self.core_killswitch = False
+        self.Progrdialog = progress.ProgressDialog(self, recovery, totallines)
+        self.Progrdialog.start()
+        self.core_occorrenzeFiltrate(mycol, filtertext, myrecovery)
+        self.Progrdialog.cancelled = True
+        self.core_killswitch = False
         TBdialog = tableeditor.Form(self.corpuswidget, self.mycfg)
         TBdialog.sessionDir = self.sessionDir
-        TBdialog.addcolumn(column[0], 0)
-        self.Progrdialog = progress.Form()
-        self.Progrdialog.show()
-        for myfilter in allfilters:
-            TBdialog.addcolumn(myfilter, 1)
-        totallines = len(self.corpus)
-        startline = 0
-        if self.OnlyVisibleRows:
-            totallines = self.aToken
-            startline = self.daToken
-        for row in range(startline, totallines):
-            if self.OnlyVisibleRows and self.corpuswidget.isRowHidden(row-startline):
-                continue
-            self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
-            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
-            QApplication.processEvents()
-            if self.Progrdialog.w.annulla.isChecked():
-                return
-            try:
-                thistext = self.corpus[row][col]
-                try:
-                    if col == self.corpuscols["pos"][0]:
-                        thistext = self.legendaPos[thistext][0]
-                except:
-                    thistext = self.corpus[row][col]
-            except:
-                thistext = ""
-            for ifilter in range(len(allfilters)):
-                if self.applicaFiltro(row, fcol, allfilters[ifilter]):
-                    tbrow = TBdialog.finditemincolumn(thistext, col=0, matchexactly = True, escape = True)
-                    if tbrow>=0:
-                        try:
-                            tbval = int(TBdialog.w.tableWidget.item(tbrow,ifilter+1).text())+1
-                        except:
-                            tbval = 1
-                        TBdialog.setcelltotable(str(tbval), tbrow, ifilter+1)
+        lineI = 0
+        with open(output, "r", encoding='utf-8') as ins:
+            for line in ins:
+                colI = 0
+                for col in line.replace("\n","").replace("\r","").split(self.separator):
+                    if lineI == 0:
+                        TBdialog.addcolumn(col, colI)
                     else:
-                        TBdialog.addlinetotable(thistext, 0)
-                        tbrow = TBdialog.w.tableWidget.rowCount()-1
-                        TBdialog.setcelltotable("1", tbrow, ifilter+1)
-        self.Progrdialog.accept()
+                        if colI == 0:
+                            TBdialog.addlinetotable(col, 0)
+                        else:
+                            TBdialog.setcelltotable(col, lineI-1, colI)
+                    colI = colI +1
+                lineI = lineI +1
+        #self.Progrdialog.accept()
         TBdialog.show()
 
     def occorrenzenormalizzate(self):
@@ -1900,6 +1894,20 @@ class BranCorpus(QObject):
                 break
         return resrow
 
+    def core_finditemincolumn(self, table, mytext, col=0, matchexactly = True, escape = True, myflags=0):
+        myregex = mytext
+        if escape:
+            myregex = re.escape(myregex)
+        if matchexactly:
+            myregex = "^" + myregex + "$"
+        for row in range(len(table)):
+            try:
+                if bool(re.match(myregex, table[row][col], flags=myflags)):
+                    return row
+            except:
+                continue
+        return -1
+
     def core_linescount(self, filename):
         f = open(filename, "r+", encoding='utf-8')
         buf = mmap.mmap(f.fileno(), 0)
@@ -2002,6 +2010,92 @@ class BranCorpus(QObject):
                 else:
                     newrow = [thistext, "1"]
                     table.append(newrow)
+                if row % 500 == 0:
+                    self.core_savetable(table, output)
+                    self.core_fileappend(str(row)+"\n", recovery)
+                    #with open(recovery, "a", encoding='utf-8') as rowfile:
+                    #    rowfile.write(str(row)+"\n")
+            row = row + 1
+        self.core_savetable(table, output)
+        #with open(recovery, "a", encoding='utf-8') as rowfile:
+        #    rowfile.write(str(row)+"\n")
+        self.core_fileappend(str(row)+"\n", recovery)
+        return output
+
+    def core_occorrenzeFiltrate(self, mycol, filtertext = "", myrecovery = False):
+        if filtertext=="":
+            self.core_calcola_occorrenze(mycol, myrecovery)
+            return
+        allfilters = filtertext.split("||")
+        fileName = self.sessionFile
+        table = []
+        try:
+            col = int(mycol)
+        except:
+            col = 0
+        hname = str(col)
+        hkey = str(col)
+        for key in self.corpuscols:
+            if col == self.corpuscols[key][0]:
+                hname = self.corpuscols[key][1]
+                hkey = key
+        cleanedfilter = re.sub("[^a-zA-Z0-9]", "", filtertext)
+        fcol = self.filtrimultiplienabled
+        output = fileName + "-occorrenze_filtrate-" + hkey + "-" + cleanedfilter + ".tsv"
+        recovery = output + ".tmp"
+        totallines = len(self.corpus)
+        startatrow = -1
+        print(fileName + " -> " + output)
+        try:
+            if os.path.isfile(recovery) and myrecovery:
+                with open(recovery, "r", encoding='utf-8') as tempfile:
+                   lastline = (list(tempfile)[-1])
+                startatrow = int(lastline)
+                print("Carico la tabella")
+                with open(output, "r", encoding='utf-8') as ins:
+                    for line in ins:
+                        table.append(line.replace("\n","").replace("\r","").split(separator))
+                print("Comincio dalla riga " + str(startatrow))
+            else:
+                exception = 0/0
+        except:
+            startatrow = -1
+            headerlist = [hname]
+            for myfilter in allfilters:
+                headerlist.append(myfilter)
+            table.append(headerlist)
+        if self.OnlyVisibleRows:
+            totallines = self.aToken
+            if bool(myrecovery == "y" or myrecovery == "Y") and self.daToken > startatrow:
+                startatrow = self.daToken
+        for row in range(startatrow, totallines):
+            if self.core_killswitch:
+                break
+            if row > startatrow:
+                try:
+                    thistext = self.corpus[row][col]
+                    try:
+                        if col == self.corpuscols["pos"][0]:
+                            thistext = self.legendaPos[thistext][0]
+                    except:
+                        thistext = self.corpus[row][col]
+                except:
+                    thistext = ""
+                for ifilter in range(len(allfilters)):
+                    if self.applicaFiltro(row, fcol, allfilters[ifilter]):
+                        tbrow = self.core_finditemincolumn(table, thistext, col=0, matchexactly = True, escape = True)
+                        if tbrow>=0:
+                            try:
+                                tbval = int(table[tbrow][ifilter+1])+1
+                            except:
+                                tbval = 1
+                            table[tbrow][ifilter+1] = tbval
+                        else:
+                            newrow = [thistext]
+                            for emptyI in range(0,len(allfilters)):
+                                newrow.append("")
+                            newrow[ifilter+1] = "1"
+                            table.append(newrow)
                 if row % 500 == 0:
                     self.core_savetable(table, output)
                     self.core_fileappend(str(row)+"\n", recovery)

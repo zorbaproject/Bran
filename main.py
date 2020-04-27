@@ -231,7 +231,8 @@ if __name__ == "__main__":
             print("python3 main.py txt2corpus file.txt|cartella [indirizzoServerTint] [ripristino (y/n)]\n")
             print("python3 main.py splitbigfile file.txt [maxnumberoflines] [.]\n")
             print("python3 main.py samplebigfile file.txt [maxnumberoflines] [.]\n")
-            print("python3 main.py occorrenze file.tsv|cartella [colonna] [ripristino (y/n)]\n")
+            print("python3 main.py occorrenze file.tsv|cartella colonna [ripristino (y/n)]\n")
+            print("python3 main.py occorrenzeFiltrate file.tsv|cartella colonna [filtro] [ripristino (y/n)]\n")
             print("python3 main.py occorrenzeNonBran file.tsv|cartella [colonna] [separatore] [ripristino (y/n)]\n")
             print("python3 main.py occorrenzeNormalizzate file.tsv|cartella [colonna] [ripristino (y/n)]\n")
             print("python3 main.py extractcolumn file.tsv|cartella colonna\n")
@@ -353,6 +354,42 @@ if __name__ == "__main__":
                 Corpus.CSVloader([fileName])
                 Corpus.sessionFile = fileName
                 Corpus.core_calcola_occorrenze(mycol, myrecovery)
+                Corpus.chiudiProgetto()
+            print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
+        if sys.argv[1] == "occorrenzeFiltrate":
+            try:
+                myfiles = sys.argv[2]
+            except:
+                sys.exit()
+            try:
+                mycol = sys.argv[3]
+            except:
+                mycol = 0
+            try:
+                myfilter = sys.argv[4]
+            except:
+                myfilter = ""
+            try:
+                rch = sys.argv[5]
+            except:
+                print("Vuoi usare un file di ripristino? [Y/N]")
+                rch = input()
+            if rch == "Y" or rch == "y":
+                myrecovery = True
+            else:
+                myrecovery = False
+            #Corpus.separator = '\t'
+            fileNames = []
+            if os.path.isfile(myfiles):
+                fileNames = [myfiles]
+            if os.path.isdir(myfiles):
+                for tfile in os.listdir(myfiles):
+                    if tfile[-4:] == ".csv" or tfile[-4:] == ".tsv":
+                        fileNames.append(os.path.join(myfiles,tfile))
+            for fileName in fileNames:
+                Corpus.CSVloader([fileName])
+                Corpus.sessionFile = fileName
+                Corpus.core_occorrenzeFiltrate(mycol, myfilter, myrecovery)
                 Corpus.chiudiProgetto()
             print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
         if sys.argv[1] == "contaverbi":
