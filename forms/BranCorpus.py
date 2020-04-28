@@ -2050,7 +2050,6 @@ class BranCorpus(QObject):
         myfilcol = None
         if myfilter != "":
             myfilcol = self.filtrimultiplienabled
-            self.OnlyVisibleRows = True
         hname = str(col)
         hkey = str(col)
         for key in self.corpuscols:
@@ -2061,14 +2060,16 @@ class BranCorpus(QObject):
         output = fileName + "-ricostruito-" + hkey + "-"+ cleanedfilter+ ".tsv"
         recovery = output + ".tmp"
         totallines = len(self.corpus)
-        startatrow = -1
+        if endrow != 0:
+            totallines = endrow
+        startatrow = 0
         print(fileName + " -> " + output)
         fulltext = ""
         try:
             if os.path.isfile(recovery) and myrecovery:
                 with open(recovery, "r", encoding='utf-8') as tempfile:
                    lastline = (list(tempfile)[-1])
-                startatrow = int(lastline)
+                primafrase = int(lastline)
                 print("Carico la tabella")
                 with open(output, "r", encoding='utf-8') as ins:
                     for line in ins:
@@ -2077,23 +2078,38 @@ class BranCorpus(QObject):
             else:
                 exception = 0/0
         except:
-            startatrow = -1
+            primafrase = 0
         if self.OnlyVisibleRows:
             totallines = self.aToken
             if myrecovery and self.daToken > startatrow:
                 startatrow = self.daToken
         frasi = []
+        frasecol = self.corpuscols["IDphrase"][0]
         for row in range(startatrow, totallines):
+            phID = self.corpus[row][frasecol]
+            if len(frasi)==0:
+                frasi.append([phID,row,row+1])
+                continue
+            if phID != frasi[-1][0]:
+                frasi[-1][2] = row
+                frasi.append([phID,row,row])
+        frasi[-1][2] = totallines
+        if myfilter != "":
+            myfilcol = self.filtrimultiplienabled
+            self.OnlyVisibleRows = True
+        for nFrase in range(primafrase, len(frasi)):
+            startrow = frasi[nFrase][1]
+            endrow = frasi[nFrase][2]
             if self.core_killswitch:
                 break
-            if row > startatrow:
-                tmptext = self.core_rebuildText(self.corpus, col, ipunct, startatrow, 0, myfilcol)
-                fulltext = fulltext + tmptext
-                if row % 500 == 0:
-                    self.core_savetext(fulltext, output)
-                    self.core_fileappend(str(row)+"\n", recovery)
+            tmptext = self.core_rebuildText(self.corpus, col, ipunct, startrow, endrow, myfilcol)
+            tmptext = self.remUselessSpaces(tmptext)
+            fulltext = fulltext + tmptext
+            if nFrase % 10 == 0:
+                self.core_savetext(fulltext, output)
+                self.core_fileappend(str(frasi[nFrase][0])+"\n", recovery)
         self.core_savetext(fulltext, output)
-        self.core_fileappend(str(row)+"\n", recovery)
+        self.core_fileappend(str(frasi[nFrase][0])+"\n", recovery)
         self.OnlyVisibleRows = oldvisrow
         return output
 
