@@ -674,6 +674,40 @@ if __name__ == "__main__":
                 myrecovery = False
             Corpus.core_mergetables(mydir, mycol, opstr, headerlines, myrecovery)
             print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
+        if sys.argv[1] == "densitalessicale":
+            try:
+                myfiles = sys.argv[2]
+            except:
+                sys.exit()
+            try:
+                mylevel = int(sys.argv[3])
+                if mylevel < 0 or mylevel > 2:
+                    mylevel = 0/0
+            except:
+                mylevel = 2
+            try:
+                rch = sys.argv[4]
+            except:
+                print("Vuoi usare un file di ripristino? [Y/N]")
+                rch = input()
+            if rch == "Y" or rch == "y":
+                myrecovery = True
+            else:
+                myrecovery = False
+            #Corpus.separator = '\t'
+            fileNames = []
+            if os.path.isfile(myfiles):
+                fileNames = [myfiles]
+            if os.path.isdir(myfiles):
+                for tfile in os.listdir(myfiles):
+                    if tfile[-4:] == ".csv" or tfile[-4:] == ".tsv":
+                        fileNames.append(os.path.join(myfiles,tfile))
+            for fileName in fileNames:
+                Corpus.CSVloader([fileName])
+                Corpus.sessionFile = fileName
+                Corpus.core_densitalessico(mylevel, myrecovery)
+                Corpus.chiudiProgetto()
+            print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
         if sys.argv[1] == "misurelessico":
             try:
                 myfiles = sys.argv[2]

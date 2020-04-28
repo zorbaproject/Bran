@@ -1230,104 +1230,27 @@ class BranCorpus(QObject):
 
     def densitalessico(self):
         col = self.corpuscols['pos'][0]
-        TBdialog = tableeditor.Form(self.corpuswidget, self.mycfg)
-        TBdialog.sessionDir = self.sessionDir
-        TBdialog.addcolumn("Part of Speech", 0)
-        TBdialog.addcolumn("Macrocategoria", 1)
-        TBdialog.addcolumn("Occorrenze", 2)
-        TBdialog.addcolumn("Percentuale", 3)
-        #calcolo le occorrenze del pos
-        self.Progrdialog = progress.Form()
-        self.Progrdialog.show()
-        mytypes = {}
-        totallines = len(self.corpus)
-        startline = 0
-        if self.OnlyVisibleRows:
-            totallines = self.aToken
-            startline = self.daToken
-        for row in range(startline, totallines):
-            if self.OnlyVisibleRows and self.corpuswidget.isRowHidden(row-startline):
-                continue
-            self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
-            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
-            QApplication.processEvents()
-            if self.Progrdialog.w.annulla.isChecked():
-                return
-            try:
-                thistextO = self.corpus[row][col]
-                thistext = self.legendaPos[thistextO][0]
-                thisposc = self.legendaPos[self.corpus[row][self.corpuscols['pos'][0]]][1]
-                try:
-                    mytypes[thisposc] = mytypes[thisposc] +1
-                except:
-                    mytypes[thisposc] = 1
-            except:
-                thistext = ""
-                thistextO = ""
-            if thistext != "":
-                tbrow = TBdialog.finditemincolumn(thistext, col=0, matchexactly = True, escape = True)
-                if tbrow>=0:
-                    tbval = int(TBdialog.w.tableWidget.item(tbrow,2).text())+1
-                    TBdialog.setcelltotable(str(tbval), tbrow, 2)
-                else:
-                    TBdialog.addlinetotable(thistext, 0)
-                    tbrow = TBdialog.w.tableWidget.rowCount()-1
-                    TBdialog.setcelltotable(self.legendaPos[thistextO][1], tbrow, 1)
-                    TBdialog.setcelltotable("1", tbrow, 2)
-        #calcolo le somme di parole piene e vuote
-        totallines = TBdialog.w.tableWidget.rowCount()
-        paroletotali = 0
-        parolepiene = 0
-        parolevuote = 0
-        parolenone = 0
-        for row in range(TBdialog.w.tableWidget.rowCount()):
-            self.Progrdialog.w.testo.setText("Sto sommando la riga numero "+str(row))
-            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
-            QApplication.processEvents()
-            thistext = TBdialog.w.tableWidget.item(row,0).text()
-            for key in self.legendaPos:
-                if thistext == self.legendaPos[key][0]:
-                    if "piene" == self.legendaPos[key][2]:
-                        paroletotali = paroletotali + int(TBdialog.w.tableWidget.item(row,2).text())
-                        parolepiene = parolepiene + int(TBdialog.w.tableWidget.item(row,2).text())
-                        break
-                    if "vuote" == self.legendaPos[key][2]:
-                        paroletotali = paroletotali + int(TBdialog.w.tableWidget.item(row,2).text())
-                        parolevuote = parolevuote + int(TBdialog.w.tableWidget.item(row,2).text())
-                        break
-                    if "none" == self.legendaPos[key][2]:
-                        paroletotali = paroletotali + int(TBdialog.w.tableWidget.item(row,2).text())
-                        parolenone = parolenone + int(TBdialog.w.tableWidget.item(row,2).text())
-                        break
-        #presento le macrocategorie
-        for key in mytypes:
-            TBdialog.addlinetotable(key, 1)
-            tbrow = TBdialog.w.tableWidget.rowCount()-1
-            TBdialog.setcelltotable(str(mytypes[key]), tbrow, 2)
-        TBdialog.addlinetotable("Parole totali", 0)
-        tbrow = TBdialog.w.tableWidget.rowCount()-1
-        TBdialog.setcelltotable(str(paroletotali), tbrow, 2)
-        TBdialog.addlinetotable("Parole piene", 0)
-        tbrow = TBdialog.w.tableWidget.rowCount()-1
-        TBdialog.setcelltotable(str(parolepiene), tbrow, 2)
-        TBdialog.addlinetotable("Parole vuote", 0)
-        tbrow = TBdialog.w.tableWidget.rowCount()-1
-        TBdialog.setcelltotable(str(parolevuote), tbrow, 2)
-        TBdialog.addlinetotable("Altri tokens", 0)
-        tbrow = TBdialog.w.tableWidget.rowCount()-1
-        TBdialog.setcelltotable(str(parolenone), tbrow, 2)
-        #calcolo le percentuali
-        for row in range(TBdialog.w.tableWidget.rowCount()):
-            self.Progrdialog.w.testo.setText("Sto calcolando le percentuali su "+str(row))
-            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
-            QApplication.processEvents()
-            ratio = (float(TBdialog.w.tableWidget.item(row,2).text())/float(paroletotali)*100)
-            ratios = f'{ratio:.3f}'
-            TBdialog.setcelltotable(ratios, row, 3)
-        #mostro i risultati
-        self.Progrdialog.accept()
-        TBdialog.show()
-
+        thisname = []
+        thisname.append("Dettagliato")
+        thisname.append("Macrocategorie")
+        thisname.append("Parole piene e vuote")
+        column = QInputDialog.getItem(self.corpuswidget, "Scegli la colonna", "Che livello di dettaglio vuoi?",thisname,current=2,editable=False)
+        level = thisname.index(column[0])
+        myrecovery = False
+        try:
+            mylevel = int(level)
+        except:
+            mylevel = 2
+        output = self.sessionFile + "-densitalessicale-" + str(mylevel) + ".tsv"
+        recovery = output + ".tmp"
+        totallines = self.core_linescount(self.sessionFile)
+        self.core_killswitch = False
+        self.Progrdialog = progress.ProgressDialog(self, recovery, totallines)
+        self.Progrdialog.start()
+        self.core_densitalessico(mylevel, myrecovery)
+        self.Progrdialog.cancelled = True
+        self.core_killswitch = False
+        self.showResults(output)
 
     def delselected(self):
         self.Progrdialog = progress.Form()
@@ -2688,6 +2611,117 @@ class BranCorpus(QObject):
         ratio =  math.pow(float(math.log10(paroletotali)), 2.0)/(float(math.log10(paroletotali)) - float(math.log10(totaltypes)) )
         ratios = f'{ratio:.3f}'
         table.append(["U", str(ratios)])
+        self.core_savetable(table, output)
+        return output
+
+    def core_densitalessico(self, level = 2, myrecovery = False):
+        fileName = self.sessionFile
+        col = self.corpuscols['pos'][0]
+        table = []
+        try:
+            mylevel = int(level)
+        except:
+            mylevel = 2
+        output = fileName + "-densitalessicale-" + str(mylevel) + ".tsv"
+        recovery = output + ".tmp"
+        totallines = len(self.corpus)
+        startatrow = -1
+        print(fileName + " -> " + output)
+        try:
+            if os.path.isfile(recovery) and myrecovery:
+                with open(recovery, "r", encoding='utf-8') as tempfile:
+                   lastline = (list(tempfile)[-1])
+                startatrow = int(lastline)
+                print("Carico la tabella")
+                with open(output, "r", encoding='utf-8') as ins:
+                    for line in ins:
+                        table.append(line.replace("\n","").replace("\r","").split(separator))
+                print("Comincio dalla riga " + str(startatrow))
+            else:
+                exception = 0/0
+        except:
+            startatrow = -1
+            table.append(["Categoria", "Occorrenze", "Percentuale"])
+        if self.OnlyVisibleRows:
+            totallines = self.aToken
+            if myrecovery and self.daToken > startatrow:
+                startatrow = self.daToken
+        totaltypes = 0
+        mytypes = {}
+        #if startatrow >= (len(self.corpus)-1):
+        #    return
+        for row in range(startatrow, totallines):
+            if self.core_killswitch:
+                break
+            if row > startatrow:
+                try:
+                    thistextO = self.corpus[row][col]
+                    thistext = self.legendaPos[thistextO][0]
+                    thisposc = self.legendaPos[self.corpus[row][self.corpuscols['pos'][0]]][1]
+                    try:
+                        mytypes[thisposc] = mytypes[thisposc] +1
+                    except:
+                        mytypes[thisposc] = 1
+                except:
+                    thistext = ""
+                    thistextO = ""
+                if thistext != "":
+                    tbrow = self.core_finditemincolumn(table, thistext, col=0, matchexactly = True, escape = True)
+                    if tbrow>=0:
+                        tbval = int(table[tbrow][1])+1
+                        table[tbrow][1] = tbval
+                    else:
+                        newrow = [thistext, "1", "0"]
+                        table.append(newrow)
+                    if row % 500 == 0 or row == len(self.corpus)-1:
+                        self.core_savetable(table, output)
+                        #with open(recovery, "a", encoding='utf-8') as rowfile:
+                        #    rowfile.write(str(row)+"\n")
+                        self.core_fileappend(str(row)+"\n", recovery)
+        self.core_fileappend(str(row)+"\n", recovery)
+        paroletotali = 0
+        parolepiene = 0
+        parolevuote = 0
+        parolenone = 0
+        for row in range(len(table)):
+            thistext = table[row][0]
+            for key in self.legendaPos:
+                if thistext == self.legendaPos[key][0]:
+                    if "piene" == self.legendaPos[key][2]:
+                        paroletotali = paroletotali + int(table[row][1])
+                        parolepiene = parolepiene + int(table[row][1])
+                        break
+                    if "vuote" == self.legendaPos[key][2]:
+                        paroletotali = paroletotali + int(table[row][1])
+                        parolevuote = parolevuote + int(table[row][1])
+                        break
+                    if "none" == self.legendaPos[key][2]:
+                        paroletotali = paroletotali + int(table[row][1])
+                        parolenone = parolenone + int(table[row][1])
+                        break
+        if mylevel == 2:
+            table = [table[0]]
+            table.append(["Parole totali", str(paroletotali), "1"])
+            table.append(["Parole piene", str(parolepiene), "1"])
+            table.append(["Parole vuote", str(parolevuote), "1"])
+            table.append(["Altri token", str(parolenone), "1"])
+        elif mylevel == 1:
+            table = [table[0]]
+            for key in mytypes:
+                table.append([key,str(mytypes[key]), "1"])
+        elif mylevel == 0:
+            pass
+        else:
+            return ""
+        #calcola percentuali
+        for row in range(len(table)):
+            thistext = table[row][0]
+            try:
+                ratio = (float(table[row][1])/float(paroletotali)*100)
+                ratios = f'{ratio:.3f}'
+            except:
+                continue
+            table[row][2] = str(ratios)
         self.core_savetable(table, output)
         return output
 
