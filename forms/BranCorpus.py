@@ -735,6 +735,26 @@ class BranCorpus(QObject):
     def deselectAllCells(self):
         self.corpuswidget.clearSelection()
 
+    def showResults(self, output):
+        TBdialog = tableeditor.Form(self.corpuswidget, self.mycfg)
+        TBdialog.sessionDir = self.sessionDir
+        lineI = 0
+        with open(output, "r", encoding='utf-8') as ins:
+            for line in ins:
+                colI = 0
+                for col in line.replace("\n","").replace("\r","").split(self.separator):
+                    if lineI == 0:
+                        TBdialog.addcolumn(col, colI)
+                    else:
+                        if colI == 0:
+                            TBdialog.addlinetotable(col, 0)
+                        else:
+                            TBdialog.setcelltotable(col, lineI-1, colI)
+                    colI = colI +1
+                lineI = lineI +1
+        #self.Progrdialog.accept()
+        TBdialog.show()
+
     def contaoccorrenze(self):
         thisname = []
         for col in self.corpuscols:
@@ -757,24 +777,7 @@ class BranCorpus(QObject):
         self.core_calcola_occorrenze(mycol, myrecovery)
         self.Progrdialog.cancelled = True
         self.core_killswitch = False
-        TBdialog = tableeditor.Form(self.corpuswidget, self.mycfg)
-        TBdialog.sessionDir = self.sessionDir
-        lineI = 0
-        with open(output, "r", encoding='utf-8') as ins:
-            for line in ins:
-                colI = 0
-                for col in line.replace("\n","").replace("\r","").split(self.separator):
-                    if lineI == 0:
-                        TBdialog.addcolumn(col, colI)
-                    else:
-                        if colI == 0:
-                            TBdialog.addlinetotable(col, 0)
-                        else:
-                            TBdialog.setcelltotable(col, lineI-1, colI)
-                    colI = colI +1
-                lineI = lineI +1
-        #self.Progrdialog.accept()
-        TBdialog.show()
+        self.showResults(output)
 
     def contaoccorrenzefiltrate(self):
         thisname = []
@@ -812,23 +815,106 @@ class BranCorpus(QObject):
         self.core_occorrenzeFiltrate(mycol, filtertext, myrecovery)
         self.Progrdialog.cancelled = True
         self.core_killswitch = False
+        self.showResults(output)
+
+    def coOccorrenze(self):
+        parola = QInputDialog.getText(self.corpuswidget, "Scegli la parola", "Indica la parola che vuoi cercare:", QLineEdit.Normal, "")[0]
+        thisname = []
+        for col in self.corpuscols:
+            thisname.append(self.corpuscols[col][1])
+        column = QInputDialog.getItem(self.corpuswidget, "Scegli la colonna", "In quale colonna devo cercare il testo?",thisname,current=1,editable=False)
+        mycol = thisname.index(column[0])
+        myrange = int(QInputDialog.getInt(self.corpuswidget, "Indica il range", "Quante parole, prima e dopo, vuoi leggere?")[0])
+        rangestr = str(myrange)
+        myfilter = str(list(self.corpuscols)[mycol]) +"="+parola
+        fcol = self.filtrimultiplienabled
+        Fildialog = creafiltro.Form(self.corpus, self.corpuscols, self.corpuswidget)
+        Fildialog.sessionDir = self.sessionDir
+        Fildialog.w.filter.setText(myfilter) #"lemma=essere&&pos[1,-1]=SP||lemma[-1]=essere&&pos=S"
+        Fildialog.updateTable()
+        Fildialog.exec()
+        if Fildialog.w.filter.text() != "":
+            self.filter = Fildialog.w.filter.text()
         TBdialog = tableeditor.Form(self.corpuswidget, self.mycfg)
         TBdialog.sessionDir = self.sessionDir
-        lineI = 0
-        with open(output, "r", encoding='utf-8') as ins:
-            for line in ins:
-                colI = 0
-                for col in line.replace("\n","").replace("\r","").split(self.separator):
-                    if lineI == 0:
-                        TBdialog.addcolumn(col, colI)
-                    else:
-                        if colI == 0:
-                            TBdialog.addlinetotable(col, 0)
-                        else:
-                            TBdialog.setcelltotable(col, lineI-1, colI)
-                    colI = colI +1
-                lineI = lineI +1
-        #self.Progrdialog.accept()
+        TBdialog.addcolumn("Segmento", 0)
+        TBdialog.addcolumn("Occorrenze", 1)
+        ret = QMessageBox.question(self.corpuswidget,'Domanda', "Vuoi ignorare la punteggiatura?", QMessageBox.Yes | QMessageBox.No)
+        if ret == QMessageBox.Yes:
+            myignore = self.ignorepos
+        else:
+            myignore = []
+        filtertext = Fildialog.w.filter.text()
+        myrecovery = False
+        hname = str(mycol)
+        hkey = str(mycol)
+        for key in self.corpuscols:
+            if mycol == self.corpuscols[key][0]:
+                hname = self.corpuscols[key][1]
+                hkey = key
+        cleanedfilter = re.sub("[^a-zA-Z0-9]", "", filtertext)
+        fcol = self.filtrimultiplienabled
+        output = self.sessionFile + "-coOccorrenze-" + hkey + "-" + cleanedfilter + ".tsv"
+        recovery = output + ".tmp"
+        totallines = self.core_linescount(self.sessionFile)
+        self.core_killswitch = False
+        self.Progrdialog = progress.ProgressDialog(self, recovery, totallines)
+        self.Progrdialog.start()
+        self.core_calcola_coOccorrenze(parola, mycol, myrange, True, myrecovery, filtertext)
+        self.Progrdialog.cancelled = True
+        self.core_killswitch = False
+        self.showResults(output)
+
+    def concordanze(self):
+        parola = QInputDialog.getText(self.corpuswidget, "Scegli la parola", "Indica la parola che vuoi cercare:", QLineEdit.Normal, "")[0]
+        thisname = []
+        for col in self.corpuscols:
+            thisname.append(self.corpuscols[col][1])
+        column = QInputDialog.getItem(self.corpuswidget, "Scegli la colonna", "In quale colonna devo cercare il testo?",thisname,current=1,editable=False)
+        col = thisname.index(column[0])
+        myrange = int(QInputDialog.getInt(self.corpuswidget, "Indica il range", "Quante parole, prima e dopo, vuoi leggere?")[0])
+        rangestr = str(myrange)
+        #myfilter = str(list(self.corpuscols)[col]) + "[" + rangestr + "]" +"="+parola
+        myfilter = str(list(self.corpuscols)[col]) +"="+parola
+        fcol = self.filtrimultiplienabled
+        Fildialog = creafiltro.Form(self.corpus, self.corpuscols, self.corpuswidget)
+        Fildialog.sessionDir = self.sessionDir
+        Fildialog.w.filter.setText(myfilter) #"lemma=essere&&pos[1,-1]=SP||lemma[-1]=essere&&pos=S"
+        Fildialog.updateTable()
+        Fildialog.exec()
+        if Fildialog.w.filter.text() != "":
+            self.filter = Fildialog.w.filter.text()
+        #self.dofiltra()
+        TBdialog = tableeditor.Form(self.corpuswidget, self.mycfg)
+        TBdialog.sessionDir = self.sessionDir
+        TBdialog.addcolumn("Segmento", 0)
+        TBdialog.addcolumn("Occorrenze", 1)
+        ret = QMessageBox.question(self.corpuswidget,'Domanda', "Vuoi ignorare la punteggiatura?", QMessageBox.Yes | QMessageBox.No)
+        if ret == QMessageBox.Yes:
+            myignore = self.ignorepos
+        else:
+            myignore = []
+        self.Progrdialog = progress.Form()
+        self.Progrdialog.show()
+        totallines = len(self.corpus)
+        startline = 0
+        if self.OnlyVisibleRows:
+            totallines = self.aToken
+            startline = self.daToken
+        for row in range(startline, totallines):
+            if not self.applicaFiltro(row, self.filtrimultiplienabled, self.filter):
+                continue
+            thistext = self.rebuildText(self.corpus, self.Progrdialog, col, myignore, row-myrange, row+myrange+1)
+            thistext = self.remUselessSpaces(thistext)
+            tbrow = TBdialog.finditemincolumn(thistext, col=0, matchexactly = True, escape = True)
+            if tbrow>=0:
+                tbval = int(TBdialog.w.tableWidget.item(tbrow,1).text())+1
+                TBdialog.setcelltotable(str(tbval), tbrow, 1)
+            else:
+                TBdialog.addlinetotable(thistext, 0)
+                tbrow = TBdialog.w.tableWidget.rowCount()-1
+                TBdialog.setcelltotable("1", tbrow, 1)
+        self.Progrdialog.accept()
         TBdialog.show()
 
     def occorrenzenormalizzate(self):
@@ -857,24 +943,7 @@ class BranCorpus(QObject):
         self.core_occorrenze_normalizzate(mycol, myrecovery, doignorepunct)
         self.Progrdialog.cancelled = True
         self.core_killswitch = False
-        TBdialog = tableeditor.Form(self.corpuswidget, self.mycfg)
-        TBdialog.sessionDir = self.sessionDir
-        lineI = 0
-        with open(output, "r", encoding='utf-8') as ins:
-            for line in ins:
-                colI = 0
-                for col in line.replace("\n","").replace("\r","").split(self.separator):
-                    if lineI == 0:
-                        TBdialog.addcolumn(col, colI)
-                    else:
-                        if colI == 0:
-                            TBdialog.addlinetotable(col, 0)
-                        else:
-                            TBdialog.setcelltotable(col, lineI-1, colI)
-                    colI = colI +1
-                lineI = lineI +1
-        #self.Progrdialog.accept()
-        TBdialog.show()
+        self.showResults(output)
 
     def orderVerbMorf(self, text, ignoreperson = False):
         if not "VerbForm" in text:
@@ -932,25 +1001,7 @@ class BranCorpus(QObject):
         self.core_contaverbi(ignoreperson, contigui, myrecovery)
         self.Progrdialog.cancelled = True
         self.core_killswitch = False
-        #calcolo le percentuali
-        TBdialog = tableeditor.Form(self.corpuswidget, self.mycfg)
-        TBdialog.sessionDir = self.sessionDir
-        lineI = 0
-        with open(output, "r", encoding='utf-8') as ins:
-            for line in ins:
-                colI = 0
-                for col in line.replace("\n","").replace("\r","").split(self.separator):
-                    if lineI == 0:
-                        TBdialog.addcolumn(col, colI)
-                    else:
-                        if colI == 0:
-                            TBdialog.addlinetotable(col, 0)
-                        else:
-                            TBdialog.setcelltotable(col, lineI-1, colI)
-                    colI = colI +1
-                lineI = lineI +1
-        #self.Progrdialog.accept()
-        TBdialog.show()
+        self.showResults(output)
 
     def trovaripetizioni(self):
         Repetdialog = ripetizioni.Form(self.corpuswidget)
@@ -1503,135 +1554,6 @@ class BranCorpus(QObject):
         self.Progrdialog.accept()
         self.updateCorpus()
 
-    def concordanze(self):
-        parola = QInputDialog.getText(self.corpuswidget, "Scegli la parola", "Indica la parola che vuoi cercare:", QLineEdit.Normal, "")[0]
-        thisname = []
-        for col in self.corpuscols:
-            thisname.append(self.corpuscols[col][1])
-        column = QInputDialog.getItem(self.corpuswidget, "Scegli la colonna", "In quale colonna devo cercare il testo?",thisname,current=1,editable=False)
-        col = thisname.index(column[0])
-        myrange = int(QInputDialog.getInt(self.corpuswidget, "Indica il range", "Quante parole, prima e dopo, vuoi leggere?")[0])
-        rangestr = str(myrange)
-        #myfilter = str(list(self.corpuscols)[col]) + "[" + rangestr + "]" +"="+parola
-        myfilter = str(list(self.corpuscols)[col]) +"="+parola
-        fcol = self.filtrimultiplienabled
-        Fildialog = creafiltro.Form(self.corpus, self.corpuscols, self.corpuswidget)
-        Fildialog.sessionDir = self.sessionDir
-        Fildialog.w.filter.setText(myfilter) #"lemma=essere&&pos[1,-1]=SP||lemma[-1]=essere&&pos=S"
-        Fildialog.updateTable()
-        Fildialog.exec()
-        if Fildialog.w.filter.text() != "":
-            self.filter = Fildialog.w.filter.text()
-        #self.dofiltra()
-        TBdialog = tableeditor.Form(self.corpuswidget, self.mycfg)
-        TBdialog.sessionDir = self.sessionDir
-        TBdialog.addcolumn("Segmento", 0)
-        TBdialog.addcolumn("Occorrenze", 1)
-        ret = QMessageBox.question(self.corpuswidget,'Domanda', "Vuoi ignorare la punteggiatura?", QMessageBox.Yes | QMessageBox.No)
-        if ret == QMessageBox.Yes:
-            myignore = self.ignorepos
-        else:
-            myignore = []
-        self.Progrdialog = progress.Form()
-        self.Progrdialog.show()
-        totallines = len(self.corpus)
-        startline = 0
-        if self.OnlyVisibleRows:
-            totallines = self.aToken
-            startline = self.daToken
-        for row in range(startline, totallines):
-            if not self.applicaFiltro(row, self.filtrimultiplienabled, self.filter):
-                continue
-            thistext = self.rebuildText(self.corpus, self.Progrdialog, col, myignore, row-myrange, row+myrange+1)
-            thistext = self.remUselessSpaces(thistext)
-            tbrow = TBdialog.finditemincolumn(thistext, col=0, matchexactly = True, escape = True)
-            if tbrow>=0:
-                tbval = int(TBdialog.w.tableWidget.item(tbrow,1).text())+1
-                TBdialog.setcelltotable(str(tbval), tbrow, 1)
-            else:
-                TBdialog.addlinetotable(thistext, 0)
-                tbrow = TBdialog.w.tableWidget.rowCount()-1
-                TBdialog.setcelltotable("1", tbrow, 1)
-        self.Progrdialog.accept()
-        TBdialog.show()
-
-    def coOccorrenze(self):
-        parola = QInputDialog.getText(self.corpuswidget, "Scegli la parola", "Indica la parola che vuoi cercare:", QLineEdit.Normal, "")[0]
-        thisname = []
-        for col in self.corpuscols:
-            thisname.append(self.corpuscols[col][1])
-        column = QInputDialog.getItem(self.corpuswidget, "Scegli la colonna", "In quale colonna devo cercare il testo?",thisname,current=1,editable=False)
-        col = thisname.index(column[0])
-        myrange = int(QInputDialog.getInt(self.corpuswidget, "Indica il range", "Quante parole, prima e dopo, vuoi leggere?")[0])
-        rangestr = str(myrange)
-        myfilter = str(list(self.corpuscols)[col]) +"="+parola
-        fcol = self.filtrimultiplienabled
-        Fildialog = creafiltro.Form(self.corpus, self.corpuscols, self.corpuswidget)
-        Fildialog.sessionDir = self.sessionDir
-        Fildialog.w.filter.setText(myfilter) #"lemma=essere&&pos[1,-1]=SP||lemma[-1]=essere&&pos=S"
-        Fildialog.updateTable()
-        Fildialog.exec()
-        if Fildialog.w.filter.text() != "":
-            self.filter = Fildialog.w.filter.text()
-        #self.dofiltra()
-        TBdialog = tableeditor.Form(self.corpuswidget, self.mycfg)
-        TBdialog.sessionDir = self.sessionDir
-        TBdialog.addcolumn("Segmento", 0)
-        TBdialog.addcolumn("Occorrenze", 1)
-        ret = QMessageBox.question(self.corpuswidget,'Domanda', "Vuoi ignorare la punteggiatura?", QMessageBox.Yes | QMessageBox.No)
-        if ret == QMessageBox.Yes:
-            myignore = self.ignorepos
-        else:
-            myignore = []
-        self.Progrdialog = progress.Form()
-        self.Progrdialog.show()
-        concordanze = []
-        totallines = len(self.corpus)
-        startline = 0
-        if self.OnlyVisibleRows:
-            totallines = self.aToken
-            startline = self.daToken
-        for row in range(startline, totallines):
-            ftext = myfilter #self.filter
-            if not self.applicaFiltro(row, fcol, ftext):
-                continue
-            thistext = self.rebuildText(self.corpus, self.Progrdialog, col, myignore, row-myrange, row+myrange+1)
-            #thistext = self.remUselessSpaces(thistext)
-            regex = re.escape('.?!')
-            if bool(re.match(".*["+regex+"].*", thistext)):
-                punctindex = [m.start(1) for m in re.finditer("(["+regex+"])", thistext, flags=re.DOTALL)]
-                if punctindex[0] < thistext.index(parola):
-                    thistext = thistext[punctindex[0]+1:]
-                else:
-                    thistext = thistext[0:punctindex[0]]
-            if thistext != "":
-                concordanze.append(thistext)
-        totallines = len(concordanze)
-        for row in range(totallines):
-            self.Progrdialog.w.testo.setText("Sto controllando l'occorrenza numero "+str(row))
-            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
-            QApplication.processEvents()
-            if self.Progrdialog.w.annulla.isChecked():
-                return
-            thisrow = concordanze[row].split(" ")
-            for word in thisrow:
-                thistext = ""
-                if thisrow.index(word) < thisrow.index(parola):
-                    thistext = str(word) + "..." + str(parola)
-                if thisrow.index(word) > thisrow.index(parola):
-                    thistext = str(parola) + "..." + str(word)
-                if thistext != "":
-                    tbrow = TBdialog.finditemincolumn(thistext, col=0, matchexactly = True, escape = True)
-                    if tbrow>=0:
-                        tbval = int(TBdialog.w.tableWidget.item(tbrow,1).text())+1
-                        TBdialog.setcelltotable(str(tbval), tbrow, 1)
-                    else:
-                        TBdialog.addlinetotable(thistext, 0)
-                        tbrow = TBdialog.w.tableWidget.rowCount()-1
-                        TBdialog.setcelltotable("1", tbrow, 1)
-        self.Progrdialog.accept()
-        TBdialog.show()
-
     def removevisiblerows(self):
         self.Progrdialog = progress.Form()
         self.Progrdialog.show()
@@ -1857,25 +1779,7 @@ class BranCorpus(QObject):
         self.core_misure_lessicometriche(mycol, myrecovery, doignorepunct)
         self.Progrdialog.cancelled = True
         self.core_killswitch = False
-        #calcolo le percentuali
-        TBdialog = tableeditor.Form(self.corpuswidget, self.mycfg)
-        TBdialog.sessionDir = self.sessionDir
-        lineI = 0
-        with open(output, "r", encoding='utf-8') as ins:
-            for line in ins:
-                colI = 0
-                for col in line.replace("\n","").replace("\r","").split(self.separator):
-                    if lineI == 0:
-                        TBdialog.addcolumn(col, colI)
-                    else:
-                        if colI == 0:
-                            TBdialog.addlinetotable(col, 0)
-                        else:
-                            TBdialog.setcelltotable(col, lineI-1, colI)
-                    colI = colI +1
-                lineI = lineI +1
-        #self.Progrdialog.accept()
-        TBdialog.show()
+        self.showResults(output)
 
 
 
@@ -2039,7 +1943,7 @@ class BranCorpus(QObject):
             if col == self.corpuscols[key][0]:
                 hname = self.corpuscols[key][1]
                 hkey = key
-        cleanedfilter = re.sub("[^a-zA-Z0-9]", "", filtertext)
+        cleanedfilter = re.sub("[^a-zA-Z0-9\[\]]", "", filtertext)
         fcol = self.filtrimultiplienabled
         output = fileName + "-occorrenze_filtrate-" + hkey + "-" + cleanedfilter + ".tsv"
         recovery = output + ".tmp"
@@ -2106,6 +2010,119 @@ class BranCorpus(QObject):
         #with open(recovery, "a", encoding='utf-8') as rowfile:
         #    rowfile.write(str(row)+"\n")
         self.core_fileappend(str(row)+"\n", recovery)
+        return output
+
+    def core_rebuildText(self, table, col = "", ipunct = [], startrow = 0, endrow = 0, filtercol = None):
+        mycorpus = ""
+        if col == "":
+            col = self.corpuscols['token'][0]
+        totallines = len(table)
+        if endrow == 0:
+            endrow = totallines
+        for row in range(startrow, endrow):
+            ftext = self.filter
+            if filtercol != None:
+                if self.OnlyVisibleRows and self.applicaFiltro(row, filtercol, ftext, table):
+                    continue
+            if row >= 0 and row < len(table):
+                thispos = self.legendaPos[table[row][self.corpuscols['pos'][0]]][0]
+                if not thispos in ipunct:
+                    mycorpus = mycorpus + table[row][col] + " "
+        return mycorpus
+
+    def core_calcola_coOccorrenze(self, parola, mycol, myrange, ignorepunct, myrecovery = False, myfilter = ""):
+        fileName = self.sessionFile
+        table = []
+        myignore = ""
+        if ignorepunct:
+            myignore = self.ignorepos
+        try:
+            col = int(mycol)
+        except:
+            col = 0
+        hname = str(col)
+        hkey = str(col)
+        for key in self.corpuscols:
+            if col == self.corpuscols[key][0]:
+                hname = self.corpuscols[key][1]
+                hkey = key
+        if myfilter == "":
+            myfilter = str(list(self.corpuscols)[col]) +"="+parola
+        cleanedfilter = re.sub("[^a-zA-Z0-9\[\]]", "", myfilter)
+        fcol = self.filtrimultiplienabled
+        output = fileName + "-coOccorrenze-" + hkey + "-" + cleanedfilter + ".tsv"
+        recovery = output + ".tmp"
+        totallines = len(self.corpus)
+        startatrow = -1
+        print(fileName + " -> " + output)
+        try:
+            if os.path.isfile(recovery) and myrecovery:
+                with open(recovery, "r", encoding='utf-8') as tempfile:
+                   lastline = (list(tempfile)[-1])
+                startatrow = int(lastline)
+                print("Carico la tabella")
+                with open(output, "r", encoding='utf-8') as ins:
+                    for line in ins:
+                        table.append(line.replace("\n","").replace("\r","").split(separator))
+                print("Comincio dalla riga " + str(startatrow))
+            else:
+                exception = 0/0
+        except:
+            startatrow = -1
+        if self.OnlyVisibleRows:
+            totallines = self.aToken
+            if bool(myrecovery == "y" or myrecovery == "Y") and self.daToken > startatrow:
+                startatrow = self.daToken
+        concordanze = []
+        for row in range(startatrow, totallines):
+            if self.core_killswitch:
+                break
+            if row > startatrow:
+                ftext = myfilter #self.filter
+                if not self.applicaFiltro(row, fcol, ftext):
+                    continue
+                thistext = self.core_rebuildText(self.corpus, col, myignore, row-myrange, row+myrange+1)
+                #thistext = self.remUselessSpaces(thistext)
+                regex = re.escape('.?!')
+                if bool(re.match(".*["+regex+"].*", thistext)):
+                    punctindex = [m.start(1) for m in re.finditer("(["+regex+"])", thistext, flags=re.DOTALL)]
+                    if punctindex[0] < thistext.index(parola):
+                        thistext = thistext[punctindex[0]+1:]
+                    else:
+                        thistext = thistext[0:punctindex[0]]
+                if thistext != "":
+                    concordanze.append(thistext)
+                    table.append([thistext])
+                if row % 500 == 0:
+                    self.core_savetable(table, output)
+                self.core_fileappend(str(row)+"\n", recovery)
+        self.core_fileappend(str(row)+"\n", recovery)
+        table = []
+        table.append(["Segmento","Occorrenze"])
+        totallines = len(concordanze)
+        for row in range(totallines):
+            if self.core_killswitch:
+                break
+            thisrow = concordanze[row].split(" ")
+            for word in thisrow:
+                thistext = ""
+                if thisrow.index(word) < thisrow.index(parola):
+                    thistext = str(word) + "..." + str(parola)
+                if thisrow.index(word) > thisrow.index(parola):
+                    thistext = str(parola) + "..." + str(word)
+                if thistext != "":
+                    tbrow = self.core_finditemincolumn(table, thistext, col=0, matchexactly = True, escape = True)
+                    if tbrow>=0:
+                        tbval = int(table[tbrow][1])+1
+                        table[tbrow][1] = tbval
+                    else:
+                        newrow = [thistext, "1"]
+                        table.append(newrow)
+                try:
+                    thistext = self.corpus[row][col]
+                except:
+                    thistext = ""
+        self.core_savetable(table, output)
         return output
 
     def core_orderVerbMorf(self, text, ignoreperson = False):
