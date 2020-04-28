@@ -235,11 +235,13 @@ if __name__ == "__main__":
             print("python3 main.py occorrenzeFiltrate file.tsv|cartella colonna [filtro] [ripristino (y/n)]\n")
             print("python3 main.py occorrenzeNonBran file.tsv|cartella [colonna] [separatore] [ripristino (y/n)]\n")
             print("python3 main.py occorrenzeNormalizzate file.tsv|cartella [colonna] [ripristino (y/n)]\n")
-            print("python3 main.py occorrenzeFiltrate file.tsv|cartella parola colonna range [ripristino (y/n)]\n")
-            print("python3 main.py extractcolumn file.tsv|cartella colonna\n")
+            print("python3 main.py coOccorrenze file.tsv|cartella parola colonna range [ripristino (y/n)]\n")
+            print("python3 main.py concordanze file.tsv|cartella parola colonna range [ripristino (y/n)]\n")
+            print("python3 main.py estraicolonna file.tsv|cartella colonna\n")
             print("python3 main.py contaverbi file.tsv|cartella [ignora persona (y/n)] [ripristino (y/n)]\n")
             print("python3 main.py misurelessico file.tsv|cartella [colonna] [ripristino (y/n)]\n")
             print("python3 main.py mergetables file1,file2|cartella colonnaChiave [sum|mean|diff,sum|mean|diff] [1] [ripristino (y/n)]\n")
+            print("python3 main.py ricostruisci file.tsv|cartella [colonna] [ignorapunteggiatura (y/n)] [filtro] [ripristino (y/n)]\n")
             print("python3 main.py texteditor file.tsv|cartella\n")
             print("python3 main.py confronto file.tsv|cartella\n")
             print("Gli argomenti tra parentesi [] sono facoltativi.")
@@ -433,6 +435,92 @@ if __name__ == "__main__":
                 Corpus.core_calcola_coOccorrenze(parola, mycol, myrange, True, myrecovery, "")
                 Corpus.chiudiProgetto()
             print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
+        if sys.argv[1] == "concordanze":
+            try:
+                myfiles = sys.argv[2]
+            except:
+                sys.exit()
+            try:
+                parola = sys.argv[3]
+            except:
+                sys.exit()
+            try:
+                mycol = int(sys.argv[4])
+            except:
+                mycol = 0
+            try:
+                myrange = int(sys.argv[5])
+            except:
+                myrange = 0
+            try:
+                rch = sys.argv[6]
+            except:
+                print("Vuoi usare un file di ripristino? [Y/N]")
+                rch = input()
+            if rch == "Y" or rch == "y":
+                myrecovery = True
+            else:
+                myrecovery = False
+            #Corpus.separator = '\t'
+            fileNames = []
+            if os.path.isfile(myfiles):
+                fileNames = [myfiles]
+            if os.path.isdir(myfiles):
+                for tfile in os.listdir(myfiles):
+                    if tfile[-4:] == ".csv" or tfile[-4:] == ".tsv":
+                        fileNames.append(os.path.join(myfiles,tfile))
+            for fileName in fileNames:
+                Corpus.CSVloader([fileName])
+                Corpus.sessionFile = fileName
+                Corpus.core_calcola_concordanze(parola, mycol, myrange, True, myrecovery, "")
+                Corpus.chiudiProgetto()
+            print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
+        if sys.argv[1] == "ricostruisci":
+            try:
+                myfiles = sys.argv[2]
+            except:
+                sys.exit()
+            try:
+                mycol = int(sys.argv[3])
+            except:
+                mycol = 1
+            try:
+                if sys.argv[4] == "y" or sys.argv[4] == "Y":
+                    myignore = True
+                else:
+                    myignore = 0/0
+            except:
+                myignore = False
+            try:
+                myfilter = sys.argv[5]
+            except:
+                myfilter = ""
+            #try:
+            #    rch = sys.argv[6]
+            #except:
+            #    print("Vuoi usare un file di ripristino? [Y/N]")
+            #    rch = input()
+            #if rch == "Y" or rch == "y":
+            #    myrecovery = True
+            #else:
+            #    myrecovery = False
+            #Corpus.separator = '\t'
+            ignpos = []
+            if myignore:
+                ignpos = Corpus.ignorepos
+            fileNames = []
+            if os.path.isfile(myfiles):
+                fileNames = [myfiles]
+            if os.path.isdir(myfiles):
+                for tfile in os.listdir(myfiles):
+                    if tfile[-4:] == ".csv" or tfile[-4:] == ".tsv":
+                        fileNames.append(os.path.join(myfiles,tfile))
+            for fileName in fileNames:
+                Corpus.CSVloader([fileName])
+                Corpus.sessionFile = fileName
+                Corpus.core_ricostruisci(Corpus.corpus, mycol, ignpos, 0, 0, myfilter)
+                Corpus.chiudiProgetto()
+            print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
         if sys.argv[1] == "contaverbi":
             try:
                 myfiles = sys.argv[2]
@@ -476,7 +564,7 @@ if __name__ == "__main__":
                 Corpus.core_contaverbi(ignoreperson, contigui, myrecovery)
                 Corpus.chiudiProgetto()
             print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
-        if sys.argv[1] == "extractcolumn":
+        if sys.argv[1] == "estraicolonna":
             try:
                 myfiles = sys.argv[2]
             except:

@@ -871,11 +871,10 @@ class BranCorpus(QObject):
         for col in self.corpuscols:
             thisname.append(self.corpuscols[col][1])
         column = QInputDialog.getItem(self.corpuswidget, "Scegli la colonna", "In quale colonna devo cercare il testo?",thisname,current=1,editable=False)
-        col = thisname.index(column[0])
+        mycol = thisname.index(column[0])
         myrange = int(QInputDialog.getInt(self.corpuswidget, "Indica il range", "Quante parole, prima e dopo, vuoi leggere?")[0])
         rangestr = str(myrange)
-        #myfilter = str(list(self.corpuscols)[col]) + "[" + rangestr + "]" +"="+parola
-        myfilter = str(list(self.corpuscols)[col]) +"="+parola
+        myfilter = str(list(self.corpuscols)[mycol]) +"="+parola
         fcol = self.filtrimultiplienabled
         Fildialog = creafiltro.Form(self.corpus, self.corpuscols, self.corpuswidget)
         Fildialog.sessionDir = self.sessionDir
@@ -884,7 +883,6 @@ class BranCorpus(QObject):
         Fildialog.exec()
         if Fildialog.w.filter.text() != "":
             self.filter = Fildialog.w.filter.text()
-        #self.dofiltra()
         TBdialog = tableeditor.Form(self.corpuswidget, self.mycfg)
         TBdialog.sessionDir = self.sessionDir
         TBdialog.addcolumn("Segmento", 0)
@@ -894,28 +892,26 @@ class BranCorpus(QObject):
             myignore = self.ignorepos
         else:
             myignore = []
-        self.Progrdialog = progress.Form()
-        self.Progrdialog.show()
-        totallines = len(self.corpus)
-        startline = 0
-        if self.OnlyVisibleRows:
-            totallines = self.aToken
-            startline = self.daToken
-        for row in range(startline, totallines):
-            if not self.applicaFiltro(row, self.filtrimultiplienabled, self.filter):
-                continue
-            thistext = self.rebuildText(self.corpus, self.Progrdialog, col, myignore, row-myrange, row+myrange+1)
-            thistext = self.remUselessSpaces(thistext)
-            tbrow = TBdialog.finditemincolumn(thistext, col=0, matchexactly = True, escape = True)
-            if tbrow>=0:
-                tbval = int(TBdialog.w.tableWidget.item(tbrow,1).text())+1
-                TBdialog.setcelltotable(str(tbval), tbrow, 1)
-            else:
-                TBdialog.addlinetotable(thistext, 0)
-                tbrow = TBdialog.w.tableWidget.rowCount()-1
-                TBdialog.setcelltotable("1", tbrow, 1)
-        self.Progrdialog.accept()
-        TBdialog.show()
+        filtertext = Fildialog.w.filter.text()
+        myrecovery = False
+        hname = str(mycol)
+        hkey = str(mycol)
+        for key in self.corpuscols:
+            if mycol == self.corpuscols[key][0]:
+                hname = self.corpuscols[key][1]
+                hkey = key
+        cleanedfilter = re.sub("[^a-zA-Z0-9]", "", filtertext)
+        fcol = self.filtrimultiplienabled
+        output = self.sessionFile + "-concordanze-" + hkey + "-" + cleanedfilter + ".tsv"
+        recovery = output + ".tmp"
+        totallines = self.core_linescount(self.sessionFile)
+        self.core_killswitch = False
+        self.Progrdialog = progress.ProgressDialog(self, recovery, totallines)
+        self.Progrdialog.start()
+        self.core_calcola_concordanze(parola, mycol, myrange, True, myrecovery, filtertext)
+        self.Progrdialog.cancelled = True
+        self.core_killswitch = False
+        self.showResults(output)
 
     def occorrenzenormalizzate(self):
         thisname = []
@@ -1108,7 +1104,7 @@ class BranCorpus(QObject):
         for row in range(startrow, endrow):
             ftext = self.filter
             if filtercol != None:
-                if self.OnlyVisibleRows and self.applicaFiltro(row, filtercol, ftext, table):
+                if self.OnlyVisibleRows and not self.applicaFiltro(row, filtercol, ftext, table):
                     continue
             Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
             Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
@@ -1831,13 +1827,30 @@ class BranCorpus(QObject):
                 tabletext = tabletext + str(col)
                 coln = coln + 1
             tabletext = tabletext + "\n"
-        #save writing
+        #safe writing
         permission = False
         first_run = True
         while not permission:
             try:
                 file = open(output,"w", encoding='utf-8')
                 file.write(tabletext)
+                file.close()
+                permission = True
+            except:
+                if first_run:
+                    print("Waiting for permission to write file "+ output + "...")
+                    first_run = False
+                permission = False
+        return permission
+
+    def core_savetext(self, mytext, output):
+        #safe writing
+        permission = False
+        first_run = True
+        while not permission:
+            try:
+                file = open(output,"w", encoding='utf-8')
+                file.write(mytext)
                 file.close()
                 permission = True
             except:
@@ -1897,7 +1910,7 @@ class BranCorpus(QObject):
             table.append([hname,"Occorrenze"])
         if self.OnlyVisibleRows:
             totallines = self.aToken
-            if bool(myrecovery == "y" or myrecovery == "Y") and self.daToken > startatrow:
+            if myrecovery and self.daToken > startatrow:
                 startatrow = self.daToken
         for row in range(startatrow, totallines):
             if self.core_killswitch:
@@ -1970,7 +1983,7 @@ class BranCorpus(QObject):
             table.append(headerlist)
         if self.OnlyVisibleRows:
             totallines = self.aToken
-            if bool(myrecovery == "y" or myrecovery == "Y") and self.daToken > startatrow:
+            if myrecovery and self.daToken > startatrow:
                 startatrow = self.daToken
         for row in range(startatrow, totallines):
             if self.core_killswitch:
@@ -2022,13 +2035,67 @@ class BranCorpus(QObject):
         for row in range(startrow, endrow):
             ftext = self.filter
             if filtercol != None:
-                if self.OnlyVisibleRows and self.applicaFiltro(row, filtercol, ftext, table):
+                if self.OnlyVisibleRows and not self.applicaFiltro(row, filtercol, ftext, table):
                     continue
             if row >= 0 and row < len(table):
                 thispos = self.legendaPos[table[row][self.corpuscols['pos'][0]]][0]
                 if not thispos in ipunct:
                     mycorpus = mycorpus + table[row][col] + " "
         return mycorpus
+
+    def core_ricostruisci(self, table, col = "", ipunct = [], startrow = 0, endrow = 0, myfilter = "", myrecovery = False):
+        self.filter = myfilter
+        fileName = self.sessionFile
+        oldvisrow = self.OnlyVisibleRows
+        myfilcol = None
+        if myfilter != "":
+            myfilcol = self.filtrimultiplienabled
+            self.OnlyVisibleRows = True
+        hname = str(col)
+        hkey = str(col)
+        for key in self.corpuscols:
+            if col == self.corpuscols[key][0]:
+                hname = self.corpuscols[key][1]
+                hkey = key
+        cleanedfilter = re.sub("[^a-zA-Z0-9\[\]]", "", myfilter)
+        output = fileName + "-ricostruito-" + hkey + "-"+ cleanedfilter+ ".tsv"
+        recovery = output + ".tmp"
+        totallines = len(self.corpus)
+        startatrow = -1
+        print(fileName + " -> " + output)
+        fulltext = ""
+        try:
+            if os.path.isfile(recovery) and myrecovery:
+                with open(recovery, "r", encoding='utf-8') as tempfile:
+                   lastline = (list(tempfile)[-1])
+                startatrow = int(lastline)
+                print("Carico la tabella")
+                with open(output, "r", encoding='utf-8') as ins:
+                    for line in ins:
+                        fulltext = fulltext + line
+                print("Comincio dalla riga " + str(startatrow))
+            else:
+                exception = 0/0
+        except:
+            startatrow = -1
+        if self.OnlyVisibleRows:
+            totallines = self.aToken
+            if myrecovery and self.daToken > startatrow:
+                startatrow = self.daToken
+        frasi = []
+        for row in range(startatrow, totallines):
+            if self.core_killswitch:
+                break
+            if row > startatrow:
+                tmptext = self.core_rebuildText(self.corpus, col, ipunct, startatrow, 0, myfilcol)
+                fulltext = fulltext + tmptext
+                if row % 500 == 0:
+                    self.core_savetext(fulltext, output)
+                    self.core_fileappend(str(row)+"\n", recovery)
+        self.core_savetext(fulltext, output)
+        self.core_fileappend(str(row)+"\n", recovery)
+        self.OnlyVisibleRows = oldvisrow
+        return output
 
     def core_calcola_coOccorrenze(self, parola, mycol, myrange, ignorepunct, myrecovery = False, myfilter = ""):
         fileName = self.sessionFile
@@ -2071,7 +2138,7 @@ class BranCorpus(QObject):
             startatrow = -1
         if self.OnlyVisibleRows:
             totallines = self.aToken
-            if bool(myrecovery == "y" or myrecovery == "Y") and self.daToken > startatrow:
+            if myrecovery and self.daToken > startatrow:
                 startatrow = self.daToken
         concordanze = []
         for row in range(startatrow, totallines):
@@ -2118,11 +2185,75 @@ class BranCorpus(QObject):
                     else:
                         newrow = [thistext, "1"]
                         table.append(newrow)
-                try:
-                    thistext = self.corpus[row][col]
-                except:
-                    thistext = ""
         self.core_savetable(table, output)
+        return output
+
+    def core_calcola_concordanze(self, parola, mycol, myrange, ignorepunct, myrecovery = False, myfilter = ""):
+        fileName = self.sessionFile
+        table = []
+        myignore = ""
+        if ignorepunct:
+            myignore = self.ignorepos
+        try:
+            col = int(mycol)
+        except:
+            col = 0
+        hname = str(col)
+        hkey = str(col)
+        for key in self.corpuscols:
+            if col == self.corpuscols[key][0]:
+                hname = self.corpuscols[key][1]
+                hkey = key
+        if myfilter == "":
+            myfilter = str(list(self.corpuscols)[col]) +"="+parola
+        cleanedfilter = re.sub("[^a-zA-Z0-9\[\]]", "", myfilter)
+        fcol = self.filtrimultiplienabled
+        output = fileName + "-concordanze-" + hkey + "-" + cleanedfilter + ".tsv"
+        recovery = output + ".tmp"
+        totallines = len(self.corpus)
+        startatrow = -1
+        print(fileName + " -> " + output)
+        try:
+            if os.path.isfile(recovery) and myrecovery:
+                with open(recovery, "r", encoding='utf-8') as tempfile:
+                   lastline = (list(tempfile)[-1])
+                startatrow = int(lastline)
+                print("Carico la tabella")
+                with open(output, "r", encoding='utf-8') as ins:
+                    for line in ins:
+                        table.append(line.replace("\n","").replace("\r","").split(separator))
+                print("Comincio dalla riga " + str(startatrow))
+            else:
+                exception = 0/0
+        except:
+            startatrow = -1
+            table.append(["Segmento","Occorrenze"])
+        if self.OnlyVisibleRows:
+            totallines = self.aToken
+            if myrecovery and self.daToken > startatrow:
+                startatrow = self.daToken
+        for row in range(startatrow, totallines):
+            if self.core_killswitch:
+                break
+            if row > startatrow:
+                ftext = myfilter #self.filter
+                if not self.applicaFiltro(row, fcol, ftext):
+                    continue
+                thistext = self.core_rebuildText(self.corpus, col, myignore, row-myrange, row+myrange+1)
+                thistext = self.remUselessSpaces(thistext)
+                if thistext != "":
+                    tbrow = self.core_finditemincolumn(table, thistext, col=0, matchexactly = True, escape = True)
+                    if tbrow>=0:
+                        tbval = int(table[tbrow][1])+1
+                        table[tbrow][1] = tbval
+                    else:
+                        newrow = [thistext, "1"]
+                        table.append(newrow)
+                if row % 500 == 0:
+                    self.core_savetable(table, output)
+                self.core_fileappend(str(row)+"\n", recovery)
+        self.core_savetable(table, output)
+        self.core_fileappend(str(row)+"\n", recovery)
         return output
 
     def core_orderVerbMorf(self, text, ignoreperson = False):
@@ -2192,7 +2323,7 @@ class BranCorpus(QObject):
             table.append(["Modo+Tempo", "Occorrenze", "Percentuali"])
         if self.OnlyVisibleRows:
             totallines = self.aToken
-            if bool(myrecovery == "y" or myrecovery == "Y") and self.daToken > startatrow:
+            if myrecovery and self.daToken > startatrow:
                 startatrow = self.daToken
         for row in range(startatrow, totallines):
             if self.core_killswitch:
@@ -2330,7 +2461,7 @@ class BranCorpus(QObject):
             table.append([hname,"Occorrenze", "Frequenza in parole", "Ordine (log10) della frequenza"]) #L'ordine di grandezza è log10(occorrenzeParola/occorrenzeTotali)
         if self.OnlyVisibleRows:
             totallines = self.aToken
-            if bool(myrecovery == "y" or myrecovery == "Y") and self.daToken > startatrow:
+            if myrecovery and self.daToken > startatrow:
                 startatrow = self.daToken
         totaltypes = 0
         mytypes = {}
@@ -2439,7 +2570,7 @@ class BranCorpus(QObject):
             table.append([hname,"Occorrenze", "Frequenza in parole", "Ordine di grandezza (log10)"])
         if self.OnlyVisibleRows:
             totallines = self.aToken
-            if bool(myrecovery == "y" or myrecovery == "Y") and self.daToken > startatrow:
+            if myrecovery and self.daToken > startatrow:
                 startatrow = self.daToken
         totaltypes = 0
         mytypes = {}
