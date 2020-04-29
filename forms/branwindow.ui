@@ -308,6 +308,7 @@
     <addaction name="actionCalcola_densit_lessicale"/>
     <addaction name="actionTrova_ripetizioni"/>
     <addaction name="actionConta_verbi"/>
+    <addaction name="actionConta_persone"/>
     <addaction name="actionConcordanze"/>
     <addaction name="separator"/>
     <addaction name="actionRicostruisci_testo"/>
@@ -570,6 +571,11 @@
   <action name="actionConta_occorrenze_normalizzate">
    <property name="text">
     <string>Conta occorrenze normalizzate</string>
+   </property>
+  </action>
+  <action name="actionConta_persone">
+   <property name="text">
+    <string>Conta persone</string>
    </property>
   </action>
  </widget>

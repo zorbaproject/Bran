@@ -95,6 +95,7 @@ class MainWindow(QMainWindow):
         self.w.actionConverti_vecchio_corpus.triggered.connect(self.convertiDaTint)
         self.w.actionEsporta_corpus_in_un_CSV_per_ogni_ID.triggered.connect(self.esportaCSVperID)
         self.w.actionConta_occorrenze.triggered.connect(self.contaoccorrenze)
+        self.w.actionConta_persone.triggered.connect(self.contapersone)
         self.w.actionConta_occorrenze_normalizzate.triggered.connect(self.occorrenzenormalizzate)
         self.w.actionConta_occorrenze_filtrate.triggered.connect(self.contaoccorrenzefiltrate)
         self.w.actionEsporta_corpus_in_CSV_unico.triggered.connect(self.salvaCSV)
@@ -267,6 +268,9 @@ class MainWindow(QMainWindow):
 
     def contaoccorrenze(self):
         self.Corpus.contaoccorrenze()
+
+    def contapersone(self):
+        self.Corpus.contapersone()
 
     def occorrenzenormalizzate(self):
         self.Corpus.occorrenzenormalizzate()

@@ -226,22 +226,28 @@ if __name__ == "__main__":
             print("Le colonne di un corpus sono le seguenti:\n")
             print(Corpus.corpuscols)
             print("\n")
-            print("Elenco dei comandi:\n")
+            print("Elenco completo dei comandi\n")
+            print("\nImportazione corpus:\n")
             print("python3 main.py tintstart [brancfg]\n")
             print("python3 main.py txt2corpus file.txt|cartella [indirizzoServerTint] [ripristino (y/n)]\n")
-            print("python3 main.py splitbigfile file.txt [maxnumberoflines] [.]\n")
-            print("python3 main.py samplebigfile file.txt [maxnumberoflines] [.]\n")
+            print("\nAnalisi su corpus di Bran:\n")
             print("python3 main.py occorrenze file.tsv|cartella colonna [ripristino (y/n)]\n")
             print("python3 main.py occorrenzeFiltrate file.tsv|cartella colonna [filtro] [ripristino (y/n)]\n")
             print("python3 main.py occorrenzeNonBran file.tsv|cartella [colonna] [separatore] [ripristino (y/n)]\n")
             print("python3 main.py occorrenzeNormalizzate file.tsv|cartella [colonna] [ripristino (y/n)]\n")
             print("python3 main.py coOccorrenze file.tsv|cartella parola colonna range [ripristino (y/n)]\n")
             print("python3 main.py concordanze file.tsv|cartella parola colonna range [ripristino (y/n)]\n")
-            print("python3 main.py estraicolonna file.tsv|cartella colonna\n")
-            print("python3 main.py contaverbi file.tsv|cartella [ignora persona (y/n)] [ripristino (y/n)]\n")
             print("python3 main.py misurelessico file.tsv|cartella [colonna] [ripristino (y/n)]\n")
-            print("python3 main.py mergetables file1,file2|cartella colonnaChiave [sum|mean|diff,sum|mean|diff] [1] [ripristino (y/n)]\n")
+            print("python3 main.py contaverbi file.tsv|cartella [ignora persona (y/n)] [ripristino (y/n)]\n")
+            print("python3 main.py contapersone file.tsv|cartella [ignora persona (y/n)] [ripristino (y/n)]\n")
+            print("python3 main.py densitalessicale file.tsv|cartella [livellodettaglio 0/1/2] [ripristino (y/n)]\n")
             print("python3 main.py ricostruisci file.tsv|cartella [colonna] [ignorapunteggiatura (y/n)] [filtro] [ripristino (y/n)]\n")
+            print("\nOperazioni su tabelle o file di testo:\n")
+            print("python3 main.py estraicolonna file.tsv|cartella colonna\n")
+            print("python3 main.py mergetables file1,file2|cartella colonnaChiave [sum|mean|diff,sum|mean|diff] [1] [ripristino (y/n)]\n")
+            print("python3 main.py splitbigfile file.txt [maxnumberoflines] [.]\n")
+            print("python3 main.py samplebigfile file.txt [maxnumberoflines] [.]\n")
+            print("\nStrumenti di Bran:\n")
             print("python3 main.py texteditor file.tsv|cartella\n")
             print("python3 main.py confronto file.tsv|cartella\n")
             print("Gli argomenti tra parentesi [] sono facoltativi.")
@@ -562,6 +568,61 @@ if __name__ == "__main__":
                 Corpus.CSVloader([fileName])
                 Corpus.sessionFile = fileName
                 Corpus.core_contaverbi(ignoreperson, contigui, myrecovery)
+                Corpus.chiudiProgetto()
+            print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
+        if sys.argv[1] == "contapersone":
+            try:
+                myfiles = sys.argv[2]
+            except:
+                sys.exit()
+            myfilter = ""
+            try:
+                if sys.argv[3] != "":
+                    myfilter = sys.argv[3]
+            except:
+                print("Vuoi usare un filtro? Es: pos=VERB||pos=AUX||pos=ADJ||pos=NOUN")
+                #Es: si possono cercare solo gli articoli determinati con pos=ADP&&morf=.*Definite.*
+                myfilter = input()
+            try:
+                levels = int(sys.argv[4])
+            except:
+                #Livelli di dettaglio:
+                #0 Tutto
+                #1 solo persona numero e genere
+                #2 solo persona e numero
+                #3 solo numero genere e determinato
+                #4 solo genere
+                #5 solo numero
+                print("Che livello di dettaglio vuoi? [0/5]")
+                levels = input()
+            try:
+                rch = sys.argv[5]
+            except:
+                print("Vuoi usare un file di ripristino? [Y/N]")
+                rch = input()
+            if rch == "Y" or rch == "y":
+                myrecovery = True
+            else:
+                myrecovery = False
+            #Corpus.separator = '\t'
+            fileNames = []
+            if os.path.isfile(myfiles):
+                fileNames = [myfiles]
+            if os.path.isdir(myfiles):
+                for tfile in os.listdir(myfiles):
+                    if tfile[-4:] == ".csv" or tfile[-4:] == ".tsv":
+                        fileNames.append(os.path.join(myfiles,tfile))
+            for fileName in fileNames:
+                Corpus.CSVloader([fileName])
+                Corpus.sessionFile = fileName
+                #Livelli di dettaglio:
+                #0 Tutto
+                #1 solo persona numero e genere
+                #2 solo persona e numero
+                #3 solo numero genere e determinato
+                #4 solo genere
+                #5 solo numero
+                Corpus.core_contapersone(myfilter, levels, myrecovery)
                 Corpus.chiudiProgetto()
             print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
         if sys.argv[1] == "estraicolonna":

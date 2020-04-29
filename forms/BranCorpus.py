@@ -817,6 +817,53 @@ class BranCorpus(QObject):
         self.core_killswitch = False
         self.showResults(output)
 
+    def contapersone(self):
+        thisname = []
+        #0 Tutto
+        #1 solo persona numero e genere
+        #2 solo persona e numero
+        #3 solo numero genere e determinato
+        #4 solo genere
+        #5 solo numero
+        thisname.append("Tutto")
+        thisname.append("Persona, numero, e genere")
+        thisname.append("Persona e numero")
+        thisname.append("Numero, genere, e determinatezza")
+        thisname.append("Genere")
+        thisname.append("Numero")
+        column = QInputDialog.getItem(self.corpuswidget, "Scegli il livello", "Che livello di dettaglio vuoi?",thisname,current=0,editable=False)
+        level = thisname.index(column[0])
+        myrecovery = False
+        try:
+            mylevel = int(level)
+        except:
+            mylevel = 2
+        QMessageBox.information(self.corpuswidget, "Filtro", "Ora puoi indicare un filtro per selezionare cercare solo alcuni tipi di parole. Per esempio, con il filtro pos=DET&&feat=.*Definite=Def.* verranno selezionati solo gli articoli determinativi. Se lasci il filtro vuoto, verranno analizzate tutte le parole del corpus.")
+        fcol = self.filtrimultiplienabled
+        Fildialog = creafiltro.Form(self.corpus, self.corpuscols, self.corpuswidget)
+        Fildialog.sessionDir = self.sessionDir
+        Fildialog.w.filter.setText("")
+        #Definite=Def|Gender=Masc|Number=Plur|PronType=Art
+        Fildialog.updateTable()
+        Fildialog.exec()
+        filtertext = Fildialog.w.filter.text()
+        if filtertext == "":
+            filtertext = "pos=.*"
+        mycol = thisname.index(column[0])
+        myrecovery = False
+        cleanedfilter = re.sub("[^a-zA-Z0-9]", "", filtertext)
+        fcol = self.filtrimultiplienabled
+        output = self.sessionFile + "-contapersone-"+str(cleanedfilter)+"-"+str(mylevel)+".tsv"
+        recovery = output + ".tmp"
+        totallines = self.core_linescount(self.sessionFile)
+        self.core_killswitch = False
+        self.Progrdialog = progress.ProgressDialog(self, recovery, totallines)
+        self.Progrdialog.start()
+        self.core_contapersone(filtertext, mylevel, myrecovery)
+        self.Progrdialog.cancelled = True
+        self.core_killswitch = False
+        self.showResults(output)
+
     def coOccorrenze(self):
         parola = QInputDialog.getText(self.corpuswidget, "Scegli la parola", "Indica la parola che vuoi cercare:", QLineEdit.Normal, "")[0]
         thisname = []
@@ -2343,7 +2390,151 @@ class BranCorpus(QObject):
                 self.core_fileappend(str(row)+"\n", recovery)
         self.core_fileappend(str(row)+"\n", recovery)
         #calcolo le percentuali
-        print("Calcolo le percentuali")
+        totallines = len(table)
+        verbitotali = 0
+        for row in range(1,len(table)):
+            try:
+                tval = int(table[row][1])
+            except:
+                tval = 0
+            verbitotali = verbitotali + tval
+        for row in range(len(table)):
+            try:
+                ratio = (float(table[row][1])/float(verbitotali)*100)
+                ratios = f'{ratio:.3f}'
+            except:
+                ratios = table[row][1]
+            if len(table[row])>2:
+                table[row][2] = ratios
+            else:
+                table[row].append(ratios)
+        self.core_savetable(table, output)
+        return output
+
+    def core_contapersone(self, filter = "", level = 0, myrecovery = False):
+        debug = False
+        poscol = self.corpuscols["pos"][0] #thisname.index(column[0])
+        morfcol = self.corpuscols["feat"][0]
+        frasecol = self.corpuscols["IDphrase"][0]
+        lemmacol = self.corpuscols["lemma"][0]
+        fileName = self.sessionFile
+        try:
+            mylevel = int(level)
+            if mylevel <0 or mylevel >6:
+                mylevel = 0/0
+        except:
+            mylevel = 0
+        if filter == "":
+            myfilter = "pos=.*" #"pos=.*VERB.*||pos=.*AUX.*||pos=.*ADJ.*||pos=.*NOUN.*||pos=.*DET.*"
+        else:
+            myfilter = filter
+        table = []
+        cleanedfilter = re.sub("[^a-zA-Z0-9]", "", myfilter)
+        output = fileName + "-contapersone-"+str(cleanedfilter)+"-"+str(mylevel)+".tsv"
+        recovery = output + ".tmp"
+        totallines = len(self.corpus)
+        startatrow = -1
+        print(fileName + " -> " + output)
+        try:
+            if os.path.isfile(recovery) and myrecovery:
+                with open(recovery, "r", encoding='utf-8') as tempfile:
+                   lastline = (list(tempfile)[-1])
+                startatrow = int(lastline)
+                print("Carico la tabella")
+                with open(output, "r", encoding='utf-8') as ins:
+                    for line in ins:
+                        table.append(line.replace("\n","").replace("\r","").split(separator))
+                print("Comincio dalla riga " + str(startatrow))
+            else:
+                exception = 0/0
+        except:
+            startatrow = -1
+            table.append(["Modo+Tempo", "Occorrenze", "Percentuali"])
+        if self.OnlyVisibleRows:
+            totallines = self.aToken
+            if myrecovery and self.daToken > startatrow:
+                startatrow = self.daToken
+        for row in range(startatrow, totallines):
+            if self.core_killswitch:
+                break
+            if row > startatrow:
+                #TODO: sicuro che non dobbiamo considerare i verbi composti come "è stato fatto" come una unica entità?
+                if not self.applicaFiltro(row, self.filtrimultiplienabled, myfilter):
+                    continue
+                thismorf = self.corpus[row][morfcol]
+                try:
+                    if (debug):
+                        mydbg = self.corpus[row][1]
+                except:
+                    pass
+                persona = ""
+                numero = ""
+                genere = ""
+                determinato = ""
+                clitico = ""
+                for thispart in thismorf.split("/"):
+                    for el in thispart.split("|"):
+                        if "Person" in el:
+                            persona = el
+                        if "Number" in el:
+                            numero = el
+                        if "Gender" in el:
+                            genere = el
+                        if "Definite" in el:
+                            determinato = el
+                        if "Clitic" in el:
+                            clitico = el
+                #Livelli di dettaglio:
+                #0 Tutto
+                #1 solo persona numero e genere
+                #2 solo persona e numero
+                #3 solo numero genere e determinato
+                #4 solo genere
+                #5 solo numero
+                thistext = ""
+                if mylevel == 0 or mylevel == 1 or mylevel == 2:
+                    thistext = persona
+                if mylevel == 0 or mylevel == 1 or mylevel == 2 or mylevel == 3 or mylevel == 5:
+                    if len(thistext) > 0 and numero != "":
+                        thistext = thistext + "|"
+                    thistext = thistext + numero
+                if mylevel == 0 or mylevel == 1 or mylevel == 3 or mylevel == 4:
+                    if len(thistext) > 0 and genere != "":
+                        thistext = thistext + "|"
+                    thistext = thistext + genere
+                if mylevel == 0 or mylevel == 3:
+                    if len(thistext) > 0 and determinato != "":
+                        thistext = thistext + "|"
+                    thistext = thistext + determinato
+                if mylevel == 0:
+                    if len(thistext) > 0 and clitico != "":
+                        thistext = thistext + "|"
+                    thistext = thistext + clitico
+                #Gender=Masc|Number=Sing|Tense=Past|VerbForm=Part
+                #Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin
+                #Gender=Masc|Number=Plur
+                #_/Definite=Def|Gender=Masc|Number=Plur|PronType=Art
+                #Clitic=Yes|Person=3|PronType=Prs
+                if thistext != "":
+                    tbrow = self.core_findintable(table, thistext, 0)
+                    if tbrow>=0:
+                        tbval = int(table[tbrow][1])+1
+                        table[tbrow][1] = tbval
+                    else:
+                        newrow = [thistext, "1"]
+                        table.append(newrow)
+                        try:
+                            if (debug):
+                                print([thistext,mydbg])
+                        except:
+                            pass
+            if row % 500 == 0 or row == len(self.corpus)-1:
+                self.core_savetable(table, output)
+                #with open(recovery, "a", encoding='utf-8') as rowfile:
+                #    rowfile.write(str(row)+"\n")
+                self.core_fileappend(str(row)+"\n", recovery)
+        self.core_fileappend(str(row)+"\n", recovery)
+        #calcolo le percentuali
         totallines = len(table)
         verbitotali = 0
         for row in range(1,len(table)):
