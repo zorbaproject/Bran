@@ -22,13 +22,38 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QGroupBox" name="groupBox">
+     <widget class="QGroupBox" name="groupBox_filter">
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>16777215</height>
+       </size>
+      </property>
       <property name="title">
-       <string>Filtra con RegEx</string>
+       <string/>
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <property name="spacing">
+        <number>1</number>
+       </property>
+       <property name="leftMargin">
+        <number>1</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>1</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
        <item>
-        <widget class="QLineEdit" name="cfilter"/>
+        <widget class="QLineEdit" name="cfilter">
+         <property name="placeholderText">
+          <string>Filtra con RegEx</string>
+         </property>
+        </widget>
        </item>
        <item>
         <widget class="QLabel" name="label">
@@ -72,105 +97,256 @@
      </widget>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_3">
-      <item>
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string>Visualizza i token da </string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QSpinBox" name="daToken"/>
-      </item>
-      <item>
-       <widget class="QLabel" name="label_3">
-        <property name="text">
-         <string> a </string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QSpinBox" name="aToken">
-        <property name="maximum">
-         <number>1000</number>
-        </property>
-        <property name="value">
-         <number>100</number>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QCheckBox" name="allToken">
-        <property name="text">
-         <string>Tutti i token</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="updateCorpus">
-        <property name="text">
-         <string>Aggiorna</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <widget class="QTableWidget" name="corpus">
-      <attribute name="horizontalHeaderDefaultSectionSize">
-       <number>150</number>
-      </attribute>
-      <column>
-       <property name="text">
-        <string>Tag corpus</string>
+     <widget class="QWidget" name="corpusandproject" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <property name="spacing">
+        <number>5</number>
        </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Forma grafica</string>
+       <property name="leftMargin">
+        <number>0</number>
        </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Lemma</string>
+       <property name="topMargin">
+        <number>1</number>
        </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Tag PoS</string>
+       <property name="rightMargin">
+        <number>0</number>
        </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Tag NER</string>
+       <property name="bottomMargin">
+        <number>0</number>
        </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Morfologia</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>ID parola</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>ID frase</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Dep</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Governor</string>
-       </property>
-      </column>
+       <item>
+        <widget class="QSplitter" name="splitter">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <widget class="QWidget" name="corpusview1" native="true">
+          <layout class="QVBoxLayout" name="corpusview">
+           <property name="spacing">
+            <number>1</number>
+           </property>
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QWidget" name="updatetokens_group" native="true">
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>40</height>
+              </size>
+             </property>
+             <layout class="QHBoxLayout" name="horizontalLayout_3">
+              <property name="spacing">
+               <number>2</number>
+              </property>
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="label_2">
+                <property name="text">
+                 <string>Visualizza da </string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="daToken"/>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_3">
+                <property name="text">
+                 <string>  a </string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="aToken">
+                <property name="maximum">
+                 <number>1000</number>
+                </property>
+                <property name="value">
+                 <number>100</number>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="allToken">
+                <property name="text">
+                 <string>Tutti i token</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="updateCorpus">
+                <property name="text">
+                 <string>Aggiorna</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QTableWidget" name="corpus">
+             <attribute name="horizontalHeaderDefaultSectionSize">
+              <number>150</number>
+             </attribute>
+             <column>
+              <property name="text">
+               <string>Tag corpus</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Forma grafica</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Lemma</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Tag PoS</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Tag NER</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Morfologia</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>ID parola</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>ID frase</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Dep</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Governor</string>
+              </property>
+             </column>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QGroupBox" name="groupBox_progetto">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="title">
+           <string/>
+          </property>
+          <property name="flat">
+           <bool>true</bool>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_2">
+           <property name="spacing">
+            <number>1</number>
+           </property>
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_4">
+             <item>
+              <widget class="QLineEdit" name="projectfilter">
+               <property name="placeholderText">
+                <string>Cerca tra i file</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QTreeWidget" name="progetto">
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <column>
+              <property name="text">
+               <string>File del progetto</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Nome completo</string>
+              </property>
+             </column>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="updateProject">
+             <property name="text">
+              <string>Aggiorna file</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </item>
     <item>
@@ -315,9 +491,11 @@
    </widget>
    <widget class="QMenu" name="menuFiltri">
     <property name="title">
-     <string>Filtri</string>
+     <string>&amp;Visualizza</string>
     </property>
     <addaction name="actionFiltri_multipli"/>
+    <addaction name="actionTutti_i_token"/>
+    <addaction name="actionFile_del_progetto"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuModifica"/>
@@ -495,7 +673,7 @@
   </action>
   <action name="actionFiltri_multipli">
    <property name="text">
-    <string>&amp;Filtri multipli</string>
+    <string>&amp;Crea filtro multiplo</string>
    </property>
   </action>
   <action name="actionConta_occorrenze_filtrate">
@@ -570,12 +748,28 @@
   </action>
   <action name="actionConta_occorrenze_normalizzate">
    <property name="text">
-    <string>Conta occorrenze normalizzate</string>
+    <string>Conta occo&amp;rrenze normalizzate</string>
    </property>
   </action>
   <action name="actionConta_persone">
    <property name="text">
-    <string>Conta persone</string>
+    <string>Conta &amp;persone</string>
+   </property>
+  </action>
+  <action name="actionTutti_i_token">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Tutti i token</string>
+   </property>
+  </action>
+  <action name="actionFile_del_progetto">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;File del progetto</string>
    </property>
   </action>
  </widget>

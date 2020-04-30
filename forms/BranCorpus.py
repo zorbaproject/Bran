@@ -130,8 +130,9 @@ class BranCorpus(QObject):
 
     def setAllTokens(self, value):
         self.allToken = value
-        self.setStart(0)
-        self.setEnd(len(self.corpus))
+        if value:
+            self.setStart(0)
+            self.setEnd(len(self.corpus))
 
     def setFilter(self, text):
         self.filter = text
@@ -2027,7 +2028,7 @@ class BranCorpus(QObject):
                 hname = self.corpuscols[key][1]
                 hkey = key
         cleanedfilter = re.sub("[^a-zA-Z0-9\[\]]", "", myfilter)
-        output = fileName + "-ricostruito-" + hkey + "-"+ cleanedfilter+ ".tsv"
+        output = fileName + "-ricostruito-" + hkey + "-"+ cleanedfilter+ ".txt"
         recovery = output + ".tmp"
         totallines = len(self.corpus)
         if endrow != 0:
