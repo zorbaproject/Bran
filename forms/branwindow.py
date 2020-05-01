@@ -293,8 +293,8 @@ class MainWindow(QMainWindow):
                 fingerprint = sessionname+"-orig-"
                 if fileTitle.startswith(fingerprint):
                     rootelem = origitem
-                    myregex = re.escape(fingerprint) + "(.*?)" + re.escape(".txt")
-                    fileTitle = "Corpus originale " + re.sub(myregex, "\g<1>", fileTitle)
+                    myregex = re.escape(fingerprint) + "(.*?)\-(.*?)" + re.escape(".txt")
+                    fileTitle = "Corpus originale " + re.sub(myregex, "\g<1> sorgente \g<2>", fileTitle)
                 fingerprint = sessionname+"-colonna-"
                 if fileTitle.startswith(fingerprint):
                     rootelem = origitem

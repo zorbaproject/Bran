@@ -228,8 +228,9 @@ if __name__ == "__main__":
             print("\n")
             print("Elenco completo dei comandi\n")
             print("\nImportazione corpus:\n")
-            print("python3 main.py tintstart [brancfg]\n")
-            print("python3 main.py txt2corpus file.txt|cartella [indirizzoServerTint] [ripristino (y/n)]\n")
+            print("python3 main.py tintStart [brancfg]\n")
+            print("python3 main.py tintImport file.txt|cartella [indirizzoServerTint] [ripristino (y/n)]\n")
+            print("python3 main.py udpipeImport file.txt|cartella [it-IT] [ripristino (y/n)]\n")
             print("\nAnalisi su corpus di Bran:\n")
             print("python3 main.py occorrenze file.tsv|cartella colonna [ripristino (y/n)]\n")
             print("python3 main.py occorrenzeFiltrate file.tsv|cartella colonna [filtro] [ripristino (y/n)]\n")
@@ -253,7 +254,7 @@ if __name__ == "__main__":
             print("Gli argomenti tra parentesi [] sono facoltativi.")
             print("\nI comandi preceduti da * sono sperimentali o non ancora implementati.")
             sys.exit(0)
-        if sys.argv[1] == "txt2corpus":
+        if sys.argv[1] == "tintImport":
             fileNames = []
             if os.path.isfile(sys.argv[2]):
                 fileNames = [sys.argv[2]]
@@ -267,7 +268,7 @@ if __name__ == "__main__":
                 tmpurl = "localhost"
             tinturl = "http://" + tmpurl + ":8012/tint"
             TCThread = tint.TintCorpus(w, fileNames, corpuscols, tinturl)
-            TCThread.outputcsv = fileNames[0] + ".tsv"
+            TCThread.outputcsv = re.sub("\..*?$","", fileNames[0]) + "-bran.tsv"
             try:
                 if sys.argv[4] == "y" or sys.argv[4] == "Y":
                     TCThread.alwaysyes = True
@@ -277,7 +278,40 @@ if __name__ == "__main__":
             TCThread.start()
             while True:
                 time.sleep(10)
-        if sys.argv[1] == "tintstart":
+        if sys.argv[1] == "udpipeImport":
+            fileNames = []
+            if os.path.isfile(sys.argv[2]):
+                fileNames = [sys.argv[2]]
+            if os.path.isdir(sys.argv[2]):
+                for tfile in os.listdir(sys.argv[2]):
+                    if tfile[-4:] == ".txt":
+                        fileNames.append(os.path.join(sys.argv[2],tfile))
+            try:
+                language = sys.argv[3]
+            except:
+                language = "it-IT"
+            if len(fileNames)<1:
+                sys.exit(0)
+            if language != "it-IT" and language != "en-US":
+                print("Language "+ language +" not supported")
+                sys.exit(0)
+            Corpus.language = language
+            #print(Corpus.mycfg)
+            udpipe = Corpus.mycfg["udpipe"]
+            model = Corpus.mycfg["udpipemodels"][Corpus.language]
+            UDThread = BranCorpus.UDCorpus(w, fileNames, corpuscols, udpipe, model, language)
+            UDThread.outputcsv = re.sub("\..*?$","", fileNames[0]) + "-bran.tsv"
+            try:
+                if sys.argv[4] == "y" or sys.argv[4] == "Y":
+                    UDThread.alwaysyes = True
+            except:
+                UDThread.alwaysyes = False
+            UDThread.finished.connect(sys.exit)
+            print("NOTA: Se il prompt rimane in stallo, premi Ctrl+C quando appare la scritta Done.")
+            UDThread.start()
+            while True:
+                time.sleep(10)
+        if sys.argv[1] == "tintStart":
             TintThread = tint.TintRunner(w)
             try:
                 text_file = open(sys.argv[2], "r", encoding='utf-8')

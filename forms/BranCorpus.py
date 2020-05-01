@@ -17,6 +17,7 @@ import platform
 import mmap
 import random
 import math
+from shutil import copyfile
 
 arch = platform.architecture()[0]
 
@@ -182,6 +183,7 @@ class BranCorpus(QObject):
         if len(fileNames)<1:
             return
         if self.language == "it-IT":
+            self.copyOrigFiles(fileNames)
             self.TCThread = tint.TintCorpus(self.corpuswidget, fileNames, self.corpuscols, self.TintAddr)
             self.TCThread.outputcsv = self.sessionFile
             self.TCThread.finished.connect(self.txtloadingstopped)
@@ -198,12 +200,33 @@ class BranCorpus(QObject):
             return
         udpipe = self.mycfg["udpipe"]
         model = self.mycfg["udpipemodels"][self.language]
+        self.copyOrigFiles(fileNames)
         self.UDThread = UDCorpus(self.corpuswidget, fileNames, self.corpuscols, udpipe, model, self.language)
         self.UDThread.outputcsv = self.sessionFile
         self.UDThread.finished.connect(self.txtloadingstopped)
         self.UDThread.start()
         #else if self.language == "en-US":
         #https://www.datacamp.com/community/tutorials/stemming-lemmatization-python
+
+    def copyOrigFiles(self, fileNames):
+        oldcount = 0
+        mydir = os.path.dirname(self.sessionFile)
+        if os.path.isdir(mydir):
+            for tfile in os.listdir(mydir):
+                print(tfile)
+                if tfile.startswith(os.path.basename(self.sessionFile) + "-orig-"):
+                    tmpcount = re.sub(".*\-orig\-(.*?)\-.*","\g<1>", tfile)
+                    print(tmpcount)
+                    try:
+                        if int(tmpcount) > oldcount:
+                            oldcount = int(tmpcount)
+                    except:
+                        continue
+        oldcount = oldcount+1
+        for fileName in fileNames:
+            fileTitle = os.path.basename(fileName)
+            dst = self.sessionFile + "-orig-" + str(oldcount) + "-" +re.sub("\..*?$","", fileTitle).replace("-","_") + ".txt"
+            copyfile(fileName, dst)
 
     def loadTextFromCSV(self):
         fileNames = QFileDialog.getOpenFileNames(self.corpuswidget, "Apri file CSV", self.sessionDir, "CSV files (*.tsv *.csv)")[0]
@@ -3210,6 +3233,7 @@ class UDCorpus(QThread):
         self.csvIDcolumn = -1
         self.csvTextcolumn = -1
         self.loadvariables()
+        self.alwaysyes = False
         self.setTerminationEnabled(True)
         self.iscli = False
         try:
@@ -3272,7 +3296,8 @@ class UDCorpus(QThread):
                                 gotEncoding = False
                     self.rowfilename = fileName + ".tmp"
                     if self.iscli:
-                        self.outputcsv = fileName + ".tsv"
+                        if self.outputcsv == "":
+                            self.outputcsv = fileName + ".tsv"
                     print(fileName + " -> " + self.outputcsv)
                     if self.csvIDcolumn <0 or self.csvTextcolumn <0:
                         try:
@@ -3374,6 +3399,7 @@ class UDCorpus(QThread):
                     if self.alwaysyes:
                         ch = "y"
                     else:
+                        ch = "n"
                         print("Ho trovato un file di ripristino, lo devo usare? [Y/N]")
                         ch = input()
                     if ch == "Y" or ch == "y":
