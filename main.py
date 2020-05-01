@@ -231,6 +231,7 @@ if __name__ == "__main__":
             print("python3 main.py tintStart [brancfg]\n")
             print("python3 main.py tintImport file.txt|cartella [indirizzoServerTint] [ripristino (y/n)]\n")
             print("python3 main.py udpipeImport file.txt|cartella [it-IT] [ripristino (y/n)]\n")
+            print("python3 main.py appendBran corpus-bran.tsv corpus-da-accodare.tsv|cartella\n")
             print("\nAnalisi su corpus di Bran:\n")
             print("python3 main.py occorrenze file.tsv|cartella colonna [ripristino (y/n)]\n")
             print("python3 main.py occorrenzeFiltrate file.tsv|cartella colonna [filtro] [ripristino (y/n)]\n")
@@ -311,6 +312,23 @@ if __name__ == "__main__":
             UDThread.start()
             while True:
                 time.sleep(10)
+        if sys.argv[1] == "appendBran":
+            if os.path.isfile(sys.argv[3]):
+                fileName = sys.argv[2]
+            fileNames = []
+            if os.path.isfile(sys.argv[3]):
+                fileNames = [sys.argv[3]]
+            if os.path.isdir(sys.argv[3]):
+                for tfile in os.listdir(sys.argv[3]):
+                    if tfile[-4:] == "-bran.tsv":
+                        fileNames.append(os.path.join(sys.argv[3],tfile))
+            if len(fileNames)<1:
+                sys.exit(0)
+            Corpus.CSVloader([fileName])
+            Corpus.sessionFile = fileName
+            Corpus.core_appendcorpus(fileNames)
+            Corpus.chiudiProgetto()
+            print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
         if sys.argv[1] == "tintStart":
             TintThread = tint.TintRunner(w)
             try:

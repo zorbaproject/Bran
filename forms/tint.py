@@ -308,12 +308,18 @@ class TintCorpus(QThread):
                     if int(self.corpuswidget.item(crow, self.corpuscols["IDphrase"][0]).text()) > IDphrase:
                         IDphrase = int(self.corpuswidget.item(crow, self.corpuscols["IDphrase"][0]).text())
             else:
+                #with open(self.rowfilename, "r", encoding='utf-8') as ins:
                 with open(self.outputcsv, "r", encoding='utf-8') as ins:
                     for line in ins:
-                        if int(line.split("\t")[self.corpuscols["IDphrase"][0]]) > IDphrase:
-                            IDphrase = int(line.split("\t")[self.corpuscols["IDphrase"][0]])
+                        try:
+                            tmpphrase = int(line.split("\t")[self.corpuscols["IDphrase"][0]])
+                        except:
+                            continue
+                        if tmpphrase > IDphrase:
+                            IDphrase = tmpphrase
         except:
             IDphrase = -1
+        #print("Starting from IDphrase " +str(IDphrase))
         row = 0
         for line in itext:
             row = row + 1

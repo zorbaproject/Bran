@@ -323,8 +323,8 @@ class BranCorpus(QObject):
     def loadCSV(self):
         if self.ImportingFile == False:
             fileNames = QFileDialog.getOpenFileNames(self.corpuswidget, "Apri file CSV", self.sessionDir, "File CSV (*.tsv *.txt *.csv)")[0]
-            self.ImportingFile = True
-            self.CSVloader(fileNames) #self.CSVloader(fileNames, self.Progrdialog)
+            self.core_appendcorpus(fileNames)
+            self.txtloadingstopped()
 
     def CSVloader(self, fileNames):
         fileID = 0
@@ -384,6 +384,7 @@ class BranCorpus(QObject):
                 self.ImportingFile = True
                 fileNames = ['']
                 fileNames[0] = self.sessionFile
+                self.corpus = []
                 self.corpuswidget.setRowCount(0)
                 print("Reading CSV")
                 self.CSVloader(fileNames)
@@ -2974,6 +2975,40 @@ class BranCorpus(QObject):
                     row = row + 1
         return output
 
+    def core_appendcorpus(self, fileNames):
+        for fileName in fileNames:
+            try:
+                IDphrase = -1
+                with open(self.sessionFile, "r", encoding='utf-8') as ins:
+                    for line in ins:
+                        try:
+                            tmpphrase = int(line.split("\t")[self.corpuscols["IDphrase"][0]])
+                        except:
+                            continue
+                        if tmpphrase > IDphrase:
+                            IDphrase = tmpphrase
+            except:
+                IDphrase = -1
+            IDphrase = IDphrase +1
+            print("Appending " + fileName + " to " + self.sessionFile + " IDphrase: " + str(IDphrase))
+            separator = '\t'
+            with open(fileName, "r", encoding='utf-8') as ins:
+                for line in ins:
+                    myline = line.replace("\n","").replace("\r","").split(separator)
+                    try:
+                        tmpphrase = int(myline[self.corpuscols["IDphrase"][0]])
+                        myline[self.corpuscols["IDphrase"][0]] = IDphrase + tmpphrase
+                    except:
+                        continue
+                    coln = 0
+                    fullline = ""
+                    for col in myline:
+                        if coln > 0:
+                            fullline = fullline + '\t'
+                        fullline = fullline + str(col)
+                        coln = coln + 1
+                    self.core_fileappend(fullline+"\n", self.sessionFile)
+
     def core_mergetables(self, mydir, mycol, opstr, headerlines, myrecovery):
         separator = '\t'
         fileNames = []
@@ -3417,12 +3452,18 @@ class UDCorpus(QThread):
                     if int(self.corpuswidget.item(crow, self.corpuscols["IDphrase"][0]).text()) > IDphrase:
                         IDphrase = int(self.corpuswidget.item(crow, self.corpuscols["IDphrase"][0]).text())
             else:
-                with open(self.rowfilename, "r", encoding='utf-8') as ins:
+                #with open(self.rowfilename, "r", encoding='utf-8') as ins:
+                with open(self.outputcsv, "r", encoding='utf-8') as ins:
                     for line in ins:
-                        if int(line.split("\t")[self.corpuscols["IDphrase"][0]]) > IDphrase:
-                            IDphrase = int(line.split("\t")[self.corpuscols["IDphrase"][0]])
+                        try:
+                            tmpphrase = int(line.split("\t")[self.corpuscols["IDphrase"][0]])
+                        except:
+                            continue
+                        if tmpphrase > IDphrase:
+                            IDphrase = tmpphrase
         except:
             IDphrase = -1
+        #print("Starting from IDphrase " +str(IDphrase))
         row = 0
         dct = {"ID" : 0, "FORM" : 1, "LEMMA" : 2, "UPOS" : 3, "XPOS" : 4, "FEATS" : 5 , "HEAD": 6, "DEPREL": 7, "DEPS": 8, "MISC": 9}
         for line in itext:
