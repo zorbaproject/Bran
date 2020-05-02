@@ -139,6 +139,7 @@ class TintCorpus(QThread):
         except:
             self.iscli = False
         self.alwaysyes = False
+        self.separateoutput = False
         self.rowfilename = ""
 
     def loadvariables(self):
@@ -197,7 +198,7 @@ class TintCorpus(QThread):
                                 gotEncoding = False
                     self.rowfilename = fileName + ".tmp"
                     if self.iscli:
-                        if self.outputcsv == "":
+                        if self.outputcsv == "" or self.separateoutput:
                             self.outputcsv = fileName + ".tsv"
                     print(fileName + " -> " + self.outputcsv)
                     if self.csvIDcolumn <0 or self.csvTextcolumn <0:
@@ -286,18 +287,11 @@ class TintCorpus(QThread):
         startatrow = -1
         try:
             if os.path.isfile(self.rowfilename):
-                ch = "Y"
-                if self.iscli:
-                    if self.alwaysyes:
-                        ch = "y"
-                    else:
-                        print("Ho trovato un file di ripristino, lo devo usare? [Y/N]")
-                        ch = input()
-                    if ch == "Y" or ch == "y":
-                        with open(self.rowfilename, "r", encoding='utf-8') as tempfile:
-                           lastline = (list(tempfile)[-1])
-                        startatrow = int(lastline)
-                        print("Comincio dalla riga " + str(startatrow))
+                if self.alwaysyes:
+                    with open(self.rowfilename, "r", encoding='utf-8') as tempfile:
+                       lastline = (list(tempfile)[-1])
+                    startatrow = int(lastline)
+                    print("Comincio dalla riga " + str(startatrow))
         except:
             startatrow = -1
         #
@@ -423,11 +417,9 @@ class TintCorpus(QThread):
                                     break
                             fdatefile = self.outputcsv
                             fullline = self.isdt_to_ud(fullline)
-                            with open(fdatefile, "a", encoding='utf-8') as myfile:
-                                myfile.write(fullline+"\n")
-                if self.iscli:
-                    with open(self.rowfilename, "a", encoding='utf-8') as rowfile:
-                        rowfile.write(str(row)+"\n")
+                            self.core_fileappend(fullline+"\n", fdatefile)
+                #if self.iscli:
+                self.core_fileappend(str(row)+"\n", self.rowfilename)
         if self.iscli:
             print("Done")
 
@@ -466,6 +458,64 @@ class TintCorpus(QThread):
             thishtml = str(ft)
         return thishtml
 
+    #
+    def core_savetable(self, table, output):
+        tabletext = ""
+        for row in table:
+            coln = 0
+            for col in row:
+                if coln > 0:
+                    tabletext = tabletext + '\t'
+                tabletext = tabletext + str(col)
+                coln = coln + 1
+            tabletext = tabletext + "\n"
+        #safe writing
+        permission = False
+        first_run = True
+        while not permission:
+            try:
+                file = open(output,"w", encoding='utf-8')
+                file.write(tabletext)
+                file.close()
+                permission = True
+            except:
+                if first_run:
+                    print("Waiting for permission to write file "+ output + "...")
+                    first_run = False
+                permission = False
+        return permission
+
+    def core_savetext(self, mytext, output):
+        #safe writing
+        permission = False
+        first_run = True
+        while not permission:
+            try:
+                file = open(output,"w", encoding='utf-8')
+                file.write(mytext)
+                file.close()
+                permission = True
+            except:
+                if first_run:
+                    print("Waiting for permission to write file "+ output + "...")
+                    first_run = False
+                permission = False
+        return permission
+
+    def core_fileappend(self, line, output):
+        permission = False
+        first_run = True
+        while not permission:
+            try:
+                with open(output, "a", encoding='utf-8') as rowfile:
+                    rowfile.write(line)
+                permission = True
+            except:
+                if first_run:
+                    print("Waiting for permission to write file "+ output + "...")
+                    first_run = False
+                permission = False
+        return permission
     #
     def isdt_to_ud(self, fullline):
         filein = os.path.abspath(os.path.dirname(sys.argv[0]))+"/dizionario/legenda/isdt-ud.json"

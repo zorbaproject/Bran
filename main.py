@@ -75,11 +75,11 @@ except:
             sys.exit(1)
 
 
-from PySide2.QtCore import QFile
-from PySide2.QtCore import QDir
-from PySide2.QtCore import Qt
-from PySide2.QtWidgets import QMainWindow
-from PySide2.QtCore import QThread
+#from PySide2.QtCore import QFile
+#from PySide2.QtCore import QDir
+#from PySide2.QtCore import Qt
+#from PySide2.QtWidgets import QMainWindow
+#from PySide2.QtCore import QThread
 
 
 from forms import branwindow
@@ -229,8 +229,8 @@ if __name__ == "__main__":
             print("Elenco completo dei comandi\n")
             print("\nImportazione corpus:\n")
             print("python3 main.py tintStart [brancfg]\n")
-            print("python3 main.py tintImport file.txt|cartella [indirizzoServerTint] [ripristino (y/n)]\n")
-            print("python3 main.py udpipeImport file.txt|cartella [it-IT] [ripristino (y/n)]\n")
+            print("python3 main.py tintImport file.txt|cartella [output separati (y/n)] [indirizzoServerTint] [ripristino (y/n)]\n")
+            print("python3 main.py udpipeImport file.txt|cartella [output separati (y/n)] [it-IT] [ripristino (y/n)]\n")
             print("python3 main.py appendBran corpus-bran.tsv corpus-da-accodare.tsv|cartella\n")
             print("\nAnalisi su corpus di Bran:\n")
             print("python3 main.py occorrenze file.tsv|cartella colonna [ripristino (y/n)]\n")
@@ -264,17 +264,30 @@ if __name__ == "__main__":
                     if tfile[-4:] == ".txt":
                         fileNames.append(os.path.join(sys.argv[2],tfile))
             try:
-                tmpurl = sys.argv[3]
+                if sys.argv[3] == "y" or sys.argv[3] == "Y":
+                    tmpseparate = True
+                else:
+                    tmpseparate = 0/0
+            except:
+                tmpseparate = False
+            try:
+                tmpurl = sys.argv[4]
             except:
                 tmpurl = "localhost"
             tinturl = "http://" + tmpurl + ":8012/tint"
             TCThread = tint.TintCorpus(w, fileNames, corpuscols, tinturl)
             TCThread.outputcsv = re.sub("\..*?$","", fileNames[0]) + "-bran.tsv"
+            TCThread.separateoutput = tmpseparate
             try:
-                if sys.argv[4] == "y" or sys.argv[4] == "Y":
+                TCThread.alwaysyes = False
+                if sys.argv[5] == "y" or sys.argv[5] == "Y":
                     TCThread.alwaysyes = True
             except:
                 TCThread.alwaysyes = False
+                print("Devo usare un file di ripristino? [Y/N]")
+                ch = input()
+                if ch == "Y" or ch == "y":
+                    TCThread.alwaysyes = True
             TCThread.finished.connect(sys.exit)
             TCThread.start()
             while True:
@@ -288,7 +301,14 @@ if __name__ == "__main__":
                     if tfile[-4:] == ".txt":
                         fileNames.append(os.path.join(sys.argv[2],tfile))
             try:
-                language = sys.argv[3]
+                if sys.argv[3] == "y" or sys.argv[3] == "Y":
+                    tmpseparate = True
+                else:
+                    tmpseparate = 0/0
+            except:
+                tmpseparate = False
+            try:
+                language = sys.argv[4]
             except:
                 language = "it-IT"
             if len(fileNames)<1:
@@ -302,14 +322,20 @@ if __name__ == "__main__":
             model = Corpus.mycfg["udpipemodels"][Corpus.language]
             UDThread = BranCorpus.UDCorpus(w, fileNames, corpuscols, udpipe, model, language)
             UDThread.outputcsv = re.sub("\..*?$","", fileNames[0]) + "-bran.tsv"
+            UDThread.separateoutput = tmpseparate
             try:
-                if sys.argv[4] == "y" or sys.argv[4] == "Y":
+                UDThread.alwaysyes = False
+                if sys.argv[5] == "y" or sys.argv[5] == "Y":
                     UDThread.alwaysyes = True
             except:
                 UDThread.alwaysyes = False
+                print("Devo usare un file di ripristino? [Y/N]")
+                ch = input()
+                if ch == "Y" or ch == "y":
+                    UDThread.alwaysyes = True
             UDThread.finished.connect(sys.exit)
-            print("NOTA: Se il prompt rimane in stallo, premi Ctrl+C quando appare la scritta Done.")
             UDThread.start()
+            print("NOTA: Se il prompt rimane in stallo, premi Ctrl+C quando appare la scritta Done.")
             while True:
                 time.sleep(10)
         if sys.argv[1] == "appendBran":

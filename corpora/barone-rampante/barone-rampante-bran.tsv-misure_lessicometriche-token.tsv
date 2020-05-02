@@ -1,0 +1,12 @@
+Misura lessicometrica	Valore
+Tokens	71444
+Types	12242
+(Types/Tokens)*100	17.135
+Tokens/Types	5.836
+Hapax	7291
+(Hapax/Tokens)*100	10.205
+Types/sqrt(Tokens)	45.800
+log(Types)/log(Tokens)	0.842
+Caratteristica di Yule (K)	50.801
+W	9.153
+U	30.754

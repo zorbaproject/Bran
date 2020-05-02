@@ -186,6 +186,7 @@ class BranCorpus(QObject):
             self.copyOrigFiles(fileNames)
             self.TCThread = tint.TintCorpus(self.corpuswidget, fileNames, self.corpuscols, self.TintAddr)
             self.TCThread.outputcsv = self.sessionFile
+            self.TCThread.alwaysyes = True
             self.TCThread.finished.connect(self.txtloadingstopped)
             self.TCThread.start()
         #else if self.language == "en-US":
@@ -203,6 +204,7 @@ class BranCorpus(QObject):
         self.copyOrigFiles(fileNames)
         self.UDThread = UDCorpus(self.corpuswidget, fileNames, self.corpuscols, udpipe, model, self.language)
         self.UDThread.outputcsv = self.sessionFile
+        self.UDThread.alwaysyes = True
         self.UDThread.finished.connect(self.txtloadingstopped)
         self.UDThread.start()
         #else if self.language == "en-US":
@@ -224,9 +226,15 @@ class BranCorpus(QObject):
                         continue
         oldcount = oldcount+1
         for fileName in fileNames:
-            fileTitle = os.path.basename(fileName)
-            dst = self.sessionFile + "-orig-" + str(oldcount) + "-" +re.sub("\..*?$","", fileTitle).replace("-","_") + ".txt"
-            copyfile(fileName, dst)
+            try:
+                if os.path.isfile(fileName + ".tmp"):
+                    #we've probably already worked on this same file
+                    continue
+                fileTitle = os.path.basename(fileName)
+                dst = self.sessionFile + "-orig-" + str(oldcount) + "-" +re.sub("\..*?$","", fileTitle).replace("-","_") + ".txt"
+                copyfile(fileName, dst)
+            except:
+                pass
 
     def loadTextFromCSV(self):
         fileNames = QFileDialog.getOpenFileNames(self.corpuswidget, "Apri file CSV", self.sessionDir, "CSV files (*.tsv *.csv)")[0]
@@ -3277,6 +3285,7 @@ class UDCorpus(QThread):
         except:
             self.iscli = False
         self.alwaysyes = False
+        self.separateoutput = False
         self.rowfilename = ""
 
     def loadvariables(self):
@@ -3331,7 +3340,7 @@ class UDCorpus(QThread):
                                 gotEncoding = False
                     self.rowfilename = fileName + ".tmp"
                     if self.iscli:
-                        if self.outputcsv == "":
+                        if self.outputcsv == "" or self.separateoutput:
                             self.outputcsv = fileName + ".tsv"
                     print(fileName + " -> " + self.outputcsv)
                     if self.csvIDcolumn <0 or self.csvTextcolumn <0:
@@ -3429,19 +3438,11 @@ class UDCorpus(QThread):
         startatrow = -1
         try:
             if os.path.isfile(self.rowfilename):
-                ch = "Y"
-                if self.iscli:
-                    if self.alwaysyes:
-                        ch = "y"
-                    else:
-                        ch = "n"
-                        print("Ho trovato un file di ripristino, lo devo usare? [Y/N]")
-                        ch = input()
-                    if ch == "Y" or ch == "y":
-                        with open(self.rowfilename, "r", encoding='utf-8') as tempfile:
-                           lastline = (list(tempfile)[-1])
-                        startatrow = int(lastline)
-                        print("Comincio dalla riga " + str(startatrow))
+                if self.alwaysyes:
+                    with open(self.rowfilename, "r", encoding='utf-8') as tempfile:
+                       lastline = (list(tempfile)[-1])
+                    startatrow = int(lastline)
+                    print("Comincio dalla riga " + str(startatrow))
         except:
             startatrow = -1
         #
@@ -3534,11 +3535,9 @@ class UDCorpus(QThread):
                             fullline = fullline + str(token[dct["HEAD"]])
                         if fullline != "":
                             fdatefile = self.outputcsv
-                            with open(fdatefile, "a", encoding='utf-8') as myfile:
-                                myfile.write(fullline+"\n")
-                if self.iscli:
-                    with open(self.rowfilename, "a", encoding='utf-8') as rowfile:
-                        rowfile.write(str(row)+"\n")
+                            self.core_fileappend(fullline+"\n", fdatefile)
+                #if self.iscli:
+                self.core_fileappend(str(row)+"\n", self.rowfilename)
         if self.iscli:
             print("Done")
 
@@ -3566,3 +3565,61 @@ class UDCorpus(QThread):
                 sentence.append(mytable[row].split("\t"))
         #print(myres)
         return myres
+
+    def core_savetable(self, table, output):
+        tabletext = ""
+        for row in table:
+            coln = 0
+            for col in row:
+                if coln > 0:
+                    tabletext = tabletext + '\t'
+                tabletext = tabletext + str(col)
+                coln = coln + 1
+            tabletext = tabletext + "\n"
+        #safe writing
+        permission = False
+        first_run = True
+        while not permission:
+            try:
+                file = open(output,"w", encoding='utf-8')
+                file.write(tabletext)
+                file.close()
+                permission = True
+            except:
+                if first_run:
+                    print("Waiting for permission to write file "+ output + "...")
+                    first_run = False
+                permission = False
+        return permission
+
+    def core_savetext(self, mytext, output):
+        #safe writing
+        permission = False
+        first_run = True
+        while not permission:
+            try:
+                file = open(output,"w", encoding='utf-8')
+                file.write(mytext)
+                file.close()
+                permission = True
+            except:
+                if first_run:
+                    print("Waiting for permission to write file "+ output + "...")
+                    first_run = False
+                permission = False
+        return permission
+
+    def core_fileappend(self, line, output):
+        permission = False
+        first_run = True
+        while not permission:
+            try:
+                with open(output, "a", encoding='utf-8') as rowfile:
+                    rowfile.write(line)
+                permission = True
+            except:
+                if first_run:
+                    print("Waiting for permission to write file "+ output + "...")
+                    first_run = False
+                permission = False
+        return permission
