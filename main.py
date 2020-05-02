@@ -89,7 +89,6 @@ from forms import texteditor
 from forms import tableeditor
 from forms import confronto
 
-
 def findintable(table, stringa, col=0):
     resrow = -1
     for row in range(len(table)):
@@ -121,8 +120,11 @@ def savetable(table, output):
     file.write(tabletext)
     file.close()
 
-def calcola_occorrenze():
-    separator = '\t'
+def occorrenzeNonBran():
+    try:
+        separator = sys.argv[4]
+    except:
+        separator = '\t'
     fileNames = []
     if os.path.isfile(sys.argv[2]):
         fileNames = [sys.argv[2]]
@@ -145,7 +147,7 @@ def calcola_occorrenze():
             if os.path.isfile(recovery):
                 ch = "Y"
                 try:
-                    if sys.argv[4] == "y" or sys.argv[4] == "Y":
+                    if sys.argv[5] == "y" or sys.argv[5] == "Y":
                         ch = "Y"
                 except:
                     print("Ho trovato un file di ripristino, lo devo usare? [Y/N]")
@@ -189,593 +191,6 @@ def calcola_occorrenze():
             with open(recovery, "a", encoding='utf-8') as rowfile:
                 rowfile.write(str(row)+"\n")
 
-def orderVerbMorf(text, ignoreperson = False):
-    if not "VerbForm" in text:
-        return text
-    mytext = ""
-    #Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin
-    vform = ""
-    mood = ""
-    tense = ""
-    pers = ""
-    num = ""
-    gender = ""
-    for el in text.split("|"):
-        if "VerbForm" in el:
-            vform = re.sub(".*VerbForm\=(.*)","\g<1>",el)
-        if "Mood" in el:
-            mood = re.sub(".*Mood\=(.*)","\g<1>",el)
-        if "Tense" in el:
-            tense = re.sub(".*Tense\=(.*)","\g<1>",el)
-        if "Person" in el:
-            pers = re.sub(".*Person\=(.*)","\g<1>",el)
-        if "Number" in el:
-            num = re.sub(".*Number\=(.*)","\g<1>",el)
-        if "Gender" in el:
-            gender = re.sub(".*Gender\=(.*)","\g<1>",el)
-    mytext = "VerbForm=" + vform
-    if mood != "":
-        mytext = mytext + "|Mood=" + mood
-    if tense != "":
-        mytext = mytext + "|Tense=" + tense
-    if pers != "" and ignoreperson==False:
-        mytext = mytext + "|Person=" + pers
-    if num != "" and ignoreperson==False:
-        mytext = mytext + "|Number=" + num
-    if gender != "" and ignoreperson==False:
-        mytext = mytext + "|Gender=" + gender
-    return mytext
-
-def contaverbi(corpuscols, legendaPos):
-    poscol = corpuscols["pos"][0] #thisname.index(column[0])
-    morfcol = corpuscols["feat"][0]
-    separator = '\t'
-    fileNames = []
-    if os.path.isfile(sys.argv[2]):
-        fileNames = [sys.argv[2]]
-    if os.path.isdir(sys.argv[2]):
-        for tfile in os.listdir(sys.argv[2]):
-            if tfile[-4:] == ".csv" or tfile[-4:] == ".tsv":
-                fileNames.append(os.path.join(sys.argv[2],tfile))
-    for fileName in fileNames:
-        #totallines = self.w.corpus.rowCount()
-        table = []
-        output = fileName + "-contaverbi.tsv"
-        recovery = output + ".tmp"
-        startatrow = -1
-        print(fileName + " -> " + output)
-        try:
-            if os.path.isfile(recovery):
-                ch = "Y"
-                try:
-                    if sys.argv[4] == "y" or sys.argv[4] == "Y":
-                        ch = "Y"
-                except:
-                    print("Ho trovato un file di ripristino, lo devo usare? [Y/N]")
-                    ch = input()
-                if ch == "Y" or ch == "y":
-                    with open(recovery, "r", encoding='utf-8') as tempfile:
-                       lastline = (list(tempfile)[-1])
-                    startatrow = int(lastline)
-                    print("Carico la tabella")
-                    with open(output, "r", encoding='utf-8') as ins:
-                        for line in ins:
-                            table.append(line.replace("\n","").replace("\r","").split(separator))
-                    print("Comincio dalla riga " + str(startatrow))
-                else:
-                    table.append(["Modo+Tempo", "Occorrenze", "Percentuali"])
-            else:
-                table.append(["Modo+Tempo", "Occorrenze", "Percentuali"])
-        except:
-            startatrow = -1
-            table.append(["Modo+Tempo", "Occorrenze", "Percentuali"])
-        corpus = []
-        with open(fileName, "r", encoding='utf-8') as ins:
-            for line in ins:
-                corpus.append(line.replace("\n","").replace("\r","").split(separator))
-        poscol = corpuscols["pos"][0] #thisname.index(column[0])
-        morfcol = corpuscols["feat"][0]
-        frasecol = corpuscols["IDphrase"][0]
-        ignoreperson = False
-        try:
-            if sys.argv[3] == "y" or sys.argv[3] == "Y":
-                ignoreperson = True
-        except:
-            print("Vuoi ignorare persona, numero, genere, e caratteristica clitica dei verbi? [Y/N]")
-            ch = input()
-            if ch == "Y" or ch == "y":
-                ignoreperson = True
-        for row in range(len(corpus)):
-            if row > startatrow:
-                try:
-                    thispos = legendaPos[corpus[row][poscol]][0]
-                    thisphrase = corpus[row][frasecol]
-                except:
-                    thispos = ""
-                    thisphrase = "0"
-                thistext = ""
-                thistext2 = ""
-                thistext3 = ""
-                #Filtro per trovare i verbi a 3 come "è stato fatto": feat=.*VerbForm.*Part.*&&feat[1]=.*VerbForm.*Part.*||feat=.*VerbForm.*Part.*&&feat[-1]=.*VerbForm.*Part.*||feat=.*VerbForm.*&&feat[1]=.*VerbForm.*Part.*&&feat[2]=.*VerbForm.*Part.*
-                if "verbo" in thispos:
-                    thistext = corpus[row][morfcol]
-                if "ausiliare" in thispos:
-                    for ind in range(1,4):
-                        try:
-                            tmpos = legendaPos[corpus[row+ind][poscol]][0]
-                            tmpphrase = corpus[row+ind][frasecol]
-                        except:
-                            tmpos = ""
-                            tmpphrase = "0"
-                        #i verbi consecutivi vanno bene finché sono nella stessa frase
-                        if tmpphrase != thisphrase:
-                            break
-                        if "verbo" in tmpos:
-                            thistext2 = thistext2 + corpus[row+ind][morfcol] + "+"
-                        startline = row+ind+1
-                    if len(thistext2.split("+"))>1:
-                        thistext3 = thistext2.split("+")[1]
-                        thistext2 = thistext2.split("+")[0]
-                if len(thistext) >= 3:
-                    thistext = orderVerbMorf(thistext, ignoreperson) + "+"
-                if len(thistext2) >= 3:
-                    thistext2 = orderVerbMorf(thistext2, ignoreperson) + "+"
-                if len(thistext3) >= 3:
-                    thistext3 = orderVerbMorf(thistext3, ignoreperson) #+ "+"
-                if thistext != "":
-                    thistext = thistext + thistext2 + thistext3
-                    if ignoreperson:
-                        thistext = thistext.replace("/Clitic=Yes", "")
-                if thistext.endswith("+"):
-                    thistext = thistext[0:-1]
-                if thistext != "":
-                    tbrow = findintable(table, thistext, 0)
-                    if tbrow>=0:
-                        tbval = int(table[tbrow][1])+1
-                        table[tbrow][1] = tbval
-                    else:
-                        newrow = [thistext, "1"]
-                        table.append(newrow)
-            if row % 500 == 0 or row == len(corpus)-1:
-                savetable(table, output)
-                with open(recovery, "a", encoding='utf-8') as rowfile:
-                    rowfile.write(str(row)+"\n")
-        #calcolo le percentuali
-        print("Calcolo le percentuali")
-        totallines = len(table)
-        verbitotali = 0
-        for row in range(len(table)):
-            try:
-                tval = int(table[row][1])
-            except:
-                tval = 0
-            verbitotali = verbitotali + tval
-        for row in range(len(table)):
-            try:
-                ratio = (float(table[row][1])/float(verbitotali)*100)
-                ratios = f'{ratio:.3f}'
-            except:
-                ratios = table[row][1]
-            if len(table[row])>2:
-                table[row][2] = ratios
-            else:
-                table[row].append(ratios)
-        savetable(table, output)
-
-def misure_lessicometriche(ignoretext, dimList):
-    separator = '\t'
-    fileNames = []
-    if os.path.isfile(sys.argv[2]):
-        fileNames = [sys.argv[2]]
-    if os.path.isdir(sys.argv[2]):
-        for tfile in os.listdir(sys.argv[2]):
-            if tfile[-4:] == ".csv" or tfile[-4:] == ".tsv":
-                fileNames.append(os.path.join(sys.argv[2],tfile))
-    try:
-        col = int(sys.argv[3])
-    except:
-        col = 0
-    for fileName in fileNames:
-        #totallines = self.w.corpus.rowCount()
-        table = []
-        output = fileName + "-" + str(col)+ "-misure_lessicometriche.tsv"
-        recovery = output + ".tmp"
-        startatrow = -1
-        print(fileName + " -> " + output)
-        try:
-            if os.path.isfile(recovery):
-                ch = "Y"
-                try:
-                    if sys.argv[4] == "y" or sys.argv[4] == "Y":
-                        ch = "Y"
-                except:
-                    print("Ho trovato un file di ripristino, lo devo usare? [Y/N]")
-                    ch = input()
-                if ch == "Y" or ch == "y":
-                    with open(recovery, "r", encoding='utf-8') as tempfile:
-                       lastline = (list(tempfile)[-1])
-                    startatrow = int(lastline)
-                    print("Carico la tabella")
-                    with open(output, "r", encoding='utf-8') as ins:
-                        for line in ins:
-                            table.append(line.replace("\n","").replace("\r","").split(separator))
-                    print("Comincio dalla riga " + str(startatrow))
-        except:
-            startatrow = -1
-        corpus = []
-        with open(fileName, "r", encoding='utf-8') as ins:
-            for line in ins:
-                corpus.append(line.replace("\n","").replace("\r","").split(separator))
-        totallines = len(corpus)
-        totaltypes = 0
-        mytypes = {}
-        if startatrow >= (len(corpus)-1):
-            continue
-        for row in range(len(corpus)):
-            if row > startatrow:
-                thisposc = "False"
-                try:
-                    thistext = corpus[row][col]
-                    if ignoretext != "":
-                        thistext = re.sub(ignoretext, "", thistext)
-                except:
-                    thistext = ""
-                if thistext != "":
-                    tbrow = findintable(table, thistext, 0)
-                    if tbrow>=0:
-                        tbval = int(table[tbrow][1])+1
-                        table[tbrow][1] = tbval
-                    else:
-                        newrow = [thistext, "1"]
-                        table.append(newrow)
-                        totaltypes = totaltypes + 1
-                    if row % 500 == 0:
-                        savetable(table, output)
-                        with open(recovery, "a", encoding='utf-8') as rowfile:
-                            rowfile.write(str(row)+"\n")
-        hapax = 0
-        classifrequenza = []
-        occClassifrequenza = []
-        totallines = len(table)
-        paroletotali = 0
-        for row in range(len(table)):
-            if int(table[row][1]) == 1:
-                hapax = hapax + 1
-            if table[row][1] in classifrequenza:
-                ind = classifrequenza.index(table[row][1])
-                occClassifrequenza[ind] = occClassifrequenza[ind] + 1
-            else:
-                classifrequenza.append(table[row][1])
-                occClassifrequenza.append(1)
-            paroletotali = paroletotali + int(table[row][1])
-        dimCorpus = dimList[0]
-        for i in range(len(dimList)-1):
-            if dimList[i] <= paroletotali and dimList[i+1] >= paroletotali:
-                lower = paroletotali - dimList[i]
-                upper = dimList[i+1] - paroletotali
-                if lower < upper:
-                    dimCorpus = dimList[i]
-                else:
-                    dimCorpus = dimList[i+1]
-        for row in range(len(table)):
-            thistext = table[row][0]
-            ratio = (float(table[row][1])/float(paroletotali)*dimCorpus)
-            ratios = f'{ratio:.3f}'
-            table[row].append(str(ratios))
-            ratio = math.log10(float(table[row][1])/float(paroletotali))
-            ratios = f'{ratio:.3f}'
-            table[row].append(str(ratios))
-        table.append(["Tokens", str(paroletotali)])
-        table.append(["Types", str(totaltypes)])
-        ratio = (float(totaltypes)/float(paroletotali))*100.0
-        ratios = f'{ratio:.3f}'
-        table.append(["(Types/Tokens)*100", str(ratios)])
-        ratio = (float(paroletotali)/float(totaltypes))
-        ratios = f'{ratio:.3f}'
-        table.append(["Tokens/Types", str(ratios)])
-        table.append(["Hapax", str(hapax)])
-        ratio = (float(hapax)/float(paroletotali))*100.0
-        ratios = f'{ratio:.3f}'
-        table.append(["(Hapax/Tokens)*100", str(ratios)])
-        ratio = float(totaltypes)/float(math.sqrt(paroletotali))
-        ratios = f'{ratio:.3f}'
-        table.append(["Types/sqrt(Tokens)", str(ratios)])
-        ratio = (float(math.log10(totaltypes))/float(math.log10(paroletotali)))
-        ratios = f'{ratio:.3f}'
-        table.append(["log(Types)/log(Tokens)", str(ratios)])
-        YuleSum = 0
-        for cfi in range(len(classifrequenza)):
-            YuleSum = YuleSum + ( math.pow(int(classifrequenza[cfi]),2) * occClassifrequenza[cfi] )
-        ratio = float(math.pow(10,4)) * ((float(YuleSum) - float(paroletotali))/ float(math.pow(paroletotali, 2)) )
-        ratios = f'{ratio:.3f}'
-        table.append(["Caratteristica di Yule (K)", str(ratios)])
-        ratio = math.pow(float(paroletotali), (1.0/math.pow(float(totaltypes), 0.172)))
-        ratios = f'{ratio:.3f}'
-        table.append(["W", str(ratios)])
-        ratio =  math.pow(float(math.log10(paroletotali)), 2.0)/(float(math.log10(paroletotali)) - float(math.log10(totaltypes)) )
-        ratios = f'{ratio:.3f}'
-        table.append(["U", str(ratios)])
-        table.insert(0,["Token", "Occorrenze", "Frequenza in " + str(dimCorpus) + " parole", "Ordine di grandezza (log10)"])
-        savetable(table, output)
-
-
-def estrai_colonna():
-    separator = '\t'
-    fileNames = []
-    if os.path.isfile(sys.argv[2]):
-        fileNames = [sys.argv[2]]
-    if os.path.isdir(sys.argv[2]):
-        for tfile in os.listdir(sys.argv[2]):
-            fileNames.append(os.path.join(sys.argv[2],tfile))
-    try:
-        col = int(sys.argv[3])
-    except:
-        col = 0
-    for fileName in fileNames:
-        row = 0
-        output = fileName + "-colonna-" + str(col) + ".tsv"
-        recovery = output + ".tmp"
-        startatrow = -1
-        try:
-            if os.path.isfile(recovery):
-                ch = "Y"
-                print("Ho trovato un file di ripristino, lo devo usare? [Y/N]")
-                ch = input()
-                if ch == "Y" or ch == "y":
-                    with open(recovery, "r", encoding='utf-8') as tempfile:
-                       lastline = (list(tempfile)[-1])
-                    startatrow = int(lastline)
-                    print("Comincio dalla riga " + str(startatrow))
-        except:
-            startatrow = -1
-        with open(fileName, "r", encoding='utf-8') as ins:
-            for line in ins:
-                if row > startatrow:
-                    try:
-                        thistext = line.replace("\n","").replace("\r","").split(separator)[col]
-                    except:
-                        thistext = ""
-                    with open(output, "a", encoding='utf-8') as outfile:
-                        outfile.write(thistext+"\n")
-                    with open(recovery, "a", encoding='utf-8') as rowfile:
-                        rowfile.write(str(row)+"\n")
-                row = row + 1
-
-
-def mergetables():
-    separator = '\t'
-    fileNames = []
-    if os.path.isdir(sys.argv[2]):
-        for tfile in os.listdir(sys.argv[2]):
-            if bool(tfile[-4:] == ".tsv" or tfile[-4:] == ".tsv") and tfile[-11:] != "-merged.tsv" and tfile[-11:] != "-merged.csv":
-                fileNames.append(os.path.join(sys.argv[2],tfile))
-    else:
-        return
-    dirName = os.path.basename(os.path.dirname(sys.argv[2]))
-    try:
-        col = int(sys.argv[3])
-    except:
-        col = 0
-    output = os.path.join(sys.argv[2],dirName + "-merged.tsv")
-    with open(fileNames[0], "r", encoding='utf-8') as f:
-        first_line = f.readline().replace("\n","").replace("\r","")
-    try:
-        opstr = str(sys.argv[4])
-        opers = opstr.split(",")
-    except:
-        opers = ["sum"]
-    try:
-        startatrow = int(sys.argv[5])-1
-        useheader = True
-    except:
-        startatrow = -1
-        useheader = False
-    table = []
-    firstfile = -1
-    for fileName in fileNames:
-        firstfile = firstfile + 1
-        row = 0
-        recovery = fileName + ".tmp"
-        print(fileName + " -> " + output)
-        totallines = linescount(fileName)
-        ch = "N"
-        try:
-            if os.path.isfile(recovery):
-                try:
-                    if sys.argv[6] == "y" or sys.argv[6] == "Y":
-                        ch = "Y"
-                except:
-                    print("Ho trovato un file di ripristino, lo devo usare? [Y/N]")
-                    ch = input()
-                if ch == "Y" or ch == "y":
-                    with open(recovery, "r", encoding='utf-8') as tempfile:
-                       lastline = (list(tempfile)[-1])
-                    startatrow = int(lastline)
-                    print("Carico la tabella")
-                    with open(output, "r", encoding='utf-8') as ins:
-                        for line in ins:
-                            table.append(line.replace("\n","").replace("\r","").split(separator))
-                    print("Comincio dalla riga " + str(startatrow))
-                    useheader = False
-            else:
-                if useheader:
-                    table.append(first_line.split(separator))
-                    useheader = False
-        except:
-            if useheader:
-                table.append(first_line.split(separator))
-                useheader = False
-        with open(fileName, "r", encoding='utf-8') as ins:
-            for line in ins:
-                if row > startatrow:
-                    try:
-                        thislist = line.split(separator)
-                        thistext = thislist[col].replace("\n","").replace("\r","")
-                    except:
-                        thislist = []
-                        thistext = ""
-                    thisvalues = []
-                    for valcol in range(len(thislist)):
-                        if valcol != col:
-                            try:
-                                thisvalues.append(thislist[valcol].replace("\n", ""))
-                            except:
-                                thisvalues.append("")
-                    while len(thisvalues)<len(opers):
-                        thisvalues.append("")
-                    tbrow = findintable(table, thistext, 0)
-                    if tbrow>=0:
-                        for valind in range(len(opers)):
-                            tbval = float(table[tbrow][valind+1])
-                            if opers[valind] == "sum":
-                                tbval = float(tbval) + float(thisvalues[valind])
-                            if opers[valind] == "mean":
-                                tbval = (float(tbval) + float(thisvalues[valind]))
-                            if opers[valind] == "diff":
-                                tbval = float(tbval) - float(thisvalues[valind])
-                            table[tbrow][valind+1] = tbval
-                    else:
-                        newrow = [thistext]
-                        for valind in range(len(thisvalues)):
-                            newrow.append(thisvalues[valind])
-                        table.append(newrow)
-                    if row % 500 == 0:
-                        savetable(table, output)
-                        with open(recovery, "a", encoding='utf-8') as rowfile:
-                            rowfile.write(str(row)+"\n")
-                row = row + 1
-    if "mean" in opers and firstfile > 0 and row == totallines and startatrow < totallines:
-        for mrow in range(len(table)):
-            for valind in range(len(opers)):
-                if opers[valind] == "mean":
-                    try:
-                        table[mrow][valind+1] = float(table[mrow][valind+1])/len(fileNames)
-                    except:
-                        err = True
-    savetable(table, output)
-    print("Done")
-    
-
-def splitbigfile():
-    separator = '\t'
-    if os.path.isfile(sys.argv[2]):
-        fileName = sys.argv[2]
-        ext = fileName[-3:]
-    try:
-        maxrow = int(sys.argv[3])
-    except:
-        maxrow = 20000
-        if ext == "csv":
-            maxrow = 500000
-    splitdot = False
-    try:
-        if sys.argv[3] == "." and ext == "txt":
-            splitdot = True
-    except:
-        splitdot = False
-    part = 0
-    row = 0
-    partrow = 0
-    output = fileName + "-part" + str(part) + "." + ext
-    recovery = output + ".tmp"
-    startatrow = -1
-    try:
-        if os.path.isfile(recovery):
-            ch = "Y"
-            print("Ho trovato un file di ripristino, lo devo usare? [Y/N]")
-            ch = input()
-            if ch == "Y" or ch == "y":
-                with open(recovery, "r", encoding='utf-8') as tempfile:
-                   lastline = (list(tempfile)[-1].split(",")[0])
-                startatrow = int(lastline)
-                part = int(list(tempfile)[-1].split(",")[1])
-                partrow = int(list(tempfile)[-1].split(",")[2])
-                print("Comincio dalla riga " + str(startatrow))
-    except:
-        startatrow = -1
-        part = 0
-    with open(fileName, "r", encoding='utf-8') as ins:
-        for line in ins:
-            if row > startatrow:
-                try:
-                    thistext = line
-                    if ext == "txt" and splitdot:
-                        partrow = partrow + len(line.split(".")) -1
-                except:
-                    thistext = ""
-                if partrow > (maxrow-1):
-                    partrow = 0
-                    part = part + 1
-                output = fileName + "-part" + str(part) + "." + ext
-                with open(output, "a", encoding='utf-8') as outfile:
-                    outfile.write(thistext)
-                with open(recovery, "a", encoding='utf-8') as rowfile:
-                    rowfile.write(str(row)+","+str(part)+","+str(partrow)+"\n")
-                partrow = partrow + 1
-            row = row + 1
-
-def samplebigfile():
-    separator = '\t'
-    if os.path.isfile(sys.argv[2]):
-        fileName = sys.argv[2]
-        ext = fileName[-3:]
-    try:
-        maxrow = int(sys.argv[3])
-    except:
-        maxrow = 20000
-        if ext == "csv":
-            maxrow = 500000
-    splitdot = False
-    try:
-        if sys.argv[3] == "." and ext == "txt":
-            splitdot = True
-    except:
-        splitdot = False
-    if splitdot == True:
-        with open(fileName, "r", encoding='utf-8') as ins:
-            for line in ins:
-                thistext = line.replace('.','.\n')
-                with open(fileName + "-splitondot.txt", "a", encoding='utf-8') as outfile:
-                    outfile.write(thistext)
-        fileName = fileName + "-splitondot.txt"
-    row = 0
-    output = fileName + "-estratto." + ext
-    startatrow = -1
-    totallines = linescount(fileName)
-    print("Total Lines: " + str(totallines))
-    #ripristino impossibile, è un sistema casuale
-    chunkf = float(totallines)/float(maxrow)
-    chunk = int(math.floor(chunkf))
-    if chunk < 2:
-        print("Non ci sono abbastanza righe nel file")
-        return
-    getrows = []
-    start = 0
-    print("Calcolo le righe da selezionare")
-    for i in range(maxrow):
-        end = start+chunk -1
-        if start >= totallines-1:
-            start = totallines -2
-        if end >= totallines:
-            end = totallines -1
-        trow = random.randint(start, end)
-        getrows.append(trow)
-        start = end + 1
-    print("Estraggo le righe in un nuovo file")
-    ir = 0
-    with open(fileName, "r", encoding='utf-8') as ins:
-        for line in ins:
-            if row == getrows[ir]:
-                try:
-                    thistext = line
-                except:
-                    thistext = ""
-                ir = ir + 1
-                if ir == len(getrows):
-                    break
-                with open(output, "a", encoding='utf-8') as outfile:
-                    outfile.write(thistext)
-            row = row + 1
 
 
 if __name__ == "__main__":
@@ -809,24 +224,38 @@ if __name__ == "__main__":
         #print(Corpus.mycfg)
         if sys.argv[1] == "help" or sys.argv[1] == "aiuto":
             print("Le colonne di un corpus sono le seguenti:\n")
-            print(corpuscols)
+            print(Corpus.corpuscols)
             print("\n")
-            print("Elenco dei comandi:\n")
-            print("python3 main.py tintstart [brancfg]\n")
-            print("python3 main.py txt2corpus file.txt|cartella [indirizzoServerTint] [y]\n")
+            print("Elenco completo dei comandi\n")
+            print("\nImportazione corpus:\n")
+            print("python3 main.py tintStart [brancfg]\n")
+            print("python3 main.py tintImport file.txt|cartella [indirizzoServerTint] [ripristino (y/n)]\n")
+            print("python3 main.py udpipeImport file.txt|cartella [it-IT] [ripristino (y/n)]\n")
+            print("python3 main.py appendBran corpus-bran.tsv corpus-da-accodare.tsv|cartella\n")
+            print("\nAnalisi su corpus di Bran:\n")
+            print("python3 main.py occorrenze file.tsv|cartella colonna [ripristino (y/n)]\n")
+            print("python3 main.py occorrenzeFiltrate file.tsv|cartella colonna [filtro] [ripristino (y/n)]\n")
+            print("python3 main.py occorrenzeNonBran file.tsv|cartella [colonna] [separatore] [ripristino (y/n)]\n")
+            print("python3 main.py occorrenzeNormalizzate file.tsv|cartella [colonna] [ripristino (y/n)]\n")
+            print("python3 main.py coOccorrenze file.tsv|cartella parola colonna range [ripristino (y/n)]\n")
+            print("python3 main.py concordanze file.tsv|cartella parola colonna range [ripristino (y/n)]\n")
+            print("python3 main.py misurelessico file.tsv|cartella [colonna] [ripristino (y/n)]\n")
+            print("python3 main.py contaverbi file.tsv|cartella [ignora persona (y/n)] [ripristino (y/n)]\n")
+            print("python3 main.py contapersone file.tsv|cartella [ignora persona (y/n)] [ripristino (y/n)]\n")
+            print("python3 main.py densitalessicale file.tsv|cartella [livellodettaglio 0/1/2] [ripristino (y/n)]\n")
+            print("python3 main.py ricostruisci file.tsv|cartella [colonna] [ignorapunteggiatura (y/n)] [filtro] [ripristino (y/n)]\n")
+            print("\nOperazioni su tabelle o file di testo:\n")
+            print("python3 main.py estraicolonna file.tsv|cartella colonna\n")
+            print("python3 main.py mergetables file1,file2|cartella colonnaChiave [sum|mean|diff,sum|mean|diff] [1] [ripristino (y/n)]\n")
             print("python3 main.py splitbigfile file.txt [maxnumberoflines] [.]\n")
             print("python3 main.py samplebigfile file.txt [maxnumberoflines] [.]\n")
-            print("python3 main.py occorrenze file.tsv|cartella [colonna] [y]\n")
-            print("python3 main.py extractcolumn file.tsv|cartella colonna\n")
-            print("python3 main.py contaverbi file.tsv|cartella [y (ignore person)] [y]\n")
-            print("python3 main.py misurelessico file.tsv|cartella [colonna] [y]\n")
-            print("python3 main.py mergetables cartella colonnaChiave [sum|mean|diff,sum|mean|diff] [1] [y]\n")
+            print("\nStrumenti di Bran:\n")
             print("python3 main.py texteditor file.tsv|cartella\n")
             print("python3 main.py confronto file.tsv|cartella\n")
             print("Gli argomenti tra parentesi [] sono facoltativi.")
             print("\nI comandi preceduti da * sono sperimentali o non ancora implementati.")
             sys.exit(0)
-        if sys.argv[1] == "txt2corpus":
+        if sys.argv[1] == "tintImport":
             fileNames = []
             if os.path.isfile(sys.argv[2]):
                 fileNames = [sys.argv[2]]
@@ -840,7 +269,7 @@ if __name__ == "__main__":
                 tmpurl = "localhost"
             tinturl = "http://" + tmpurl + ":8012/tint"
             TCThread = tint.TintCorpus(w, fileNames, corpuscols, tinturl)
-            TCThread.outputcsv = fileNames[0] + ".tsv"
+            TCThread.outputcsv = re.sub("\..*?$","", fileNames[0]) + "-bran.tsv"
             try:
                 if sys.argv[4] == "y" or sys.argv[4] == "Y":
                     TCThread.alwaysyes = True
@@ -850,7 +279,57 @@ if __name__ == "__main__":
             TCThread.start()
             while True:
                 time.sleep(10)
-        if sys.argv[1] == "tintstart":
+        if sys.argv[1] == "udpipeImport":
+            fileNames = []
+            if os.path.isfile(sys.argv[2]):
+                fileNames = [sys.argv[2]]
+            if os.path.isdir(sys.argv[2]):
+                for tfile in os.listdir(sys.argv[2]):
+                    if tfile[-4:] == ".txt":
+                        fileNames.append(os.path.join(sys.argv[2],tfile))
+            try:
+                language = sys.argv[3]
+            except:
+                language = "it-IT"
+            if len(fileNames)<1:
+                sys.exit(0)
+            if language != "it-IT" and language != "en-US":
+                print("Language "+ language +" not supported")
+                sys.exit(0)
+            Corpus.language = language
+            #print(Corpus.mycfg)
+            udpipe = Corpus.mycfg["udpipe"]
+            model = Corpus.mycfg["udpipemodels"][Corpus.language]
+            UDThread = BranCorpus.UDCorpus(w, fileNames, corpuscols, udpipe, model, language)
+            UDThread.outputcsv = re.sub("\..*?$","", fileNames[0]) + "-bran.tsv"
+            try:
+                if sys.argv[4] == "y" or sys.argv[4] == "Y":
+                    UDThread.alwaysyes = True
+            except:
+                UDThread.alwaysyes = False
+            UDThread.finished.connect(sys.exit)
+            print("NOTA: Se il prompt rimane in stallo, premi Ctrl+C quando appare la scritta Done.")
+            UDThread.start()
+            while True:
+                time.sleep(10)
+        if sys.argv[1] == "appendBran":
+            if os.path.isfile(sys.argv[3]):
+                fileName = sys.argv[2]
+            fileNames = []
+            if os.path.isfile(sys.argv[3]):
+                fileNames = [sys.argv[3]]
+            if os.path.isdir(sys.argv[3]):
+                for tfile in os.listdir(sys.argv[3]):
+                    if tfile[-4:] == "-bran.tsv":
+                        fileNames.append(os.path.join(sys.argv[3],tfile))
+            if len(fileNames)<1:
+                sys.exit(0)
+            Corpus.CSVloader([fileName])
+            Corpus.sessionFile = fileName
+            Corpus.core_appendcorpus(fileNames)
+            Corpus.chiudiProgetto()
+            print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
+        if sys.argv[1] == "tintStart":
             TintThread = tint.TintRunner(w)
             try:
                 text_file = open(sys.argv[2], "r", encoding='utf-8')
@@ -903,26 +382,508 @@ if __name__ == "__main__":
             cf.show()
             print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
             sys.exit(app.exec_())
+        if sys.argv[1] == "occorrenzeNonBran":
+            occorrenzeNonBran()
+            print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
         if sys.argv[1] == "occorrenze":
-            calcola_occorrenze()
+            try:
+                myfiles = sys.argv[2]
+            except:
+                sys.exit()
+            try:
+                mycol = sys.argv[3]
+            except:
+                mycol = 0
+            try:
+                rch = sys.argv[4]
+            except:
+                print("Vuoi usare un file di ripristino? [Y/N]")
+                rch = input()
+            if rch == "Y" or rch == "y":
+                myrecovery = True
+            else:
+                myrecovery = False
+            #Corpus.separator = '\t'
+            fileNames = []
+            if os.path.isfile(myfiles):
+                fileNames = [myfiles]
+            if os.path.isdir(myfiles):
+                for tfile in os.listdir(myfiles):
+                    if tfile[-4:] == ".csv" or tfile[-4:] == ".tsv":
+                        fileNames.append(os.path.join(myfiles,tfile))
+            for fileName in fileNames:
+                Corpus.CSVloader([fileName])
+                Corpus.sessionFile = fileName
+                Corpus.core_calcola_occorrenze(mycol, myrecovery)
+                Corpus.chiudiProgetto()
+            print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
+        if sys.argv[1] == "occorrenzeFiltrate":
+            try:
+                myfiles = sys.argv[2]
+            except:
+                sys.exit()
+            try:
+                mycol = sys.argv[3]
+            except:
+                mycol = 0
+            try:
+                myfilter = sys.argv[4]
+            except:
+                myfilter = ""
+            try:
+                rch = sys.argv[5]
+            except:
+                print("Vuoi usare un file di ripristino? [Y/N]")
+                rch = input()
+            if rch == "Y" or rch == "y":
+                myrecovery = True
+            else:
+                myrecovery = False
+            #Corpus.separator = '\t'
+            fileNames = []
+            if os.path.isfile(myfiles):
+                fileNames = [myfiles]
+            if os.path.isdir(myfiles):
+                for tfile in os.listdir(myfiles):
+                    if tfile[-4:] == ".csv" or tfile[-4:] == ".tsv":
+                        fileNames.append(os.path.join(myfiles,tfile))
+            for fileName in fileNames:
+                Corpus.CSVloader([fileName])
+                Corpus.sessionFile = fileName
+                Corpus.core_occorrenzeFiltrate(mycol, myfilter, myrecovery)
+                Corpus.chiudiProgetto()
+            print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
+        if sys.argv[1] == "coOccorrenze":
+            try:
+                myfiles = sys.argv[2]
+            except:
+                sys.exit()
+            try:
+                parola = sys.argv[3]
+            except:
+                sys.exit()
+            try:
+                mycol = int(sys.argv[4])
+            except:
+                mycol = 0
+            try:
+                myrange = int(sys.argv[5])
+            except:
+                myrange = 0
+            try:
+                rch = sys.argv[6]
+            except:
+                print("Vuoi usare un file di ripristino? [Y/N]")
+                rch = input()
+            if rch == "Y" or rch == "y":
+                myrecovery = True
+            else:
+                myrecovery = False
+            #Corpus.separator = '\t'
+            fileNames = []
+            if os.path.isfile(myfiles):
+                fileNames = [myfiles]
+            if os.path.isdir(myfiles):
+                for tfile in os.listdir(myfiles):
+                    if tfile[-4:] == ".csv" or tfile[-4:] == ".tsv":
+                        fileNames.append(os.path.join(myfiles,tfile))
+            for fileName in fileNames:
+                Corpus.CSVloader([fileName])
+                Corpus.sessionFile = fileName
+                Corpus.core_calcola_coOccorrenze(parola, mycol, myrange, True, myrecovery, "")
+                Corpus.chiudiProgetto()
+            print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
+        if sys.argv[1] == "concordanze":
+            try:
+                myfiles = sys.argv[2]
+            except:
+                sys.exit()
+            try:
+                parola = sys.argv[3]
+            except:
+                sys.exit()
+            try:
+                mycol = int(sys.argv[4])
+            except:
+                mycol = 0
+            try:
+                myrange = int(sys.argv[5])
+            except:
+                myrange = 0
+            try:
+                rch = sys.argv[6]
+            except:
+                print("Vuoi usare un file di ripristino? [Y/N]")
+                rch = input()
+            if rch == "Y" or rch == "y":
+                myrecovery = True
+            else:
+                myrecovery = False
+            #Corpus.separator = '\t'
+            fileNames = []
+            if os.path.isfile(myfiles):
+                fileNames = [myfiles]
+            if os.path.isdir(myfiles):
+                for tfile in os.listdir(myfiles):
+                    if tfile[-4:] == ".csv" or tfile[-4:] == ".tsv":
+                        fileNames.append(os.path.join(myfiles,tfile))
+            for fileName in fileNames:
+                Corpus.CSVloader([fileName])
+                Corpus.sessionFile = fileName
+                Corpus.core_calcola_concordanze(parola, mycol, myrange, True, myrecovery, "")
+                Corpus.chiudiProgetto()
+            print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
+        if sys.argv[1] == "ricostruisci":
+            try:
+                myfiles = sys.argv[2]
+            except:
+                sys.exit()
+            try:
+                mycol = int(sys.argv[3])
+            except:
+                mycol = 1
+            try:
+                if sys.argv[4] == "y" or sys.argv[4] == "Y":
+                    myignore = True
+                else:
+                    myignore = 0/0
+            except:
+                myignore = False
+            try:
+                myfilter = sys.argv[5]
+            except:
+                myfilter = ""
+            #try:
+            #    rch = sys.argv[6]
+            #except:
+            #    print("Vuoi usare un file di ripristino? [Y/N]")
+            #    rch = input()
+            #if rch == "Y" or rch == "y":
+            #    myrecovery = True
+            #else:
+            #    myrecovery = False
+            #Corpus.separator = '\t'
+            ignpos = []
+            if myignore:
+                ignpos = Corpus.ignorepos
+            fileNames = []
+            if os.path.isfile(myfiles):
+                fileNames = [myfiles]
+            if os.path.isdir(myfiles):
+                for tfile in os.listdir(myfiles):
+                    if tfile[-4:] == ".csv" or tfile[-4:] == ".tsv":
+                        fileNames.append(os.path.join(myfiles,tfile))
+            for fileName in fileNames:
+                Corpus.CSVloader([fileName])
+                Corpus.sessionFile = fileName
+                Corpus.core_ricostruisci(Corpus.corpus, mycol, ignpos, 0, 0, myfilter)
+                Corpus.chiudiProgetto()
             print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
         if sys.argv[1] == "contaverbi":
-            contaverbi(corpuscols, legendaPos)
+            try:
+                myfiles = sys.argv[2]
+            except:
+                sys.exit()
+            ignoreperson = False
+            try:
+                if sys.argv[3] == "y" or sys.argv[3] == "Y":
+                    ignoreperson = True
+            except:
+                print("Vuoi ignorare persona, numero, genere, e caratteristica clitica dei verbi? [Y/N]")
+                ch = input()
+                if ch == "Y" or ch == "y":
+                    ignoreperson = True
+            try:
+                if sys.argv[4] == "y" or sys.argv[4] == "Y":
+                    contigui = "Y"
+            except:
+                print("Vuoi che i verbi composti siano contigui? [Y/N]")
+                contigui = input()
+            try:
+                rch = sys.argv[5]
+            except:
+                print("Vuoi usare un file di ripristino? [Y/N]")
+                rch = input()
+            if rch == "Y" or rch == "y":
+                myrecovery = True
+            else:
+                myrecovery = False
+            #Corpus.separator = '\t'
+            fileNames = []
+            if os.path.isfile(myfiles):
+                fileNames = [myfiles]
+            if os.path.isdir(myfiles):
+                for tfile in os.listdir(myfiles):
+                    if tfile[-4:] == ".csv" or tfile[-4:] == ".tsv":
+                        fileNames.append(os.path.join(myfiles,tfile))
+            for fileName in fileNames:
+                Corpus.CSVloader([fileName])
+                Corpus.sessionFile = fileName
+                Corpus.core_contaverbi(ignoreperson, contigui, myrecovery)
+                Corpus.chiudiProgetto()
             print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
-        if sys.argv[1] == "extractcolumn":
-            estrai_colonna()
+        if sys.argv[1] == "contapersone":
+            try:
+                myfiles = sys.argv[2]
+            except:
+                sys.exit()
+            myfilter = ""
+            try:
+                if sys.argv[3] != "":
+                    myfilter = sys.argv[3]
+            except:
+                print("Vuoi usare un filtro? Es: pos=VERB||pos=AUX||pos=ADJ||pos=NOUN")
+                #Es: si possono cercare solo gli articoli determinati con pos=ADP&&morf=.*Definite.*
+                myfilter = input()
+            try:
+                levels = int(sys.argv[4])
+            except:
+                #Livelli di dettaglio:
+                #0 Tutto
+                #1 solo persona numero e genere
+                #2 solo persona e numero
+                #3 solo numero genere e determinato
+                #4 solo genere
+                #5 solo numero
+                print("Che livello di dettaglio vuoi? [0/5]")
+                levels = input()
+            try:
+                rch = sys.argv[5]
+            except:
+                print("Vuoi usare un file di ripristino? [Y/N]")
+                rch = input()
+            if rch == "Y" or rch == "y":
+                myrecovery = True
+            else:
+                myrecovery = False
+            #Corpus.separator = '\t'
+            fileNames = []
+            if os.path.isfile(myfiles):
+                fileNames = [myfiles]
+            if os.path.isdir(myfiles):
+                for tfile in os.listdir(myfiles):
+                    if tfile[-4:] == ".csv" or tfile[-4:] == ".tsv":
+                        fileNames.append(os.path.join(myfiles,tfile))
+            for fileName in fileNames:
+                Corpus.CSVloader([fileName])
+                Corpus.sessionFile = fileName
+                #Livelli di dettaglio:
+                #0 Tutto
+                #1 solo persona numero e genere
+                #2 solo persona e numero
+                #3 solo numero genere e determinato
+                #4 solo genere
+                #5 solo numero
+                Corpus.core_contapersone(myfilter, levels, myrecovery)
+                Corpus.chiudiProgetto()
+            print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
+        if sys.argv[1] == "estraicolonna":
+            try:
+                myfiles = sys.argv[2]
+            except:
+                sys.exit()
+            try:
+                mycol = sys.argv[3]
+            except:
+                mycol = 0
+            try:
+                rch = sys.argv[4]
+            except:
+                print("Vuoi usare un file di ripristino? [Y/N]")
+                rch = input()
+            if rch == "Y" or rch == "y":
+                myrecovery = True
+            else:
+                myrecovery = False
+            #Corpus.separator = '\t'
+            fileNames = []
+            if os.path.isfile(myfiles):
+                fileNames = [myfiles]
+            if os.path.isdir(myfiles):
+                for tfile in os.listdir(myfiles):
+                    if tfile[-4:] == ".csv" or tfile[-4:] == ".tsv":
+                        fileNames.append(os.path.join(myfiles,tfile))
+            Corpus.core_estrai_colonna(fileNames, mycol, myrecovery)
             print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
         if sys.argv[1] == "splitbigfile":
-            splitbigfile()
+            try:
+                myfiles = sys.argv[2]
+            except:
+                sys.exit()
+            try:
+                maxrow = sys.argv[3]
+            except:
+                maxrow = 0
+            try:
+                mysplit = sys.argv[4]
+            except:
+                mysplit = "."
+            try:
+                rch = sys.argv[5]
+            except:
+                print("Vuoi usare un file di ripristino? [Y/N]")
+                rch = input()
+            if rch == "Y" or rch == "y":
+                myrecovery = True
+            else:
+                myrecovery = False
+            Corpus.core_splitbigfile(myfiles, maxrow, mysplit, myrecovery)
             print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
         if sys.argv[1] == "samplebigfile":
-            samplebigfile()
+            try:
+                myfiles = sys.argv[2]
+            except:
+                sys.exit()
+            try:
+                maxrow = sys.argv[3]
+            except:
+                maxrow = 0
+            try:
+                mysplit = sys.argv[4]
+            except:
+                mysplit = "."
+            try:
+                rch = sys.argv[5]
+            except:
+                #print("Vuoi usare un file di ripristino? [Y/N]")
+                #rch = input()
+                rch = "N"
+            if rch == "Y" or rch == "y":
+                myrecovery = True
+            else:
+                myrecovery = False
+            Corpus.core_samplebigfile(myfiles, maxrow, mysplit, myrecovery)
             print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
         if sys.argv[1] == "mergetables":
-            mergetables()
+            try:
+                if os.path.isdir(sys.argv[2]):
+                    mydir = sys.argv[2]
+                elif os.path.isfile(sys.argv[2].split(",")[0]):
+                    mydir = sys.argv[2].split(",")
+                else :
+                    mydir = 0/0
+            except:
+                sys.exit()
+            try:
+                mycol = sys.argv[3]
+            except:
+                mycol = 1
+            try:
+                opstr = str(sys.argv[4])
+            except:
+                opstr = "sum"
+            try:
+                headerlines = str(sys.argv[5])
+            except:
+                headerlines = "1"
+            try:
+                rch = sys.argv[6]
+            except:
+                print("Vuoi usare un file di ripristino? [Y/N]")
+                rch = input()
+            if rch == "Y" or rch == "y":
+                myrecovery = True
+            else:
+                myrecovery = False
+            Corpus.core_mergetables(mydir, mycol, opstr, headerlines, myrecovery)
+            print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
+        if sys.argv[1] == "densitalessicale":
+            try:
+                myfiles = sys.argv[2]
+            except:
+                sys.exit()
+            try:
+                mylevel = int(sys.argv[3])
+                if mylevel < 0 or mylevel > 2:
+                    mylevel = 0/0
+            except:
+                mylevel = 2
+            try:
+                rch = sys.argv[4]
+            except:
+                print("Vuoi usare un file di ripristino? [Y/N]")
+                rch = input()
+            if rch == "Y" or rch == "y":
+                myrecovery = True
+            else:
+                myrecovery = False
+            #Corpus.separator = '\t'
+            fileNames = []
+            if os.path.isfile(myfiles):
+                fileNames = [myfiles]
+            if os.path.isdir(myfiles):
+                for tfile in os.listdir(myfiles):
+                    if tfile[-4:] == ".csv" or tfile[-4:] == ".tsv":
+                        fileNames.append(os.path.join(myfiles,tfile))
+            for fileName in fileNames:
+                Corpus.CSVloader([fileName])
+                Corpus.sessionFile = fileName
+                Corpus.core_densitalessico(mylevel, myrecovery)
+                Corpus.chiudiProgetto()
             print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
         if sys.argv[1] == "misurelessico":
-            misure_lessicometriche(ignoretext, dimList)
+            try:
+                myfiles = sys.argv[2]
+            except:
+                sys.exit()
+            try:
+                mycol = sys.argv[3]
+            except:
+                mycol = 1
+            try:
+                rch = sys.argv[4]
+            except:
+                print("Vuoi usare un file di ripristino? [Y/N]")
+                rch = input()
+            if rch == "Y" or rch == "y":
+                myrecovery = True
+            else:
+                myrecovery = False
+            #Corpus.separator = '\t'
+            fileNames = []
+            if os.path.isfile(myfiles):
+                fileNames = [myfiles]
+            if os.path.isdir(myfiles):
+                for tfile in os.listdir(myfiles):
+                    if tfile[-4:] == ".csv" or tfile[-4:] == ".tsv":
+                        fileNames.append(os.path.join(myfiles,tfile))
+            for fileName in fileNames:
+                Corpus.CSVloader([fileName])
+                Corpus.sessionFile = fileName
+                Corpus.core_misure_lessicometriche(mycol, myrecovery)
+                Corpus.chiudiProgetto()
+            print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
+        if sys.argv[1] == "occorrenzeNormalizzate":
+            try:
+                myfiles = sys.argv[2]
+            except:
+                sys.exit()
+            try:
+                mycol = sys.argv[3]
+            except:
+                mycol = 0
+            try:
+                rch = sys.argv[4]
+            except:
+                print("Vuoi usare un file di ripristino? [Y/N]")
+                rch = input()
+            if rch == "Y" or rch == "y":
+                myrecovery = True
+            else:
+                myrecovery = False
+            #Corpus.separator = '\t'
+            fileNames = []
+            if os.path.isfile(myfiles):
+                fileNames = [myfiles]
+            if os.path.isdir(myfiles):
+                for tfile in os.listdir(myfiles):
+                    if tfile[-4:] == ".csv" or tfile[-4:] == ".tsv":
+                        fileNames.append(os.path.join(myfiles,tfile))
+            for fileName in fileNames:
+                Corpus.CSVloader([fileName])
+                Corpus.sessionFile = fileName
+                Corpus.core_occorrenze_normalizzate(mycol, myrecovery)
+                Corpus.chiudiProgetto()
             print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
         sys.exit(0)
     else:

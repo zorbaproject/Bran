@@ -42,6 +42,10 @@ from PySide2.QtWidgets import QMainWindow
 from PySide2.QtWidgets import QTableWidget
 from PySide2.QtWidgets import QTableWidgetItem
 from PySide2.QtWidgets import QTableWidgetSelectionRange
+from PySide2.QtWidgets import QTreeWidget
+from PySide2.QtWidgets import QTreeWidgetItem
+from PySide2.QtWidgets import QTreeWidgetItemIterator
+from PySide2.QtWidgets import QSizePolicy
 from PySide2.QtCore import QThread
 
 
@@ -90,11 +94,16 @@ class MainWindow(QMainWindow):
         self.w.actionFiltri_multipli.triggered.connect(self.filtriMultipli)
         self.w.delselected.clicked.connect(self.delselected)
         self.w.updateCorpus.clicked.connect(self.updateCorpus)
+        self.w.updateProject.clicked.connect(self.updateProject)
+        self.w.projectfilter.textChanged.connect(self.filterProject)
+        self.w.progetto.itemDoubleClicked.connect(self.openprjfile)
         self.w.actionRimuovi_righe_selezionate.triggered.connect(self.delselected)
         self.w.actionScarica_corpus_da_sito_web.triggered.connect(self.web2corpus)
         self.w.actionConverti_vecchio_corpus.triggered.connect(self.convertiDaTint)
         self.w.actionEsporta_corpus_in_un_CSV_per_ogni_ID.triggered.connect(self.esportaCSVperID)
         self.w.actionConta_occorrenze.triggered.connect(self.contaoccorrenze)
+        self.w.actionConta_persone.triggered.connect(self.contapersone)
+        self.w.actionConta_occorrenze_normalizzate.triggered.connect(self.occorrenzenormalizzate)
         self.w.actionConta_occorrenze_filtrate.triggered.connect(self.contaoccorrenzefiltrate)
         self.w.actionEsporta_corpus_in_CSV_unico.triggered.connect(self.salvaCSV)
         self.w.actionEsporta_vista_attuale_in_CSV.triggered.connect(self.esportavistaCSV)
@@ -104,6 +113,7 @@ class MainWindow(QMainWindow):
         self.w.actionRimuovi_vista_attuale_dal_corpus.triggered.connect(self.removevisiblerows)
         self.w.actionCalcola_densit_lessicale.triggered.connect(self.densitalessico)
         self.w.actionNumero_dipendenze_per_frase.triggered.connect(self.actionNumero_dipendenze_per_frase)
+        self.w.actionFile_del_progetto.triggered.connect(self.showProjectFiles)
         self.w.actionVisualizza_frasi.triggered.connect(self.visualizzafrasi)
         self.w.actionRicostruisci_testo.triggered.connect(self.ricostruisciTesto)
         self.w.actionConcordanze.triggered.connect(self.concordanze)
@@ -127,13 +137,14 @@ class MainWindow(QMainWindow):
         self.w.actionEstrai_dizionario.triggered.connect(self.misure_lessicometriche)
         self.w.actionTrova_ripetizioni.triggered.connect(self.trovaripetizioni)
         self.w.actionConta_verbi.triggered.connect(self.contaverbi)
+        self.w.actionTutti_i_token.triggered.connect(self.menualltoken)
         self.w.actionItaliano.triggered.connect(lambda: self.changeLang("it-IT"))
         self.ignorepos = ["punteggiatura - \"\" () «» - - ", "punteggiatura - : ;", "punteggiatura - ,", "altro"] # "punteggiatura - .?!"
         self.separator = "\t"
         self.language = "it-IT"
         self.Corpus = BranCorpus.BranCorpus(self.corpuscols, self.legendaPos, self.ignoretext, self.dimList, tablewidget=self.w.corpus)
         self.Corpus.sizeChanged.connect(self.corpusSizeChanged)
-        self.w.allToken.toggled.connect(lambda: self.Corpus.setAllTokens(self.w.allToken.isChecked()))
+        self.w.allToken.toggled.connect(self.setalltokens)
         self.w.actionEsegui_calcoli_solo_su_righe_visibili.toggled.connect(lambda: self.Corpus.setOnlyVisible(self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked()))
         self.w.cfilter.textChanged.connect(lambda text: self.Corpus.setFilter(text))
         self.w.daToken.valueChanged.connect(self.Corpus.setStart)
@@ -149,12 +160,17 @@ class MainWindow(QMainWindow):
         #self.w.cfilter.setMaxLength(sys.maxsize-1)
         self.w.cfilter.setMaxLength(2147483647)
         #self.Corpus.mycfgfile = QDir.homePath() + "/.brancfg"
-        #self.mycfg = json.loads('{"javapath": "", "tintpath": "", "tintaddr": "", "tintport": "", "sessions" : []}')
-        #self.loadPersonalCFG()
         self.loadSession()
         self.TintAddr = ""
-        #self.loadTintConfig()
         self.Corpus.txtloadingstopped()
+        self.setcss()
+        self.showProjectFiles()
+        self.w.corpusandproject.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+        self.w.groupBox_progetto.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+        self.w.groupBox_filter.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
+        self.w.updatetokens_group.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
+        self.w.groupBox_filter.setStyleSheet("QGroupBox{padding-top:1em; margin-top:-1em}")
+        self.w.groupBox_progetto.setStyleSheet("QGroupBox{padding-top:1em; margin-top:-1em}")
 
     def corpusSizeChanged(self, newsize):
         #maximum = len(self.Corpus.corpus)
@@ -220,8 +236,156 @@ class MainWindow(QMainWindow):
             print("Session file does not exist")
             sys.exit(0)
 
+    def filterProject(self):
+        myfilter = ".*"+self.w.projectfilter.text()+".*"
+        for it in QTreeWidgetItemIterator(self.w.progetto):
+            it.value().setHidden(False)
+        for it in QTreeWidgetItemIterator(self.w.progetto):
+            filetitle = it.value().text(0)
+            filename = os.path.basename(it.value().text(1))
+            if it.value().childCount() >0:
+                continue
+            if bool(re.match(myfilter, filetitle, flags=re.IGNORECASE|re.DOTALL)) or bool(re.match(myfilter, filename, flags=re.IGNORECASE|re.DOTALL)):
+            #if myfilter.lower() in filetitle.lower() or myfilter.lower() in filename.lower():
+                it.value().setHidden(False)
+            else:
+                it.value().setHidden(True)
 
+    def openprjfile(self, myitem, col):
+        filepath = myitem.text(1)
+        if filepath[-4:]==".tsv" or filepath[-4:]==".csv":
+            self.Corpus.showResults(filepath)
+        else:
+            te = texteditor.TextEditor(self.Corpus.corpuswidget, self.Corpus.mycfg)
+            te.aprilista([filepath])
+            te.show()
 
+    def updateProject(self):
+        self.w.progetto.clear()
+        if self.Corpus.sessionFile == "" or self.sessionDir == ".":
+            return
+        origitem = QTreeWidgetItem(self.w.progetto)
+        origitem.setText(0,"Corpus")
+        resitem = QTreeWidgetItem(self.w.progetto)
+        resitem.setText(0,"Risultati di Bran")
+        otheritem = QTreeWidgetItem(self.w.progetto)
+        otheritem.setText(0,"Altri file")
+        fileNames = []
+        sessionname = os.path.basename(self.Corpus.sessionFile)
+        if os.path.isdir(self.sessionDir):
+            for tfile in os.listdir(self.sessionDir):
+                fileNames.append(os.path.join(self.sessionDir,tfile))
+        for fileName in fileNames:
+            fileTitle = os.path.basename(fileName)
+            rootelem = otheritem
+            if fileName[-4:] == ".tmp":
+                continue
+            if fileTitle.startswith(sessionname):
+                if fileTitle == sessionname:
+                    rootelem = origitem
+                    fileTitle = "Progetto di Bran"
+                #Prevediamo la possibilità di avere più versioni del corpus
+                fingerprint = sessionname+"-ricostruito-"
+                if fileTitle.startswith(fingerprint):
+                    rootelem = origitem
+                    myregex = re.escape(fingerprint) + "(.*?)\-" + "(.*?)" + re.escape(".txt")
+                    fileTitle = "Testo ricostruito "+ re.sub(myregex, "\g<1> filtro \g<2>", fileTitle)
+                fingerprint = sessionname+"-orig-"
+                if fileTitle.startswith(fingerprint):
+                    rootelem = origitem
+                    myregex = re.escape(fingerprint) + "(.*?)\-(.*?)" + re.escape(".txt")
+                    fileTitle = "Corpus originale " + re.sub(myregex, "\g<1> sorgente \g<2>", fileTitle)
+                fingerprint = sessionname+"-colonna-"
+                if fileTitle.startswith(fingerprint):
+                    rootelem = origitem
+                    myregex = re.escape(fingerprint) + "(.*?)" + re.escape(".tsv")
+                    fileTitle = "Colonna " + re.sub(myregex, "\g<1>", fileTitle)
+                fingerprint = sessionname+"-occorrenze-"
+                if fileTitle.startswith(fingerprint):
+                    rootelem = resitem
+                    myregex = re.escape(fingerprint) + "(.*?)" + re.escape(".tsv")
+                    fileTitle = "Occorrenze "+ re.sub(myregex, "\g<1>", fileTitle)
+                fingerprint = sessionname+"-occorrenze_filtrate-"
+                if fileTitle.startswith(fingerprint):
+                    rootelem = resitem
+                    myregex = re.escape(fingerprint) + "(.*?)\-" + "(.*?)" + re.escape(".tsv")
+                    fileTitle = "Occorrenze "+ re.sub(myregex, "\g<1> filtro \g<2>", fileTitle)
+                fingerprint = sessionname+"-coOccorrenze-"
+                if fileTitle.startswith(fingerprint):
+                    rootelem = resitem
+                    myregex = re.escape(fingerprint) + "(.*?)\-" + "(.*?)" + re.escape(".tsv")
+                    fileTitle = "Co occorrenze "+ re.sub(myregex, "\g<1> filtro \g<2>", fileTitle)
+                fingerprint = sessionname+"-concordanze-"
+                if fileTitle.startswith(fingerprint):
+                    rootelem = resitem
+                    myregex = re.escape(fingerprint) + "(.*?)\-" + "(.*?)" + re.escape(".tsv")
+                    fileTitle = "Concordanze "+ re.sub(myregex, "\g<1> filtro \g<2>", fileTitle)
+                fingerprint = sessionname+"-contaverbi.tsv"
+                if fileTitle.startswith(fingerprint):
+                    rootelem = resitem
+                    fileTitle = "Contaverbi"
+                fingerprint = sessionname+"-contapersone-"
+                if fileTitle.startswith(fingerprint):
+                    rootelem = resitem
+                    myregex = re.escape(fingerprint) + "(.*?)\-" + "(.*?)" + re.escape(".tsv")
+                    fileTitle = "Contapersone "+ re.sub(myregex, "\g<2> filtro \g<1>", fileTitle)
+                fingerprint = sessionname+"-occorrenze_normalizzate-"
+                if fileTitle.startswith(fingerprint):
+                    rootelem = resitem
+                    myregex = re.escape(fingerprint) + "(.*?)" + re.escape(".tsv")
+                    fileTitle = "Occorrenze normalizzate "+ re.sub(myregex, "\g<1>", fileTitle)
+                fingerprint = sessionname+"-misure_lessicometriche-"
+                if fileTitle.startswith(fingerprint):
+                    rootelem = resitem
+                    myregex = re.escape(fingerprint) + "(.*?)" + re.escape(".tsv")
+                    fileTitle = "Misure lessicometriche "+ re.sub(myregex, "\g<1>", fileTitle)
+                fingerprint = sessionname+"-densitalessicale-"
+                if fileTitle.startswith(fingerprint):
+                    rootelem = resitem
+                    myregex = re.escape(fingerprint) + "(.*?)" + re.escape(".tsv")
+                    fileTitle = "Densità lessicale "+ re.sub(myregex, "\g<1>", fileTitle)
+                #
+            tritem = QTreeWidgetItem(rootelem)
+            tritem.setText(0,fileTitle)
+            tritem.setText(1,fileName)
+            tritem.setExpanded(True)
+        resitem.setExpanded(True)
+        origitem.setExpanded(True)
+        otheritem.setExpanded(True)
+        for i in range(self.w.progetto.columnCount()):
+            self.w.progetto.resizeColumnToContents(i)
+
+    def showProjectFiles(self):
+        if self.w.actionFile_del_progetto.isChecked():
+            totSw = self.w.splitter.width()
+            self.w.splitter.setSizes([totSw*0.7, totSw*0.3])
+            self.w.groupBox_progetto.setVisible(True)
+            self.updateProject()
+        else:
+            self.w.groupBox_progetto.setVisible(False)
+
+    def setcss(self):
+        css = ""
+        css = css + "QTreeView::branch:has-siblings:!adjoins-item {\n"
+        css = css + "border-image: url("+os.path.abspath(os.path.dirname(sys.argv[0]))+"/icons/stylesheet-vline.png) 0;\n"
+        css = css + "}\n"
+        css = css + "QTreeView::branch:has-siblings:adjoins-item {\n"
+        css = css + "border-image: url("+os.path.abspath(os.path.dirname(sys.argv[0]))+"/icons/stylesheet-branch-more.png) 0;\n"
+        css = css + "}\n"
+        css = css + "QTreeView::branch:!has-children:!has-siblings:adjoins-item {\n"
+        css = css + "border-image: url("+os.path.abspath(os.path.dirname(sys.argv[0]))+"/icons/stylesheet-branch-end.png) 0;\n"
+        css = css + "}\n"
+        css = css + "QTreeView::branch:has-children:!has-siblings:closed,\n"
+        css = css + "QTreeView::branch:closed:has-children:has-siblings {\n"
+        css = css + "border-image: none;\n"
+        css = css + "image: url("+os.path.abspath(os.path.dirname(sys.argv[0]))+"/icons/stylesheet-branch-closed.png);\n"
+        css = css + "}\n"
+        css = css + "QTreeView::branch:open:has-children:!has-siblings,\n"
+        css = css + "QTreeView::branch:open:has-children:has-siblings  {\n"
+        css = css + "border-image: none;\n"
+        css = css + "image: url("+os.path.abspath(os.path.dirname(sys.argv[0]))+"/icons/stylesheet-branch-open.png);\n"
+        css = css + "}"
+        self.w.progetto.setStyleSheet(css)
 
     def apriProgetto(self):
         self.loadSession()
@@ -266,6 +430,12 @@ class MainWindow(QMainWindow):
 
     def contaoccorrenze(self):
         self.Corpus.contaoccorrenze()
+
+    def contapersone(self):
+        self.Corpus.contapersone()
+
+    def occorrenzenormalizzate(self):
+        self.Corpus.occorrenzenormalizzate()
 
     def contaoccorrenzefiltrate(self):
         self.Corpus.contaoccorrenzefiltrate()
@@ -542,6 +712,15 @@ class MainWindow(QMainWindow):
     #    except:
     #        print("Error editing cell")
     #        self.updateCorpus()
+
+    def menualltoken(self):
+        self.w.allToken.setChecked(self.w.actionTutti_i_token.isChecked())
+        self.updateCorpus()
+
+    def setalltokens(self):
+        self.Corpus.setStart(self.w.daToken.value())
+        self.Corpus.setEnd(self.w.aToken.value())
+        self.Corpus.setAllTokens(self.w.allToken.isChecked())
 
     def updateCorpus(self):
         self.Corpus.updateCorpus()

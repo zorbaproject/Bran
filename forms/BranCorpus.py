@@ -17,6 +17,7 @@ import platform
 import mmap
 import random
 import math
+from shutil import copyfile
 
 arch = platform.architecture()[0]
 
@@ -104,6 +105,7 @@ class BranCorpus(QObject):
         self.alreadyChecked = False
         self.ImportingFile = False
         self.OnlyVisibleRows = False
+        self.core_killswitch = False
         self.sessionFile = ""
         self.sessionDir = "."
         self.mycfgfile = QDir.homePath() + "/.brancfg"
@@ -129,8 +131,9 @@ class BranCorpus(QObject):
 
     def setAllTokens(self, value):
         self.allToken = value
-        self.setStart(0)
-        self.setEnd(len(self.corpus))
+        if value:
+            self.setStart(0)
+            self.setEnd(len(self.corpus))
 
     def setFilter(self, text):
         self.filter = text
@@ -165,10 +168,13 @@ class BranCorpus(QObject):
         self.sessionFile = ""
         self.sessionDir = "."
         self.corpus = []
-        for row in range(self.corpuswidget.rowCount()):
-            self.corpuswidget.removeRow(0)
-            if row<100 or row%100==0:
-                QApplication.processEvents()
+        try:
+            for row in range(self.corpuswidget.rowCount()):
+                self.corpuswidget.removeRow(0)
+                if row<100 or row%100==0:
+                    QApplication.processEvents()
+        except:
+            print("Session closed")
         #self.setWindowTitle("Bran")
 
     def loadFromTint(self, tintaddr = "localhost"):
@@ -177,6 +183,7 @@ class BranCorpus(QObject):
         if len(fileNames)<1:
             return
         if self.language == "it-IT":
+            self.copyOrigFiles(fileNames)
             self.TCThread = tint.TintCorpus(self.corpuswidget, fileNames, self.corpuscols, self.TintAddr)
             self.TCThread.outputcsv = self.sessionFile
             self.TCThread.finished.connect(self.txtloadingstopped)
@@ -193,12 +200,33 @@ class BranCorpus(QObject):
             return
         udpipe = self.mycfg["udpipe"]
         model = self.mycfg["udpipemodels"][self.language]
+        self.copyOrigFiles(fileNames)
         self.UDThread = UDCorpus(self.corpuswidget, fileNames, self.corpuscols, udpipe, model, self.language)
         self.UDThread.outputcsv = self.sessionFile
         self.UDThread.finished.connect(self.txtloadingstopped)
         self.UDThread.start()
         #else if self.language == "en-US":
         #https://www.datacamp.com/community/tutorials/stemming-lemmatization-python
+
+    def copyOrigFiles(self, fileNames):
+        oldcount = 0
+        mydir = os.path.dirname(self.sessionFile)
+        if os.path.isdir(mydir):
+            for tfile in os.listdir(mydir):
+                print(tfile)
+                if tfile.startswith(os.path.basename(self.sessionFile) + "-orig-"):
+                    tmpcount = re.sub(".*\-orig\-(.*?)\-.*","\g<1>", tfile)
+                    print(tmpcount)
+                    try:
+                        if int(tmpcount) > oldcount:
+                            oldcount = int(tmpcount)
+                    except:
+                        continue
+        oldcount = oldcount+1
+        for fileName in fileNames:
+            fileTitle = os.path.basename(fileName)
+            dst = self.sessionFile + "-orig-" + str(oldcount) + "-" +re.sub("\..*?$","", fileTitle).replace("-","_") + ".txt"
+            copyfile(fileName, dst)
 
     def loadTextFromCSV(self):
         fileNames = QFileDialog.getOpenFileNames(self.corpuswidget, "Apri file CSV", self.sessionDir, "CSV files (*.tsv *.csv)")[0]
@@ -295,8 +323,8 @@ class BranCorpus(QObject):
     def loadCSV(self):
         if self.ImportingFile == False:
             fileNames = QFileDialog.getOpenFileNames(self.corpuswidget, "Apri file CSV", self.sessionDir, "File CSV (*.tsv *.txt *.csv)")[0]
-            self.ImportingFile = True
-            self.CSVloader(fileNames) #self.CSVloader(fileNames, self.Progrdialog)
+            self.core_appendcorpus(fileNames)
+            self.txtloadingstopped()
 
     def CSVloader(self, fileNames):
         fileID = 0
@@ -356,6 +384,7 @@ class BranCorpus(QObject):
                 self.ImportingFile = True
                 fileNames = ['']
                 fileNames[0] = self.sessionFile
+                self.corpus = []
                 self.corpuswidget.setRowCount(0)
                 print("Reading CSV")
                 self.CSVloader(fileNames)
@@ -731,57 +760,49 @@ class BranCorpus(QObject):
     def deselectAllCells(self):
         self.corpuswidget.clearSelection()
 
+    def showResults(self, output):
+        TBdialog = tableeditor.Form(self.corpuswidget, self.mycfg)
+        TBdialog.sessionDir = self.sessionDir
+        lineI = 0
+        with open(output, "r", encoding='utf-8') as ins:
+            for line in ins:
+                colI = 0
+                for col in line.replace("\n","").replace("\r","").split(self.separator):
+                    if lineI == 0:
+                        TBdialog.addcolumn(col, colI)
+                    else:
+                        if colI == 0:
+                            TBdialog.addlinetotable(col, 0)
+                        else:
+                            TBdialog.setcelltotable(col, lineI-1, colI)
+                    colI = colI +1
+                lineI = lineI +1
+        #self.Progrdialog.accept()
+        TBdialog.show()
+
     def contaoccorrenze(self):
         thisname = []
         for col in self.corpuscols:
             thisname.append(self.corpuscols[col][1])
         column = QInputDialog.getItem(self.corpuswidget, "Scegli la colonna", "Su quale colonna devo contare le occorrenze?",thisname,current=0,editable=False)
-        col = thisname.index(column[0])
-        TBdialog = tableeditor.Form(self.corpuswidget, self.mycfg)
-        TBdialog.sessionDir = self.sessionDir
-        TBdialog.addcolumn(column[0], 0)
-        TBdialog.addcolumn("Occorrenze", 1)
-        self.Progrdialog = progress.Form()
-        self.Progrdialog.show()
-        totallines = len(self.corpus)
-        startline = 0
-        if self.OnlyVisibleRows:
-            totallines = self.aToken
-            startline = self.daToken
-        self.progressUpdated.connect(self.Progrdialog.setValue)
-        self.Progrdialog.setBasetext("Sto conteggiando la riga numero ")
-        self.Progrdialog.setTotal(totallines)
-        for row in range(startline, totallines):
-            if self.OnlyVisibleRows and self.corpuswidget.isRowHidden(row-startline):
-                continue
-            #self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
-            #self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
-            #QApplication.processEvents()
-            self.progressUpdated.emit(row)
-            if row<100 or row % 100 == 0:
-                QApplication.processEvents()
-            if self.Progrdialog.w.annulla.isChecked():
-                return
-            try:
-                thistext = self.corpus[row][col]
-                try:
-                    if col == self.corpuscols["pos"][0]:
-                        thistext = self.legendaPos[thistext][0]
-                except:
-                    thistext = self.corpus[row][col]
-            except:
-                thistext = ""
-            tbrow = TBdialog.finditemincolumn(thistext, col=0, matchexactly = True, escape = True)
-            if tbrow>=0:
-                tbval = int(TBdialog.w.tableWidget.item(tbrow,1).text())+1
-                TBdialog.setcelltotable(str(tbval), tbrow, 1)
-            else:
-                TBdialog.addlinetotable(thistext, 0)
-                tbrow = TBdialog.w.tableWidget.rowCount()-1
-                TBdialog.setcelltotable("1", tbrow, 1)
-        self.Progrdialog.accept()
-        #TBdialog.exec()
-        TBdialog.show()
+        mycol = thisname.index(column[0])
+        myrecovery = False
+        hname = str(mycol)
+        hkey = str(mycol)
+        for key in self.corpuscols:
+            if mycol == self.corpuscols[key][0]:
+                hname = self.corpuscols[key][1]
+                hkey = key
+        output = self.sessionFile + "-occorrenze-" + hkey + ".tsv"
+        recovery = output + ".tmp"
+        totallines = self.core_linescount(self.sessionFile)
+        self.core_killswitch = False
+        self.Progrdialog = progress.ProgressDialog(self, recovery, totallines)
+        self.Progrdialog.start()
+        self.core_calcola_occorrenze(mycol, myrecovery)
+        self.Progrdialog.cancelled = True
+        self.core_killswitch = False
+        self.showResults(output)
 
     def contaoccorrenzefiltrate(self):
         thisname = []
@@ -793,56 +814,204 @@ class BranCorpus(QObject):
         fcol = self.filtrimultiplienabled
         Fildialog = creafiltro.Form(self.corpus, self.corpuscols, self.corpuswidget)
         Fildialog.sessionDir = self.sessionDir
-        Fildialog.w.filter.setText("pos=A.*||pos=S.*")
+        Fildialog.w.filter.setText("pos=AD.*||pos=NOUN")
         Fildialog.updateTable()
         Fildialog.exec()
         if Fildialog.w.filter.text() == "":
             return
-        allfilters = Fildialog.w.filter.text().split("||")
+        filtertext = Fildialog.w.filter.text()
+        #allfilters = filtertext.split("||")
+        mycol = thisname.index(column[0])
+        myrecovery = False
+        hname = str(mycol)
+        hkey = str(mycol)
+        for key in self.corpuscols:
+            if col == self.corpuscols[key][0]:
+                hname = self.corpuscols[key][1]
+                hkey = key
+        cleanedfilter = re.sub("[^a-zA-Z0-9]", "", filtertext)
+        fcol = self.filtrimultiplienabled
+        output = self.sessionFile + "-occorrenze_filtrate-" + hkey + "-" + cleanedfilter + ".tsv"
+        recovery = output + ".tmp"
+        totallines = self.core_linescount(self.sessionFile)
+        self.core_killswitch = False
+        self.Progrdialog = progress.ProgressDialog(self, recovery, totallines)
+        self.Progrdialog.start()
+        self.core_occorrenzeFiltrate(mycol, filtertext, myrecovery)
+        self.Progrdialog.cancelled = True
+        self.core_killswitch = False
+        self.showResults(output)
+
+    def contapersone(self):
+        thisname = []
+        #0 Tutto
+        #1 solo persona numero e genere
+        #2 solo persona e numero
+        #3 solo numero genere e determinato
+        #4 solo genere
+        #5 solo numero
+        thisname.append("Tutto")
+        thisname.append("Persona, numero, e genere")
+        thisname.append("Persona e numero")
+        thisname.append("Numero, genere, e determinatezza")
+        thisname.append("Genere")
+        thisname.append("Numero")
+        column = QInputDialog.getItem(self.corpuswidget, "Scegli il livello", "Che livello di dettaglio vuoi?",thisname,current=0,editable=False)
+        level = thisname.index(column[0])
+        myrecovery = False
+        try:
+            mylevel = int(level)
+        except:
+            mylevel = 2
+        QMessageBox.information(self.corpuswidget, "Filtro", "Ora puoi indicare un filtro per selezionare cercare solo alcuni tipi di parole. Per esempio, con il filtro pos=DET&&feat=.*Definite=Def.* verranno selezionati solo gli articoli determinativi. Se lasci il filtro vuoto, verranno analizzate tutte le parole del corpus.")
+        fcol = self.filtrimultiplienabled
+        Fildialog = creafiltro.Form(self.corpus, self.corpuscols, self.corpuswidget)
+        Fildialog.sessionDir = self.sessionDir
+        Fildialog.w.filter.setText("")
+        #Definite=Def|Gender=Masc|Number=Plur|PronType=Art
+        Fildialog.updateTable()
+        Fildialog.exec()
+        filtertext = Fildialog.w.filter.text()
+        if filtertext == "":
+            filtertext = "pos=.*"
+        mycol = thisname.index(column[0])
+        myrecovery = False
+        cleanedfilter = re.sub("[^a-zA-Z0-9]", "", filtertext)
+        fcol = self.filtrimultiplienabled
+        output = self.sessionFile + "-contapersone-"+str(cleanedfilter)+"-"+str(mylevel)+".tsv"
+        recovery = output + ".tmp"
+        totallines = self.core_linescount(self.sessionFile)
+        self.core_killswitch = False
+        self.Progrdialog = progress.ProgressDialog(self, recovery, totallines)
+        self.Progrdialog.start()
+        self.core_contapersone(filtertext, mylevel, myrecovery)
+        self.Progrdialog.cancelled = True
+        self.core_killswitch = False
+        self.showResults(output)
+
+    def coOccorrenze(self):
+        parola = QInputDialog.getText(self.corpuswidget, "Scegli la parola", "Indica la parola che vuoi cercare:", QLineEdit.Normal, "")[0]
+        thisname = []
+        for col in self.corpuscols:
+            thisname.append(self.corpuscols[col][1])
+        column = QInputDialog.getItem(self.corpuswidget, "Scegli la colonna", "In quale colonna devo cercare il testo?",thisname,current=1,editable=False)
+        mycol = thisname.index(column[0])
+        myrange = int(QInputDialog.getInt(self.corpuswidget, "Indica il range", "Quante parole, prima e dopo, vuoi leggere?")[0])
+        rangestr = str(myrange)
+        myfilter = str(list(self.corpuscols)[mycol]) +"="+parola
+        fcol = self.filtrimultiplienabled
+        Fildialog = creafiltro.Form(self.corpus, self.corpuscols, self.corpuswidget)
+        Fildialog.sessionDir = self.sessionDir
+        Fildialog.w.filter.setText(myfilter) #"lemma=essere&&pos[1,-1]=SP||lemma[-1]=essere&&pos=S"
+        Fildialog.updateTable()
+        Fildialog.exec()
+        if Fildialog.w.filter.text() != "":
+            self.filter = Fildialog.w.filter.text()
         TBdialog = tableeditor.Form(self.corpuswidget, self.mycfg)
         TBdialog.sessionDir = self.sessionDir
-        TBdialog.addcolumn(column[0], 0)
-        self.Progrdialog = progress.Form()
-        self.Progrdialog.show()
-        for myfilter in allfilters:
-            TBdialog.addcolumn(myfilter, 1)
-        totallines = len(self.corpus)
-        startline = 0
-        if self.OnlyVisibleRows:
-            totallines = self.aToken
-            startline = self.daToken
-        for row in range(startline, totallines):
-            if self.OnlyVisibleRows and self.corpuswidget.isRowHidden(row-startline):
-                continue
-            self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
-            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
-            QApplication.processEvents()
-            if self.Progrdialog.w.annulla.isChecked():
-                return
-            try:
-                thistext = self.corpus[row][col]
-                try:
-                    if col == self.corpuscols["pos"][0]:
-                        thistext = self.legendaPos[thistext][0]
-                except:
-                    thistext = self.corpus[row][col]
-            except:
-                thistext = ""
-            for ifilter in range(len(allfilters)):
-                if self.applicaFiltro(row, fcol, allfilters[ifilter]):
-                    tbrow = TBdialog.finditemincolumn(thistext, col=0, matchexactly = True, escape = True)
-                    if tbrow>=0:
-                        try:
-                            tbval = int(TBdialog.w.tableWidget.item(tbrow,ifilter+1).text())+1
-                        except:
-                            tbval = 1
-                        TBdialog.setcelltotable(str(tbval), tbrow, ifilter+1)
-                    else:
-                        TBdialog.addlinetotable(thistext, 0)
-                        tbrow = TBdialog.w.tableWidget.rowCount()-1
-                        TBdialog.setcelltotable("1", tbrow, ifilter+1)
-        self.Progrdialog.accept()
-        TBdialog.show()
+        TBdialog.addcolumn("Segmento", 0)
+        TBdialog.addcolumn("Occorrenze", 1)
+        ret = QMessageBox.question(self.corpuswidget,'Domanda', "Vuoi ignorare la punteggiatura?", QMessageBox.Yes | QMessageBox.No)
+        if ret == QMessageBox.Yes:
+            myignore = self.ignorepos
+        else:
+            myignore = []
+        filtertext = Fildialog.w.filter.text()
+        myrecovery = False
+        hname = str(mycol)
+        hkey = str(mycol)
+        for key in self.corpuscols:
+            if mycol == self.corpuscols[key][0]:
+                hname = self.corpuscols[key][1]
+                hkey = key
+        cleanedfilter = re.sub("[^a-zA-Z0-9]", "", filtertext)
+        fcol = self.filtrimultiplienabled
+        output = self.sessionFile + "-coOccorrenze-" + hkey + "-" + cleanedfilter + ".tsv"
+        recovery = output + ".tmp"
+        totallines = self.core_linescount(self.sessionFile)
+        self.core_killswitch = False
+        self.Progrdialog = progress.ProgressDialog(self, recovery, totallines)
+        self.Progrdialog.start()
+        self.core_calcola_coOccorrenze(parola, mycol, myrange, True, myrecovery, filtertext)
+        self.Progrdialog.cancelled = True
+        self.core_killswitch = False
+        self.showResults(output)
+
+    def concordanze(self):
+        parola = QInputDialog.getText(self.corpuswidget, "Scegli la parola", "Indica la parola che vuoi cercare:", QLineEdit.Normal, "")[0]
+        thisname = []
+        for col in self.corpuscols:
+            thisname.append(self.corpuscols[col][1])
+        column = QInputDialog.getItem(self.corpuswidget, "Scegli la colonna", "In quale colonna devo cercare il testo?",thisname,current=1,editable=False)
+        mycol = thisname.index(column[0])
+        myrange = int(QInputDialog.getInt(self.corpuswidget, "Indica il range", "Quante parole, prima e dopo, vuoi leggere?")[0])
+        rangestr = str(myrange)
+        myfilter = str(list(self.corpuscols)[mycol]) +"="+parola
+        fcol = self.filtrimultiplienabled
+        Fildialog = creafiltro.Form(self.corpus, self.corpuscols, self.corpuswidget)
+        Fildialog.sessionDir = self.sessionDir
+        Fildialog.w.filter.setText(myfilter) #"lemma=essere&&pos[1,-1]=SP||lemma[-1]=essere&&pos=S"
+        Fildialog.updateTable()
+        Fildialog.exec()
+        if Fildialog.w.filter.text() != "":
+            self.filter = Fildialog.w.filter.text()
+        TBdialog = tableeditor.Form(self.corpuswidget, self.mycfg)
+        TBdialog.sessionDir = self.sessionDir
+        TBdialog.addcolumn("Segmento", 0)
+        TBdialog.addcolumn("Occorrenze", 1)
+        ret = QMessageBox.question(self.corpuswidget,'Domanda', "Vuoi ignorare la punteggiatura?", QMessageBox.Yes | QMessageBox.No)
+        if ret == QMessageBox.Yes:
+            myignore = self.ignorepos
+        else:
+            myignore = []
+        filtertext = Fildialog.w.filter.text()
+        myrecovery = False
+        hname = str(mycol)
+        hkey = str(mycol)
+        for key in self.corpuscols:
+            if mycol == self.corpuscols[key][0]:
+                hname = self.corpuscols[key][1]
+                hkey = key
+        cleanedfilter = re.sub("[^a-zA-Z0-9]", "", filtertext)
+        fcol = self.filtrimultiplienabled
+        output = self.sessionFile + "-concordanze-" + hkey + "-" + cleanedfilter + ".tsv"
+        recovery = output + ".tmp"
+        totallines = self.core_linescount(self.sessionFile)
+        self.core_killswitch = False
+        self.Progrdialog = progress.ProgressDialog(self, recovery, totallines)
+        self.Progrdialog.start()
+        self.core_calcola_concordanze(parola, mycol, myrange, True, myrecovery, filtertext)
+        self.Progrdialog.cancelled = True
+        self.core_killswitch = False
+        self.showResults(output)
+
+    def occorrenzenormalizzate(self):
+        thisname = []
+        for col in self.corpuscols:
+            thisname.append(self.corpuscols[col][1])
+        column = QInputDialog.getItem(self.corpuswidget, "Scegli la colonna", "Se vuoi estrarre il dizionario devi cercare nella colonna dei lemmi. Ma puoi anche scegliere di ottenere le statistiche su altre colonne, come la Forma grafica.",thisname,current=self.corpuscols['token'][0],editable=False)
+        mycol = thisname.index(column[0])
+        ret = QMessageBox.question(self.corpuswidget,'Domanda', "Vuoi ignorare la punteggiatura?", QMessageBox.Yes | QMessageBox.No)
+        doignorepunct = False
+        if ret == QMessageBox.Yes:
+            doignorepunct = True
+        myrecovery = False
+        hname = str(mycol)
+        hkey = str(mycol)
+        for key in self.corpuscols:
+            if mycol == self.corpuscols[key][0]:
+                hname = self.corpuscols[key][1]
+                hkey = key
+        output = self.sessionFile + "-occorrenze_normalizzate-" + hkey + ".tsv"
+        recovery = output + ".tmp"
+        totallines = self.core_linescount(self.sessionFile)
+        self.core_killswitch = False
+        self.Progrdialog = progress.ProgressDialog(self, recovery, totallines)
+        self.Progrdialog.start()
+        self.core_occorrenze_normalizzate(mycol, myrecovery, doignorepunct)
+        self.Progrdialog.cancelled = True
+        self.core_killswitch = False
+        self.showResults(output)
 
     def orderVerbMorf(self, text, ignoreperson = False):
         if not "VerbForm" in text:
@@ -882,99 +1051,25 @@ class BranCorpus(QObject):
         return mytext
 
     def contaverbi(self):
-        poscol = self.corpuscols["pos"][0] #thisname.index(column[0])
-        morfcol = self.corpuscols["feat"][0]
-        frasecol = self.corpuscols["IDphrase"][0]
         ignoreperson = False
         ret = QMessageBox.question(self.corpuswidget,'Domanda', "Vuoi ignorare persona, numero, genere, e caratteristica clitica dei verbi?", QMessageBox.Yes | QMessageBox.No)
         if ret == QMessageBox.Yes:
             ignoreperson = True
-        TBdialog = tableeditor.Form(self.corpuswidget, self.mycfg)
-        TBdialog.sessionDir = self.sessionDir
-        TBdialog.addcolumn("Modo+Tempo", 0)
-        TBdialog.addcolumn("Occorrenze", 1)
-        TBdialog.addcolumn("Percentuali", 1)
-        self.Progrdialog = progress.Form()
-        self.Progrdialog.show()
-        totallines = len(self.corpus)
-        startline = 0
-        if self.OnlyVisibleRows:
-            totallines = self.aToken
-            startline = self.daToken
-        for row in range(startline, totallines):
-            if self.OnlyVisibleRows and self.corpuswidget.isRowHidden(row-startline):
-                continue
-            self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
-            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
-            QApplication.processEvents()
-            if self.Progrdialog.w.annulla.isChecked():
-                return
-            if row < startline:
-                continue
-            try:
-                thispos = self.legendaPos[self.corpus[row][poscol]][0]
-                thisphrase = self.corpus[row][frasecol]
-            except:
-                thispos = ""    
-                thisphrase = "0"
-            thistext = ""
-            thistext2 = ""
-            thistext3 = ""
-            #Filtro per trovare i verbi a 3 come "è stato fatto": feat=.*VerbForm.*Part.*&&feat[1]=.*VerbForm.*Part.*||feat=.*VerbForm.*Part.*&&feat[-1]=.*VerbForm.*Part.*||feat=.*VerbForm.*&&feat[1]=.*VerbForm.*Part.*&&feat[2]=.*VerbForm.*Part.*
-            if "verbo" in thispos:
-                thistext = self.corpus[row][morfcol]
-            if "ausiliare" in thispos:
-                for ind in range(1,4):
-                    try:
-                        tmpos = self.legendaPos[self.corpus[row+ind][poscol]][0]
-                        tmpphrase = self.corpus[row+ind][frasecol]
-                    except:
-                        tmpos = ""
-                        tmpphrase = "0"
-                    #i verbi consecutivi vanno bene finché sono nella stessa frase
-                    if tmpphrase != thisphrase:
-                        break
-                    if "verbo" in tmpos:
-                        thistext2 = thistext2 + self.corpus[row+ind][morfcol] + "+"
-                    startline = row+ind+1
-                if len(thistext2.split("+"))>1:
-                    thistext3 = thistext2.split("+")[1]
-                    thistext2 = thistext2.split("+")[0]
-            if len(thistext) >= 3:
-                thistext = self.orderVerbMorf(thistext, ignoreperson) + "+"
-            if len(thistext2) >= 3:
-                thistext2 = self.orderVerbMorf(thistext2, ignoreperson) + "+"
-            if len(thistext3) >= 3:
-                thistext3 = self.orderVerbMorf(thistext3, ignoreperson) #+ "+"
-            if thistext != "":
-                thistext = thistext + thistext2 + thistext3
-                if ignoreperson:
-                    thistext = thistext.replace("/Clitic=Yes", "")
-            if thistext.endswith("+"):
-                thistext = thistext[0:-1]
-            if thistext != "":
-                tbrow = TBdialog.finditemincolumn(thistext, col=0, matchexactly = True, escape = True)
-                if tbrow>=0:
-                    tbval = int(TBdialog.w.tableWidget.item(tbrow,1).text())+1
-                    TBdialog.setcelltotable(str(tbval), tbrow, 1)
-                else:
-                    TBdialog.addlinetotable(thistext, 0)
-                    tbrow = TBdialog.w.tableWidget.rowCount()-1
-                    TBdialog.setcelltotable("1", tbrow, 1)
-        #calcolo le percentuali
-        totallines = TBdialog.w.tableWidget.rowCount()
-        verbitotali = 0
-        for row in range(TBdialog.w.tableWidget.rowCount()):
-            verbitotali = verbitotali + int(TBdialog.w.tableWidget.item(row,1).text())
-        for row in range(TBdialog.w.tableWidget.rowCount()):
-            self.Progrdialog.w.testo.setText("Sto calcolando le percentuali su "+str(row))
-            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
-            QApplication.processEvents()
-            ratio = (float(TBdialog.w.tableWidget.item(row,1).text())/float(verbitotali)*100)
-            ratios = f'{ratio:.3f}'
-            TBdialog.setcelltotable(ratios, row, 2)
-        self.Progrdialog.accept()
-        TBdialog.show()
+        contigui = False
+        ret = QMessageBox.question(self.corpuswidget,'Domanda', "Vuoi che i verbi composti siano sempre contigui (es: \"è anche stato\" non è contiguo)?", QMessageBox.Yes | QMessageBox.No)
+        if ret == QMessageBox.Yes:
+            contigui = True
+        myrecovery = False
+        output = self.sessionFile + "-contaverbi.tsv"
+        recovery = output + ".tmp"
+        totallines = self.core_linescount(self.sessionFile)
+        self.core_killswitch = False
+        self.Progrdialog = progress.ProgressDialog(self, recovery, totallines)
+        self.Progrdialog.start()
+        self.core_contaverbi(ignoreperson, contigui, myrecovery)
+        self.Progrdialog.cancelled = True
+        self.core_killswitch = False
+        self.showResults(output)
 
     def trovaripetizioni(self):
         Repetdialog = ripetizioni.Form(self.corpuswidget)
@@ -1081,7 +1176,7 @@ class BranCorpus(QObject):
         for row in range(startrow, endrow):
             ftext = self.filter
             if filtercol != None:
-                if self.OnlyVisibleRows and self.applicaFiltro(row, filtercol, ftext, table):
+                if self.OnlyVisibleRows and not self.applicaFiltro(row, filtercol, ftext, table):
                     continue
             Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
             Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
@@ -1207,104 +1302,27 @@ class BranCorpus(QObject):
 
     def densitalessico(self):
         col = self.corpuscols['pos'][0]
-        TBdialog = tableeditor.Form(self.corpuswidget, self.mycfg)
-        TBdialog.sessionDir = self.sessionDir
-        TBdialog.addcolumn("Part of Speech", 0)
-        TBdialog.addcolumn("Macrocategoria", 1)
-        TBdialog.addcolumn("Occorrenze", 2)
-        TBdialog.addcolumn("Percentuale", 3)
-        #calcolo le occorrenze del pos
-        self.Progrdialog = progress.Form()
-        self.Progrdialog.show()
-        mytypes = {}
-        totallines = len(self.corpus)
-        startline = 0
-        if self.OnlyVisibleRows:
-            totallines = self.aToken
-            startline = self.daToken
-        for row in range(startline, totallines):
-            if self.OnlyVisibleRows and self.corpuswidget.isRowHidden(row-startline):
-                continue
-            self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
-            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
-            QApplication.processEvents()
-            if self.Progrdialog.w.annulla.isChecked():
-                return
-            try:
-                thistextO = self.corpus[row][col]
-                thistext = self.legendaPos[thistextO][0]
-                thisposc = self.legendaPos[self.corpus[row][self.corpuscols['pos'][0]]][1]
-                try:
-                    mytypes[thisposc] = mytypes[thisposc] +1
-                except:
-                    mytypes[thisposc] = 1
-            except:
-                thistext = ""
-                thistextO = ""
-            if thistext != "":
-                tbrow = TBdialog.finditemincolumn(thistext, col=0, matchexactly = True, escape = True)
-                if tbrow>=0:
-                    tbval = int(TBdialog.w.tableWidget.item(tbrow,2).text())+1
-                    TBdialog.setcelltotable(str(tbval), tbrow, 2)
-                else:
-                    TBdialog.addlinetotable(thistext, 0)
-                    tbrow = TBdialog.w.tableWidget.rowCount()-1
-                    TBdialog.setcelltotable(self.legendaPos[thistextO][1], tbrow, 1)
-                    TBdialog.setcelltotable("1", tbrow, 2)
-        #calcolo le somme di parole piene e vuote
-        totallines = TBdialog.w.tableWidget.rowCount()
-        paroletotali = 0
-        parolepiene = 0
-        parolevuote = 0
-        parolenone = 0
-        for row in range(TBdialog.w.tableWidget.rowCount()):
-            self.Progrdialog.w.testo.setText("Sto sommando la riga numero "+str(row))
-            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
-            QApplication.processEvents()
-            thistext = TBdialog.w.tableWidget.item(row,0).text()
-            for key in self.legendaPos:
-                if thistext == self.legendaPos[key][0]:
-                    if "piene" == self.legendaPos[key][2]:
-                        paroletotali = paroletotali + int(TBdialog.w.tableWidget.item(row,2).text())
-                        parolepiene = parolepiene + int(TBdialog.w.tableWidget.item(row,2).text())
-                        break
-                    if "vuote" == self.legendaPos[key][2]:
-                        paroletotali = paroletotali + int(TBdialog.w.tableWidget.item(row,2).text())
-                        parolevuote = parolevuote + int(TBdialog.w.tableWidget.item(row,2).text())
-                        break
-                    if "none" == self.legendaPos[key][2]:
-                        paroletotali = paroletotali + int(TBdialog.w.tableWidget.item(row,2).text())
-                        parolenone = parolenone + int(TBdialog.w.tableWidget.item(row,2).text())
-                        break
-        #presento le macrocategorie
-        for key in mytypes:
-            TBdialog.addlinetotable(key, 1)
-            tbrow = TBdialog.w.tableWidget.rowCount()-1
-            TBdialog.setcelltotable(str(mytypes[key]), tbrow, 2)
-        TBdialog.addlinetotable("Parole totali", 0)
-        tbrow = TBdialog.w.tableWidget.rowCount()-1
-        TBdialog.setcelltotable(str(paroletotali), tbrow, 2)
-        TBdialog.addlinetotable("Parole piene", 0)
-        tbrow = TBdialog.w.tableWidget.rowCount()-1
-        TBdialog.setcelltotable(str(parolepiene), tbrow, 2)
-        TBdialog.addlinetotable("Parole vuote", 0)
-        tbrow = TBdialog.w.tableWidget.rowCount()-1
-        TBdialog.setcelltotable(str(parolevuote), tbrow, 2)
-        TBdialog.addlinetotable("Altri tokens", 0)
-        tbrow = TBdialog.w.tableWidget.rowCount()-1
-        TBdialog.setcelltotable(str(parolenone), tbrow, 2)
-        #calcolo le percentuali
-        for row in range(TBdialog.w.tableWidget.rowCount()):
-            self.Progrdialog.w.testo.setText("Sto calcolando le percentuali su "+str(row))
-            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
-            QApplication.processEvents()
-            ratio = (float(TBdialog.w.tableWidget.item(row,2).text())/float(paroletotali)*100)
-            ratios = f'{ratio:.3f}'
-            TBdialog.setcelltotable(ratios, row, 3)
-        #mostro i risultati
-        self.Progrdialog.accept()
-        TBdialog.show()
-
+        thisname = []
+        thisname.append("Dettagliato")
+        thisname.append("Macrocategorie")
+        thisname.append("Parole piene e vuote")
+        column = QInputDialog.getItem(self.corpuswidget, "Scegli la colonna", "Che livello di dettaglio vuoi?",thisname,current=2,editable=False)
+        level = thisname.index(column[0])
+        myrecovery = False
+        try:
+            mylevel = int(level)
+        except:
+            mylevel = 2
+        output = self.sessionFile + "-densitalessicale-" + str(mylevel) + ".tsv"
+        recovery = output + ".tmp"
+        totallines = self.core_linescount(self.sessionFile)
+        self.core_killswitch = False
+        self.Progrdialog = progress.ProgressDialog(self, recovery, totallines)
+        self.Progrdialog.start()
+        self.core_densitalessico(mylevel, myrecovery)
+        self.Progrdialog.cancelled = True
+        self.core_killswitch = False
+        self.showResults(output)
 
     def delselected(self):
         self.Progrdialog = progress.Form()
@@ -1527,135 +1545,6 @@ class BranCorpus(QObject):
         self.Progrdialog.accept()
         self.updateCorpus()
 
-    def concordanze(self):
-        parola = QInputDialog.getText(self.corpuswidget, "Scegli la parola", "Indica la parola che vuoi cercare:", QLineEdit.Normal, "")[0]
-        thisname = []
-        for col in self.corpuscols:
-            thisname.append(self.corpuscols[col][1])
-        column = QInputDialog.getItem(self.corpuswidget, "Scegli la colonna", "In quale colonna devo cercare il testo?",thisname,current=1,editable=False)
-        col = thisname.index(column[0])
-        myrange = int(QInputDialog.getInt(self.corpuswidget, "Indica il range", "Quante parole, prima e dopo, vuoi leggere?")[0])
-        rangestr = str(myrange)
-        #myfilter = str(list(self.corpuscols)[col]) + "[" + rangestr + "]" +"="+parola
-        myfilter = str(list(self.corpuscols)[col]) +"="+parola
-        fcol = self.filtrimultiplienabled
-        Fildialog = creafiltro.Form(self.corpus, self.corpuscols, self.corpuswidget)
-        Fildialog.sessionDir = self.sessionDir
-        Fildialog.w.filter.setText(myfilter) #"lemma=essere&&pos[1,-1]=SP||lemma[-1]=essere&&pos=S"
-        Fildialog.updateTable()
-        Fildialog.exec()
-        if Fildialog.w.filter.text() != "":
-            self.filter = Fildialog.w.filter.text()
-        #self.dofiltra()
-        TBdialog = tableeditor.Form(self.corpuswidget, self.mycfg)
-        TBdialog.sessionDir = self.sessionDir
-        TBdialog.addcolumn("Segmento", 0)
-        TBdialog.addcolumn("Occorrenze", 1)
-        ret = QMessageBox.question(self.corpuswidget,'Domanda', "Vuoi ignorare la punteggiatura?", QMessageBox.Yes | QMessageBox.No)
-        if ret == QMessageBox.Yes:
-            myignore = self.ignorepos
-        else:
-            myignore = []
-        self.Progrdialog = progress.Form()
-        self.Progrdialog.show()
-        totallines = len(self.corpus)
-        startline = 0
-        if self.OnlyVisibleRows:
-            totallines = self.aToken
-            startline = self.daToken
-        for row in range(startline, totallines):
-            if not self.applicaFiltro(row, self.filtrimultiplienabled, self.filter):
-                continue
-            thistext = self.rebuildText(self.corpus, self.Progrdialog, col, myignore, row-myrange, row+myrange+1)
-            thistext = self.remUselessSpaces(thistext)
-            tbrow = TBdialog.finditemincolumn(thistext, col=0, matchexactly = True, escape = True)
-            if tbrow>=0:
-                tbval = int(TBdialog.w.tableWidget.item(tbrow,1).text())+1
-                TBdialog.setcelltotable(str(tbval), tbrow, 1)
-            else:
-                TBdialog.addlinetotable(thistext, 0)
-                tbrow = TBdialog.w.tableWidget.rowCount()-1
-                TBdialog.setcelltotable("1", tbrow, 1)
-        self.Progrdialog.accept()
-        TBdialog.show()
-
-    def coOccorrenze(self):
-        parola = QInputDialog.getText(self.corpuswidget, "Scegli la parola", "Indica la parola che vuoi cercare:", QLineEdit.Normal, "")[0]
-        thisname = []
-        for col in self.corpuscols:
-            thisname.append(self.corpuscols[col][1])
-        column = QInputDialog.getItem(self.corpuswidget, "Scegli la colonna", "In quale colonna devo cercare il testo?",thisname,current=1,editable=False)
-        col = thisname.index(column[0])
-        myrange = int(QInputDialog.getInt(self.corpuswidget, "Indica il range", "Quante parole, prima e dopo, vuoi leggere?")[0])
-        rangestr = str(myrange)
-        myfilter = str(list(self.corpuscols)[col]) +"="+parola
-        fcol = self.filtrimultiplienabled
-        Fildialog = creafiltro.Form(self.corpus, self.corpuscols, self.corpuswidget)
-        Fildialog.sessionDir = self.sessionDir
-        Fildialog.w.filter.setText(myfilter) #"lemma=essere&&pos[1,-1]=SP||lemma[-1]=essere&&pos=S"
-        Fildialog.updateTable()
-        Fildialog.exec()
-        if Fildialog.w.filter.text() != "":
-            self.filter = Fildialog.w.filter.text()
-        #self.dofiltra()
-        TBdialog = tableeditor.Form(self.corpuswidget, self.mycfg)
-        TBdialog.sessionDir = self.sessionDir
-        TBdialog.addcolumn("Segmento", 0)
-        TBdialog.addcolumn("Occorrenze", 1)
-        ret = QMessageBox.question(self.corpuswidget,'Domanda', "Vuoi ignorare la punteggiatura?", QMessageBox.Yes | QMessageBox.No)
-        if ret == QMessageBox.Yes:
-            myignore = self.ignorepos
-        else:
-            myignore = []
-        self.Progrdialog = progress.Form()
-        self.Progrdialog.show()
-        concordanze = []
-        totallines = len(self.corpus)
-        startline = 0
-        if self.OnlyVisibleRows:
-            totallines = self.aToken
-            startline = self.daToken
-        for row in range(startline, totallines):
-            ftext = myfilter #self.filter
-            if not self.applicaFiltro(row, fcol, ftext):
-                continue
-            thistext = self.rebuildText(self.corpus, self.Progrdialog, col, myignore, row-myrange, row+myrange+1)
-            #thistext = self.remUselessSpaces(thistext)
-            regex = re.escape('.?!')
-            if bool(re.match(".*["+regex+"].*", thistext)):
-                punctindex = [m.start(1) for m in re.finditer("(["+regex+"])", thistext, flags=re.DOTALL)]
-                if punctindex[0] < thistext.index(parola):
-                    thistext = thistext[punctindex[0]+1:]
-                else:
-                    thistext = thistext[0:punctindex[0]]
-            if thistext != "":
-                concordanze.append(thistext)
-        totallines = len(concordanze)
-        for row in range(totallines):
-            self.Progrdialog.w.testo.setText("Sto controllando l'occorrenza numero "+str(row))
-            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
-            QApplication.processEvents()
-            if self.Progrdialog.w.annulla.isChecked():
-                return
-            thisrow = concordanze[row].split(" ")
-            for word in thisrow:
-                thistext = ""
-                if thisrow.index(word) < thisrow.index(parola):
-                    thistext = str(word) + "..." + str(parola)
-                if thisrow.index(word) > thisrow.index(parola):
-                    thistext = str(parola) + "..." + str(word)
-                if thistext != "":
-                    tbrow = TBdialog.finditemincolumn(thistext, col=0, matchexactly = True, escape = True)
-                    if tbrow>=0:
-                        tbval = int(TBdialog.w.tableWidget.item(tbrow,1).text())+1
-                        TBdialog.setcelltotable(str(tbval), tbrow, 1)
-                    else:
-                        TBdialog.addlinetotable(thistext, 0)
-                        tbrow = TBdialog.w.tableWidget.rowCount()-1
-                        TBdialog.setcelltotable("1", tbrow, 1)
-        self.Progrdialog.accept()
-        TBdialog.show()
-
     def removevisiblerows(self):
         self.Progrdialog = progress.Form()
         self.Progrdialog.show()
@@ -1699,6 +1588,11 @@ class BranCorpus(QObject):
             self.updateCorpus()
 
     def updateCorpus(self):
+        try:
+            tempccount = self.corpuswidget.columnCount()
+        except:
+            print("Running in cli, ignore table widget")
+            return
         Progrdialog = progress.Form() #self.Progrdialog = progress.Form()
         Progrdialog.show() #self.Progrdialog.show()
         # Clear table before adding new lines
@@ -1855,140 +1749,1509 @@ class BranCorpus(QObject):
         for col in self.corpuscols:
             thisname.append(self.corpuscols[col][1])
         column = QInputDialog.getItem(self.corpuswidget, "Scegli la colonna", "Se vuoi estrarre il dizionario devi cercare nella colonna dei lemmi. Ma puoi anche scegliere di ottenere le statistiche su altre colonne, come la Forma grafica.",thisname,current=self.corpuscols['token'][0],editable=False)
-        col = thisname.index(column[0])
+        mycol = thisname.index(column[0])
         ret = QMessageBox.question(self.corpuswidget,'Domanda', "Vuoi ignorare la punteggiatura?", QMessageBox.Yes | QMessageBox.No)
-        TBdialog = tableeditor.Form(self.corpuswidget, self.mycfg)
-        TBdialog.sessionDir = self.sessionDir
-        TBdialog.addcolumn("Token", 0)
-        TBdialog.addcolumn("Occorrenze", 1)
-        #calcolo le occorrenze del pos
-        self.Progrdialog = progress.Form()
-        self.Progrdialog.show()
-        totaltypes = 0
-        mytypes = {}
+        doignorepunct = False
+        if ret == QMessageBox.Yes:
+            doignorepunct = True
+        myrecovery = False
+        hname = str(mycol)
+        hkey = str(mycol)
+        for key in self.corpuscols:
+            if mycol == self.corpuscols[key][0]:
+                hname = self.corpuscols[key][1]
+                hkey = key
+        output = self.sessionFile + "-misure_lessicometriche-" + hkey + ".tsv"
+        recovery = output + ".tmp"
+        totallines = self.core_linescount(self.sessionFile)
+        self.core_killswitch = False
+        self.Progrdialog = progress.ProgressDialog(self, recovery, totallines)
+        self.Progrdialog.start()
+        self.core_misure_lessicometriche(mycol, myrecovery, doignorepunct)
+        self.Progrdialog.cancelled = True
+        self.core_killswitch = False
+        self.showResults(output)
+
+
+
+    ####################################################################################################################
+    #CORE FUNCTIONS
+    ####################################################################################################################
+
+
+
+
+    def core_findintable(self, table, stringa, col=0):
+        resrow = -1
+        for row in range(len(table)):
+            if table[row][col] == stringa:
+                resrow = row
+                break
+        return resrow
+
+    def core_finditemincolumn(self, table, mytext, col=0, matchexactly = True, escape = True, myflags=0):
+        myregex = mytext
+        if escape:
+            myregex = re.escape(myregex)
+        if matchexactly:
+            myregex = "^" + myregex + "$"
+        for row in range(len(table)):
+            try:
+                if bool(re.match(myregex, table[row][col], flags=myflags)):
+                    return row
+            except:
+                continue
+        return -1
+
+    def core_linescount(self, filename):
+        f = open(filename, "r+", encoding='utf-8')
+        buf = mmap.mmap(f.fileno(), 0)
+        lines = 0
+        readline = buf.readline
+        while readline():
+            lines += 1
+        return lines
+
+    def core_savetable(self, table, output):
+        tabletext = ""
+        for row in table:
+            coln = 0
+            for col in row:
+                if coln > 0:
+                    tabletext = tabletext + '\t'
+                tabletext = tabletext + str(col)
+                coln = coln + 1
+            tabletext = tabletext + "\n"
+        #safe writing
+        permission = False
+        first_run = True
+        while not permission:
+            try:
+                file = open(output,"w", encoding='utf-8')
+                file.write(tabletext)
+                file.close()
+                permission = True
+            except:
+                if first_run:
+                    print("Waiting for permission to write file "+ output + "...")
+                    first_run = False
+                permission = False
+        return permission
+
+    def core_savetext(self, mytext, output):
+        #safe writing
+        permission = False
+        first_run = True
+        while not permission:
+            try:
+                file = open(output,"w", encoding='utf-8')
+                file.write(mytext)
+                file.close()
+                permission = True
+            except:
+                if first_run:
+                    print("Waiting for permission to write file "+ output + "...")
+                    first_run = False
+                permission = False
+        return permission
+
+    def core_fileappend(self, line, output):
+        permission = False
+        first_run = True
+        while not permission:
+            try:
+                with open(output, "a", encoding='utf-8') as rowfile:
+                    rowfile.write(line)
+                permission = True
+            except:
+                if first_run:
+                    print("Waiting for permission to write file "+ output + "...")
+                    first_run = False
+                permission = False
+        return permission
+
+    def core_calcola_occorrenze(self, mycol, myrecovery = False):
+        fileName = self.sessionFile
+        table = []
+        try:
+            col = int(mycol)
+        except:
+            col = 0
+        hname = str(col)
+        hkey = str(col)
+        for key in self.corpuscols:
+            if col == self.corpuscols[key][0]:
+                hname = self.corpuscols[key][1]
+                hkey = key
+        output = fileName + "-occorrenze-" + hkey + ".tsv"
+        recovery = output + ".tmp"
         totallines = len(self.corpus)
-        startline = 0
+        startatrow = -1
+        print(fileName + " -> " + output)
+        try:
+            if os.path.isfile(recovery) and myrecovery:
+                with open(recovery, "r", encoding='utf-8') as tempfile:
+                   lastline = (list(tempfile)[-1])
+                startatrow = int(lastline)
+                print("Carico la tabella")
+                with open(output, "r", encoding='utf-8') as ins:
+                    for line in ins:
+                        table.append(line.replace("\n","").replace("\r","").split(separator))
+                print("Comincio dalla riga " + str(startatrow))
+            else:
+                exception = 0/0
+        except:
+            startatrow = -1
+            table.append([hname,"Occorrenze"])
         if self.OnlyVisibleRows:
             totallines = self.aToken
-            startline = self.daToken
-        for row in range(startline, totallines):
-            if self.OnlyVisibleRows and self.corpuswidget.isRowHidden(row-startline):
-                continue
-            self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(row))
-            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
-            QApplication.processEvents()
-            if self.Progrdialog.w.annulla.isChecked():
-                return
-            thisposc = "False"
-            try:
-                thistext = self.corpus[row][col]
-            except:
-                thistext = ""
-            if ret == QMessageBox.Yes:
-                thistext = re.sub(self.ignoretext, "", thistext)
-            if thistext != "":
-                tbrow = TBdialog.finditemincolumn(thistext, col=0, matchexactly = True, escape = True)
+            if myrecovery and self.daToken > startatrow:
+                startatrow = self.daToken
+        for row in range(startatrow, totallines):
+            if self.core_killswitch:
+                break
+            if row > startatrow:
+                try:
+                    thistext = self.corpus[row][col]
+                except:
+                    thistext = ""
+                tbrow = self.core_findintable(table, thistext, 0)
                 if tbrow>=0:
-                    tbval = int(TBdialog.w.tableWidget.item(tbrow,1).text())+1
-                    TBdialog.setcelltotable(str(tbval), tbrow, 1)
+                    tbval = int(table[tbrow][1])+1
+                    table[tbrow][1] = tbval
                 else:
-                    TBdialog.addlinetotable(thistext, 0)
-                    tbrow = TBdialog.w.tableWidget.rowCount()-1
-                    TBdialog.setcelltotable("1", tbrow, 1)
-                    totaltypes = totaltypes + 1
+                    newrow = [thistext, "1"]
+                    table.append(newrow)
+                if row % 500 == 0:
+                    self.core_savetable(table, output)
+                    self.core_fileappend(str(row)+"\n", recovery)
+                    #with open(recovery, "a", encoding='utf-8') as rowfile:
+                    #    rowfile.write(str(row)+"\n")
+            row = row + 1
+        self.core_savetable(table, output)
+        #with open(recovery, "a", encoding='utf-8') as rowfile:
+        #    rowfile.write(str(row)+"\n")
+        self.core_fileappend(str(row)+"\n", recovery)
+        return output
+
+    def core_occorrenzeFiltrate(self, mycol, filtertext = "", myrecovery = False):
+        if filtertext=="":
+            self.core_calcola_occorrenze(mycol, myrecovery)
+            return
+        allfilters = filtertext.split("||")
+        fileName = self.sessionFile
+        table = []
+        try:
+            col = int(mycol)
+        except:
+            col = 0
+        hname = str(col)
+        hkey = str(col)
+        for key in self.corpuscols:
+            if col == self.corpuscols[key][0]:
+                hname = self.corpuscols[key][1]
+                hkey = key
+        cleanedfilter = re.sub("[^a-zA-Z0-9\[\]]", "", filtertext)
+        fcol = self.filtrimultiplienabled
+        output = fileName + "-occorrenze_filtrate-" + hkey + "-" + cleanedfilter + ".tsv"
+        recovery = output + ".tmp"
+        totallines = len(self.corpus)
+        startatrow = -1
+        print(fileName + " -> " + output)
+        try:
+            if os.path.isfile(recovery) and myrecovery:
+                with open(recovery, "r", encoding='utf-8') as tempfile:
+                   lastline = (list(tempfile)[-1])
+                startatrow = int(lastline)
+                print("Carico la tabella")
+                with open(output, "r", encoding='utf-8') as ins:
+                    for line in ins:
+                        table.append(line.replace("\n","").replace("\r","").split(separator))
+                print("Comincio dalla riga " + str(startatrow))
+            else:
+                exception = 0/0
+        except:
+            startatrow = -1
+            headerlist = [hname]
+            for myfilter in allfilters:
+                headerlist.append(myfilter)
+            table.append(headerlist)
+        if self.OnlyVisibleRows:
+            totallines = self.aToken
+            if myrecovery and self.daToken > startatrow:
+                startatrow = self.daToken
+        for row in range(startatrow, totallines):
+            if self.core_killswitch:
+                break
+            if row > startatrow:
+                try:
+                    thistext = self.corpus[row][col]
+                    try:
+                        if col == self.corpuscols["pos"][0]:
+                            thistext = self.legendaPos[thistext][0]
+                    except:
+                        thistext = self.corpus[row][col]
+                except:
+                    thistext = ""
+                for ifilter in range(len(allfilters)):
+                    if self.applicaFiltro(row, fcol, allfilters[ifilter]):
+                        tbrow = self.core_finditemincolumn(table, thistext, col=0, matchexactly = True, escape = True)
+                        if tbrow>=0:
+                            try:
+                                tbval = int(table[tbrow][ifilter+1])+1
+                            except:
+                                tbval = 1
+                            table[tbrow][ifilter+1] = tbval
+                        else:
+                            newrow = [thistext]
+                            for emptyI in range(0,len(allfilters)):
+                                newrow.append("")
+                            newrow[ifilter+1] = "1"
+                            table.append(newrow)
+                if row % 500 == 0:
+                    self.core_savetable(table, output)
+                    self.core_fileappend(str(row)+"\n", recovery)
+                    #with open(recovery, "a", encoding='utf-8') as rowfile:
+                    #    rowfile.write(str(row)+"\n")
+            row = row + 1
+        self.core_savetable(table, output)
+        #with open(recovery, "a", encoding='utf-8') as rowfile:
+        #    rowfile.write(str(row)+"\n")
+        self.core_fileappend(str(row)+"\n", recovery)
+        return output
+
+    def core_rebuildText(self, table, col = "", ipunct = [], startrow = 0, endrow = 0, filtercol = None):
+        mycorpus = ""
+        if col == "":
+            col = self.corpuscols['token'][0]
+        totallines = len(table)
+        if endrow == 0:
+            endrow = totallines
+        for row in range(startrow, endrow):
+            ftext = self.filter
+            if filtercol != None:
+                if self.OnlyVisibleRows and not self.applicaFiltro(row, filtercol, ftext, table):
+                    continue
+            if row >= 0 and row < len(table):
+                thispos = self.legendaPos[table[row][self.corpuscols['pos'][0]]][0]
+                if not thispos in ipunct:
+                    mycorpus = mycorpus + table[row][col] + " "
+        return mycorpus
+
+    def core_ricostruisci(self, table, col = "", ipunct = [], startrow = 0, endrow = 0, myfilter = "", myrecovery = False):
+        self.filter = myfilter
+        fileName = self.sessionFile
+        oldvisrow = self.OnlyVisibleRows
+        myfilcol = None
+        if myfilter != "":
+            myfilcol = self.filtrimultiplienabled
+        hname = str(col)
+        hkey = str(col)
+        for key in self.corpuscols:
+            if col == self.corpuscols[key][0]:
+                hname = self.corpuscols[key][1]
+                hkey = key
+        cleanedfilter = re.sub("[^a-zA-Z0-9\[\]]", "", myfilter)
+        output = fileName + "-ricostruito-" + hkey + "-"+ cleanedfilter+ ".txt"
+        recovery = output + ".tmp"
+        totallines = len(self.corpus)
+        if endrow != 0:
+            totallines = endrow
+        startatrow = 0
+        print(fileName + " -> " + output)
+        fulltext = ""
+        try:
+            if os.path.isfile(recovery) and myrecovery:
+                with open(recovery, "r", encoding='utf-8') as tempfile:
+                   lastline = (list(tempfile)[-1])
+                primafrase = int(lastline)
+                print("Carico la tabella")
+                with open(output, "r", encoding='utf-8') as ins:
+                    for line in ins:
+                        fulltext = fulltext + line
+                print("Comincio dalla riga " + str(startatrow))
+            else:
+                exception = 0/0
+        except:
+            primafrase = 0
+        if self.OnlyVisibleRows:
+            totallines = self.aToken
+            if myrecovery and self.daToken > startatrow:
+                startatrow = self.daToken
+        frasi = []
+        frasecol = self.corpuscols["IDphrase"][0]
+        for row in range(startatrow, totallines):
+            phID = self.corpus[row][frasecol]
+            if len(frasi)==0:
+                frasi.append([phID,row,row+1])
+                continue
+            if phID != frasi[-1][0]:
+                frasi[-1][2] = row
+                frasi.append([phID,row,row])
+        frasi[-1][2] = totallines
+        if myfilter != "":
+            myfilcol = self.filtrimultiplienabled
+            self.OnlyVisibleRows = True
+        for nFrase in range(primafrase, len(frasi)):
+            startrow = frasi[nFrase][1]
+            endrow = frasi[nFrase][2]
+            if self.core_killswitch:
+                break
+            tmptext = self.core_rebuildText(self.corpus, col, ipunct, startrow, endrow, myfilcol)
+            tmptext = self.remUselessSpaces(tmptext)
+            fulltext = fulltext + tmptext
+            if nFrase % 10 == 0:
+                self.core_savetext(fulltext, output)
+                self.core_fileappend(str(frasi[nFrase][0])+"\n", recovery)
+        self.core_savetext(fulltext, output)
+        self.core_fileappend(str(frasi[nFrase][0])+"\n", recovery)
+        self.OnlyVisibleRows = oldvisrow
+        return output
+
+    def core_calcola_coOccorrenze(self, parola, mycol, myrange, ignorepunct, myrecovery = False, myfilter = ""):
+        fileName = self.sessionFile
+        table = []
+        myignore = ""
+        if ignorepunct:
+            myignore = self.ignorepos
+        try:
+            col = int(mycol)
+        except:
+            col = 0
+        hname = str(col)
+        hkey = str(col)
+        for key in self.corpuscols:
+            if col == self.corpuscols[key][0]:
+                hname = self.corpuscols[key][1]
+                hkey = key
+        if myfilter == "":
+            myfilter = str(list(self.corpuscols)[col]) +"="+parola
+        cleanedfilter = re.sub("[^a-zA-Z0-9\[\]]", "", myfilter)
+        fcol = self.filtrimultiplienabled
+        output = fileName + "-coOccorrenze-" + hkey + "-" + cleanedfilter + ".tsv"
+        recovery = output + ".tmp"
+        totallines = len(self.corpus)
+        startatrow = -1
+        print(fileName + " -> " + output)
+        try:
+            if os.path.isfile(recovery) and myrecovery:
+                with open(recovery, "r", encoding='utf-8') as tempfile:
+                   lastline = (list(tempfile)[-1])
+                startatrow = int(lastline)
+                print("Carico la tabella")
+                with open(output, "r", encoding='utf-8') as ins:
+                    for line in ins:
+                        table.append(line.replace("\n","").replace("\r","").split(separator))
+                print("Comincio dalla riga " + str(startatrow))
+            else:
+                exception = 0/0
+        except:
+            startatrow = -1
+        if self.OnlyVisibleRows:
+            totallines = self.aToken
+            if myrecovery and self.daToken > startatrow:
+                startatrow = self.daToken
+        concordanze = []
+        for row in range(startatrow, totallines):
+            if self.core_killswitch:
+                break
+            if row > startatrow:
+                ftext = myfilter #self.filter
+                if not self.applicaFiltro(row, fcol, ftext):
+                    continue
+                thistext = self.core_rebuildText(self.corpus, col, myignore, row-myrange, row+myrange+1)
+                #thistext = self.remUselessSpaces(thistext)
+                regex = re.escape('.?!')
+                if bool(re.match(".*["+regex+"].*", thistext)):
+                    punctindex = [m.start(1) for m in re.finditer("(["+regex+"])", thistext, flags=re.DOTALL)]
+                    if punctindex[0] < thistext.index(parola):
+                        thistext = thistext[punctindex[0]+1:]
+                    else:
+                        thistext = thistext[0:punctindex[0]]
+                if thistext != "":
+                    concordanze.append(thistext)
+                    table.append([thistext])
+                if row % 500 == 0:
+                    self.core_savetable(table, output)
+                self.core_fileappend(str(row)+"\n", recovery)
+        self.core_fileappend(str(row)+"\n", recovery)
+        table = []
+        table.append(["Segmento","Occorrenze"])
+        totallines = len(concordanze)
+        for row in range(totallines):
+            if self.core_killswitch:
+                break
+            thisrow = concordanze[row].split(" ")
+            for word in thisrow:
+                thistext = ""
+                if thisrow.index(word) < thisrow.index(parola):
+                    thistext = str(word) + "..." + str(parola)
+                if thisrow.index(word) > thisrow.index(parola):
+                    thistext = str(parola) + "..." + str(word)
+                if thistext != "":
+                    tbrow = self.core_finditemincolumn(table, thistext, col=0, matchexactly = True, escape = True)
+                    if tbrow>=0:
+                        tbval = int(table[tbrow][1])+1
+                        table[tbrow][1] = tbval
+                    else:
+                        newrow = [thistext, "1"]
+                        table.append(newrow)
+        self.core_savetable(table, output)
+        return output
+
+    def core_calcola_concordanze(self, parola, mycol, myrange, ignorepunct, myrecovery = False, myfilter = ""):
+        fileName = self.sessionFile
+        table = []
+        myignore = ""
+        if ignorepunct:
+            myignore = self.ignorepos
+        try:
+            col = int(mycol)
+        except:
+            col = 0
+        hname = str(col)
+        hkey = str(col)
+        for key in self.corpuscols:
+            if col == self.corpuscols[key][0]:
+                hname = self.corpuscols[key][1]
+                hkey = key
+        if myfilter == "":
+            myfilter = str(list(self.corpuscols)[col]) +"="+parola
+        cleanedfilter = re.sub("[^a-zA-Z0-9\[\]]", "", myfilter)
+        fcol = self.filtrimultiplienabled
+        output = fileName + "-concordanze-" + hkey + "-" + cleanedfilter + ".tsv"
+        recovery = output + ".tmp"
+        totallines = len(self.corpus)
+        startatrow = -1
+        print(fileName + " -> " + output)
+        try:
+            if os.path.isfile(recovery) and myrecovery:
+                with open(recovery, "r", encoding='utf-8') as tempfile:
+                   lastline = (list(tempfile)[-1])
+                startatrow = int(lastline)
+                print("Carico la tabella")
+                with open(output, "r", encoding='utf-8') as ins:
+                    for line in ins:
+                        table.append(line.replace("\n","").replace("\r","").split(separator))
+                print("Comincio dalla riga " + str(startatrow))
+            else:
+                exception = 0/0
+        except:
+            startatrow = -1
+            table.append(["Segmento","Occorrenze"])
+        if self.OnlyVisibleRows:
+            totallines = self.aToken
+            if myrecovery and self.daToken > startatrow:
+                startatrow = self.daToken
+        for row in range(startatrow, totallines):
+            if self.core_killswitch:
+                break
+            if row > startatrow:
+                ftext = myfilter #self.filter
+                if not self.applicaFiltro(row, fcol, ftext):
+                    continue
+                thistext = self.core_rebuildText(self.corpus, col, myignore, row-myrange, row+myrange+1)
+                thistext = self.remUselessSpaces(thistext)
+                if thistext != "":
+                    tbrow = self.core_finditemincolumn(table, thistext, col=0, matchexactly = True, escape = True)
+                    if tbrow>=0:
+                        tbval = int(table[tbrow][1])+1
+                        table[tbrow][1] = tbval
+                    else:
+                        newrow = [thistext, "1"]
+                        table.append(newrow)
+                if row % 500 == 0:
+                    self.core_savetable(table, output)
+                self.core_fileappend(str(row)+"\n", recovery)
+        self.core_savetable(table, output)
+        self.core_fileappend(str(row)+"\n", recovery)
+        return output
+
+    def core_orderVerbMorf(self, text, ignoreperson = False):
+        if not "VerbForm" in text:
+            return text
+        mytext = ""
+        #Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin
+        vform = ""
+        mood = ""
+        tense = ""
+        pers = ""
+        num = ""
+        gender = ""
+        for el in text.split("|"):
+            if "VerbForm" in el:
+                vform = re.sub(".*VerbForm\=(.*)","\g<1>",el)
+            if "Mood" in el:
+                mood = re.sub(".*Mood\=(.*)","\g<1>",el)
+            if "Tense" in el:
+                tense = re.sub(".*Tense\=(.*)","\g<1>",el)
+            if "Person" in el:
+                pers = re.sub(".*Person\=(.*)","\g<1>",el)
+            if "Number" in el:
+                num = re.sub(".*Number\=(.*)","\g<1>",el)
+            if "Gender" in el:
+                gender = re.sub(".*Gender\=(.*)","\g<1>",el)
+        mytext = "VerbForm=" + vform
+        if mood != "":
+            mytext = mytext + "|Mood=" + mood
+        if tense != "":
+            mytext = mytext + "|Tense=" + tense
+        if pers != "" and ignoreperson==False:
+            mytext = mytext + "|Person=" + pers
+        if num != "" and ignoreperson==False:
+            mytext = mytext + "|Number=" + num
+        if gender != "" and ignoreperson==False:
+            mytext = mytext + "|Gender=" + gender
+        return mytext
+
+    def core_contaverbi(self, ignoreperson = True, contigui = False, myrecovery = False):
+        debug = False
+        poscol = self.corpuscols["pos"][0] #thisname.index(column[0])
+        morfcol = self.corpuscols["feat"][0]
+        frasecol = self.corpuscols["IDphrase"][0]
+        lemmacol = self.corpuscols["lemma"][0]
+        fileName = self.sessionFile
+        table = []
+        output = fileName + "-contaverbi.tsv"
+        recovery = output + ".tmp"
+        totallines = len(self.corpus)
+        startatrow = -1
+        print(fileName + " -> " + output)
+        try:
+            if os.path.isfile(recovery) and myrecovery:
+                with open(recovery, "r", encoding='utf-8') as tempfile:
+                   lastline = (list(tempfile)[-1])
+                startatrow = int(lastline)
+                print("Carico la tabella")
+                with open(output, "r", encoding='utf-8') as ins:
+                    for line in ins:
+                        table.append(line.replace("\n","").replace("\r","").split(separator))
+                print("Comincio dalla riga " + str(startatrow))
+            else:
+                exception = 0/0
+        except:
+            startatrow = -1
+            table.append(["Modo+Tempo", "Occorrenze", "Percentuali"])
+        if self.OnlyVisibleRows:
+            totallines = self.aToken
+            if myrecovery and self.daToken > startatrow:
+                startatrow = self.daToken
+        for row in range(startatrow, totallines):
+            if self.core_killswitch:
+                break
+            if row > startatrow:
+                try:
+                    thispos = self.legendaPos[self.corpus[row][poscol]][0]
+                    thisphrase = self.corpus[row][frasecol]
+                    thislemma = self.corpus[row][lemmacol]
+                except:
+                    thispos = ""
+                    thisphrase = "0"
+                    thislemma = ""
+                thistext = ""
+                thistext2 = ""
+                thistext3 = ""
+                #Filtro per trovare i verbi a 3 come "è stato fatto": feat=.*VerbForm.*Part.*&&feat[1]=.*VerbForm.*Part.*||feat=.*VerbForm.*Part.*&&feat[-1]=.*VerbForm.*Part.*||feat=.*VerbForm.*&&feat[1]=.*VerbForm.*Part.*&&feat[2]=.*VerbForm.*Part.*
+                if "verbo" in thispos:
+                    thistext = self.corpus[row][morfcol]
+                try:
+                    if (debug):
+                        mydbg = self.corpus[row][1]
+                except:
+                    pass
+                if "avere" in thislemma or "essere" in thislemma:
+                    for ind in range(1,4): #range(1,3):
+                        try:
+                            tmpos = self.legendaPos[self.corpus[row+ind][poscol]][0]
+                            tmpphrase = self.corpus[row+ind][frasecol]
+                        except:
+                            tmpos = ""
+                            tmpphrase = "0"
+                        #i verbi consecutivi vanno bene finché sono nella stessa frase
+                        if tmpphrase != thisphrase:
+                            break
+                        if "verbo" in tmpos:
+                            thistext2 = thistext2 + self.corpus[row+ind][morfcol] + "+"
+                            try:
+                                if (debug):
+                                    mydbg = mydbg + " " + self.corpus[row+ind][1]
+                            except:
+                                pass
+                            startline = row+ind+1
+                        elif contigui=="y" or contigui=="Y":
+                            break
+                    if len(thistext2.split("+"))>1:
+                        thistext3 = thistext2.split("+")[1]
+                        thistext2 = thistext2.split("+")[0]
+                if len(thistext) >= 3:
+                    thistext = self.core_orderVerbMorf(thistext, ignoreperson) + "+"
+                if len(thistext2) >= 3:
+                    thistext2 = self.core_orderVerbMorf(thistext2, ignoreperson) + "+"
+                if len(thistext3) >= 3:
+                    thistext3 = self.core_orderVerbMorf(thistext3, ignoreperson) #+ "+"
+                if thistext != "":
+                    thistext = thistext + thistext2 + thistext3
+                    if ignoreperson:
+                        thistext = thistext.replace("/Clitic=Yes", "")
+                if thistext.endswith("+"):
+                    thistext = thistext[0:-1]
+                if thistext != "":
+                    tbrow = self.core_findintable(table, thistext, 0)
+                    if tbrow>=0:
+                        tbval = int(table[tbrow][1])+1
+                        table[tbrow][1] = tbval
+                    else:
+                        newrow = [thistext, "1"]
+                        table.append(newrow)
+                        try:
+                            if (debug):
+                                print([thistext,mydbg])
+                        except:
+                            pass
+            if row % 500 == 0 or row == len(self.corpus)-1:
+                self.core_savetable(table, output)
+                #with open(recovery, "a", encoding='utf-8') as rowfile:
+                #    rowfile.write(str(row)+"\n")
+                self.core_fileappend(str(row)+"\n", recovery)
+        self.core_fileappend(str(row)+"\n", recovery)
+        #calcolo le percentuali
+        totallines = len(table)
+        verbitotali = 0
+        for row in range(1,len(table)):
+            try:
+                tval = int(table[row][1])
+            except:
+                tval = 0
+            verbitotali = verbitotali + tval
+        for row in range(len(table)):
+            try:
+                ratio = (float(table[row][1])/float(verbitotali)*100)
+                ratios = f'{ratio:.3f}'
+            except:
+                ratios = table[row][1]
+            if len(table[row])>2:
+                table[row][2] = ratios
+            else:
+                table[row].append(ratios)
+        self.core_savetable(table, output)
+        return output
+
+    def core_contapersone(self, filter = "", level = 0, myrecovery = False):
+        debug = False
+        poscol = self.corpuscols["pos"][0] #thisname.index(column[0])
+        morfcol = self.corpuscols["feat"][0]
+        frasecol = self.corpuscols["IDphrase"][0]
+        lemmacol = self.corpuscols["lemma"][0]
+        fileName = self.sessionFile
+        try:
+            mylevel = int(level)
+            if mylevel <0 or mylevel >6:
+                mylevel = 0/0
+        except:
+            mylevel = 0
+        if filter == "":
+            myfilter = "pos=.*" #"pos=.*VERB.*||pos=.*AUX.*||pos=.*ADJ.*||pos=.*NOUN.*||pos=.*DET.*"
+        else:
+            myfilter = filter
+        table = []
+        cleanedfilter = re.sub("[^a-zA-Z0-9]", "", myfilter)
+        output = fileName + "-contapersone-"+str(cleanedfilter)+"-"+str(mylevel)+".tsv"
+        recovery = output + ".tmp"
+        totallines = len(self.corpus)
+        startatrow = -1
+        print(fileName + " -> " + output)
+        try:
+            if os.path.isfile(recovery) and myrecovery:
+                with open(recovery, "r", encoding='utf-8') as tempfile:
+                   lastline = (list(tempfile)[-1])
+                startatrow = int(lastline)
+                print("Carico la tabella")
+                with open(output, "r", encoding='utf-8') as ins:
+                    for line in ins:
+                        table.append(line.replace("\n","").replace("\r","").split(separator))
+                print("Comincio dalla riga " + str(startatrow))
+            else:
+                exception = 0/0
+        except:
+            startatrow = -1
+            table.append(["Modo+Tempo", "Occorrenze", "Percentuali"])
+        if self.OnlyVisibleRows:
+            totallines = self.aToken
+            if myrecovery and self.daToken > startatrow:
+                startatrow = self.daToken
+        for row in range(startatrow, totallines):
+            if self.core_killswitch:
+                break
+            if row > startatrow:
+                #TODO: sicuro che non dobbiamo considerare i verbi composti come "è stato fatto" come una unica entità?
+                if not self.applicaFiltro(row, self.filtrimultiplienabled, myfilter):
+                    continue
+                thismorf = self.corpus[row][morfcol]
+                try:
+                    if (debug):
+                        mydbg = self.corpus[row][1]
+                except:
+                    pass
+                persona = ""
+                numero = ""
+                genere = ""
+                determinato = ""
+                clitico = ""
+                for thispart in thismorf.split("/"):
+                    for el in thispart.split("|"):
+                        if "Person" in el:
+                            persona = el
+                        if "Number" in el:
+                            numero = el
+                        if "Gender" in el:
+                            genere = el
+                        if "Definite" in el:
+                            determinato = el
+                        if "Clitic" in el:
+                            clitico = el
+                #Livelli di dettaglio:
+                #0 Tutto
+                #1 solo persona numero e genere
+                #2 solo persona e numero
+                #3 solo numero genere e determinato
+                #4 solo genere
+                #5 solo numero
+                thistext = ""
+                if mylevel == 0 or mylevel == 1 or mylevel == 2:
+                    thistext = persona
+                if mylevel == 0 or mylevel == 1 or mylevel == 2 or mylevel == 3 or mylevel == 5:
+                    if len(thistext) > 0 and numero != "":
+                        thistext = thistext + "|"
+                    thistext = thistext + numero
+                if mylevel == 0 or mylevel == 1 or mylevel == 3 or mylevel == 4:
+                    if len(thistext) > 0 and genere != "":
+                        thistext = thistext + "|"
+                    thistext = thistext + genere
+                if mylevel == 0 or mylevel == 3:
+                    if len(thistext) > 0 and determinato != "":
+                        thistext = thistext + "|"
+                    thistext = thistext + determinato
+                if mylevel == 0:
+                    if len(thistext) > 0 and clitico != "":
+                        thistext = thistext + "|"
+                    thistext = thistext + clitico
+                #Gender=Masc|Number=Sing|Tense=Past|VerbForm=Part
+                #Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin
+                #Gender=Masc|Number=Plur
+                #_/Definite=Def|Gender=Masc|Number=Plur|PronType=Art
+                #Clitic=Yes|Person=3|PronType=Prs
+                if thistext != "":
+                    tbrow = self.core_findintable(table, thistext, 0)
+                    if tbrow>=0:
+                        tbval = int(table[tbrow][1])+1
+                        table[tbrow][1] = tbval
+                    else:
+                        newrow = [thistext, "1"]
+                        table.append(newrow)
+                        try:
+                            if (debug):
+                                print([thistext,mydbg])
+                        except:
+                            pass
+            if row % 500 == 0 or row == len(self.corpus)-1:
+                self.core_savetable(table, output)
+                #with open(recovery, "a", encoding='utf-8') as rowfile:
+                #    rowfile.write(str(row)+"\n")
+                self.core_fileappend(str(row)+"\n", recovery)
+        self.core_fileappend(str(row)+"\n", recovery)
+        #calcolo le percentuali
+        totallines = len(table)
+        verbitotali = 0
+        for row in range(1,len(table)):
+            try:
+                tval = int(table[row][1])
+            except:
+                tval = 0
+            verbitotali = verbitotali + tval
+        for row in range(len(table)):
+            try:
+                ratio = (float(table[row][1])/float(verbitotali)*100)
+                ratios = f'{ratio:.3f}'
+            except:
+                ratios = table[row][1]
+            if len(table[row])>2:
+                table[row][2] = ratios
+            else:
+                table[row].append(ratios)
+        self.core_savetable(table, output)
+        return output
+
+    def core_occorrenze_normalizzate(self, mycol, myrecovery, doignorepunct = True):
+        fileName = self.sessionFile
+        table = []
+        try:
+            col = int(mycol)
+        except:
+            col = 0
+        hname = str(col)
+        hkey = str(col)
+        for key in self.corpuscols:
+            if col == self.corpuscols[key][0]:
+                hname = self.corpuscols[key][1]
+                hkey = key
+        output = fileName + "-occorrenze_normalizzate-" + hkey + ".tsv"
+        recovery = output + ".tmp"
+        totallines = len(self.corpus)
+        startatrow = -1
+        print(fileName + " -> " + output)
+        try:
+            if os.path.isfile(recovery) and myrecovery:
+                with open(recovery, "r", encoding='utf-8') as tempfile:
+                   lastline = (list(tempfile)[-1])
+                startatrow = int(lastline)
+                print("Carico la tabella")
+                with open(output, "r", encoding='utf-8') as ins:
+                    for line in ins:
+                        table.append(line.replace("\n","").replace("\r","").split(separator))
+                print("Comincio dalla riga " + str(startatrow))
+            else:
+                exception = 0/0
+        except:
+            startatrow = -1
+            table.append([hname,"Occorrenze", "Frequenza in parole", "Ordine (log10) della frequenza"]) #L'ordine di grandezza è log10(occorrenzeParola/occorrenzeTotali)
+        if self.OnlyVisibleRows:
+            totallines = self.aToken
+            if myrecovery and self.daToken > startatrow:
+                startatrow = self.daToken
+        totaltypes = 0
+        mytypes = {}
+        #if startatrow >= (len(self.corpus)-1):
+        #    return
+        for row in range(startatrow, totallines):
+            if self.core_killswitch:
+                break
+            if row > startatrow:
+                thisposc = "False"
+                try:
+                    thistext = self.corpus[row][col]
+                    if self.ignoretext != "" and doignorepunct:
+                        thistext = re.sub(self.ignoretext, "", thistext)
+                except:
+                    thistext = ""
+                if thistext != "":
+                    tbrow = self.core_findintable(table, thistext, 0)
+                    if tbrow>=0:
+                        tbval = int(table[tbrow][1])+1
+                        table[tbrow][1] = tbval
+                    else:
+                        newrow = [thistext, "1"]
+                        table.append(newrow)
+                        totaltypes = totaltypes + 1
+                    if row % 500 == 0 or row == len(self.corpus)-1:
+                        self.core_savetable(table, output)
+                        #with open(recovery, "a", encoding='utf-8') as rowfile:
+                        #    rowfile.write(str(row)+"\n")
+                        self.core_fileappend(str(row)+"\n", recovery)
+        self.core_fileappend(str(row)+"\n", recovery)
         hapax = 0
         classifrequenza = []
         occClassifrequenza = []
-        for row in range(TBdialog.w.tableWidget.rowCount()):
-            self.Progrdialog.w.testo.setText("Sto cercando gli hapax su "+str(row))
-            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
-            QApplication.processEvents()
-            if int(TBdialog.w.tableWidget.item(row,1).text()) == 1:
-                hapax = hapax + 1
-            if TBdialog.w.tableWidget.item(row,1).text() in classifrequenza:
-                ind = classifrequenza.index(TBdialog.w.tableWidget.item(row,1).text())
+        totallines = len(table)
+        paroletotali = 0
+        for row in range(len(table)):
+            try:
+                if int(table[row][1]) == 1:
+                    hapax = hapax + 1
+            except:
+                continue
+            if table[row][1] in classifrequenza:
+                ind = classifrequenza.index(table[row][1])
                 occClassifrequenza[ind] = occClassifrequenza[ind] + 1
             else:
-                classifrequenza.append(TBdialog.w.tableWidget.item(row,1).text())
+                classifrequenza.append(table[row][1])
                 occClassifrequenza.append(1)
-        totallines = TBdialog.w.tableWidget.rowCount()
+            paroletotali = paroletotali + int(table[row][1])
+        dimCorpus = self.dimList[0]
+        for i in range(len(self.dimList)-1):
+            if self.dimList[i] <= paroletotali and self.dimList[i+1] >= paroletotali:
+                lower = paroletotali - self.dimList[i]
+                upper = self.dimList[i+1] - paroletotali
+                if lower < upper:
+                    dimCorpus = self.dimList[i]
+                else:
+                    dimCorpus = self.dimList[i+1]
+        for row in range(len(table)):
+            thistext = table[row][0]
+            try:
+                ratio = (float(table[row][1])/float(paroletotali)*dimCorpus)
+            except:
+                continue
+            ratios = f'{ratio:.3f}'
+            table[row].append(str(ratios))
+            ratio = math.log10(float(table[row][1])/float(paroletotali))
+            ratios = f'{ratio:.3f}'
+            table[row].append(str(ratios))
+        table[0][2] = "Frequenza in " + str(dimCorpus) + " parole"
+        self.core_savetable(table, output)
+        return output
+
+    def core_misure_lessicometriche(self, mycol, myrecovery, doignorepunct = True):
+        fileName = self.sessionFile
+        table = []
+        try:
+            col = int(mycol)
+        except:
+            col = 0
+        hname = str(col)
+        hkey = str(col)
+        for key in self.corpuscols:
+            if col == self.corpuscols[key][0]:
+                hname = self.corpuscols[key][1]
+                hkey = key
+        output = fileName + "-misure_lessicometriche-" + hkey + ".tsv"
+        recovery = output + ".tmp"
+        totallines = len(self.corpus)
+        startatrow = -1
+        print(fileName + " -> " + output)
+        try:
+            if os.path.isfile(recovery) and myrecovery:
+                with open(recovery, "r", encoding='utf-8') as tempfile:
+                   lastline = (list(tempfile)[-1])
+                startatrow = int(lastline)
+                print("Carico la tabella")
+                with open(output, "r", encoding='utf-8') as ins:
+                    for line in ins:
+                        table.append(line.replace("\n","").replace("\r","").split(separator))
+                print("Comincio dalla riga " + str(startatrow))
+            else:
+                exception = 0/0
+        except:
+            startatrow = -1
+            table.append([hname,"Occorrenze", "Frequenza in parole", "Ordine di grandezza (log10)"])
+        if self.OnlyVisibleRows:
+            totallines = self.aToken
+            if myrecovery and self.daToken > startatrow:
+                startatrow = self.daToken
+        totaltypes = 0
+        mytypes = {}
+        #if startatrow >= (len(self.corpus)-1):
+        #    return
+        for row in range(startatrow, totallines):
+            if self.core_killswitch:
+                break
+            if row > startatrow:
+                thisposc = "False"
+                try:
+                    thistext = self.corpus[row][col]
+                    if self.ignoretext != "" and doignorepunct:
+                        thistext = re.sub(self.ignoretext, "", thistext)
+                except:
+                    thistext = ""
+                if thistext != "":
+                    tbrow = self.core_findintable(table, thistext, 0)
+                    if tbrow>=0:
+                        tbval = int(table[tbrow][1])+1
+                        table[tbrow][1] = tbval
+                    else:
+                        newrow = [thistext, "1"]
+                        table.append(newrow)
+                        totaltypes = totaltypes + 1
+                    if row % 500 == 0 or row == len(self.corpus)-1:
+                        self.core_savetable(table, output)
+                        #with open(recovery, "a", encoding='utf-8') as rowfile:
+                        #    rowfile.write(str(row)+"\n")
+                        self.core_fileappend(str(row)+"\n", recovery)
+        self.core_fileappend(str(row)+"\n", recovery)
+        hapax = 0
+        classifrequenza = []
+        occClassifrequenza = []
+        totallines = len(table)
         paroletotali = 0
-        for row in range(TBdialog.w.tableWidget.rowCount()):
-            self.Progrdialog.w.testo.setText("Sto calcolando le somme su "+str(row))
-            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
-            QApplication.processEvents()
-            paroletotali = paroletotali + int(TBdialog.w.tableWidget.item(row,1).text())
-        dimCorpus = self.getCorpusDim(paroletotali)
-        TBdialog.addcolumn("Frequenza in " + str(dimCorpus) + " parole", 2)
-        TBdialog.addcolumn("Ordine di grandezza (log10)", 3)
-        for row in range(TBdialog.w.tableWidget.rowCount()):
-            self.Progrdialog.w.testo.setText("Sto controllando la riga numero "+str(row))
-            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
-            QApplication.processEvents()
-            thistext = TBdialog.w.tableWidget.item(row,0).text()
-            ratio = (float(TBdialog.w.tableWidget.item(row,1).text())/float(paroletotali)*dimCorpus)
+        for row in range(len(table)):
+            try:
+                if int(table[row][1]) == 1:
+                    hapax = hapax + 1
+            except:
+                continue
+            if table[row][1] in classifrequenza:
+                ind = classifrequenza.index(table[row][1])
+                occClassifrequenza[ind] = occClassifrequenza[ind] + 1
+            else:
+                classifrequenza.append(table[row][1])
+                occClassifrequenza.append(1)
+            paroletotali = paroletotali + int(table[row][1])
+        dimCorpus = self.dimList[0]
+        for i in range(len(self.dimList)-1):
+            if self.dimList[i] <= paroletotali and self.dimList[i+1] >= paroletotali:
+                lower = paroletotali - self.dimList[i]
+                upper = self.dimList[i+1] - paroletotali
+                if lower < upper:
+                    dimCorpus = self.dimList[i]
+                else:
+                    dimCorpus = self.dimList[i+1]
+        for row in range(len(table)):
+            thistext = table[row][0]
+            try:
+                ratio = (float(table[row][1])/float(paroletotali)*dimCorpus)
+            except:
+                continue
             ratios = f'{ratio:.3f}'
-            TBdialog.setcelltotable(str(ratios), row, 2)
-            ratio = math.log10(float(TBdialog.w.tableWidget.item(row,1).text())/float(paroletotali))
+            table[row].append(str(ratios))
+            ratio = math.log10(float(table[row][1])/float(paroletotali))
             ratios = f'{ratio:.3f}'
-            TBdialog.setcelltotable(str(ratios), row, 3)
-        TBdialog.addlinetotable("Tokens", 0)
-        tbrow = TBdialog.w.tableWidget.rowCount()-1
-        TBdialog.setcelltotable(str(paroletotali), tbrow, 1)
-        TBdialog.addlinetotable("Types", 0)
-        tbrow = TBdialog.w.tableWidget.rowCount()-1
-        TBdialog.setcelltotable(str(totaltypes), tbrow, 1)
-        TBdialog.addlinetotable("(Types/Tokens)*100", 0)
-        tbrow = TBdialog.w.tableWidget.rowCount()-1
+            table[row].append(str(ratios))
+        table = []
+        table.append(["Misura lessicometrica", "Valore"])
+        table.append(["Tokens", str(paroletotali)])
+        table.append(["Types", str(totaltypes)])
         ratio = (float(totaltypes)/float(paroletotali))*100.0
         ratios = f'{ratio:.3f}'
-        TBdialog.setcelltotable(str(ratios), tbrow, 1)
-        TBdialog.addlinetotable("Tokens/Types", 0)
-        tbrow = TBdialog.w.tableWidget.rowCount()-1
+        table.append(["(Types/Tokens)*100", str(ratios)])
         ratio = (float(paroletotali)/float(totaltypes))
         ratios = f'{ratio:.3f}'
-        TBdialog.setcelltotable(str(ratios), tbrow, 1)
-        TBdialog.addlinetotable("Hapax", 0)
-        tbrow = TBdialog.w.tableWidget.rowCount()-1
-        TBdialog.setcelltotable(str(hapax), tbrow, 1)
-        TBdialog.addlinetotable("(Hapax/Tokens)*100", 0)
-        tbrow = TBdialog.w.tableWidget.rowCount()-1
+        table.append(["Tokens/Types", str(ratios)])
+        table.append(["Hapax", str(hapax)])
         ratio = (float(hapax)/float(paroletotali))*100.0
         ratios = f'{ratio:.3f}'
-        TBdialog.setcelltotable(str(ratios), tbrow, 1)
-        TBdialog.addlinetotable("Types/sqrt(Tokens)", 0)
-        tbrow = TBdialog.w.tableWidget.rowCount()-1
+        table.append(["(Hapax/Tokens)*100", str(ratios)])
         ratio = float(totaltypes)/float(math.sqrt(paroletotali))
         ratios = f'{ratio:.3f}'
-        TBdialog.setcelltotable(str(ratios), tbrow, 1)
-        TBdialog.addlinetotable("log(Types)/log(Tokens)", 0)
-        tbrow = TBdialog.w.tableWidget.rowCount()-1
+        table.append(["Types/sqrt(Tokens)", str(ratios)])
         ratio = (float(math.log10(totaltypes))/float(math.log10(paroletotali)))
         ratios = f'{ratio:.3f}'
-        TBdialog.setcelltotable(str(ratios), tbrow, 1)
+        table.append(["log(Types)/log(Tokens)", str(ratios)])
         YuleSum = 0
         for cfi in range(len(classifrequenza)):
             YuleSum = YuleSum + ( math.pow(int(classifrequenza[cfi]),2) * occClassifrequenza[cfi] )
-        TBdialog.addlinetotable("Caratteristica di Yule (K)", 0)
-        tbrow = TBdialog.w.tableWidget.rowCount()-1
         ratio = float(math.pow(10,4)) * ((float(YuleSum) - float(paroletotali))/ float(math.pow(paroletotali, 2)) )
         ratios = f'{ratio:.3f}'
-        TBdialog.setcelltotable(str(ratios), tbrow, 1)
-        TBdialog.addlinetotable("W", 0)
-        tbrow = TBdialog.w.tableWidget.rowCount()-1
+        table.append(["Caratteristica di Yule (K)", str(ratios)])
         ratio = math.pow(float(paroletotali), (1.0/math.pow(float(totaltypes), 0.172)))
         ratios = f'{ratio:.3f}'
-        TBdialog.setcelltotable(str(ratios), tbrow, 1)
-        TBdialog.addlinetotable("U", 0)
-        tbrow = TBdialog.w.tableWidget.rowCount()-1
+        table.append(["W", str(ratios)])
         ratio =  math.pow(float(math.log10(paroletotali)), 2.0)/(float(math.log10(paroletotali)) - float(math.log10(totaltypes)) )
         ratios = f'{ratio:.3f}'
-        TBdialog.setcelltotable(str(ratios), tbrow, 1)
-        #mostro i risultati
-        self.Progrdialog.accept()
-        TBdialog.show()
+        table.append(["U", str(ratios)])
+        self.core_savetable(table, output)
+        return output
 
-#
+    def core_densitalessico(self, level = 2, myrecovery = False):
+        fileName = self.sessionFile
+        col = self.corpuscols['pos'][0]
+        table = []
+        try:
+            mylevel = int(level)
+        except:
+            mylevel = 2
+        output = fileName + "-densitalessicale-" + str(mylevel) + ".tsv"
+        recovery = output + ".tmp"
+        totallines = len(self.corpus)
+        startatrow = -1
+        print(fileName + " -> " + output)
+        try:
+            if os.path.isfile(recovery) and myrecovery:
+                with open(recovery, "r", encoding='utf-8') as tempfile:
+                   lastline = (list(tempfile)[-1])
+                startatrow = int(lastline)
+                print("Carico la tabella")
+                with open(output, "r", encoding='utf-8') as ins:
+                    for line in ins:
+                        table.append(line.replace("\n","").replace("\r","").split(separator))
+                print("Comincio dalla riga " + str(startatrow))
+            else:
+                exception = 0/0
+        except:
+            startatrow = -1
+            table.append(["Categoria", "Occorrenze", "Percentuale"])
+        if self.OnlyVisibleRows:
+            totallines = self.aToken
+            if myrecovery and self.daToken > startatrow:
+                startatrow = self.daToken
+        totaltypes = 0
+        mytypes = {}
+        #if startatrow >= (len(self.corpus)-1):
+        #    return
+        for row in range(startatrow, totallines):
+            if self.core_killswitch:
+                break
+            if row > startatrow:
+                try:
+                    thistextO = self.corpus[row][col]
+                    thistext = self.legendaPos[thistextO][0]
+                    thisposc = self.legendaPos[self.corpus[row][self.corpuscols['pos'][0]]][1]
+                    try:
+                        mytypes[thisposc] = mytypes[thisposc] +1
+                    except:
+                        mytypes[thisposc] = 1
+                except:
+                    thistext = ""
+                    thistextO = ""
+                if thistext != "":
+                    tbrow = self.core_finditemincolumn(table, thistext, col=0, matchexactly = True, escape = True)
+                    if tbrow>=0:
+                        tbval = int(table[tbrow][1])+1
+                        table[tbrow][1] = tbval
+                    else:
+                        newrow = [thistext, "1", "0"]
+                        table.append(newrow)
+                    if row % 500 == 0 or row == len(self.corpus)-1:
+                        self.core_savetable(table, output)
+                        #with open(recovery, "a", encoding='utf-8') as rowfile:
+                        #    rowfile.write(str(row)+"\n")
+                        self.core_fileappend(str(row)+"\n", recovery)
+        self.core_fileappend(str(row)+"\n", recovery)
+        paroletotali = 0
+        parolepiene = 0
+        parolevuote = 0
+        parolenone = 0
+        for row in range(len(table)):
+            thistext = table[row][0]
+            for key in self.legendaPos:
+                if thistext == self.legendaPos[key][0]:
+                    if "piene" == self.legendaPos[key][2]:
+                        paroletotali = paroletotali + int(table[row][1])
+                        parolepiene = parolepiene + int(table[row][1])
+                        break
+                    if "vuote" == self.legendaPos[key][2]:
+                        paroletotali = paroletotali + int(table[row][1])
+                        parolevuote = parolevuote + int(table[row][1])
+                        break
+                    if "none" == self.legendaPos[key][2]:
+                        paroletotali = paroletotali + int(table[row][1])
+                        parolenone = parolenone + int(table[row][1])
+                        break
+        if mylevel == 2:
+            table = [table[0]]
+            table.append(["Parole totali", str(paroletotali), "1"])
+            table.append(["Parole piene", str(parolepiene), "1"])
+            table.append(["Parole vuote", str(parolevuote), "1"])
+            table.append(["Altri token", str(parolenone), "1"])
+        elif mylevel == 1:
+            table = [table[0]]
+            for key in mytypes:
+                table.append([key,str(mytypes[key]), "1"])
+        elif mylevel == 0:
+            pass
+        else:
+            return ""
+        #calcola percentuali
+        for row in range(len(table)):
+            thistext = table[row][0]
+            try:
+                ratio = (float(table[row][1])/float(paroletotali)*100)
+                ratios = f'{ratio:.3f}'
+            except:
+                continue
+            table[row][2] = str(ratios)
+        self.core_savetable(table, output)
+        return output
+
+    def core_estrai_colonna(self, fileNames, mycol, myrecovery, separator = '\t'):
+        try:
+            col = int(mycol)
+        except:
+            col = 0
+        for fileName in fileNames:
+            row = 0
+            output = fileName + "-colonna-" + str(col) + ".tsv"
+            recovery = output + ".tmp"
+            startatrow = -1
+            try:
+                if os.path.isfile(recovery) and myrecovery:
+                    with open(recovery, "r", encoding='utf-8') as tempfile:
+                       lastline = (list(tempfile)[-1])
+                    startatrow = int(lastline)
+                    print("Comincio dalla riga " + str(startatrow))
+            except:
+                startatrow = -1
+            with open(fileName, "r", encoding='utf-8') as ins:
+                for line in ins:
+                    if row > startatrow:
+                        try:
+                            thistext = line.replace("\n","").replace("\r","").split(separator)[col]
+                        except:
+                            thistext = ""
+                        #with open(output, "a", encoding='utf-8') as outfile:
+                        #    outfile.write(thistext+"\n")
+                        self.core_fileappend(thistext+"\n", output)
+                        #with open(recovery, "a", encoding='utf-8') as rowfile:
+                        #    rowfile.write(str(row)+"\n")
+                        self.core_fileappend(str(row)+"\n", recovery)
+                    row = row + 1
+        return output
+
+    def core_appendcorpus(self, fileNames):
+        for fileName in fileNames:
+            try:
+                IDphrase = -1
+                with open(self.sessionFile, "r", encoding='utf-8') as ins:
+                    for line in ins:
+                        try:
+                            tmpphrase = int(line.split("\t")[self.corpuscols["IDphrase"][0]])
+                        except:
+                            continue
+                        if tmpphrase > IDphrase:
+                            IDphrase = tmpphrase
+            except:
+                IDphrase = -1
+            IDphrase = IDphrase +1
+            print("Appending " + fileName + " to " + self.sessionFile + " IDphrase: " + str(IDphrase))
+            separator = '\t'
+            with open(fileName, "r", encoding='utf-8') as ins:
+                for line in ins:
+                    myline = line.replace("\n","").replace("\r","").split(separator)
+                    try:
+                        tmpphrase = int(myline[self.corpuscols["IDphrase"][0]])
+                        myline[self.corpuscols["IDphrase"][0]] = IDphrase + tmpphrase
+                    except:
+                        continue
+                    coln = 0
+                    fullline = ""
+                    for col in myline:
+                        if coln > 0:
+                            fullline = fullline + '\t'
+                        fullline = fullline + str(col)
+                        coln = coln + 1
+                    self.core_fileappend(fullline+"\n", self.sessionFile)
+
+    def core_mergetables(self, mydir, mycol, opstr, headerlines, myrecovery):
+        separator = '\t'
+        fileNames = []
+        try:
+            if os.path.isdir(mydir):
+                for tfile in os.listdir(mydir):
+                    if bool(tfile[-4:] == ".tsv" or tfile[-4:] == ".tsv") and tfile[-11:] != "-merged.tsv" and tfile[-11:] != "-merged.csv":
+                        fileNames.append(os.path.join(mydir,tfile))
+            else:
+                return
+        except:
+            try:
+                if os.path.isfile(mydir[0]):
+                    fileNames = mydir
+            except:
+                return
+        dirName = os.path.basename(os.path.dirname(fileNames[0]))
+        try:
+            col = int(mycol)
+        except:
+            col = 0
+        output = os.path.join(os.path.dirname(fileNames[0]),dirName + "-merged.tsv")
+        with open(fileNames[0], "r", encoding='utf-8') as f:
+            first_line = f.readline().replace("\n","").replace("\r","")
+        try:
+            opers = opstr.split(",")
+        except:
+            opers = ["sum"]
+        try:
+            startatrow = int(headerlines)-1
+            useheader = True
+        except:
+            startatrow = -1
+            useheader = False
+        table = []
+        firstfile = -1
+        for fileName in fileNames:
+            firstfile = firstfile + 1
+            row = 0
+            recovery = fileName + ".tmp"
+            print(fileName + " -> " + output)
+            totallines = self.core_linescount(fileName)
+            ch = "N"
+            try:
+                if os.path.isfile(recovery) and myrecovery:
+                        with open(recovery, "r", encoding='utf-8') as tempfile:
+                           lastline = (list(tempfile)[-1])
+                        startatrow = int(lastline)
+                        print("Carico la tabella")
+                        with open(output, "r", encoding='utf-8') as ins:
+                            for line in ins:
+                                table.append(line.replace("\n","").replace("\r","").split(separator))
+                        print("Comincio dalla riga " + str(startatrow))
+                        useheader = False
+                else:
+                    exc = 1/0
+            except:
+                if useheader:
+                    table.append(first_line.split(separator))
+                    useheader = False
+            with open(fileName, "r", encoding='utf-8') as ins:
+                for line in ins:
+                    if row > startatrow:
+                        try:
+                            thislist = line.split(separator)
+                            thistext = thislist[col].replace("\n","").replace("\r","")
+                        except:
+                            thislist = []
+                            thistext = ""
+                        thisvalues = []
+                        for valcol in range(len(thislist)):
+                            if valcol != col:
+                                try:
+                                    thisvalues.append(thislist[valcol].replace("\n", ""))
+                                except:
+                                    thisvalues.append("")
+                        while len(thisvalues)<len(opers):
+                            thisvalues.append("")
+                        tbrow = self.core_findintable(table, thistext, 0)
+                        if tbrow>=0:
+                            for valind in range(len(opers)):
+                                tbval = float(table[tbrow][valind+1])
+                                if opers[valind] == "sum":
+                                    tbval = float(tbval) + float(thisvalues[valind])
+                                if opers[valind] == "mean":
+                                    tbval = (float(tbval) + float(thisvalues[valind]))
+                                if opers[valind] == "diff":
+                                    tbval = float(tbval) - float(thisvalues[valind])
+                                table[tbrow][valind+1] = tbval
+                        else:
+                            newrow = [thistext]
+                            for valind in range(len(thisvalues)):
+                                newrow.append(thisvalues[valind])
+                            table.append(newrow)
+                        if row % 500 == 0 or row == totallines:
+                            self.core_savetable(table, output)
+                            #with open(recovery, "a", encoding='utf-8') as rowfile:
+                            #    rowfile.write(str(row)+"\n")
+                            self.core_fileappend(str(row)+"\n", recovery)
+                    row = row + 1
+            self.core_fileappend(str(row)+"\n", recovery)
+        if "mean" in opers and firstfile > 0 and row == totallines and startatrow < totallines:
+            for mrow in range(len(table)):
+                for valind in range(len(opers)):
+                    if opers[valind] == "mean":
+                        try:
+                            table[mrow][valind+1] = float(table[mrow][valind+1])/len(fileNames)
+                        except:
+                            err = True
+        self.core_savetable(table, output)
+        return output
+
+
+    def core_splitbigfile(self, myfile, mymaxrow, mysplit, myrecovery):
+        separator = '\t'
+        if os.path.isfile(myfile):
+            fileName = myfile
+            ext = fileName[-3:]
+        try:
+            maxrow = int(mymaxrow)
+        except:
+            maxrow = 20000
+            if ext == "csv" or ext=="tsv":
+                maxrow = 500000
+        splitdot = False
+        try:
+            if mysplit == "." and ext == "txt":
+                splitdot = True
+        except:
+            splitdot = False
+        part = 0
+        row = 0
+        partrow = 0
+        output = fileName + "-part" + str(part) + "." + ext
+        recovery = output + ".tmp"
+        startatrow = -1
+        try:
+            if os.path.isfile(recovery) and myrecovery:
+                with open(recovery, "r", encoding='utf-8') as tempfile:
+                   lastline = (list(tempfile)[-1].split(",")[0])
+                startatrow = int(lastline)
+                part = int(list(tempfile)[-1].split(",")[1])
+                partrow = int(list(tempfile)[-1].split(",")[2])
+                print("Comincio dalla riga " + str(startatrow))
+        except:
+            startatrow = -1
+            part = 0
+        oldoutput = ""
+        with open(fileName, "r", encoding='utf-8') as ins:
+            for line in ins:
+                if row > startatrow:
+                    try:
+                        thistext = line
+                        if ext == "txt" and splitdot:
+                            partrow = partrow + len(line.split(".")) -1
+                    except:
+                        thistext = ""
+                    if partrow > (maxrow-1):
+                        partrow = 0
+                        part = part + 1
+                    output = fileName + "-part" + str(part) + "." + ext
+                    if output != oldoutput:
+                        print(output)
+                        oldoutput = output
+                    #with open(output, "a", encoding='utf-8') as outfile:
+                    #    outfile.write(thistext)
+                    self.core_fileappend(thistext, output)
+                    #with open(recovery, "a", encoding='utf-8') as rowfile:
+                    #    rowfile.write(str(row)+","+str(part)+","+str(partrow)+"\n")
+                    self.core_fileappend(str(row)+","+str(part)+","+str(partrow)+"\n", recovery)
+                    partrow = partrow + 1
+                row = row + 1
+        return output
+
+    def core_samplebigfile(self, myfile, mymaxrow, mysplit, myrecovery = False):
+        separator = '\t'
+        if os.path.isfile(myfile):
+            fileName = myfile
+            ext = fileName[-3:]
+        try:
+            maxrow = int(mymaxrow)
+        except:
+            maxrow = 20000
+            if ext == "csv":
+                maxrow = 500000
+        splitdot = False
+        try:
+            if mysplit == "." and ext == "txt":
+                splitdot = True
+        except:
+            splitdot = False
+        if splitdot == True:
+            with open(fileName, "r", encoding='utf-8') as ins:
+                for line in ins:
+                    thistext = line.replace('.','.\n')
+                    with open(fileName + "-splitondot.txt", "a", encoding='utf-8') as outfile:
+                        outfile.write(thistext)
+            fileName = fileName + "-splitondot.txt"
+        row = 0
+        output = fileName + "-estratto." + ext
+        startatrow = -1
+        totallines = self.core_linescount(fileName)
+        print("Total Lines: " + str(totallines))
+        #ripristino impossibile, è un sistema casuale
+        chunkf = float(totallines)/float(maxrow)
+        chunk = int(math.floor(chunkf))
+        if chunk < 2:
+            print("Non ci sono abbastanza righe nel file")
+            return
+        getrows = []
+        start = 0
+        print("Calcolo le righe da selezionare")
+        for i in range(maxrow):
+            end = start+chunk -1
+            if start >= totallines-1:
+                start = totallines -2
+            if end >= totallines:
+                end = totallines -1
+            trow = random.randint(start, end)
+            getrows.append(trow)
+            start = end + 1
+        print("Estraggo le righe in un nuovo file")
+        ir = 0
+        with open(fileName, "r", encoding='utf-8') as ins:
+            for line in ins:
+                if row == getrows[ir]:
+                    try:
+                        thistext = line
+                    except:
+                        thistext = ""
+                    ir = ir + 1
+                    if ir == len(getrows):
+                        break
+                    #with open(output, "a", encoding='utf-8') as outfile:
+                    #    outfile.write(thistext)
+                    self.core_fileappend(thistext, output)
+                row = row + 1
+        print(myfile +" -> "+ output)
+        return output
+
+
+########### UDPIPE INTEGRATION
+
 class UDCorpus(QThread):
     dataReceived = Signal(bool)
     updated = Signal(int)
@@ -2005,6 +3268,7 @@ class UDCorpus(QThread):
         self.csvIDcolumn = -1
         self.csvTextcolumn = -1
         self.loadvariables()
+        self.alwaysyes = False
         self.setTerminationEnabled(True)
         self.iscli = False
         try:
@@ -2067,7 +3331,8 @@ class UDCorpus(QThread):
                                 gotEncoding = False
                     self.rowfilename = fileName + ".tmp"
                     if self.iscli:
-                        self.outputcsv = fileName + ".tsv"
+                        if self.outputcsv == "":
+                            self.outputcsv = fileName + ".tsv"
                     print(fileName + " -> " + self.outputcsv)
                     if self.csvIDcolumn <0 or self.csvTextcolumn <0:
                         try:
@@ -2169,6 +3434,7 @@ class UDCorpus(QThread):
                     if self.alwaysyes:
                         ch = "y"
                     else:
+                        ch = "n"
                         print("Ho trovato un file di ripristino, lo devo usare? [Y/N]")
                         ch = input()
                     if ch == "Y" or ch == "y":
@@ -2186,12 +3452,18 @@ class UDCorpus(QThread):
                     if int(self.corpuswidget.item(crow, self.corpuscols["IDphrase"][0]).text()) > IDphrase:
                         IDphrase = int(self.corpuswidget.item(crow, self.corpuscols["IDphrase"][0]).text())
             else:
-                with open(self.rowfilename, "r", encoding='utf-8') as ins:
+                #with open(self.rowfilename, "r", encoding='utf-8') as ins:
+                with open(self.outputcsv, "r", encoding='utf-8') as ins:
                     for line in ins:
-                        if int(line.split("\t")[self.corpuscols["IDphrase"][0]]) > IDphrase:
-                            IDphrase = int(line.split("\t")[self.corpuscols["IDphrase"][0]])
+                        try:
+                            tmpphrase = int(line.split("\t")[self.corpuscols["IDphrase"][0]])
+                        except:
+                            continue
+                        if tmpphrase > IDphrase:
+                            IDphrase = tmpphrase
         except:
             IDphrase = -1
+        #print("Starting from IDphrase " +str(IDphrase))
         row = 0
         dct = {"ID" : 0, "FORM" : 1, "LEMMA" : 2, "UPOS" : 3, "XPOS" : 4, "FEATS" : 5 , "HEAD": 6, "DEPREL": 7, "DEPS": 8, "MISC": 9}
         for line in itext:

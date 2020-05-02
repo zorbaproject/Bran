@@ -19,19 +19,23 @@ import re
 import sys
 import os
 import platform
+import time
 
 
 class ProgressDialog(QThread):
     #dataReceived = Signal(bool)
 
-    def __init__(self, widget):
+    def __init__(self, corpus, rec = "", tl = 1):
         QThread.__init__(self)
-        self.w = widget
+        #self.w = widget
+        self.Corpus = corpus
         self.Progrdialog = Form()
         self.cancelled = False
-        self.stupidwindows = 0
+        self.recovery = rec
+        self.totallines = tl
+        self.stupidwindows = False
         if platform.system() == "Windows":
-            self.stupidwindows = 1
+            self.stupidwindows = True
 
     def __del__(self):
         print("Done")
@@ -41,11 +45,34 @@ class ProgressDialog(QThread):
         return
 
     def loadDialog(self):
-        if self.stupidwindows == 1:
-            self.Progrdialog.show()
+        if self.recovery != "" and self.totallines != 1:
+            self.autoUpdate()
+            self.Progrdialog.isaccepted()
         else:
-            self.Progrdialog.exec()
-        #self.Progrdialog.isaccepted()
+            if self.stupidwindows:
+                self.Progrdialog.show()
+            else:
+                self.Progrdialog.exec()
+            self.Progrdialog.isaccepted()
+
+    def autoUpdate(self):
+        self.Progrdialog.show()
+        i = 0
+        while self.cancelled == False and self.Corpus.core_killswitch == False:
+            try:
+                with open(self.recovery, "r", encoding='utf-8') as tempfile:
+                    lastline = int(list(tempfile)[-1])
+            except:
+                lastline = 0
+            self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(lastline))
+            self.Progrdialog.w.progressBar.setValue(int((lastline/self.totallines)*100))
+            if i%1==0:
+                QApplication.processEvents()
+            time.sleep(1)
+            i = i +1
+            if self.Progrdialog.w.annulla.isChecked():
+                self.cancelled = True
+                self.Corpus.core_killswitch = True
 
 
 class Form(QDialog):
