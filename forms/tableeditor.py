@@ -12,6 +12,7 @@ from PySide2.QtWidgets import QPushButton
 from PySide2.QtCore import QFile
 from PySide2.QtWidgets import QTableWidget
 from PySide2.QtWidgets import QTableWidgetItem
+from PySide2.QtSvg import QSvgWidget
 
 import re
 import sys
@@ -363,6 +364,16 @@ class Form(QMainWindow):
             process.stdin.close()
             stroutput = outputbyte.decode(encoding='utf-8')
             print(stroutput)
+            svg = path + "/" +  mybasename + ".svg"
+            mydialog = QDialog(self)
+            svgwidget = QSvgWidget(mydialog)
+            layout = QVBoxLayout()
+            layout.addWidget(svgwidget)
+            # Set dialog layout
+            svgwidget.load(svg)
+            mydialog.setLayout(layout)
+            mydialog.setWindowTitle("Anteprima del grafico")
+            mydialog.show()
 
 
 class QTableNumberItem(QTableWidgetItem):
