@@ -254,7 +254,9 @@ if __name__ == "__main__":
             print("python3 main.py texteditor file.tsv|cartella\n")
             print("python3 main.py confronto file.tsv|cartella\n")
             print("Gli argomenti tra parentesi [] sono facoltativi.")
-            print("\nI comandi preceduti da * sono sperimentali o non ancora implementati.")
+            print("\nI comandi preceduti da * sono sperimentali o non ancora implementati.\n")
+            print("I comandi possono essere automatizzati tramite script Bash o Batch:")
+            print("for i in ../miacartella/*.txt; do ./main.py tintImport \"$i\" localhost n; done\n")
             sys.exit(0)
         if sys.argv[1] == "estraiTesto":
             exts = Corpus.Textracts_exts.replace(" ", "").split("*.")
@@ -284,7 +286,7 @@ if __name__ == "__main__":
                 tmpurl = "localhost"
             tinturl = "http://" + tmpurl + ":8012/tint"
             TCThread = tint.TintCorpus(w, fileNames, corpuscols, tinturl)
-            TCThread.outputcsv = re.sub("\..*?$","", fileNames[0]) + "-bran.tsv"
+            #TCThread.outputcsv = re.sub("\..*?$","", fileNames[0]) + "-bran.tsv"
             try:
                 if sys.argv[4] == "y" or sys.argv[4] == "Y":
                     TCThread.alwaysyes = True

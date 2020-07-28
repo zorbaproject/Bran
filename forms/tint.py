@@ -291,8 +291,9 @@ class TintCorpus(QThread):
                     if self.alwaysyes:
                         ch = "y"
                     else:
-                        print("Ho trovato un file di ripristino, lo devo usare? [Y/N]")
-                        ch = input()
+                        #print("Ho trovato un file di ripristino, lo devo usare? [Y/N]")
+                        #ch = input()
+                        ch = "N"
                     if ch == "Y" or ch == "y":
                         with open(self.rowfilename, "r", encoding='utf-8') as tempfile:
                            lastline = (list(tempfile)[-1])
