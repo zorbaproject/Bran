@@ -108,6 +108,7 @@ class BranCorpus(QObject):
         self.core_killswitch = False
         self.sessionFile = ""
         self.sessionDir = "."
+        self.Textracts_exts = "*.tsv *.csv *.doc *.docx *.eml *.epub *.gif *.jpg *.jpeg *.json *.html *.htm *.mp3 *.msg *.odt *.ogg *.pdf *.png via tesseract-ocr *.pptx *.ps *.rtf *.tiff *.tif *.txt *.wav *.xlsx *.xls"
         self.mycfgfile = QDir.homePath() + "/.brancfg"
         self.mycfg = json.loads('{"javapath": "", "tintpath": "", "tintaddr": "", "tintport": "", "udpipe": "", "rscript": "", "sessions" : []}')
         self.loadPersonalCFG()
@@ -265,6 +266,39 @@ class BranCorpus(QObject):
                 except:
                     gotEncoding = False
         return lines
+
+    def batch_textract(self, fileNames, append = False, lang = ""):
+        try:
+            import textract
+        except:
+            self.install_textract()
+            import textract
+
+        fulltext = ""
+        for fileName in fileNames:
+            try:
+                mybytes = b''
+                print("File: " + str(fileName))
+                if ".gif" in fileName or ".jpg" in fileName or ".jpeg" in fileName or ".png" in fileName:
+                    if lang == "":
+                        print("Sembra che tu abbia selezionato un file immagine. Per estrarre il testo, verrà usato l'OCR: per favore, specifica la lingua del testo (es: ita, eng, deu)")
+                        mylang = input()
+                    else:
+                        mylang = lang
+                    mybytes = textract.process(fileName, language=mylang, method='tesseract', encoding='utf-8')
+                else:
+                    mybytes = textract.process(fileName, encoding='utf-8')
+                mytext = mybytes.decode('utf-8')
+                if append:
+                    fulltext = fulltext + str(mytext)
+                else:
+                    text_file = open(str(fileName[0:fileName.rfind(".")])+".txt", "w", encoding='utf-8')
+                    text_file.write(mytext)
+                    text_file.close()
+            except:
+                print("Unable to extract file from "+str(fileName))
+        if append:
+            return fulltext
 
     def importfromTreeTagger(self):
         fileNames = QFileDialog.getOpenFileNames(self.corpuswidget, "Apri file CSV", self.sessionDir, "CSV files (*.tsv *.csv *.txt)")[0]

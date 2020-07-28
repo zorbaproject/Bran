@@ -74,6 +74,7 @@ class TextEditor(QMainWindow):
         self.showpreview = False
         self.sessionDir = "."
         self.modified = -1
+        self.Textracts_exts = "*.tsv *.csv *.doc *.docx *.eml *.epub *.gif *.jpg *.jpeg *.json *.html *.htm *.mp3 *.msg *.odt *.ogg *.pdf *.png via tesseract-ocr *.pptx *.ps *.rtf *.tiff *.tif *.txt *.wav *.xlsx *.xls"
         self.setWindowTitle("Bran Text Editor")
 
     def nuovo(self):
@@ -770,10 +771,10 @@ class TextEditor(QMainWindow):
             if ret == QMessageBox.Yes:
                 self.salva()
         try:
-            exts = "*.tsv *.csv *.doc *.docx *.eml *.epub *.gif *.jpg *.jpeg *.json *.html *.htm *.mp3 *.msg *.odt *.ogg *.pdf *.png via tesseract-ocr *.pptx *.ps *.rtf *.tiff *.tif *.txt *.wav *.xlsx *.xls"
-            fileNames = QFileDialog.getOpenFileNames(self, "Apri file", self.sessionDir, "Text files ("+exts+")")[0]
-            if len(fileNames)>0:
-                self.nuovo()
+            #exts = "*.tsv *.csv *.doc *.docx *.eml *.epub *.gif *.jpg *.jpeg *.json *.html *.htm *.mp3 *.msg *.odt *.ogg *.pdf *.png via tesseract-ocr *.pptx *.ps *.rtf *.tiff *.tif *.txt *.wav *.xlsx *.xls"
+            fileNames = QFileDialog.getOpenFileNames(self, "Apri file", self.sessionDir, "Text files ("+self.Textracts_exts+")")[0]
+            #if len(fileNames)>0:
+                #self.nuovo()
             for fileName in fileNames:
                 mybytes = b''
                 if ".gif" in fileName or ".jpg" in fileName or ".jpeg" in fileName or ".png" in fileName:
@@ -790,3 +791,4 @@ class TextEditor(QMainWindow):
             if fileName != "" and os.path.isfile(fileName):
                 self.loadfile(fileName)
                 self.currentFilename = fileName
+

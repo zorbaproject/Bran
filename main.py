@@ -229,6 +229,7 @@ if __name__ == "__main__":
             print("Elenco completo dei comandi\n")
             print("\nImportazione corpus:\n")
             print("python3 main.py tintStart [brancfg]\n")
+            print("python3 main.py estraiTesto file.txt|cartella [ita]\n")
             print("python3 main.py tintImport file.txt|cartella [indirizzoServerTint] [ripristino (y/n)]\n")
             print("python3 main.py udpipeImport file.txt|cartella [it-IT] [ripristino (y/n)]\n")
             print("python3 main.py appendBran corpus-bran.tsv corpus-da-accodare.tsv|cartella\n")
@@ -255,6 +256,20 @@ if __name__ == "__main__":
             print("Gli argomenti tra parentesi [] sono facoltativi.")
             print("\nI comandi preceduti da * sono sperimentali o non ancora implementati.")
             sys.exit(0)
+        if sys.argv[1] == "estraiTesto":
+            exts = Corpus.Textracts_exts.replace(" ", "").split("*.")
+            fileNames = []
+            if os.path.isfile(sys.argv[2]):
+                fileNames = [sys.argv[2]]
+            if os.path.isdir(sys.argv[2]):
+                for tfile in os.listdir(sys.argv[2]):
+                    if tfile[-4:] in exts:
+                        fileNames.append(os.path.join(sys.argv[2],tfile))
+            try:
+                lang = sys.argv[3]
+            except:
+                lang = ""
+            Corpus.batch_textract(fileNames, False, lang)
         if sys.argv[1] == "tintImport":
             fileNames = []
             if os.path.isfile(sys.argv[2]):
