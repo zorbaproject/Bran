@@ -3325,8 +3325,8 @@ class UDCorpus(QThread):
 
     def loadtxt(self):
         fileID = 0
-        self.Progrdialog = progress.Form()
         if not self.iscli:
+            self.Progrdialog = progress.Form()
             self.updated.connect(self.Progrdialog.setValue)
             self.Progrdialog.show()
         for fileName in self.fileNames:
@@ -3418,7 +3418,8 @@ class UDCorpus(QThread):
                 self.dataReceived.emit(True)
             except:
                 self.dataReceived.emit(False)
-        self.Progrdialog.accept()
+        if not self.iscli:
+            self.Progrdialog.accept()
 
 
     def addlinetocorpus(self, text, column):
@@ -3458,8 +3459,9 @@ class UDCorpus(QThread):
         del ntext
         totallines = len(itext)
         print("Total lines: "+str(totallines))
-        self.Progrdialog.setBasetext("Sto lavorando sul paragrafo numero ")
-        self.Progrdialog.setTotal(totallines)
+        if not self.iscli:
+            self.Progrdialog.setBasetext("Sto lavorando sul paragrafo numero ")
+            self.Progrdialog.setTotal(totallines)
         startatrow = -1
         try:
             if os.path.isfile(self.rowfilename):
@@ -3508,8 +3510,9 @@ class UDCorpus(QThread):
                 self.updated.emit(row)
                 if not self.iscli and row % 20 == 0:
                     QApplication.processEvents()
-                if self.Progrdialog.w.annulla.isChecked():
-                    return
+                if not self.iscli:
+                    if self.Progrdialog.w.annulla.isChecked():
+                        return
                 myres = []
                 if line != "":
                     myres = self.getUDTable(line)
@@ -3577,6 +3580,7 @@ class UDCorpus(QThread):
             print("Done")
 
     def getUDTable(self, text):
+        print("Running "+self.udpipe)
         process = subprocess.Popen([self.udpipe, "--tokenize", "--tag", "--parse", self.udpipemodel], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         testobyte = text.encode(encoding='utf-8')
         outputbyte = process.communicate(testobyte)[0]
