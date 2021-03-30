@@ -2054,6 +2054,109 @@ class BranCorpus(QObject):
         self.core_fileappend(str(row)+"\n", recovery)
         return output
 
+    def core_cercaConFiltro(self, mycol, filtertext, myrecovery = False):
+        allfilters = filtertext.split("||")
+        fileName = self.sessionFile
+        table = []
+        try:
+            col = int(mycol)
+        except:
+            col = 0
+        hname = str(col)
+        hkey = str(col)
+        
+        for key in self.corpuscols:
+            if col == self.corpuscols[key][0]:
+                hname = self.corpuscols[key][1]
+                hkey = key
+
+        max_lookahead = 0
+        max_lookbehind = 0
+        for m in re.finditer("\[\-([0-9]*)\]", filtertext):
+            try:
+                tmp_la = int(m.group(1))
+            except:
+                continue
+            if tmp_la > max_lookbehind:
+                max_lookbehind = tmp_la
+        for m in re.finditer("\[([^\-][0-9]*)\]", filtertext):
+            try:
+                tmp_la = int(m.group(1))
+            except:
+                continue
+            if tmp_la > max_lookahead:
+                max_lookahead = tmp_la
+
+        cleanedfilter = re.sub("[^a-zA-Z0-9\[\]]", "", filtertext)
+        fcol = self.filtrimultiplienabled
+        output = fileName + "-cerca-" + hkey + "-filtro-" + cleanedfilter + ".tsv"
+        recovery = output + ".tmp"
+        totallines = len(self.corpus)
+        startatrow = -1
+        print(fileName + " -> " + output)
+        try:
+            if os.path.isfile(recovery) and myrecovery:
+                with open(recovery, "r", encoding='utf-8') as tempfile:
+                   lastline = (list(tempfile)[-1])
+                startatrow = int(lastline)
+                print("Carico la tabella")
+                with open(output, "r", encoding='utf-8') as ins:
+                    for line in ins:
+                        table.append(line.replace("\n","").replace("\r","").split(separator))
+                print("Comincio dalla riga " + str(startatrow))
+            else:
+                exception = 0/0
+        except:
+            startatrow = -1
+            headerlist = [hname, "start", "end"]
+            table.append(headerlist)
+        if self.OnlyVisibleRows:
+            totallines = self.aToken
+            if myrecovery and self.daToken > startatrow:
+                startatrow = self.daToken
+        for row in range(startatrow, totallines):
+            if self.core_killswitch:
+                break
+            if row > startatrow:
+                try:
+                    thistext = self.corpus[row][col]
+                    try:
+                        if col == self.corpuscols["pos"][0]:
+                            thistext = self.legendaPos[thistext][0]
+                    except:
+                        thistext = self.corpus[row][col]
+                except:
+                    thistext = ""
+                for ifilter in range(len(allfilters)):
+                    if self.applicaFiltro(row, fcol, allfilters[ifilter]):
+                        tbrow = self.core_finditemincolumn(table, thistext, col=0, matchexactly = True, escape = True)
+                        matchstart = row - max_lookbehind
+                        matchend = row + max_lookahead
+                        fullmatchtext = ""
+                        for imatchr in range(matchstart,matchend+1):
+                            try:
+                                fullmatchtext += self.corpus[imatchr][col]
+                                if col == self.corpuscols["pos"][0]:
+                                    thistext = self.legendaPos[thistext][0]
+                                fullmatchtext += " "
+                            except:
+                                pass
+                        newrow = [fullmatchtext]
+                        newrow.append(matchstart)
+                        newrow.append(matchend)
+                        table.append(newrow)
+                if row % 500 == 0:
+                    self.core_savetable(table, output)
+                    self.core_fileappend(str(row)+"\n", recovery)
+                    #with open(recovery, "a", encoding='utf-8') as rowfile:
+                    #    rowfile.write(str(row)+"\n")
+            row = row + 1
+        self.core_savetable(table, output)
+        #with open(recovery, "a", encoding='utf-8') as rowfile:
+        #    rowfile.write(str(row)+"\n")
+        self.core_fileappend(str(row)+"\n", recovery)
+        return output
+
     def core_rebuildText(self, table, col = "", ipunct = [], startrow = 0, endrow = 0, filtercol = None):
         mycorpus = ""
         if col == "":
