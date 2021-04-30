@@ -3415,6 +3415,7 @@ class UDCorpus(QThread):
             self.iscli = False
         self.alwaysyes = False
         self.rowfilename = ""
+        self.logfile = ""
 
     def loadvariables(self):
         self.useragent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
@@ -3467,6 +3468,7 @@ class UDCorpus(QThread):
                             except:
                                 gotEncoding = False
                     self.rowfilename = fileName + ".tmp"
+                    self.logfile = fileName + ".log"
                     if self.iscli:
                         if self.outputcsv == "":
                             self.outputcsv = fileName + ".tsv"
@@ -3513,6 +3515,10 @@ class UDCorpus(QThread):
                                         corpusID = line.split("\t")[colID]+",lang:"+self.language+",tagger:udpipe"
                                         self.text2corpusUD(line.split("\t")[textID], corpusID)
                             except:
+                                if self.logfile != "":
+                                    logline = "ERROR,"+fileName+","+ corpusID  + "," +"Errore in text2corpusUD"
+                                    with open(self.logfile, "a", encoding='utf-8') as mylogfile:
+                                        mylogfile.write(str(logline)+"\n")
                                 continue
         if self.fileNames == []:
             testline = "Il gatto è sopra al tetto."
@@ -3672,10 +3678,15 @@ class UDCorpus(QThread):
                             fullline = fullline + str(IDphrase)
                             fullline = fullline + "\t" + str(token[dct["DEPREL"]]) + "\t"
                             fullline = fullline + str(token[dct["HEAD"]])
-                        if fullline != "":
+                        if fullline != "" and t<= skipT:
                             fdatefile = self.outputcsv
                             with open(fdatefile, "a", encoding='utf-8') as myfile:
                                 myfile.write(fullline+"\n")
+                        else:
+                            if self.logfile != "":
+                                logline = "ERROR,"+self.outputcsv+",Frase:"+ str(IDphrase) +",Token:" + str(t) + "," +"Errore: riga vuota per il token "+str(token).replace("\n","")+" nella frase "+str(sentence).replace("\n","")
+                                with open(self.logfile, "a", encoding='utf-8') as mylogfile:
+                                    mylogfile.write(str(logline)+"\n")
                 if self.iscli:
                     with open(self.rowfilename, "a", encoding='utf-8') as rowfile:
                         rowfile.write(str(row)+"\n")
