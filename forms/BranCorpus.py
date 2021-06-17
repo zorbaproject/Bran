@@ -3129,8 +3129,8 @@ class BranCorpus(QObject):
                         if self.corpus[row][self.corpuscols['pos'][0]] == "PUNCT":
                             thistext = ""
                             #Nota: ho visto che qualcuno tra i caratteri calcola anche la punteggiatura
-                            tbval = int(table[tbrow][3])+len(self.corpus[row][self.corpuscols['token'][0]])
-                            table[tbrow][3] = tbval
+                            #tbval = int(table[tbrow][3])+len(self.corpus[row][self.corpuscols['token'][0]])
+                            #table[tbrow][3] = tbval
                         #thistext = re.sub(self.ignoretext, "", thistext) #Questo non dovrebbe servire, i numeri e altro testo speciale va contato comunque
                 except:
                     thistext = ""
