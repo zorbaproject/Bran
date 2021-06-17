@@ -3078,6 +3078,101 @@ class BranCorpus(QObject):
         self.core_savetable(table, output)
         return output
 
+    def core_gulpease(self, myrecovery, filter = "", doignorepunct = True):
+        fileName = self.sessionFile
+        table = []
+        col = self.corpuscols['pos'][0]
+        hkey = re.sub("[^a-zA-Z0-9]", "_", filter)
+        output = fileName + "-gulpease-" + hkey + ".tsv"
+        recovery = output + ".tmp"
+        totallines = len(self.corpus)
+        startatrow = -1
+        print(fileName + " -> " + output)
+        try:
+            if os.path.isfile(recovery) and myrecovery:
+                with open(recovery, "r", encoding='utf-8') as tempfile:
+                   lastline = (list(tempfile)[-1])
+                startatrow = int(lastline)
+                print("Carico la tabella")
+                with open(output, "r", encoding='utf-8') as ins:
+                    for line in ins:
+                        table.append(line.replace("\n","").replace("\r","").split(separator))
+                print("Comincio dalla riga " + str(startatrow))
+            else:
+                exception = 0/0
+        except:
+            startatrow = -1
+            table.append(["Subcorpus", "Parole", "Frasi", "Caratteri", "Valore GULPEASE"])
+        if self.OnlyVisibleRows:
+            totallines = self.aToken
+            if myrecovery and self.daToken > startatrow:
+                startatrow = self.daToken
+        #if startatrow >= (len(self.corpus)-1):
+        #    return
+        table = []
+        table.append(["Subcorpus", "Parole", "Frasi", "Caratteri", "Valore GULPEASE"])
+        if filter != "":
+            table.append([filter, 0, 0, 0, 0])
+        else:
+            table.append(["Totale", 0, 0, 0, 0])
+        lastphrasenum = ""
+        for row in range(startatrow, totallines):
+            if self.core_killswitch:
+                break
+            if row > startatrow:
+                if filter != "":
+                    if not self.applicaFiltro(row, self.filtrimultiplienabled, filter):
+                        continue
+                try:
+                    thistext = self.corpus[row][self.corpuscols['lemma'][0]]
+                    if self.ignoretext != "" and doignorepunct:
+                        if self.corpus[row][self.corpuscols['pos'][0]] == "PUNCT":
+                            thistext = ""
+                            #Nota: ho visto che qualcuno tra i caratteri calcola anche la punteggiatura
+                            tbval = int(table[tbrow][3])+len(self.corpus[row][self.corpuscols['token'][0]])
+                            table[tbrow][3] = tbval
+                        #thistext = re.sub(self.ignoretext, "", thistext) #Questo non dovrebbe servire, i numeri e altro testo speciale va contato comunque
+                except:
+                    thistext = ""
+                if thistext != "":
+                    filterClean = filter
+                    if filter == "":
+                        filterClean = "Totale"
+                    tbrow = self.core_findintable(table, filterClean, 0)
+                    if tbrow>=0:
+                        tbval = int(table[tbrow][1])+1
+                        table[tbrow][1] = tbval
+                        tbval = int(table[tbrow][3])+len(self.corpus[row][self.corpuscols['token'][0]])
+                        table[tbrow][3] = tbval
+                        if lastphrasenum != self.corpus[row][self.corpuscols['IDphrase'][0]]:
+                            tbval = int(table[tbrow][2])+1
+                            table[tbrow][2] = tbval
+                            lastphrasenum = self.corpus[row][self.corpuscols['IDphrase'][0]]
+                    else:
+                        print("Non existent filter")
+                    if row % 500 == 0 or row == len(self.corpus)-1:
+                        self.core_savetable(table, output)
+                        #with open(recovery, "a", encoding='utf-8') as rowfile:
+                        #    rowfile.write(str(row)+"\n")
+                        self.core_fileappend(str(row)+"\n", recovery)
+        self.core_fileappend(str(row)+"\n", recovery)
+        for row in range(len(table)):
+            if row == 0:
+                continue
+            totalwords = int(table[row][1])
+            totalphrases = int(table[row][2])
+            totalchars = int(table[row][3])
+            gulpease = 89+(((300*totalphrases)-(10*totalchars))/(totalwords))
+            ratios = f'{gulpease:.3f}'
+            table[row][4] = str(ratios)
+            table[row][3] = str(totalchars)
+            table[row][2] = str(totalphrases)
+            table[row][1] = str(totalwords)
+        self.core_savetable(table, output)
+        return output
+
+
+
     def core_estrai_colonna(self, fileNames, mycol, myrecovery, separator = '\t'):
         try:
             col = int(mycol)
