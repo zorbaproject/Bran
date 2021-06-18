@@ -1428,37 +1428,91 @@ class BranCorpus(QObject):
             for option in filtro.split("||"):
                 for andcond in option.split("&&"):
                     res = False
-                    cellname = andcond.split("=", 1)[0]
-                    try:
-                        ftext = andcond.split("=", 1)[1]
-                    except:
-                        continue
-                    colname = cellname.split("[")[0]
-                    col = self.corpuscols[colname][0]
-                    if "[" in cellname.replace("]",""):
-                        rowlist = cellname.replace("]","").split("[")[1].split(",")
+                    operators = [">=", "<=", "=", ">", "<"] #l'ordine è importante
+                    for operator in operators:
+                        if operator in andcond:
+                            break
+                    if operator != "=":
+                        #Looking for number
+                        cellname = andcond.split(operator, 1)[0]
+                        try:
+                            fnum = float(andcond.split(operator, 1)[1])
+                        except:
+                            continue
+                        colname = cellname.split("[")[0]
+                        col = self.corpuscols[colname][0]
+                        if "[" in cellname.replace("]",""):
+                            rowlist = cellname.replace("]","").split("[")[1].split(",")
+                        else:
+                            rowlist = [0]
+                        for rowp in rowlist:
+                            tmprow = row + int(rowp)
+                            try:
+                                if table == None:
+                                    ctext = self.corpus[tmprow][col]
+                                else:
+                                    ctext = table[tmprow][col]
+                            except:
+                                ctext = ""
+                            try:
+                                cnum = float(ctext)
+                                #print(str(fnum)+"|"+str(cnum))
+                            except:
+                                continue
+                            try:
+                                if cnum >= fnum and operator == ">=":
+                                    res = True
+                                    break
+                                elif cnum <= fnum and operator == "<=":
+                                    res = True
+                                    break
+                                elif cnum > fnum and operator == ">":
+                                    res = True
+                                    break
+                                elif cnum < fnum and operator == "<":
+                                    res = True
+                                    break
+                                else:
+                                    res = False
+                                    break
+                            except:
+                                print("Error in numeric formula")
+                                pass
                     else:
-                        rowlist = [0]
-                    for rowp in rowlist:
-                        tmprow = row + int(rowp)
+                        #Looking for regex
+                        cellname = andcond.split(operator, 1)[0]
                         try:
-                            if table == None:
-                                ctext = self.corpus[tmprow][col]
-                            else:
-                                ctext = table[tmprow][col]
+                            ftext = andcond.split(operator, 1)[1]
                         except:
-                            ctext = ""
-                        try:
-                            if bool(re.match(ftext, ctext)):
-                                res = True
-                                break
-                        except:
-                            print("Error in regex")
-                            pass
+                            continue
+                        colname = cellname.split("[")[0]
+                        col = self.corpuscols[colname][0]
+                        if "[" in cellname.replace("]",""):
+                            rowlist = cellname.replace("]","").split("[")[1].split(",")
+                        else:
+                            rowlist = [0]
+                        for rowp in rowlist:
+                            tmprow = row + int(rowp)
+                            try:
+                                if table == None:
+                                    ctext = self.corpus[tmprow][col]
+                                else:
+                                    ctext = table[tmprow][col]
+                            except:
+                                ctext = ""
+                            try:
+                                if bool(re.match(ftext, ctext)):
+                                    res = True
+                                    break
+                            except:
+                                print("Error in regex")
+                                pass
                     if res == False:
                         break
                 if res == True:
                     break
+            #if res:
+            #    print(cnum)
         return res
 
     def filtriMultipli(self):

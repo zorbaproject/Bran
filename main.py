@@ -910,6 +910,7 @@ if __name__ == "__main__":
             print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
         if sys.argv[1] == "gulpease":
             #./main.py gulpease ~/gatto-bran.tsv Y "IDphrase=^1$||IDphrase=^2$" N
+            #./main.py gulpease ~/gatto-bran.tsv Y "IDphrase>0&&IDphrase<3" N
             #TODO: insert numeric filters < >
             try:
                 myfiles = sys.argv[2]
