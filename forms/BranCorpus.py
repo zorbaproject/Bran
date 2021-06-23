@@ -1860,6 +1860,32 @@ class BranCorpus(QObject):
         self.core_killswitch = False
         self.showResults(output)
 
+    def gulpease(self):
+        Fildialog = creafiltro.Form(self.corpus, self.corpuscols, self.corpuswidget)
+        Fildialog.sessionDir = self.sessionDir
+        Fildialog.w.filter.setText("IDphrase>0&&IDphrase<3")
+        Fildialog.updateTable()
+        Fildialog.exec()
+        if Fildialog.w.filter.text() == "":
+            return
+        myfilter = Fildialog.w.filter.text()
+        print(myfilter)
+        ret = QMessageBox.question(self.corpuswidget,'Domanda', "Vuoi ignorare la punteggiatura?", QMessageBox.Yes | QMessageBox.No)
+        doignorepunct = False
+        if ret == QMessageBox.Yes:
+            doignorepunct = True
+        myrecovery = False
+        hkey = re.sub("[^a-zA-Z0-9]", "_", myfilter)
+        output = self.sessionFile + "-gulpease-" + hkey + ".tsv"
+        recovery = output + ".tmp"
+        totallines = self.core_linescount(self.sessionFile)
+        self.core_killswitch = False
+        self.Progrdialog = progress.ProgressDialog(self, recovery, totallines)
+        self.Progrdialog.start()
+        self.core_gulpease(myrecovery, myfilter, doignorepunct)
+        self.Progrdialog.cancelled = True
+        self.core_killswitch = False
+        self.showResults(output)
 
 
     ####################################################################################################################

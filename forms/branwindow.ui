@@ -382,7 +382,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>30</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -481,6 +481,7 @@
     <addaction name="menuOccorrenze"/>
     <addaction name="menuDipendenze"/>
     <addaction name="actionEstrai_dizionario"/>
+    <addaction name="actionGulpEASE"/>
     <addaction name="actionCalcola_densit_lessicale"/>
     <addaction name="actionTrova_ripetizioni"/>
     <addaction name="actionConta_verbi"/>
@@ -770,6 +771,11 @@
    </property>
    <property name="text">
     <string>&amp;File del progetto</string>
+   </property>
+  </action>
+  <action name="actionGulpEASE">
+   <property name="text">
+    <string>GulpEASE</string>
    </property>
   </action>
  </widget>

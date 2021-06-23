@@ -57,6 +57,11 @@
         </column>
         <column>
          <property name="text">
+          <string>Operatore</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
           <string>RegEx</string>
          </property>
         </column>

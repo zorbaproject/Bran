@@ -113,13 +113,14 @@ class Form(QDialog):
                 else:
                     myfilter = myfilter + "&&"
             colonna = self.w.tableWidget.item(tbrow,0).text()
-            myregex = self.w.tableWidget.item(tbrow,2).text()
+            operator = self.w.tableWidget.item(tbrow,2).text()
+            myregex = self.w.tableWidget.item(tbrow,3).text()
             if colonna == "" or myregex == "":
                 continue
             myfilter = myfilter + colonna
             if self.w.tableWidget.item(tbrow,1).text() != "":
                 myfilter = myfilter + "[" + self.w.tableWidget.item(tbrow,1).text()+ "]"
-            myfilter = myfilter + "=" + myregex
+            myfilter = myfilter + operator + myregex
             iand = iand+1
         self.w.filter.setText(myfilter)
 
@@ -135,8 +136,14 @@ class Form(QDialog):
                     tmpcol = ""
                     tmprows = ""
                     tmpregex = ""
-                    cellname = andcond.split("=", 1)[0]
-                    tmpregex = andcond.split("=", 1)[1]
+                    operators = [">=", "<=", "=", ">", "<"] #l'ordine è importante
+                    for operator in operators:
+                        if operator in andcond:
+                            break
+                    #cellname = andcond.split("=", 1)[0]
+                    #tmpregex = andcond.split("=", 1)[1]
+                    cellname = andcond.split(operator, 1)[0]
+                    tmpregex = andcond.split(operator, 1)[1]
                     tmpcol = cellname.split("[")[0]
                     if "[" in cellname.replace("]",""):
                         tmprows = cellname.replace("]","").split("[")[1]
@@ -144,7 +151,8 @@ class Form(QDialog):
                         tmprows = ""
                     tbrow = self.addlinetotable(tmpcol, 0)
                     self.setcelltocorpus(tmprows, tbrow, 1)
-                    self.setcelltocorpus(tmpregex, tbrow, 2)
+                    self.setcelltocorpus(operator, tbrow, 2)
+                    self.setcelltocorpus(tmpregex, tbrow, 3)
                 iopt = iopt +1
         except:
             print("Filtro non valido")

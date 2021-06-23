@@ -135,6 +135,7 @@ class MainWindow(QMainWindow):
         self.w.actionConfronta_corpora.triggered.connect(self.confronto)
         self.w.actionAbout_Bran.triggered.connect(self.aboutbran)
         self.w.actionEstrai_dizionario.triggered.connect(self.misure_lessicometriche)
+        self.w.actionGulpEASE.triggered.connect(self.gulpease)
         self.w.actionTrova_ripetizioni.triggered.connect(self.trovaripetizioni)
         self.w.actionConta_verbi.triggered.connect(self.contaverbi)
         self.w.actionTutti_i_token.triggered.connect(self.menualltoken)
@@ -344,6 +345,11 @@ class MainWindow(QMainWindow):
                     rootelem = resitem
                     myregex = re.escape(fingerprint) + "(.*?)" + re.escape(".tsv")
                     fileTitle = "Densità lessicale "+ re.sub(myregex, "\g<1>", fileTitle)
+                fingerprint = sessionname+"-gulpease-"
+                if fileTitle.startswith(fingerprint):
+                    rootelem = resitem
+                    myregex = re.escape(fingerprint) + "(.*?)" + re.escape(".tsv")
+                    fileTitle = "Misure lessicometriche "+ re.sub(myregex, "\g<1>", fileTitle)
                 #
             tritem = QTreeWidgetItem(rootelem)
             tritem.setText(0,fileTitle)
@@ -861,3 +867,6 @@ class MainWindow(QMainWindow):
 
     def misure_lessicometriche(self):
         self.Corpus.misure_lessicometriche()
+
+    def gulpease(self):
+        self.Corpus.gulpease()
