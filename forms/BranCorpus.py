@@ -3853,12 +3853,12 @@ class UDCorpus(QThread):
                             fullline = fullline + str(IDphrase)
                             fullline = fullline + "\t" + str(token[dct["DEPREL"]]) + "\t"
                             fullline = fullline + str(token[dct["HEAD"]])
-                        if fullline != "" and t<= skipT:
+                        if fullline != "":
                             fdatefile = self.outputcsv
                             with open(fdatefile, "a", encoding='utf-8') as myfile:
                                 myfile.write(fullline+"\n")
                         else:
-                            if self.logfile != "":
+                            if self.logfile != "" and t > skipT:
                                 logline = "ERROR,"+self.outputcsv+",Frase:"+ str(IDphrase) +",Token:" + str(t) + "," +"Errore: riga vuota per il token "+str(token).replace("\n","")+" nella frase "+str(sentence).replace("\n","")
                                 with open(self.logfile, "a", encoding='utf-8') as mylogfile:
                                     mylogfile.write(str(logline)+"\n")
