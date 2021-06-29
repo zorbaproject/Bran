@@ -1441,9 +1441,18 @@ class BranCorpus(QObject):
                             continue
                         colname = cellname.split("[")[0]
                         col = self.corpuscols[colname][0]
+                        rowlist = [0]
                         if "[" in cellname.replace("]",""):
-                            rowlist = cellname.replace("]","").split("[")[1].split(",")
-                        else:
+                            tmprowliststr = cellname.replace("]","").split("[")[1]
+                            if "," in tmprowliststr:
+                                rowlist = tmprowliststr.split(",")
+                            elif ":" in tmprowliststr:
+                                rowlist = list(range(tmprowliststr.split(":")[0],tmprowliststr.split(":")[1]))
+                                if len(rowlist)==0:
+                                    rowlist = list(range(tmprowliststr.split(":")[0],tmprowliststr.split(":")[1], -1))
+                            else:
+                                rowlist = [int(tmprowliststr)]
+                        if len(rowlist)==0:
                             rowlist = [0]
                         for rowp in rowlist:
                             tmprow = row + int(rowp)
@@ -1487,9 +1496,52 @@ class BranCorpus(QObject):
                             continue
                         colname = cellname.split("[")[0]
                         col = self.corpuscols[colname][0]
+                        rowlist = [0]
                         if "[" in cellname.replace("]",""):
-                            rowlist = cellname.replace("]","").split("[")[1].split(",")
-                        else:
+                            tmprowliststr = cellname.replace("]","").split("[")[1]
+                            if "," in tmprowliststr:
+                                rowlist = tmprowliststr.split(",")
+                            elif ":" in tmprowliststr:
+                                rowlist = list(range(tmprowliststr.split(":")[0],tmprowliststr.split(":")[1]))
+                                if len(rowlist)==0:
+                                    rowlist = list(range(tmprowliststr.split(":")[0],tmprowliststr.split(":")[1], -1))
+                            elif "F" in tmprowliststr:              #Fino alla fine della frase
+                                searchforphaseEnd = True
+                                epCounter = 0
+                                IDptextOLD = IDptext = self.corpus[row][self.corpuscols["IDphrase"][0]]
+                                while searchforphaseEnd:
+                                    epCounter = epCounter + 1
+                                    try:
+                                        if table == None:
+                                            IDptext = self.corpus[row+epCounter][self.corpuscols["IDphrase"][0]]
+                                        else:
+                                            IDptext = table[row+epCounter][self.corpuscols["IDphrase"][0]]
+                                        if IDptext != IDptextOLD:
+                                            epCounter = epCounter + 1
+                                            searchforphaseEnd = False
+                                    except:
+                                        searchforphaseEnd = False
+                                    rowlist = list(range(0,epCounter))
+                            elif "I" in tmprowliststr:     #Fino all'inizio della frase
+                                searchforphaseEnd = True
+                                epCounter = 0
+                                IDptextOLD = IDptext = self.corpus[row][self.corpuscols["IDphrase"][0]]
+                                while searchforphaseEnd:
+                                    epCounter = epCounter - 1
+                                    try:
+                                        if table == None:
+                                            IDptext = self.corpus[row+epCounter][self.corpuscols["IDphrase"][0]]
+                                        else:
+                                            IDptext = table[row+epCounter][self.corpuscols["IDphrase"][0]]
+                                        if IDptext != IDptextOLD:
+                                            epCounter = epCounter - 1
+                                            searchforphaseEnd = False
+                                    except:
+                                        searchforphaseEnd = False
+                                    rowlist = list(range(0,epCounter, -1))
+                            else:
+                                rowlist = [int(tmprowliststr)]
+                        if len(rowlist)==0:
                             rowlist = [0]
                         for rowp in rowlist:
                             tmprow = row + int(rowp)
