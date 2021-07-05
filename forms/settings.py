@@ -105,7 +105,10 @@ class Form(QDialog):
             if platform.system() == "Windows":
                 self.w.udpipe.setText(os.path.abspath(os.path.dirname(sys.argv[0]))+"\\udpipe\\bin-win64\\udpipe.exe")
             else:
-                self.w.udpipe.setText(os.path.abspath(os.path.dirname(sys.argv[0]))+"/udpipe/bin-linux64/udpipe")
+                if platform.architecture()[0] == '32bit':
+                    self.w.udpipe.setText(os.path.abspath(os.path.dirname(sys.argv[0]))+"/udpipe/bin-linux32/udpipe")
+                else:
+                    self.w.udpipe.setText(os.path.abspath(os.path.dirname(sys.argv[0]))+"/udpipe/bin-linux64/udpipe")
         try:
             self.w.udpipemodels.setText(self.Corpus.mycfg["udpipemodels"])
             if self.Corpus.mycfg["udpipemodels"] == "":
