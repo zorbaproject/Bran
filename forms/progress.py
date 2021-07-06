@@ -25,7 +25,7 @@ import time
 class ProgressDialog(QThread):
     #dataReceived = Signal(bool)
 
-    def __init__(self, corpus, rec = "", tl = 1):
+    def __init__(self, corpus, rec = "", tl = -1):
         QThread.__init__(self)
         #self.w = widget
         self.Corpus = corpus
@@ -33,6 +33,7 @@ class ProgressDialog(QThread):
         self.cancelled = False
         self.recovery = rec
         self.totallines = tl
+        print("Looking for recovery in "+self.recovery)
         self.stupidwindows = False
         if platform.system() == "Windows":
             self.stupidwindows = True
@@ -45,7 +46,7 @@ class ProgressDialog(QThread):
         return
 
     def loadDialog(self):
-        if self.recovery != "" and self.totallines != 1:
+        if self.recovery != "" and self.totallines > -1:
             self.autoUpdate()
             self.Progrdialog.isaccepted()
         else:
@@ -58,17 +59,28 @@ class ProgressDialog(QThread):
     def autoUpdate(self):
         self.Progrdialog.show()
         i = 0
+        oldval = -1
         while self.cancelled == False and self.Corpus.core_killswitch == False:
             try:
                 with open(self.recovery, "r", encoding='utf-8') as tempfile:
-                    lastline = int(list(tempfile)[-1])
+                    lastEl = list(tempfile)[-1]
+                    if "," in lastEl:
+                        lastline = int(lastEl.split(",")[0])
+                        self.totallines = int(lastEl.split(",")[1])
+                    else:
+                        lastline = int(lastEl)
             except:
                 lastline = 0
-            self.Progrdialog.w.testo.setText("Sto conteggiando la riga numero "+str(lastline))
-            self.Progrdialog.w.progressBar.setValue(int((lastline/self.totallines)*100))
-            if i%1==0:
+            if self.totallines > 0:
+                tmpTotallines = self.totallines
+            else:
+                tmpTotallines = 1
+            self.Progrdialog.w.testo.setText("Sto analizzando il paragrafo numero "+str(lastline))
+            self.Progrdialog.w.progressBar.setValue(int((lastline/tmpTotallines)*100))
+            if i%1==0 and lastline != oldval:
                 QApplication.processEvents()
             time.sleep(1)
+            oldval = lastline
             i = i +1
             if self.Progrdialog.w.annulla.isChecked():
                 self.cancelled = True

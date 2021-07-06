@@ -199,15 +199,55 @@ class BranCorpus(QObject):
         if self.language != "it-IT" and self.language != "en-US":
             print("Language "+ self.language +" not supported")
             return
+
         udpipe = self.mycfg["udpipe"]
         model = self.mycfg["udpipemodels"][self.language]
+
+        corpusID = "[ID]_[FILENAME],lang:it-IT,tagger:udpipe"
+        corpusID = QInputDialog.getText(self.corpuswidget, "Scegli il tag", "Indica il tag di questo file nel corpus:", QLineEdit.Normal, corpusID)[0]
         self.copyOrigFiles(fileNames)
+
+        # progrdialog
+        recovery = self.sessionFile + "-UD-importlog.tmp"
+        totallines = 0
+        self.core_killswitch = False
+        self.Progrdialog = progress.ProgressDialog(self, recovery, totallines)
+        self.Progrdialog.start()
+
+        # Run udpipe
         self.UDThread = UDCorpus(self.corpuswidget, fileNames, self.corpuscols, udpipe, model, self.language)
         self.UDThread.outputcsv = self.sessionFile
+        self.UDThread.corpusIDpattern = corpusID
         self.UDThread.finished.connect(self.txtloadingstopped)
         self.UDThread.start()
         #else if self.language == "en-US":
         #https://www.datacamp.com/community/tutorials/stemming-lemmatization-python
+
+    def core_paragraphscount(self, fileName):
+        text_file = open(fileName, "r", encoding='utf-8')
+        lines = text_file.read()
+        text_file.close()
+        itext = text.replace('.','. \n')
+        itext = itext.replace('?','? \n')
+        #merge phrases in paragraphs to optimize loading time for udpipe
+        print("Lines before optimization: " + str(len(itext.split('\n'))))
+        frasiInParagrafo = 50
+        count = 0
+        itext = itext.split('\n')
+        ntext = []
+        temp = ""
+        for f in range(len(itext)):
+            if count != frasiInParagrafo and f<(len(itext)-1):
+                temp = temp + " " + itext[f]
+                count = count + 1
+            else:
+                ntext.append(temp)
+                count = 0
+                temp = ""
+        itext = ntext
+        del ntext
+        totallines = len(itext)
+        return totallines
 
     def copyOrigFiles(self, fileNames):
         oldcount = 0
@@ -233,8 +273,17 @@ class BranCorpus(QObject):
         fileNames = QFileDialog.getOpenFileNames(self.corpuswidget, "Apri file CSV", self.sessionDir, "CSV files (*.tsv *.csv)")[0]
         if len(fileNames)<1:
             return
-        if self.language == "it-IT":
-            print("UDpipe still not supported")
+        return  #This function is not fully implemented
+        sep = QInputDialog.getText(self.corpuswidget, "Scegli il separatore", "Indica il carattere che separa le colonne (\\t è la tabulazione):", QLineEdit.Normal, "\\t")[0]
+        if sep == "\\t":
+            sep = "\t"
+        textID = QInputDialog.getInt(self.corpuswidget, "Scegli il testo", "Indica la colonna della tabella che contiene il testo di questo sottocorpus:")[0]
+        corpusID = QInputDialog.getText(self.corpuswidget, "Scegli il tag", "Indica il tag di questo file nel corpus. Puoi usare [FILENAME] per indicare il nome del file e [COLONNA] per indicare la colonna da cui estrarre un tag.", QLineEdit.Normal, "[ID]_[FILENAME],[0],lang:it-IT,tagger:udpipe")[0]
+        self.UDThread.corpusIDpattern = corpusID
+        self.UDThread.csvTextcolumn = textID
+        self.UDThread.csvSep = sep
+        #if self.language == "it-IT":
+        #    print("UDpipe still not supported")
         #else if self.language == "en-US":
         #https://www.datacamp.com/community/tutorials/stemming-lemmatization-python
 
@@ -409,6 +458,12 @@ class BranCorpus(QObject):
         return lines
 
     def txtloadingstopped(self):
+        #Closing import progress dialog if it was running
+        try:
+            self.core_killswitch = False
+            self.Progrdialog.cancelled = True
+        except:
+            pass
         print("Loading project")
         if self.sessionFile != "" and self.ImportingFile == False:
             if os.path.isfile(self.sessionFile):
@@ -3629,8 +3684,10 @@ class UDCorpus(QThread):
         self.udpipemodel = udpipemodel
         self.language = lang
         self.outputcsv = ""
+        self.corpusIDpattern = "[ID]_[FILENAME],lang:it-IT,tagger:udpipe"
         self.csvIDcolumn = -1
         self.csvTextcolumn = -1
+        self.csvSep = '\t'
         self.loadvariables()
         self.alwaysyes = False
         self.setTerminationEnabled(True)
@@ -3641,6 +3698,7 @@ class UDCorpus(QThread):
         except:
             self.iscli = False
         self.alwaysyes = False
+        self.core_killswitch = False
         self.rowfilename = ""
         self.logfile = ""
 
@@ -3656,10 +3714,11 @@ class UDCorpus(QThread):
 
     def loadtxt(self):
         fileID = 0
-        if not self.iscli:
-            self.Progrdialog = progress.Form()
-            self.updated.connect(self.Progrdialog.setValue)
-            self.Progrdialog.show()
+        tagPattern = self.corpusIDpattern
+        #if not self.iscli:
+        #    self.Progrdialog = progress.Form()
+        #    self.updated.connect(self.Progrdialog.setValue)
+        #    self.Progrdialog.show()
         for fileName in self.fileNames:
             if not fileName == "":
                 if os.path.isfile(fileName):
@@ -3679,14 +3738,21 @@ class UDCorpus(QThread):
                         myencoding = "ISO-8859-15"
                         #https://pypi.org/project/chardet/
                         gotEncoding = False
+                        encI = 0
+                        encs = ["ISO-8859-15", "cp1252"]
                         while gotEncoding == False:
-                            try:
-                                self.Progrdialog.hide()
-                                myencoding = QInputDialog.getText(self.corpuswidget, "Scegli la codifica", "Sembra che questo file non sia codificato in UTF-8. Vuoi provare a specificare una codifica diversa? (Es: cp1252 oppure ISO-8859-15)", QLineEdit.Normal, myencoding)
-                                self.Progrdialog.show()
-                            except:
+                            #try:
+                                #self.Progrdialog.hide()
+                                #myencoding = QInputDialog.getText(self.corpuswidget, "Scegli la codifica", "Sembra che questo file non sia codificato in UTF-8. Vuoi provare a specificare una codifica diversa? (Es: cp1252 oppure ISO-8859-15)", QLineEdit.Normal, myencoding)
+                                #self.Progrdialog.show()
+                            #except:
+                            if encI > (len(encs)-1):
                                 print("Sembra che questo file non sia codificato in UTF-8. Vuoi provare a specificare una codifica diversa? (Es: cp1252 oppure ISO-8859-15)")
                                 myencoding = [input()]
+                                encI = encI + 1
+                            else:
+                                myencoding = encs[encI]
+                                encI = encI + 1
                             try:
                                 text_file = open(fileName, "r", encoding=myencoding[0])
                                 lines = text_file.read()
@@ -3701,26 +3767,31 @@ class UDCorpus(QThread):
                             self.outputcsv = fileName + ".tsv"
                     print(fileName + " -> " + self.outputcsv)
                     if self.csvIDcolumn <0 or self.csvTextcolumn <0:
-                        try:
-                            self.Progrdialog.hide()
-                            corpusID = str(fileID)+"_"+os.path.basename(fileName)+",lang:"+self.language+",tagger:udpipe"
-                            corpusID = QInputDialog.getText(self.corpuswidget, "Scegli il tag", "Indica il tag di questo file nel corpus:", QLineEdit.Normal, corpusID)[0]
-                            self.Progrdialog.show()
-                        except:
-                            corpusID = str(fileID)+"_"+os.path.basename(fileName)+",lang:"+self.language+",tagger:udpipe"
+                        #try:
+                        #    self.Progrdialog.hide()
+                        #    corpusID = str(fileID)+"_"+os.path.basename(fileName)+",lang:"+self.language+",tagger:udpipe"
+                        #    corpusID = QInputDialog.getText(self.corpuswidget, "Scegli il tag", "Indica il tag di questo file nel corpus:", QLineEdit.Normal, corpusID)[0]
+                        #    self.Progrdialog.show()
+                        #except:
+                        #    corpusID = str(fileID)+"_"+os.path.basename(fileName)+",lang:"+self.language+",tagger:udpipe"
+                        #corpusID = str(fileID)+"_"+os.path.basename(fileName)+",lang:"+self.language+",tagger:udpipe"
+                        corpusID = tagPattern.replace("[ID]", str(fileID)).replace("[FILENAME]", os.path.basename(fileName))
                         self.text2corpusUD(lines, corpusID)
                     else:
                         try:
-                            sep = QInputDialog.getText(self.corpuswidget, "Scegli il separatore", "Indica il carattere che separa le colonne (\\t è la tabulazione):", QLineEdit.Normal, "\\t")[0]
+                            #sep = QInputDialog.getText(self.corpuswidget, "Scegli il separatore", "Indica il carattere che separa le colonne (\\t è la tabulazione):", QLineEdit.Normal, "\\t")[0]
+                            sep = self.csvSep
                             if sep == "\\t":
                                 sep = "\t"
-                            self.Progrdialog.hide()
-                            textID = QInputDialog.getInt(self.corpuswidget, "Scegli il testo", "Indica la colonna della tabella che contiene il testo di questo sottocorpus:")[0]
-                            corpusIDtext = QInputDialog.getText(self.corpuswidget, "Scegli il tag", "Indica il tag di questo file nel corpus. Puoi usare [filename] per indicare il nome del file e [numeroColonna] per indicare la colonna da cui estrarre un tag.", QLineEdit.Normal, "[filename], [0]"+",tagger:udpipe")[0]
-                            self.Progrdialog.show()
+                            #self.Progrdialog.hide()
+                            #textID = QInputDialog.getInt(self.corpuswidget, "Scegli il testo", "Indica la colonna della tabella che contiene il testo di questo sottocorpus:")[0]
+                            #corpusIDtext = QInputDialog.getText(self.corpuswidget, "Scegli il tag", "Indica il tag di questo file nel corpus. Puoi usare [FILENAME] per indicare il nome del file e [COLONNA] per indicare la colonna da cui estrarre un tag.", QLineEdit.Normal, "[filename], [0]"+",tagger:udpipe")[0]
+                            textID = self.csvTextcolumn
+                            corpusIDtext = tagPattern
+                            #self.Progrdialog.show()
                             textID = int(textID)
                             for line in lines.split("\n"):
-                                corpusID = corpusIDtext.replace("[filename]", os.path.basename(fileName))
+                                corpusID = corpusIDtext.replace("[FILENAME]", os.path.basename(fileName))
                                 indexes = [(m.start(0), m.end(0)) for m in re.finditer('\[[0-9]*\]', corpusID)]
                                 for n in range(len(indexes)):
                                     start = indexes[n][0]
@@ -3754,8 +3825,8 @@ class UDCorpus(QThread):
                 self.dataReceived.emit(True)
             except:
                 self.dataReceived.emit(False)
-        if not self.iscli:
-            self.Progrdialog.accept()
+        #if not self.iscli:
+        #    self.Progrdialog.accept()
 
 
     def addlinetocorpus(self, text, column):
@@ -3795,9 +3866,9 @@ class UDCorpus(QThread):
         del ntext
         totallines = len(itext)
         print("Total lines: "+str(totallines))
-        if not self.iscli:
-            self.Progrdialog.setBasetext("Sto lavorando sul paragrafo numero ")
-            self.Progrdialog.setTotal(totallines)
+        #if not self.iscli:
+        #    self.Progrdialog.setBasetext("Sto lavorando sul paragrafo numero ")
+        #    self.Progrdialog.setTotal(totallines)
         startatrow = -1
         try:
             if os.path.isfile(self.rowfilename):
@@ -3844,11 +3915,13 @@ class UDCorpus(QThread):
                 #self.Progrdialog.w.testo.setText("Sto lavorando sulla frase numero "+str(row))
                 #self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
                 self.updated.emit(row)
-                if not self.iscli and row % 20 == 0:
-                    QApplication.processEvents()
-                if not self.iscli:
-                    if self.Progrdialog.w.annulla.isChecked():
-                        return
+                #if not self.iscli and row % 20 == 0:
+                #    QApplication.processEvents()
+                #if not self.iscli:
+                #    if self.Progrdialog.w.annulla.isChecked():
+                #        return
+                if self.core_killswitch:
+                    break
                 myres = []
                 if line != "":
                     myres = self.getUDTable(line)
@@ -3917,6 +3990,9 @@ class UDCorpus(QThread):
                 if self.iscli:
                     with open(self.rowfilename, "a", encoding='utf-8') as rowfile:
                         rowfile.write(str(row)+"\n")
+                else:
+                    with open(self.outputcsv+"-UD-importlog.tmp", "a", encoding='utf-8') as rowfile:
+                        rowfile.write(str(row)+","+str(totallines)+"\n")
         if self.iscli:
             print("Done")
 
