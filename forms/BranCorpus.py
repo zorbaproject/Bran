@@ -111,6 +111,9 @@ class BranCorpus(QObject):
         self.Textracts_exts = "*.tsv *.csv *.doc *.docx *.eml *.epub *.gif *.jpg *.jpeg *.json *.html *.htm *.mp3 *.msg *.odt *.ogg *.pdf *.png via tesseract-ocr *.pptx *.ps *.rtf *.tiff *.tif *.txt *.wav *.xlsx *.xls"
         self.mycfgfile = QDir.homePath() + "/.brancfg"
         self.mycfg = json.loads('{"javapath": "", "tintpath": "", "tintaddr": "", "tintport": "", "udpipe": "", "rscript": "", "sessions" : []}')
+        self.stupidwindows = False
+        if platform.system() == "Windows":
+            self.stupidwindows = True
         self.loadPersonalCFG()
         #TODO: Should we specify the session in the constructor?
         #self.txtloadingstopped()
@@ -849,7 +852,13 @@ class BranCorpus(QObject):
     def deselectAllCells(self):
         self.corpuswidget.clearSelection()
 
-    def showResults(self, output):
+    def showResults(self, output, fromProjectTree = False):
+        #filemtime = int(os.path.getmtime(output))
+        #now = int(datetime.datetime.now().timestamp())
+        #if self.stupidwindows and 30>(now-filemtime) and not fromProjectTree:
+        if self.stupidwindows and not fromProjectTree:
+            print("Su Windows non puoi visualizzare una tabella subito dopo averla creata: devi aspettare un minuto per dare al sistema il tempo di finire di scrivere sul disco. Clicca su Visualizza/File del progetto e prova a aprire il file tra un minuto.")
+            return
         TBdialog = tableeditor.Form(self.corpuswidget, self.mycfg)
         TBdialog.sessionDir = self.sessionDir
         lineI = 0
@@ -866,7 +875,6 @@ class BranCorpus(QObject):
                             TBdialog.setcelltotable(col, lineI-1, colI)
                     colI = colI +1
                 lineI = lineI +1
-        #self.Progrdialog.accept()
         TBdialog.show()
 
     def contaoccorrenze(self):
@@ -891,7 +899,9 @@ class BranCorpus(QObject):
         self.core_calcola_occorrenze(mycol, myrecovery)
         self.Progrdialog.cancelled = True
         self.core_killswitch = False
-        self.showResults(output)
+        if not self.stupidwindows:
+            self.showResults(output)
+        return output
 
     def contaoccorrenzefiltrate(self):
         thisname = []

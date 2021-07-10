@@ -172,6 +172,7 @@ class MainWindow(QMainWindow):
         self.w.updatetokens_group.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
         self.w.groupBox_filter.setStyleSheet("QGroupBox{padding-top:1em; margin-top:-1em}")
         self.w.groupBox_progetto.setStyleSheet("QGroupBox{padding-top:1em; margin-top:-1em}")
+        self.tableeditor("init")
 
     def corpusSizeChanged(self, newsize):
         #maximum = len(self.Corpus.corpus)
@@ -255,7 +256,7 @@ class MainWindow(QMainWindow):
     def openprjfile(self, myitem, col):
         filepath = myitem.text(1)
         if filepath[-4:]==".tsv" or filepath[-4:]==".csv":
-            self.Corpus.showResults(filepath)
+            self.Corpus.showResults(filepath, True)
         else:
             te = texteditor.TextEditor(self.Corpus.corpuswidget, self.Corpus.mycfg)
             te.aprilista([filepath])
@@ -434,8 +435,31 @@ class MainWindow(QMainWindow):
     def deselectAllCells(self):
         self.w.corpus.clearSelection()
 
+    def selectFromProjectFiles(self, output):
+        self.w.actionFile_del_progetto.setChecked(True)
+        self.showProjectFiles()
+        self.updateProject()
+        return
+        root = self.w.progetto.invisibleRootItem()
+        cCount = root.childCount()
+        for i in range(cCount):
+            if root.child(i).text(0) == "Risultati di Bran":
+                ccCount = root.child(i).childCount()
+                for c in range(ccCount):
+                    try:
+                        item = root.child(i).child(c)
+                        if output == item.text(1):
+                            print(item.text(1))
+                            self.w.progetto.setCurrentItem(root.child(i).child(c))
+                    except:
+                        pass
+
     def contaoccorrenze(self):
-        self.Corpus.contaoccorrenze()
+        self.tableeditor("init")
+        #QMessageBox.information(self.w, "Avviso", "Su Windows devi prima di tutto cliccare su Visualizza/File del progetto e provare a aprire una tabella, poi puoi caricare i file con i risultati.")
+        output = self.Corpus.contaoccorrenze()
+        if self.Corpus.stupidwindows:
+            self.selectFromProjectFiles(output)
 
     def contapersone(self):
         self.Corpus.contapersone()
@@ -840,11 +864,13 @@ class MainWindow(QMainWindow):
     def texteditor(self):
         self.Corpus.texteditor()
 
-    def tableeditor(self):
+    def tableeditor(self, runner = ""):
         TBdialog = tableeditor.Form(self.w.corpus, self.Corpus.mycfg)
         TBdialog.sessionDir = self.sessionDir
         TBdialog.w.apricsv.show()
         TBdialog.show()
+        if runner == "init":
+            TBdialog.hide()
 
     def confronto(self):
         self.Corpus.confronto()
