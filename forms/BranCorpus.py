@@ -939,7 +939,9 @@ class BranCorpus(QObject):
         self.core_occorrenzeFiltrate(mycol, filtertext, myrecovery)
         self.Progrdialog.cancelled = True
         self.core_killswitch = False
-        self.showResults(output)
+        if not self.stupidwindows:
+            self.showResults(output)
+        return output
 
     def contapersone(self):
         thisname = []
@@ -986,7 +988,9 @@ class BranCorpus(QObject):
         self.core_contapersone(filtertext, mylevel, myrecovery)
         self.Progrdialog.cancelled = True
         self.core_killswitch = False
-        self.showResults(output)
+        if not self.stupidwindows:
+            self.showResults(output)
+        return output
 
     def coOccorrenze(self):
         parola = QInputDialog.getText(self.corpuswidget, "Scegli la parola", "Indica la parola che vuoi cercare:", QLineEdit.Normal, "")[0]
@@ -1034,7 +1038,9 @@ class BranCorpus(QObject):
         self.core_calcola_coOccorrenze(parola, mycol, myrange, True, myrecovery, filtertext)
         self.Progrdialog.cancelled = True
         self.core_killswitch = False
-        self.showResults(output)
+        if not self.stupidwindows:
+            self.showResults(output)
+        return output
 
     def concordanze(self):
         parola = QInputDialog.getText(self.corpuswidget, "Scegli la parola", "Indica la parola che vuoi cercare:", QLineEdit.Normal, "")[0]
@@ -1082,7 +1088,9 @@ class BranCorpus(QObject):
         self.core_calcola_concordanze(parola, mycol, myrange, True, myrecovery, filtertext)
         self.Progrdialog.cancelled = True
         self.core_killswitch = False
-        self.showResults(output)
+        if not self.stupidwindows:
+            self.showResults(output)
+        return output
 
     def occorrenzenormalizzate(self):
         thisname = []
@@ -1110,7 +1118,9 @@ class BranCorpus(QObject):
         self.core_occorrenze_normalizzate(mycol, myrecovery, doignorepunct)
         self.Progrdialog.cancelled = True
         self.core_killswitch = False
-        self.showResults(output)
+        if not self.stupidwindows:
+            self.showResults(output)
+        return output
 
     def orderVerbMorf(self, text, ignoreperson = False):
         if not "VerbForm" in text:
@@ -1168,7 +1178,9 @@ class BranCorpus(QObject):
         self.core_contaverbi(ignoreperson, contigui, myrecovery)
         self.Progrdialog.cancelled = True
         self.core_killswitch = False
-        self.showResults(output)
+        if not self.stupidwindows:
+            self.showResults(output)
+        return output
 
     def trovaripetizioni(self):
         Repetdialog = ripetizioni.Form(self.corpuswidget)
@@ -1421,7 +1433,9 @@ class BranCorpus(QObject):
         self.core_densitalessico(mylevel, myrecovery)
         self.Progrdialog.cancelled = True
         self.core_killswitch = False
-        self.showResults(output)
+        if not self.stupidwindows:
+            self.showResults(output)
+        return output
 
     def delselected(self):
         self.Progrdialog = progress.Form()
@@ -1975,7 +1989,9 @@ class BranCorpus(QObject):
         self.core_misure_lessicometriche(mycol, myrecovery, doignorepunct)
         self.Progrdialog.cancelled = True
         self.core_killswitch = False
-        self.showResults(output)
+        if not self.stupidwindows:
+            self.showResults(output)
+        return output
 
     def gulpease(self):
         Fildialog = creafiltro.Form(self.corpus, self.corpuscols, self.corpuswidget)
@@ -2002,7 +2018,9 @@ class BranCorpus(QObject):
         self.core_gulpease(myrecovery, myfilter, doignorepunct)
         self.Progrdialog.cancelled = True
         self.core_killswitch = False
-        self.showResults(output)
+        if not self.stupidwindows:
+            self.showResults(output)
+        return output
 
 
     ####################################################################################################################

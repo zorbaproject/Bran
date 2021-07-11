@@ -350,7 +350,7 @@ class MainWindow(QMainWindow):
                 if fileTitle.startswith(fingerprint):
                     rootelem = resitem
                     myregex = re.escape(fingerprint) + "(.*?)" + re.escape(".tsv")
-                    fileTitle = "Misure lessicometriche "+ re.sub(myregex, "\g<1>", fileTitle)
+                    fileTitle = "Gulpease "+ re.sub(myregex, "\g<1>", fileTitle)
                 #
             tritem = QTreeWidgetItem(rootelem)
             tritem.setText(0,fileTitle)
@@ -435,11 +435,12 @@ class MainWindow(QMainWindow):
     def deselectAllCells(self):
         self.w.corpus.clearSelection()
 
-    def selectFromProjectFiles(self, output):
+    def selectFromProjectFiles(self, output = ""):
         self.w.actionFile_del_progetto.setChecked(True)
         self.showProjectFiles()
         self.updateProject()
         return
+        #Windows si bloca se provo a selezionare l'elemento
         root = self.w.progetto.invisibleRootItem()
         cCount = root.childCount()
         for i in range(cCount):
@@ -462,18 +463,23 @@ class MainWindow(QMainWindow):
             self.selectFromProjectFiles(output)
 
     def contapersone(self):
+        self.tableeditor("init")
         self.Corpus.contapersone()
 
     def occorrenzenormalizzate(self):
+        self.tableeditor("init")
         self.Corpus.occorrenzenormalizzate()
 
     def contaoccorrenzefiltrate(self):
+        self.tableeditor("init")
         self.Corpus.contaoccorrenzefiltrate()
 
     def contaverbi(self):
+        self.tableeditor("init")
         self.Corpus.contaverbi()
 
     def trovaripetizioni(self):
+        self.tableeditor("init")
         self.Corpus.trovaripetizioni()
 
     def ricostruisciTesto(self):
@@ -490,6 +496,7 @@ class MainWindow(QMainWindow):
         self.Corpus.translatePos()
 
     def densitalessico(self):
+        self.tableeditor("init")
         self.Corpus.densitalessico()
 
     def aggiornamenti(self):
