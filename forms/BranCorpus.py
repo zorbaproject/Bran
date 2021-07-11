@@ -3774,6 +3774,8 @@ class UDCorpus(QThread):
                                 #myencoding = QInputDialog.getText(self.corpuswidget, "Scegli la codifica", "Sembra che questo file non sia codificato in UTF-8. Vuoi provare a specificare una codifica diversa? (Es: cp1252 oppure ISO-8859-15)", QLineEdit.Normal, myencoding)
                                 #self.Progrdialog.show()
                             #except:
+                            if encI > (len(encs)+1):
+                                break
                             if encI > (len(encs)-1):
                                 print("Sembra che questo file non sia codificato in UTF-8. Vuoi provare a specificare una codifica diversa? (Es: cp1252 oppure ISO-8859-15)")
                                 myencoding = [input()]
