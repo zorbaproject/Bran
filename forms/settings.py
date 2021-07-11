@@ -56,6 +56,7 @@ class Form(QDialog):
         self.w.resettwitter.clicked.connect(self.resettwitter)
         self.w.resetfacebook.clicked.connect(self.resetfacebook)
         self.w.configfile.setText(self.Corpus.mycfgfile)
+        self.w.disableProgress.stateChanged.connect(self.showprogress)
         self.setWindowTitle("Impostazioni di Bran")
         self.accepted = False
         self.loadsettings()
@@ -122,6 +123,14 @@ class Form(QDialog):
             else:
                 udmodels = { "it-IT" : os.path.abspath(os.path.dirname(sys.argv[0]))+"/udpipe/modelli/italian-isdt-ud-2.4-190531.udpipe" }
                 self.w.udpipemodels.setText(json.dumps(udmodels))
+        try:
+            self.w.disableProgress.setChecked(self.Corpus.mycfg["disableProgress"])
+        except:
+            self.Corpus.mycfg["disableProgress"] = False
+            print("Error reading Bran config")
+            if platform.system() == "Windows":
+                self.Corpus.mycfg["disableProgress"] = True
+                self.w.disableProgress.setChecked(True)
         try:
             self.w.rscript.setText(self.Corpus.mycfg["rscript"])
             if self.Corpus.mycfg["rscript"] == "":
@@ -254,3 +263,6 @@ class Form(QDialog):
 
     def resetaddress(self):
         self.w.address.setText("localhost")
+
+    def showprogress(self, state):
+        self.Corpus.mycfg["disableProgress"] = self.w.disableProgress.isChecked()

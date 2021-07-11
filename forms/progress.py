@@ -57,7 +57,8 @@ class ProgressDialog(QThread):
             self.Progrdialog.isaccepted()
 
     def autoUpdate(self):
-        self.Progrdialog.show()
+        if not self.Corpus.mycfg["disableProgress"]:
+            self.Progrdialog.show()
         i = 0
         oldval = -1
         while self.cancelled == False and self.Corpus.core_killswitch == False:
