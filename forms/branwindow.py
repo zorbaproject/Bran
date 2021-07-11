@@ -217,6 +217,7 @@ class MainWindow(QMainWindow):
     def loadSession(self):
         seSdialog = sessione.Form(self)
         seSdialog.loadhistory(self.Corpus.mycfg["sessions"])
+        seSdialog.baseTempDir = self.Corpus.mycfg["tempDir"]
         seSdialog.exec()
         self.Corpus.sessionFile = seSdialog.filesessione
         self.setWindowTitle("Bran - "+self.Corpus.sessionFile)
@@ -830,6 +831,8 @@ class MainWindow(QMainWindow):
             self.Corpus.mycfg["udpipemodels"] = json.loads(self.BranSetdialog.w.udpipemodels.text())
             self.Corpus.mycfg["facebook"] = json.loads(self.BranSetdialog.w.facebook.text())
             self.Corpus.mycfg["twitter"] = json.loads(self.BranSetdialog.w.twitter.text())
+            self.Corpus.mycfg["tempDir"] = self.BranSetdialog.w.tempDir.text()
+            self.Corpus.mycfg["disableProgress"] = self.BranSetdialog.w.disableProgress.isChecked()
             print("Full config:")
             print(self.Corpus.mycfg)
         self.Corpus.savePersonalCFG()

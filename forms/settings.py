@@ -29,7 +29,7 @@ from PySide2.QtWidgets import QInputDialog
 from PySide2.QtWidgets import QMessageBox
 from PySide2.QtWidgets import QTableWidget
 from PySide2.QtWidgets import QTableWidgetItem #QtGui?
-
+from PySide2.QtCore import QTemporaryDir
 
 
 class Form(QDialog):
@@ -48,6 +48,7 @@ class Form(QDialog):
         self.w.loadjava.clicked.connect(self.loadjava)
         self.w.loadtint.clicked.connect(self.loadtint)
         self.w.loadrscript.clicked.connect(self.loadrscript)
+        self.w.loadTempDir.clicked.connect(self.loadTempDir)
         self.w.loadudpipe.clicked.connect(self.loadudpipe)
         self.w.loadudpipemodels.clicked.connect(self.loadudpipemodels)
         self.w.clearsessions.clicked.connect(self.clearsessions)
@@ -96,6 +97,19 @@ class Form(QDialog):
                 self.w.tintlib.setText(os.path.abspath(os.path.dirname(sys.argv[0]))+"\\tint\\lib")
             else:
                 self.w.tintlib.setText(os.path.abspath(os.path.dirname(sys.argv[0]))+"/tint/lib")
+        try:
+            self.w.tempDir.setText(self.Corpus.mycfg["tempDir"])
+            if self.Corpus.mycfg["tempDir"] == "":
+                0/0
+        except:
+            print("Error reading Bran config")
+            self.Corpus.mycfg["tempDir"] = ""
+            if platform.system() == "Windows":
+                tdir = QTemporaryDir()
+                foldername = tdir.path().replace("-","_")
+                self.w.tempDir.setText(os.path.abspath(os.path.dirname(foldername)))
+            else:
+                self.w.tempDir.setText("/tmp/")
         try:
             self.w.udpipe.setText(self.Corpus.mycfg["udpipe"])
             if self.Corpus.mycfg["udpipe"] == "":
@@ -217,6 +231,12 @@ class Form(QDialog):
         fileName = QFileDialog.getExistingDirectory(self, "Seleziona la cartella di Tint")
         if fileName != "":
             self.w.tintlib.setText(fileName)
+
+
+    def loadTempDir(self):
+        fileName = QFileDialog.getExistingDirectory(self, "Seleziona la cartella dei file temporanei")
+        if fileName != "":
+            self.w.tempDir.setText(fileName)
 
     def loadrscript(self):
         QMessageBox.information(self, "Hai già RScript?", "Se non hai Rscript puoi scaricarlo da qui per Windows: <a href=\"https://cran.r-project.org/bin/windows/base/\">https://cran.r-project.org/bin/windows/base/</a>. Scarica il file di setup e installalo. Poi, indica la posizione del file RScript.exe (di solito nella cartella bin). Dovranno essere installati anche i pacchetti ggplot2 e gridSVG. Puoi farlo automaticamente eseguendo lo script creato da Bran come amministratore, oppure manualmente con il gestore pacchetti di R.")

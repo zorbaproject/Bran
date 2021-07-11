@@ -37,6 +37,7 @@ class Form(QDialog):
         self.setWindowTitle("Scegli una sessione di lavoro")
         #self.w.recenti.horizontalScrollBar().setValue(self.w.recenti.horizontalScrollBar().maximum())
         self.filesessione = ""
+        self.baseTempDir = ""
 
     def isaccepted(self):
         self.filesessione = ""
@@ -79,8 +80,16 @@ class Form(QDialog):
             self.isrejected()
 
     def isrejected(self):
-        tdir = QTemporaryDir()
-        self.filesessione = tdir.path().replace("-","_")
+        try:
+            if self.baseTempDir != "":
+                tdir = QTemporaryDir()
+                tmpDir = tdir.path().replace("-","_")
+                self.filesessione = self.baseTempDir + "/" + os.path.basename(tmpDir)
+            else:
+                0/0
+        except:
+            tdir = QTemporaryDir()
+            self.filesessione = tdir.path().replace("-","_")
         ret = QMessageBox.question(self,'Sicuro sicuro?', "Bran creerà una sessione temporanea nella cartella "+self.filesessione+". La cartella continuerà a esistere anche dopo la chiusura di Bran, ma verrà cancellata automaticamente al riavvio del sistema. Sei sicuro di voler continuare?", QMessageBox.Yes | QMessageBox.No)
         if ret == QMessageBox.Yes:
             sname = os.path.basename(self.filesessione)
