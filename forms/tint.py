@@ -128,8 +128,10 @@ class TintCorpus(QThread):
         self.Tintaddr = myTintAddr
         self.outputcsv = ""
         self.language = "it-IT"
+        self.corpusIDpattern = "[ID]_[FILENAME],lang:it-IT,tagger:tint"
         self.csvIDcolumn = -1
         self.csvTextcolumn = -1
+        self.csvSep = '\t'
         self.loadvariables()
         self.setTerminationEnabled(True)
         self.iscli = False
@@ -139,6 +141,7 @@ class TintCorpus(QThread):
         except:
             self.iscli = False
         self.alwaysyes = False
+        self.core_killswitch = False
         self.rowfilename = ""
 
     def loadvariables(self):
@@ -155,10 +158,7 @@ class TintCorpus(QThread):
 
     def loadtxt(self):
         fileID = 0
-        self.Progrdialog = progress.Form()
-        if not self.iscli:
-            self.updated.connect(self.Progrdialog.setValue)
-            self.Progrdialog.show()
+        tagPattern = self.corpusIDpattern
         for fileName in self.fileNames:
             if not fileName == "":
                 if os.path.isfile(fileName):
@@ -178,16 +178,18 @@ class TintCorpus(QThread):
                         myencoding = "ISO-8859-15"
                         #https://pypi.org/project/chardet/
                         gotEncoding = False
+                        encI = 0
+                        encs = ["ISO-8859-15", "cp1252"]
                         while gotEncoding == False:
-                            try:
-                                if self.iscli:
-                                    temp = 0/0
-                                self.Progrdialog.hide()
-                                myencoding = QInputDialog.getText(None, "Scegli la codifica", "Sembra che questo file non sia codificato in UTF-8. Vuoi provare a specificare una codifica diversa? (Es: cp1252 oppure ISO-8859-15)", QLineEdit.Normal, myencoding)
-                                self.Progrdialog.show()
-                            except:
+                            if encI > (len(encs)+1):
+                                break
+                            if encI > (len(encs)-1):
                                 print("Sembra che questo file non sia codificato in UTF-8. Vuoi provare a specificare una codifica diversa? (Es: cp1252 oppure ISO-8859-15)")
                                 myencoding = [input()]
+                                encI = encI + 1
+                            else:
+                                myencoding = encs[encI]
+                                encI = encI + 1
                             try:
                                 text_file = open(fileName, "r", encoding=myencoding[0])
                                 lines = text_file.read()
@@ -201,30 +203,25 @@ class TintCorpus(QThread):
                             self.outputcsv = fileName + ".tsv"
                     print(fileName + " -> " + self.outputcsv)
                     if self.csvIDcolumn <0 or self.csvTextcolumn <0:
-                        try:
-                            if self.iscli:
-                                err = 0/0
-                            corpusID = str(fileID)+"_"+os.path.basename(fileName)+",lang:"+self.language+",tagger:tint"
-                            self.Progrdialog.hide()
-                            corpusID = QInputDialog.getText(None, "Scegli il tag", "Indica il tag di questo file nel corpus:", QLineEdit.Normal, corpusID)[0]
-                            self.Progrdialog.show()
-                        except:
-                            corpusID = str(fileID)+"_"+os.path.basename(fileName)+",lang:"+self.language+",tagger:tint"
+                        corpusID = tagPattern.replace("[ID]", str(fileID)).replace("[FILENAME]", os.path.basename(fileName))
                         self.text2corpusTINT(lines, corpusID)
                     else:
                         try:
                             if self.iscli:
                                 err = 0/0
-                            sep = QInputDialog.getText(None, "Scegli il separatore", "Indica il carattere che separa le colonne (\\t è la tabulazione):", QLineEdit.Normal, "\\t")[0]
+                            #sep = QInputDialog.getText(None, "Scegli il separatore", "Indica il carattere che separa le colonne (\\t è la tabulazione):", QLineEdit.Normal, "\\t")[0]
+                            sep = self.csvSep
                             if sep == "\\t":
                                 sep = "\t"
-                            self.Progrdialog.hide()
-                            textID = QInputDialog.getInt(None, "Scegli il testo", "Indica la colonna della tabella che contiene il testo di questo sottocorpus:")[0]
-                            corpusIDtext = QInputDialog.getText(None, "Scegli il tag", "Indica il tag di questo file nel corpus. Puoi usare [filename] per indicare il nome del file e [numeroColonna] per indicare la colonna da cui estrarre un tag.", QLineEdit.Normal, "[filename], [0]"+",tagger:tint")[0]
-                            self.Progrdialog.show()
+                            #self.Progrdialog.hide()
+                            #textID = QInputDialog.getInt(None, "Scegli il testo", "Indica la colonna della tabella che contiene il testo di questo sottocorpus:")[0]
+                            #corpusIDtext = QInputDialog.getText(None, "Scegli il tag", "Indica il tag di questo file nel corpus. Puoi usare [filename] per indicare il nome del file e [numeroColonna] per indicare la colonna da cui estrarre un tag.", QLineEdit.Normal, "[filename], [0]"+",tagger:tint")[0]
+                            #self.Progrdialog.show()
+                            textID = self.csvTextcolumn
+                            corpusIDtext = tagPattern
                             textID = int(textID)
                             for line in lines.split("\n"):
-                                corpusID = corpusIDtext.replace("[filename]", os.path.basename(fileName))
+                                corpusID = corpusIDtext.replace("[FILENAME]", os.path.basename(fileName))
                                 indexes = [(m.start(0), m.end(0)) for m in re.finditer('\[[0-9]*\]', corpusID)]
                                 for n in range(len(indexes)):
                                     start = indexes[n][0]
@@ -255,7 +252,7 @@ class TintCorpus(QThread):
                 self.dataReceived.emit(True)
             except:
                 self.dataReceived.emit(False)
-        self.Progrdialog.accept()
+        #self.Progrdialog.accept()
 
 
     def addlinetocorpus(self, text, column):
@@ -280,9 +277,6 @@ class TintCorpus(QThread):
         itext = itext.split('\n')
         #itext = re.split('[\n\.\?]', text)
         totallines = len(itext)
-        print("Total lines: "+str(totallines))
-        self.Progrdialog.setBasetext("Sto lavorando sulla frase numero ")
-        self.Progrdialog.setTotal(totallines)
         startatrow = -1
         try:
             if os.path.isfile(self.rowfilename):
@@ -328,10 +322,8 @@ class TintCorpus(QThread):
                 #self.Progrdialog.w.testo.setText("Sto lavorando sulla frase numero "+str(row))
                 #self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
                 self.updated.emit(row)
-                if not self.iscli and row % 20 == 0:
-                    QApplication.processEvents()
-                if self.Progrdialog.w.annulla.isChecked():
-                    return
+                if self.core_killswitch:
+                    break
                 myres = ""
                 #print(row)
                 if line != "":
@@ -429,6 +421,9 @@ class TintCorpus(QThread):
                 if self.iscli:
                     with open(self.rowfilename, "a", encoding='utf-8') as rowfile:
                         rowfile.write(str(row)+"\n")
+                else:
+                    with open(self.outputcsv+"-TINT-importlog.tmp", "a", encoding='utf-8') as rowfile:
+                        rowfile.write(str(row)+","+str(totallines)+"\n")
         if self.iscli:
             print("Done")
 

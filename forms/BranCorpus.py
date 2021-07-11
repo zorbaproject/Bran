@@ -183,15 +183,30 @@ class BranCorpus(QObject):
 
     def loadFromTint(self, tintaddr = "localhost"):
         self.TintAddr = tintaddr
+        print("Tint ha ancora bisogno di qualche fix, usa udpipe per ora")
+        return
         fileNames = QFileDialog.getOpenFileNames(self.corpuswidget, "Apri file TXT", self.sessionDir, "Text files (*.txt *.md)")[0]
         if len(fileNames)<1:
             return
         if self.language == "it-IT":
+            corpusID = "[ID]_[FILENAME],lang:it-IT,tagger:tint"
+            corpusID = QInputDialog.getText(self.corpuswidget, "Scegli il tag", "Indica il tag di questo file nel corpus:", QLineEdit.Normal, corpusID)[0]
             self.copyOrigFiles(fileNames)
+
+            # progrdialog
+            recovery = self.sessionFile + "-TINT-importlog.tmp"
+            totallines = 0
+            self.core_killswitch = False
+            self.Progrdialog = progress.ProgressDialog(self, recovery, totallines)
+            self.Progrdialog.start()
+
             self.TCThread = tint.TintCorpus(self.corpuswidget, fileNames, self.corpuscols, self.TintAddr)
             self.TCThread.outputcsv = self.sessionFile
+            self.TCThread.corpusIDpattern = corpusID
             self.TCThread.finished.connect(self.txtloadingstopped)
             self.TCThread.start()
+        else:
+            print("Tint funziona solo con la lingua italiana.")
         #else if self.language == "en-US":
         #https://www.datacamp.com/community/tutorials/stemming-lemmatization-python
 
