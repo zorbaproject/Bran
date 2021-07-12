@@ -57,8 +57,13 @@ class ProgressDialog(QThread):
             self.Progrdialog.isaccepted()
 
     def autoUpdate(self):
-        if not self.Corpus.mycfg["disableProgress"]:
-            self.Progrdialog.show()
+        try:
+            if not self.Corpus.mycfg["disableProgress"]:
+                self.Progrdialog.show()
+        except:
+            if not self.stupidwindows:
+                self.Progrdialog.show()
+                pass
         i = 0
         oldval = -1
         while self.cancelled == False and self.Corpus.core_killswitch == False:
@@ -76,8 +81,13 @@ class ProgressDialog(QThread):
                 tmpTotallines = self.totallines
             else:
                 tmpTotallines = 1
-            self.Progrdialog.w.testo.setText("Sto analizzando il paragrafo numero "+str(lastline))
-            self.Progrdialog.w.progressBar.setValue(int((lastline/tmpTotallines)*100))
+            self.Progrdialog.w.testo.setText("Sto analizzando la riga numero "+str(lastline))
+            try:
+                perc = int((lastline/tmpTotallines)*100)
+                if lastline != oldval:
+                    self.Progrdialog.w.progressBar.setValue(perc)
+            except:
+                pass
             if i%1==0 and lastline != oldval:
                 QApplication.processEvents()
             time.sleep(1)

@@ -183,8 +183,6 @@ class BranCorpus(QObject):
 
     def loadFromTint(self, tintaddr = "localhost"):
         self.TintAddr = tintaddr
-        print("Tint ha ancora bisogno di qualche fix, usa udpipe per ora")
-        return
         fileNames = QFileDialog.getOpenFileNames(self.corpuswidget, "Apri file TXT", self.sessionDir, "Text files (*.txt *.md)")[0]
         if len(fileNames)<1:
             return
