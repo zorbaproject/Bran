@@ -217,7 +217,10 @@ class MainWindow(QMainWindow):
     def loadSession(self):
         seSdialog = sessione.Form(self)
         seSdialog.loadhistory(self.Corpus.mycfg["sessions"])
-        seSdialog.baseTempDir = self.Corpus.mycfg["tempDir"]
+        try:
+            seSdialog.baseTempDir = self.Corpus.mycfg["tempDir"]
+        except:
+            seSdialog.baseTempDir = ""
         seSdialog.exec()
         self.Corpus.sessionFile = seSdialog.filesessione
         self.setWindowTitle("Bran - "+self.Corpus.sessionFile)
