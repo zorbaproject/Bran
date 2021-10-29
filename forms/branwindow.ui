@@ -413,7 +413,8 @@
      <property name="title">
       <string>&amp;Lingua</string>
      </property>
-     <addaction name="actionItaliano"/>
+     <addaction name="separator"/>
+     <addaction name="actionAltre_lingue"/>
     </widget>
     <addaction name="actionApri"/>
     <addaction name="actionSalva"/>
@@ -643,8 +644,14 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
-    <string>&amp;Italiano</string>
+    <string>&amp;Italian</string>
+   </property>
+   <property name="toolTip">
+    <string>it-IT</string>
    </property>
   </action>
   <action name="actionSostituisci_solo_nelle_celle_selezionate">
@@ -775,7 +782,12 @@
   </action>
   <action name="actionGulpEASE">
    <property name="text">
-    <string>GulpEASE</string>
+    <string>&amp;GulpEASE</string>
+   </property>
+  </action>
+  <action name="actionAltre_lingue">
+   <property name="text">
+    <string>&amp;Altre lingue</string>
    </property>
   </action>
  </widget>

@@ -33,6 +33,7 @@ from PySide2.QtCore import QFile
 from PySide2.QtCore import QDir
 from PySide2.QtCore import Qt
 from PySide2.QtCore import Signal
+from PySide2.QtWidgets import QAction
 from PySide2.QtWidgets import QLabel
 from PySide2.QtWidgets import QLineEdit
 from PySide2.QtWidgets import QFileDialog
@@ -139,11 +140,13 @@ class MainWindow(QMainWindow):
         self.w.actionTrova_ripetizioni.triggered.connect(self.trovaripetizioni)
         self.w.actionConta_verbi.triggered.connect(self.contaverbi)
         self.w.actionTutti_i_token.triggered.connect(self.menualltoken)
-        self.w.actionItaliano.triggered.connect(lambda: self.changeLang("it-IT"))
+        self.w.actionAltre_lingue.triggered.connect(self.otherLanguagesHelp)
+        #self.w.actionItaliano.triggered.connect(lambda: self.changeLang("it-IT"))
         self.ignorepos = ["punteggiatura - \"\" () «» - - ", "punteggiatura - : ;", "punteggiatura - ,", "altro"] # "punteggiatura - .?!"
         self.separator = "\t"
         self.language = "it-IT"
         self.Corpus = BranCorpus.BranCorpus(self.corpuscols, self.legendaPos, self.ignoretext, self.dimList, tablewidget=self.w.corpus)
+        self.loadLanguages()
         self.Corpus.sizeChanged.connect(self.corpusSizeChanged)
         self.w.allToken.toggled.connect(self.setalltokens)
         self.w.actionEsegui_calcoli_solo_su_righe_visibili.toggled.connect(lambda: self.Corpus.setOnlyVisible(self.w.actionEsegui_calcoli_solo_su_righe_visibili.isChecked()))
@@ -193,8 +196,30 @@ class MainWindow(QMainWindow):
         else:
             self.w.aToken.setValue(newsize)
 
+    def otherLanguagesHelp(self):
+        QMessageBox.information(self.w, "Modelli di UDpipe", "Puoi scaricare modelli di UDPipe per altre lingue da questo indirizzo: <a href=\"https://lindat.mff.cuni.cz/repository/xmlui/handle/11234/1-3131\">https://lindat.mff.cuni.cz/repository/xmlui/handle/11234/1-3131</a>. Dopo avere scaricato i modelli che ti interessano, aggiungili alla configurazione di Bran (Strumenti/Configurazione di Bran)")
+        self.showbranconfig()
+
+    def loadLanguages(self):
+        sepAct = QAction()
+        for sepAct in self.w.menuImposta_lingua.actions():
+            if sepAct.isSeparator():
+                break
+        for lang in self.Corpus.mycfg["udpipemodels"]:
+            newlangName = re.sub("\-.*","",os.path.basename(self.Corpus.mycfg["udpipemodels"][lang]))
+            newlangName = newlangName[0].upper() + newlangName[1:]
+            newlangAct = QAction(newlangName, parent=self.w)
+            newlangAct.setToolTip(lang)
+            newlangAct.setCheckable(True)
+            newlangAct.triggered.connect(lambda: self.changeLang(lang))
+            self.w.menuImposta_lingua.insertAction(sepAct, newlangAct)
+            #print("Test:"+lang+newlangName)
+            #self.w.actionItaliano.triggered.connect(lambda: self.changeLang("it-IT"))
+        pass
+
     def changeLang(self, lang):
         self.language = lang
+        #https://lindat.mff.cuni.cz/repository/xmlui/handle/11234/1-3131
         print("Set language "+self.language)
 
     def loadTintConfig(self):
