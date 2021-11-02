@@ -98,7 +98,7 @@ class BranCorpus(QObject):
         #self.ignorepos = ["punteggiatura - \"\" () «» - - ", "punteggiatura - : ;", "punteggiatura - ,", "altro"] # "punteggiatura - .?!"
         self.ignorepos = ["punteggiatura - .?!", "simboli", "altro"]
         self.separator = "\t"
-        self.language = "it-IT"
+        self.language = "ita"
         self.filtrimultiplienabled = 10 #"Filtro multiplo"
         self.filter = ""
         self.filterColumn = self.filtrimultiplienabled
@@ -156,7 +156,7 @@ class BranCorpus(QObject):
                 self.mycfg = json.loads(lines.replace("\n", "").replace("\r", ""))
             except:
                 print("Creo il file di configurazione")
-        cfgtemplate = {'javapath': '', 'tintpath': '', 'tintaddr': '', '': '', 'sessions': [], 'udpipe': '', 'udpipemodels': {'it-IT': ''}, 'rscript': '', 'facebook': [], 'twitter': []}
+        cfgtemplate = {'javapath': '', 'tintpath': '', 'tintaddr': '', '': '', 'sessions': [], 'udpipe': '', 'udpipemodels': {'ita': ''}, 'rscript': '', 'facebook': [], 'twitter': []}
         for key in cfgtemplate:
             if key not in self.mycfg:
                 self.mycfg[key] = cfgtemplate[key]
@@ -186,8 +186,8 @@ class BranCorpus(QObject):
         fileNames = QFileDialog.getOpenFileNames(self.corpuswidget, "Apri file TXT", self.sessionDir, "Text files (*.txt *.md)")[0]
         if len(fileNames)<1:
             return
-        if self.language == "it-IT":
-            corpusID = "[ID]_[FILENAME],lang:it-IT,tagger:tint"
+        if self.language == "ita":
+            corpusID = "[ID]_[FILENAME],lang:ita,tagger:tint"
             corpusID = QInputDialog.getText(self.corpuswidget, "Scegli il tag", "Indica il tag di questo file nel corpus:", QLineEdit.Normal, corpusID)[0]
             self.copyOrigFiles(fileNames)
 
@@ -212,14 +212,14 @@ class BranCorpus(QObject):
         fileNames = QFileDialog.getOpenFileNames(self.corpuswidget, "Apri file TXT", self.sessionDir, "Text files (*.txt *.md)")[0]
         if len(fileNames)<1:
             return
-        if self.language != "it-IT" and self.language != "en-US":
+        if self.language != "ita" and self.language != "eng":
             print("Language "+ self.language +" not supported")
             return
 
         udpipe = self.mycfg["udpipe"]
         model = self.mycfg["udpipemodels"][self.language]
 
-        corpusID = "[ID]_[FILENAME],lang:it-IT,tagger:udpipe"
+        corpusID = "[ID]_[FILENAME],lang:ita,tagger:udpipe"
         corpusID = QInputDialog.getText(self.corpuswidget, "Scegli il tag", "Indica il tag di questo file nel corpus:", QLineEdit.Normal, corpusID)[0]
         self.copyOrigFiles(fileNames)
 
@@ -294,11 +294,11 @@ class BranCorpus(QObject):
         if sep == "\\t":
             sep = "\t"
         textID = QInputDialog.getInt(self.corpuswidget, "Scegli il testo", "Indica la colonna della tabella che contiene il testo di questo sottocorpus:")[0]
-        corpusID = QInputDialog.getText(self.corpuswidget, "Scegli il tag", "Indica il tag di questo file nel corpus. Puoi usare [FILENAME] per indicare il nome del file e [COLONNA] per indicare la colonna da cui estrarre un tag.", QLineEdit.Normal, "[ID]_[FILENAME],[0],lang:it-IT,tagger:udpipe")[0]
+        corpusID = QInputDialog.getText(self.corpuswidget, "Scegli il tag", "Indica il tag di questo file nel corpus. Puoi usare [FILENAME] per indicare il nome del file e [COLONNA] per indicare la colonna da cui estrarre un tag.", QLineEdit.Normal, "[ID]_[FILENAME],[0],lang:ita,tagger:udpipe")[0]
         self.UDThread.corpusIDpattern = corpusID
         self.UDThread.csvTextcolumn = textID
         self.UDThread.csvSep = sep
-        #if self.language == "it-IT":
+        #if self.language == "ita":
         #    print("UDpipe still not supported")
         #else if self.language == "en-US":
         #https://www.datacamp.com/community/tutorials/stemming-lemmatization-python
@@ -3725,7 +3725,7 @@ class UDCorpus(QThread):
         self.udpipemodel = udpipemodel
         self.language = lang
         self.outputcsv = ""
-        self.corpusIDpattern = "[ID]_[FILENAME],lang:it-IT,tagger:udpipe"
+        self.corpusIDpattern = "[ID]_[FILENAME],lang:ita,tagger:udpipe"
         self.csvIDcolumn = -1
         self.csvTextcolumn = -1
         self.csvSep = '\t'

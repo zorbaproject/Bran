@@ -142,10 +142,10 @@ class MainWindow(QMainWindow):
         self.w.actionConta_verbi.triggered.connect(self.contaverbi)
         self.w.actionTutti_i_token.triggered.connect(self.menualltoken)
         self.w.actionAltre_lingue.triggered.connect(self.otherLanguagesHelp)
-        #self.w.actionItaliano.triggered.connect(lambda: self.changeLang("it-IT"))
+        #self.w.actionItaliano.triggered.connect(lambda: self.changeLang("ita"))
         self.ignorepos = ["punteggiatura - \"\" () «» - - ", "punteggiatura - : ;", "punteggiatura - ,", "altro"] # "punteggiatura - .?!"
         self.separator = "\t"
-        self.language = "it-IT"
+        self.language = "ita"
         self.Corpus = BranCorpus.BranCorpus(self.corpuscols, self.legendaPos, self.ignoretext, self.dimList, tablewidget=self.w.corpus)
         self.loadLanguages()
         self.Corpus.sizeChanged.connect(self.corpusSizeChanged)
@@ -215,7 +215,7 @@ class MainWindow(QMainWindow):
             newlangAct.triggered.connect(lambda: self.changeLang(lang))
             self.w.menuImposta_lingua.insertAction(sepAct, newlangAct)
             #print("Test:"+lang+newlangName)
-            #self.w.actionItaliano.triggered.connect(lambda: self.changeLang("it-IT"))
+            #self.w.actionItaliano.triggered.connect(lambda: self.changeLang("ita"))
         pass
 
     def changeLang(self, lang):

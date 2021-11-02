@@ -231,7 +231,7 @@ if __name__ == "__main__":
             print("python3 main.py tintStart [brancfg]\n")
             print("python3 main.py estraiTesto file.txt|cartella [ita]\n")
             print("python3 main.py tintImport file.txt|cartella [indirizzoServerTint] [ripristino (y/n)]\n")
-            print("python3 main.py udpipeImport file.txt|cartella [it-IT] [ripristino (y/n)]\n")
+            print("python3 main.py udpipeImport file.txt|cartella [ita] [ripristino (y/n)]\n")
             print("python3 main.py appendBran corpus-bran.tsv corpus-da-accodare.tsv|cartella\n")
             print("\nAnalisi su corpus di Bran:\n")
             print("python3 main.py occorrenze file.tsv|cartella colonna [ripristino (y/n)]\n")
@@ -309,10 +309,10 @@ if __name__ == "__main__":
             try:
                 language = sys.argv[3]
             except:
-                language = "it-IT"
+                language = "ita"
             if len(fileNames)<1:
                 sys.exit(0)
-            if language != "it-IT" and language != "en-US":
+            if language != "ita" and language != "eng":
                 print("Language "+ language +" not supported")
                 sys.exit(0)
             Corpus.language = language

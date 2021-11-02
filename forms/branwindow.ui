@@ -651,7 +651,7 @@
     <string>&amp;Italian</string>
    </property>
    <property name="toolTip">
-    <string>it-IT</string>
+    <string>ita</string>
    </property>
   </action>
   <action name="actionSostituisci_solo_nelle_celle_selezionate">

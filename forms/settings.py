@@ -135,17 +135,17 @@ class Form(QDialog):
             print(udmodelsDict)
             self.setUDmodels(udmodelsDict)
             #self.w.udpipemodels.setText(self.Corpus.mycfg["udpipemodels"])
-            if self.Corpus.mycfg["udpipemodels"] == "":
+            if len(self.Corpus.mycfg["udpipemodels"]) == 0:
                 0/0
         except:
             self.Corpus.mycfg["udpipemodels"] = ""
             print("Error reading Bran config")
             if platform.system() == "Windows":
-                udmodels = { "it-IT" : os.path.abspath(os.path.dirname(sys.argv[0]))+"\\udpipe\\modelli\\italian-isdt-ud-2.4-190531.udpipe" }
+                udmodels = { "ita" : os.path.abspath(os.path.dirname(sys.argv[0]))+"\\udpipe\\modelli\\italian-isdt-ud-2.4-190531.udpipe" }
                 #self.w.udpipemodels.setText(json.dumps(udmodels))
                 self.setUDmodels(udmodels)
             else:
-                udmodels = { "it-IT" : os.path.abspath(os.path.dirname(sys.argv[0]))+"/udpipe/modelli/italian-isdt-ud-2.4-190531.udpipe" }
+                udmodels = { "ita" : os.path.abspath(os.path.dirname(sys.argv[0]))+"/udpipe/modelli/italian-isdt-ud-2.4-190531.udpipe" }
                 #self.w.udpipemodels.setText(json.dumps(udmodels))
                 self.setUDmodels(udmodels)
         try:
@@ -320,7 +320,7 @@ class Form(QDialog):
     def loadudpipemodels(self):
         #Got standard code from https://iso639-3.sil.org/code_tables/639/data
         thisname = []
-        #thisname.append("it-IT")
+        #thisname.append("ita")
         #thisname.append("en-US")
         for key in self.langLegenda:
             thisname.append(key)

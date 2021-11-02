@@ -127,8 +127,8 @@ class TintCorpus(QThread):
         self.corpuscols = corpcol
         self.Tintaddr = myTintAddr
         self.outputcsv = ""
-        self.language = "it-IT"
-        self.corpusIDpattern = "[ID]_[FILENAME],lang:it-IT,tagger:tint"
+        self.language = "ita"
+        self.corpusIDpattern = "[ID]_[FILENAME],lang:ita,tagger:tint"
         self.csvIDcolumn = -1
         self.csvTextcolumn = -1
         self.csvSep = '\t'
