@@ -47,6 +47,7 @@ from PySide2.QtWidgets import QTreeWidget
 from PySide2.QtWidgets import QTreeWidgetItem
 from PySide2.QtWidgets import QTreeWidgetItemIterator
 from PySide2.QtWidgets import QSizePolicy
+from PySide2.QtWidgets import QWidget
 from PySide2.QtCore import QThread
 
 
@@ -198,7 +199,7 @@ class MainWindow(QMainWindow):
 
     def otherLanguagesHelp(self):
         QMessageBox.information(self.w, "Modelli di UDpipe", "Puoi scaricare modelli di UDPipe per altre lingue da questo indirizzo: <a href=\"https://lindat.mff.cuni.cz/repository/xmlui/handle/11234/1-3131\">https://lindat.mff.cuni.cz/repository/xmlui/handle/11234/1-3131</a>. Dopo avere scaricato i modelli che ti interessano, aggiungili alla configurazione di Bran (Strumenti/Configurazione di Bran)")
-        self.showbranconfig()
+        self.showbranconfig("udpipe")
 
     def loadLanguages(self):
         sepAct = QAction()
@@ -845,8 +846,10 @@ class MainWindow(QMainWindow):
         else:
             self.TintSetdialog.accept()
 
-    def showbranconfig(self):
+    def showbranconfig(self, currentTab = ""):
         self.BranSetdialog = settings.Form(self, self.Corpus)
+        if currentTab == "udpipe":
+            self.BranSetdialog.w.tabWidget.setCurrentWidget(self.BranSetdialog.w.tabWidget.findChild(QWidget, "tab_4"))
         self.BranSetdialog.exec()
         if self.BranSetdialog.accepted:
             self.Corpus.mycfg["javapath"] = self.BranSetdialog.w.java.text()
@@ -856,7 +859,7 @@ class MainWindow(QMainWindow):
             self.Corpus.mycfg["udpipe"] = self.BranSetdialog.w.udpipe.text()
             self.Corpus.mycfg["rscript"] = self.BranSetdialog.w.rscript.text()
             self.Corpus.mycfg["sessions"] = json.loads(self.BranSetdialog.w.sessions.text())
-            self.Corpus.mycfg["udpipemodels"] = json.loads(self.BranSetdialog.w.udpipemodels.text())
+            self.Corpus.mycfg["udpipemodels"] = self.BranSetdialog.udmodelsTable2Dict()
             self.Corpus.mycfg["facebook"] = json.loads(self.BranSetdialog.w.facebook.text())
             self.Corpus.mycfg["twitter"] = json.loads(self.BranSetdialog.w.twitter.text())
             self.Corpus.mycfg["tempDir"] = self.BranSetdialog.w.tempDir.text()

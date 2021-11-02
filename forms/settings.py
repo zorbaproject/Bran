@@ -30,6 +30,7 @@ from PySide2.QtWidgets import QMessageBox
 from PySide2.QtWidgets import QTableWidget
 from PySide2.QtWidgets import QTableWidgetItem #QtGui?
 from PySide2.QtCore import QTemporaryDir
+from PySide2.QtGui import QDesktopServices
 
 
 class Form(QDialog):
@@ -51,6 +52,8 @@ class Form(QDialog):
         self.w.loadTempDir.clicked.connect(self.loadTempDir)
         self.w.loadudpipe.clicked.connect(self.loadudpipe)
         self.w.loadudpipemodels.clicked.connect(self.loadudpipemodels)
+        self.w.removeudpipemodels.clicked.connect(self.delselected)
+        self.w.downloadudpipemodels.clicked.connect(self.downloadUD)
         self.w.clearsessions.clicked.connect(self.clearsessions)
         self.w.resetport.clicked.connect(self.resetport)
         self.w.resetaddress.clicked.connect(self.resetaddress)
@@ -60,6 +63,7 @@ class Form(QDialog):
         self.w.disableProgress.stateChanged.connect(self.showprogress)
         self.setWindowTitle("Impostazioni di Bran")
         self.accepted = False
+        self.langLegenda = {"afr": "Afrikaans" , "grc": "AncientGreek" , "ara": "Arabic" , "hye": "Armenian" , "eus": "Basque" , "bel": "Belarusian" , "bul": "Bulgarian" , "cat": "Catalan" , "zho": "Chinese" , "chu": "ChurchSlavic" , "cop": "Coptic" , "hrv": "Croatian" , "ces": "Czech" , "dan": "Danish" , "nld": "Dutch" , "eng": "English" , "est": "Estonian" , "fin": "Finnish" , "fra": "French" , "glg": "Galician" , "wof": "GambianWolof" , "deu": "German" , "got": "Gothic" , "heb": "Hebrew" , "hin": "Hindi" , "hun": "Hungarian" , "ind": "Indonesian" , "gle": "Irish" , "ita": "Italian" , "jpn": "Japanese" , "kaz": "Kazakh" , "kor": "Korean" , "lat": "Latin" , "lav": "Latvian" , "lzh": "LiteraryChinese" , "lit": "Lithuanian" , "mlt": "Maltese" , "mar": "Marathi" , "ell": "Modern Greek" , "sme": "Northern Sami" , "nob": "NorwegianBokmål" , "nno": "Norwegian Nynorsk" , "fro": "OldFrench" , "orv": "OldRussian" , "fas": "Persian" , "pol": "Polish" , "por": "Portuguese" , "ron": "Romanian" , "rus": "Russian" , "san": "Sanskrit" , "gla": "ScottishGaelic" , "srp": "Serbian" , "slk": "Slovak" , "slv": "Slovenian" , "spa": "Spanish" , "swe": "Swedish" , "tam": "Tamil" , "tel": "Telugu" , "tur": "Turkish" , "uig": "Uighur" , "ukr": "Ukrainian" , "urd": "Urdu" , "vie": "Vietnamese" , "wol": "Wolof" }
         self.loadsettings()
 
     def loadsettings(self):
@@ -125,7 +129,12 @@ class Form(QDialog):
                 else:
                     self.w.udpipe.setText(os.path.abspath(os.path.dirname(sys.argv[0]))+"/udpipe/bin-linux64/udpipe")
         try:
-            self.w.udpipemodels.setText(self.Corpus.mycfg["udpipemodels"])
+            print("mycfg")
+            print(self.Corpus.mycfg)
+            udmodelsDict = self.Corpus.mycfg["udpipemodels"] #json.loads(self.Corpus.mycfg["udpipemodels"])
+            print(udmodelsDict)
+            self.setUDmodels(udmodelsDict)
+            #self.w.udpipemodels.setText(self.Corpus.mycfg["udpipemodels"])
             if self.Corpus.mycfg["udpipemodels"] == "":
                 0/0
         except:
@@ -133,10 +142,12 @@ class Form(QDialog):
             print("Error reading Bran config")
             if platform.system() == "Windows":
                 udmodels = { "it-IT" : os.path.abspath(os.path.dirname(sys.argv[0]))+"\\udpipe\\modelli\\italian-isdt-ud-2.4-190531.udpipe" }
-                self.w.udpipemodels.setText(json.dumps(udmodels))
+                #self.w.udpipemodels.setText(json.dumps(udmodels))
+                self.setUDmodels(udmodels)
             else:
                 udmodels = { "it-IT" : os.path.abspath(os.path.dirname(sys.argv[0]))+"/udpipe/modelli/italian-isdt-ud-2.4-190531.udpipe" }
-                self.w.udpipemodels.setText(json.dumps(udmodels))
+                #self.w.udpipemodels.setText(json.dumps(udmodels))
+                self.setUDmodels(udmodels)
         try:
             self.w.disableProgress.setChecked(self.Corpus.mycfg["disableProgress"])
         except:
@@ -211,8 +222,59 @@ class Form(QDialog):
             print("Error reading Bran config")
             self.w.twitter.setText("[]")
 
+    def setUDmodels(self, udmodelsDict):
+        self.w.udpipemodelsTable.setRowCount(0)
+        for key in udmodelsDict:
+            myrow = self.addlinetotable(key, 0)
+            self.setcelltotable(udmodelsDict[key], myrow, 1)
+        self.Corpus.mycfg["udpipemodels"] = udmodelsDict
+
+    def addlinetotable(self, text, column):
+        row = self.w.udpipemodelsTable.rowCount()
+        self.w.udpipemodelsTable.insertRow(row)
+        titem = QTableWidgetItem()
+        titem.setText(text)
+        self.w.udpipemodelsTable.setItem(row, column, titem)
+        self.w.udpipemodelsTable.setCurrentCell(row, column)
+        return row
+
+    def setcelltotable(self, text, row, column):
+        titem = QTableWidgetItem()
+        titem.setText(text)
+        self.w.udpipemodelsTable.setItem(row, column, titem)
+
+    def udmodelsTable2Dict(self):
+        temp = {}
+        for row in range(self.w.udpipemodelsTable.rowCount()):
+            try:
+                key = self.w.udpipemodelsTable.item(row,0).text()
+            except:
+                continue
+            try:
+                value = self.w.udpipemodelsTable.item(row,1).text()
+            except:
+                continue
+            temp[key] = value
+        #temp = json.loads(self.w.udpipemodels.text())
+        return temp
+
+    def delselected(self):
+        toselect = []
+        for i in range(len(self.w.udpipemodelsTable.selectedItems())):
+            row = self.w.udpipemodelsTable.selectedItems()[i].row()
+            toselect.append(row)
+        totallines = len(toselect)
+        for row in range(len(toselect),0,-1):
+            self.w.udpipemodelsTable.removeRow(toselect[row-1])
+
+    def downloadUD(self):
+        udurl="https://lindat.mff.cuni.cz/repository/xmlui/handle/11234/1-3131"
+        QDesktopServices.openUrl(udurl)
+
     def isaccepted(self):
         self.accepted = True
+        temp = self.udmodelsTable2Dict()
+        self.Corpus.mycfg["udpipemodels"] = temp
         self.accept()
 
     def isrejected(self):
@@ -256,18 +318,22 @@ class Form(QDialog):
             self.w.udpipe.setText(fileName)
 
     def loadudpipemodels(self):
+        #Got standard code from https://iso639-3.sil.org/code_tables/639/data
         thisname = []
-        thisname.append("it-IT")
-        thisname.append("en-US")
-        lang = QInputDialog.getItem(self.w, "Scegli la lingua", "Per quale lingua stai scegliendo il modello di UDpipe?",thisname,current=0,editable=False)[0]
+        #thisname.append("it-IT")
+        #thisname.append("en-US")
+        for key in self.langLegenda:
+            thisname.append(key)
+        lang = QInputDialog.getItem(self.w, "Scegli la lingua", "Per quale lingua (ISO639-3) stai scegliendo il modello di UDpipe?",thisname,current=0,editable=False)[0]
         filter = ""
         if platform.system() == "Windows":
             filter = "UDpipe Models (*.udpipe)"
         fileName = QFileDialog.getOpenFileName(self, "Trova modelli UDpipe", ".", filter)[0]
         if fileName != "":
-            temp = json.loads(self.w.udpipemodels.text())
+            temp = self.udmodelsTable2Dict() #json.loads(self.w.udpipemodels.text())
             temp[lang] = fileName
-            self.w.udpipemodels.setText(json.dumps(temp))
+            #self.w.udpipemodels.setText(json.dumps(temp))
+            self.setUDmodels(temp)
 
     def clearsessions(self):
         self.w.sessions.setText("[]")
