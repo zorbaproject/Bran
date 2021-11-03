@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QSplitter" name="splitter">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <widget class="QListWidget" name="filelist">
+       <property name="maximumSize">
+        <size>
+         <width>150</width>
+         <height>16777215</height>
+        </size>
+       </property>
+      </widget>
+      <widget class="QWidget" name="verticalLayoutWidget">
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QTextEdit" name="textEdit"/>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Trova:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="findtext"/>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="findregex">
+            <property name="text">
+             <string>RegEx</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="findprev">
+            <property name="text">
+             <string>&lt;</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="findnext">
+            <property name="text">
+             <string>&gt;</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>Fi&amp;le</string>
+    </property>
+    <addaction name="actionNuovo"/>
+    <addaction name="actionApri"/>
+    <addaction name="actionPreview_mode"/>
+    <addaction name="actionSalva"/>
+    <addaction name="actionSalva_come"/>
+    <addaction name="separator"/>
+    <addaction name="actionChiudi"/>
+   </widget>
+   <widget class="QMenu" name="menuModifica">
+    <property name="title">
+     <string>&amp;Modifica</string>
+    </property>
+    <addaction name="actionCopia"/>
+    <addaction name="actionIncolla"/>
+    <addaction name="actionCerca"/>
+   </widget>
+   <widget class="QMenu" name="menuAbout">
+    <property name="title">
+     <string>&amp;About</string>
+    </property>
+    <addaction name="actionAbout_this_text_editor"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuModifica"/>
+   <addaction name="menuAbout"/>
+  </widget>
+  <action name="actionAbout_this_text_editor">
+   <property name="text">
+    <string>&amp;About this text editor</string>
+   </property>
+  </action>
+  <action name="actionNuovo">
+   <property name="text">
+    <string>&amp;Nuovo</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="actionApri">
+   <property name="text">
+    <string>&amp;Apri</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionSalva">
+   <property name="text">
+    <string>&amp;Salva</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionSalva_come">
+   <property name="text">
+    <string>Sa&amp;lva come</string>
+   </property>
+  </action>
+  <action name="actionChiudi">
+   <property name="text">
+    <string>&amp;Chiudi</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+W</string>
+   </property>
+  </action>
+  <action name="actionConta_occorrenze">
+   <property name="text">
+    <string>&amp;Conta occorrenze</string>
+   </property>
+  </action>
+  <action name="actionRimuovi_frasi_ripetute">
+   <property name="text">
+    <string>&amp;Rimuovi frasi ripetute</string>
+   </property>
+  </action>
+  <action name="actionCerca">
+   <property name="text">
+    <string>Cerca</string>
+   </property>
+  </action>
+  <action name="actionCopia">
+   <property name="text">
+    <string>&amp;Copia</string>
+   </property>
+  </action>
+  <action name="actionIncolla">
+   <property name="text">
+    <string>&amp;Incolla</string>
+   </property>
+  </action>
+  <action name="actionTaglia">
+   <property name="text">
+    <string>&amp;Taglia</string>
+   </property>
+  </action>
+  <action name="actionTutto_maiuscolo">
+   <property name="text">
+    <string>&amp;Tutto maiuscolo</string>
+   </property>
+  </action>
+  <action name="actionTutto_minuscolo">
+   <property name="text">
+    <string>Tutto &amp;minuscolo</string>
+   </property>
+  </action>
+  <action name="actionIniziali_sempre_minuscole">
+   <property name="text">
+    <string>&amp;Iniziali sempre minuscole</string>
+   </property>
+  </action>
+  <action name="actionElimina_parole_con_numeri">
+   <property name="text">
+    <string>&amp;Elimina parole con numeri</string>
+   </property>
+  </action>
+  <action name="actionElimina_invii_a_capo_multipli">
+   <property name="text">
+    <string>Elimina &amp;invii a capo multipli</string>
+   </property>
+  </action>
+  <action name="actionBatch_mode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Modalità batch</string>
+   </property>
+  </action>
+  <action name="actionPreview_mode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Mostra solo anteprima</string>
+   </property>
+  </action>
+  <action name="actionEstrai_con_RegEx">
+   <property name="text">
+    <string>&amp;Estrai con RegEx</string>
+   </property>
+  </action>
+  <action name="actionEstrai_testo_da_file_PDF">
+   <property name="text">
+    <string>Estrai testo &amp;da altro file</string>
+   </property>
+  </action>
+  <action name="actionTrova_co_occorrenze">
+   <property name="text">
+    <string>&amp;Trova co occorrenze</string>
+   </property>
+  </action>
+  <action name="actionNormalizza_parole_note">
+   <property name="text">
+    <string>&amp;Normalizza parole note</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

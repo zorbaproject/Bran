@@ -24,6 +24,8 @@ forms/tableeditor.py
 forms/tableeditor.ui
 forms/texteditor.py
 forms/texteditor.ui
+forms/textviewer.py
+forms/textviewer.ui
 forms/tint.py
 forms/tint.ui
 forms/url2corpus.py

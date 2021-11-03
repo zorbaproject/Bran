@@ -1,0 +1,271 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from os import path
+import sys
+import os
+import subprocess
+import platform
+import csv
+import re
+import mmap
+import json
+
+from PySide2.QtWidgets import QApplication, QDialog, QLineEdit, QPushButton, QVBoxLayout, QMainWindow
+from PySide2.QtUiTools import QUiLoader
+from PySide2.QtWidgets import QLabel
+from PySide2.QtWidgets import QInputDialog
+from PySide2.QtWidgets import QMessageBox
+from PySide2.QtCore import QFile
+from PySide2.QtWidgets import QFileDialog
+from PySide2.QtWidgets import QMainWindow
+from PySide2.QtWidgets import QDialog
+from PySide2.QtCore import Qt
+from PySide2.QtGui import QTextCursor
+
+
+from forms import regex_replace
+from forms import progress
+from forms import about
+from forms import tableeditor
+
+class TextViewer(QMainWindow):
+
+    def __init__(self, parent=None, mycfg=None):
+        super(TextViewer, self).__init__(parent)
+        file = QFile(os.path.abspath(os.path.dirname(sys.argv[0]))+"/forms/textviewer.ui")
+        file.open(QFile.ReadOnly)
+        loader = QUiLoader()
+        self.w = loader.load(file)
+        #layout = QVBoxLayout()
+        #layout.addWidget(self.w)
+        #self.setLayout(layout)
+        self.setCentralWidget(self.w)
+        self.mycfg = mycfg
+        self.w.actionNuovo.triggered.connect(self.nuovo)
+        self.w.actionChiudi.triggered.connect(self.chiudi)
+        self.w.actionApri.triggered.connect(self.apri)
+        self.w.actionSalva.triggered.connect(self.salva)
+        self.w.actionSalva_come.triggered.connect(self.salvacome)
+        self.w.actionCopia.triggered.connect(self.copia)
+        self.w.actionIncolla.triggered.connect(self.incolla)
+        #self.w.findprev.clicked.connect(self.findprev)
+        #self.w.findnext.clicked.connect(self.findnext)
+        #self.w.textEdit.cursorPositionChanged.connect(self.showcurpos)
+        #self.w.textEdit.textChanged.connect(self.textchanged)
+        self.currentFilename = ""
+        self.donotshow = False
+        self.previewlimit = 500000
+        self.showpreview = False
+        self.sessionDir = "."
+        self.setWindowTitle("Bran Text Viewer")
+
+
+    def nuovo(self):
+        self.currentFilename = ""
+        self.w.textEdit.setPlainText("")
+        self.setWindowTitle("Bran Text Viewer")
+        self.modified = -1
+        self.w.textEdit.document().clearUndoRedoStacks()
+
+    def chiudi(self):
+        for i in self.w.filelist.selectedItems():
+            self.w.filelist.takeItem(self.w.filelist.row(i))
+        for i in range(self.w.filelist.count()):
+            item = self.w.filelist.item(i)
+            self.w.filelist.setItemSelected(item, False)
+        self.nuovo()
+
+    def copia(self):
+        self.w.textEdit.copy()
+
+    def incolla(self):
+        self.w.textEdit.paste()
+
+    def taglia(self):
+        self.w.textEdit.cut()
+
+    def showcurpos(self):
+        row = self.w.textEdit.textCursor().blockNumber()
+        col = self.w.textEdit.textCursor().positionInBlock()
+        self.w.statusBar().showMessage("Riga: "+str(row)+" Colonna: "+str(col))
+
+    def linescount(self, filename):
+        lines = 0
+        try:
+            f = open(filename, "r+", encoding='utf-8')
+            buf = mmap.mmap(f.fileno(), 0)
+            readline = buf.readline
+            while readline():
+                lines += 1
+        except:
+            lines = 0
+        return lines
+
+    def salva(self, onlycurrent = ""):
+        if self.currentFilename == "":
+            self.salvacome()
+            return
+        if self.showpreview:
+            QMessageBox.information(self, "Attenzione", "È abilitata la modalità di anteprima: significa che il testo attualmente visualizzato potrebbe non essere il completo contenuto del file originale. Per evitare sovrascritture, ti verrà chiesto di salvare su un nuovo file.")
+            self.salvacome()
+            return
+        fileName = self.currentFilename
+        textlist = self.w.textEdit.toPlainText().split("\n")
+        text_file = open(fileName, "w", encoding='utf-8')
+        text_file.write("")
+        text_file.close()
+        self.Progrdialog = progress.Form(self)
+        self.Progrdialog.show()
+        row = 0
+        totallines = len(textlist)
+        for line in textlist:
+            self.Progrdialog.w.testo.setText("Sto salvando la riga numero "+str(row))
+            self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+            QApplication.processEvents()
+            if self.Progrdialog.w.annulla.isChecked():
+                return
+            with open(fileName, "a", encoding='utf-8') as myfile:
+                myfile.write(line+"\n")
+            row = row + 1
+        self.modified = 0
+        self.Progrdialog.accept()
+
+    def salvacome(self):
+        fileName = QFileDialog.getSaveFileName(self, "Salva file TXT", self.sessionDir, "Text files (*.txt)")[0]
+        if fileName != "":
+            if fileName[-4:] != ".txt":
+                fileName = fileName + ".txt"
+            self.currentFilename = fileName
+            self.salva(fileName)
+
+    def apri(self):
+        fileNames = QFileDialog.getOpenFileNames(self, "Apri file TXT", self.sessionDir, "Text files (*.txt *.md)")[0]
+        self.aprilista(fileNames)
+
+    def aprilista(self, fileNames):
+        if len(fileNames)<1:
+            return
+        for fileName in fileNames:
+            if len(self.w.filelist.findItems(fileName, Qt.MatchExactly))==0:
+                self.w.filelist.addItem(fileName)
+        fileName = fileNames[-1]
+        self.currentFilename = fileName
+        self.w.filelist.setCurrentRow(self.w.filelist.count()-1)
+        if self.w.filelist.count()>1 and not self.batchmode:
+            ret = QMessageBox.question(self,'Domanda', "Hai selezionato più di un file. Se attivi la modalità batch, le modifiche eseguite con gli strumenti di ricerca e sostituzione verranno applicate automaticamente a tutti i file, altrimenti saranno applicate solo al file attivo. Vuoi attivare la modalità batch?", QMessageBox.Yes | QMessageBox.No)
+            if ret == QMessageBox.Yes:
+                self.batchmode = True
+                self.w.actionBatch_mode.setChecked(True)
+        self.loadfile(fileName)
+
+    def loadfile(self, fileName = "", showhtml = False):
+        if fileName == "":
+            fileName = self.currentFilename
+        totallines = self.linescount(fileName)
+        if totallines > self.previewlimit and not self.showpreview:
+            ret = QMessageBox.question(self,'Domanda', "Il file selezionato è molto grande, caricarlo del tutto richiederà tempo e risorse: se non hai abbastanza RAM, il computer potrebbe bloccarsi. Vuoi caricare solo una anteprima?", QMessageBox.Yes | QMessageBox.No)
+            if ret == QMessageBox.Yes:
+                self.showpreview = True
+                self.w.actionPreview_mode.setChecked(True)
+                totallines = self.previewlimit
+        self.nuovo()
+        lines = self.openwithencoding(fileName, 'utf-8')
+        if lines == "ERRORE BRAN: Codifica errata":
+            predefEncode = "ISO-8859-15"
+            #https://pypi.org/project/chardet/
+            myencoding = QInputDialog.getText(self, "Scegli la codifica", "Sembra che questo file non sia codificato in UTF-8. Vuoi provare a specificare una codifica diversa? (Es: cp1252 oppure ISO-8859-15)", QLineEdit.Normal, predefEncode)
+            self.nuovo()
+            lines = self.openwithencoding(fileName, myencoding[0], totallines, showhtml)
+            if lines == "ERRORE BRAN: Codifica errata":
+                self.loadfile(fileName)
+                return
+        self.setWindowTitle("Bran Text Viewer - "+fileName)
+        self.currentFilename = fileName
+
+    def openwithencoding(self, fileName, myencoding = 'utf-8', totallines = -1, showhtml = False):
+        if totallines < 0:
+            totallines = self.linescount(fileName)
+        self.Progrdialog = progress.Form(self)
+        self.Progrdialog.show()
+        row = 0
+        lines = ""
+        try:
+            with open(fileName, "r", encoding=myencoding) as ins:
+                for line in ins:
+                    if row%500 == 0:
+                        self.Progrdialog.w.testo.setText("Sto caricando la riga numero "+str(row))
+                        self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+                        QApplication.processEvents()
+                        if self.Progrdialog.w.annulla.isChecked():
+                            return
+                    if showhtml:
+                        self.w.textEdit.insertHtml(line.replace('\n',''))
+                    else:
+                        self.w.textEdit.insertPlainText(line.replace('\n',''))
+                    #if row%2==0:
+                    #    fmt= QTextBlockFormat()
+                    #    fmt.setBackground(self.errorColor)
+                    #    self.w.textEdit.textCursor().setBlockFormat(fmt)
+                    row = row + 1
+                    if row > self.previewlimit and self.showpreview:
+                        break
+        except:
+            lines = "ERRORE BRAN: Codifica errata"
+        self.Progrdialog.accept()
+        self.modified = 0
+        self.w.textEdit.document().clearUndoRedoStacks()
+        return lines
+
+    def previewmodeshift(self):
+        if showpreview:
+            showpreview = False
+            self.w.actionPreview_mode.setChecked(False)
+        else:
+            showpreview = True
+            self.w.actionPreview_mode.setChecked(True)
+
+    def searchreplace(self):
+        self.do_searchreplace(self.w.textEdit.toPlainText())
+
+
+    def findnext(self):
+        self.findgeneric(1)
+
+    def findprev(self):
+        self.findgeneric(-1)
+
+    def findgeneric(self, dir = 0):
+        mytext = self.w.textEdit.toPlainText()
+        escape = bool(self.w.findregex.isChecked() == False)
+        myregex = self.w.findtext.text()
+        mypos = self.w.textEdit.textCursor().position()
+        if escape:
+            myregex = re.escape(myregex)
+        indexes = [(m.start(0), m.end(0)) for m in re.finditer(myregex, mytext)]
+        if dir > 0:
+            n = 0
+        else:
+            n = len(indexes)-1
+        while n > -1 and n < len(indexes):
+            start = indexes[n][0]
+            end = indexes[n][1]
+            if bool(dir > 0 and start > mypos) or bool(dir < 0 and end < mypos):
+                cursor = QTextCursor(self.w.textEdit.textCursor())
+                cursor.setPosition(start, QTextCursor.MoveAnchor)
+                cursor.setPosition(end, QTextCursor.KeepAnchor)
+                self.w.textEdit.setTextCursor(cursor)
+                break
+            if dir > 0:
+                n = n + 1
+            else:
+                n = n - 1
+
+
+
+    def findIndexinCol(arr, string, col):
+        for i in range(len(arr)):
+            if (arr[i][col]) == string:
+                return i
+        return -1
+

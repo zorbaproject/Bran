@@ -253,7 +253,7 @@ class TextEditor(QMainWindow):
                 self.w.actionBatch_mode.setChecked(True)
         self.loadfile(fileName)
 
-    def loadfile(self, fileName = ""):
+    def loadfile(self, fileName = "", showhtml = False):
         if fileName == "":
             fileName = self.currentFilename
         totallines = self.linescount(fileName)
@@ -262,6 +262,7 @@ class TextEditor(QMainWindow):
             if ret == QMessageBox.Yes:
                 self.showpreview = True
                 self.w.actionPreview_mode.setChecked(True)
+                totallines = self.previewlimit
         self.nuovo()
         lines = self.openwithencoding(fileName, 'utf-8')
         if lines == "ERRORE BRAN: Codifica errata":
@@ -269,14 +270,14 @@ class TextEditor(QMainWindow):
             #https://pypi.org/project/chardet/
             myencoding = QInputDialog.getText(self, "Scegli la codifica", "Sembra che questo file non sia codificato in UTF-8. Vuoi provare a specificare una codifica diversa? (Es: cp1252 oppure ISO-8859-15)", QLineEdit.Normal, predefEncode)
             self.nuovo()
-            lines = self.openwithencoding(fileName, myencoding[0])
+            lines = self.openwithencoding(fileName, myencoding[0], totallines, showhtml)
             if lines == "ERRORE BRAN: Codifica errata":
                 self.loadfile(fileName)
                 return
         self.setWindowTitle("Bran Text Editor - "+fileName)
         self.currentFilename = fileName
 
-    def openwithencoding(self, fileName, myencoding = 'utf-8', totallines = -1):
+    def openwithencoding(self, fileName, myencoding = 'utf-8', totallines = -1, showhtml = False):
         if totallines < 0:
             totallines = self.linescount(fileName)
         self.Progrdialog = progress.Form(self)
@@ -292,7 +293,10 @@ class TextEditor(QMainWindow):
                         QApplication.processEvents()
                         if self.Progrdialog.w.annulla.isChecked():
                             return
-                    self.w.plainTextEdit.appendPlainText(line.replace('\n',''))
+                    if showhtml:
+                        self.w.plainTextEdit.appendPlainText(line.replace('\n',''))
+                    else:
+                        self.w.plainTextEdit.appendPlainText(line.replace('\n',''))
                     #if row%2==0:
                     #    fmt= QTextBlockFormat()
                     #    fmt.setBackground(self.errorColor)

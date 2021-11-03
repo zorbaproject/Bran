@@ -61,6 +61,7 @@ from PySide2.QtWidgets import QWidget
 from forms import regex_replace
 from forms import url2corpus
 from forms import texteditor
+from forms import textviewer
 from forms import tableeditor
 from forms import confronto
 from forms import tint
@@ -1281,13 +1282,19 @@ class BranCorpus(QObject):
             thisname.append(self.corpuscols[col][1])
         column = QInputDialog.getItem(self.corpuswidget, "Scegli la colonna", "Su quale colonna devo ricostruire il testo?",thisname,current=1,editable=False)
         col = thisname.index(column[0])
-        self.Progrdialog = progress.Form()
-        self.Progrdialog.show()
-        mycorpus = self.rebuildText(self.corpus, self.Progrdialog, col)
-        mycorpus = self.remUselessSpaces(mycorpus)
-        self.Progrdialog.accept()
-        te = texteditor.TextEditor(self.corpuswidget, self.mycfg)
-        te.w.plainTextEdit.setPlainText(mycorpus)
+        #self.Progrdialog = progress.Form()
+        #self.Progrdialog.show()
+        #mycorpus = self.rebuildText(self.corpus, self.Progrdialog, col)
+        #mycorpus = self.remUselessSpaces(mycorpus)
+        #self.Progrdialog.accept()
+        myfilter = ""
+        usehtml = False
+        ret = QMessageBox.question(self.corpuswidget,'Plain text o HTML', "Il testo può essere ricostruito come plain text oppure come html. Vuoi ricostruirlo come html?", QMessageBox.Yes | QMessageBox.No)
+        if ret == QMessageBox.Yes:
+            usehtml = True
+        outfile = self.core_ricostruisci(self.corpus, col, [], 0, 0, myfilter, False, usehtml)
+        te = textviewer.TextViewer(self.corpuswidget, self.mycfg)
+        te.loadfile(outfile, usehtml)
         te.show()
 
     def rebuildText(self, table, Progrdialog, col = "", ipunct = [], startrow = 0, endrow = 0, filtercol = None):
@@ -1313,11 +1320,17 @@ class BranCorpus(QObject):
                     mycorpus = mycorpus + table[row][col] + " "
         return mycorpus
 
-    def remUselessSpaces(self, tempstring):
-        punt = " (["+re.escape(".,;!?)")+ "])"
-        tmpstring = re.sub(punt, "\g<1>", tempstring, flags=re.IGNORECASE)
-        punt = "(["+re.escape("'’(")+ "]) "
-        tmpstring = re.sub(punt, "\g<1>", tmpstring, flags=re.IGNORECASE|re.DOTALL)
+    def remUselessSpaces(self, tempstring, usehtml = False):
+        if usehtml:
+            punt = " (<.*>["+re.escape(".,;!?)")+ "]<.*>)"
+            tmpstring = re.sub(punt, "\g<1>", tempstring, flags=re.IGNORECASE)
+            punt = "(<.*>["+re.escape("'’(")+ "]<.*>) "
+            tmpstring = re.sub(punt, "\g<1>", tmpstring, flags=re.IGNORECASE|re.DOTALL)
+        else:
+            punt = " (["+re.escape(".,;!?)")+ "])"
+            tmpstring = re.sub(punt, "\g<1>", tempstring, flags=re.IGNORECASE)
+            punt = "(["+re.escape("'’(")+ "]) "
+            tmpstring = re.sub(punt, "\g<1>", tmpstring, flags=re.IGNORECASE|re.DOTALL)
         return tmpstring
 
     def findngrams(self, tokens, minoccur, TBdialog, Progrdialog, ignorecase, remspaces, ipunct, col, vuoteI, vuoteF, charNotWord= False):
@@ -2385,7 +2398,7 @@ class BranCorpus(QObject):
         self.core_fileappend(str(row)+"\n", recovery)
         return output
 
-    def core_rebuildText(self, table, col = "", ipunct = [], startrow = 0, endrow = 0, filtercol = None):
+    def core_rebuildText(self, table, col = "", ipunct = [], startrow = 0, endrow = 0, filtercol = None, usehtml = False):
         mycorpus = ""
         if col == "":
             col = self.corpuscols['token'][0]
@@ -2400,10 +2413,14 @@ class BranCorpus(QObject):
             if row >= 0 and row < len(table):
                 thispos = self.legendaPos[table[row][self.corpuscols['pos'][0]]][0]
                 if not thispos in ipunct:
-                    mycorpus = mycorpus + table[row][col] + " "
+                    if usehtml:
+                        wordid = table[row][self.corpuscols['IDphrase'][0]]+"-"+table[row][self.corpuscols['IDword'][0]]
+                        mycorpus = mycorpus + '<span id="'+wordid+'" name="'+wordid+'" >' + table[row][col] +'</span> '
+                    else:
+                        mycorpus = mycorpus + table[row][col] + " "
         return mycorpus
 
-    def core_ricostruisci(self, table, col = "", ipunct = [], startrow = 0, endrow = 0, myfilter = "", myrecovery = False):
+    def core_ricostruisci(self, table, col = "", ipunct = [], startrow = 0, endrow = 0, myfilter = "", myrecovery = False, usehtml = False):
         self.filter = myfilter
         fileName = self.sessionFile
         oldvisrow = self.OnlyVisibleRows
@@ -2417,7 +2434,11 @@ class BranCorpus(QObject):
                 hname = self.corpuscols[key][1]
                 hkey = key
         cleanedfilter = re.sub("[^a-zA-Z0-9\[\]]", "", myfilter)
-        output = fileName + "-ricostruito-" + hkey + "-"+ cleanedfilter+ ".txt"
+        output = fileName + "-ricostruito-" + hkey + "-"+ cleanedfilter
+        if usehtml:
+            output = output + ".html"
+        else:
+            output = output + ".txt"
         recovery = output + ".tmp"
         totallines = len(self.corpus)
         if endrow != 0:
@@ -2462,9 +2483,13 @@ class BranCorpus(QObject):
             endrow = frasi[nFrase][2]
             if self.core_killswitch:
                 break
-            tmptext = self.core_rebuildText(self.corpus, col, ipunct, startrow, endrow, myfilcol)
-            tmptext = self.remUselessSpaces(tmptext)
-            fulltext = fulltext + tmptext
+            tmptext = self.core_rebuildText(self.corpus, col, ipunct, startrow, endrow, myfilcol, usehtml)
+            tmptext = self.remUselessSpaces(tmptext, usehtml)
+            if usehtml:
+                phraseid = frasi[nFrase][0]
+                fulltext = fulltext + '<span id="'+phraseid+'" name="'+phraseid+'" >' + tmptext +'</span> '
+            else:
+                fulltext = fulltext + tmptext
             if nFrase % 10 == 0:
                 self.core_savetext(fulltext, output)
                 self.core_fileappend(str(frasi[nFrase][0])+"\n", recovery)

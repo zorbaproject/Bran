@@ -246,7 +246,7 @@ if __name__ == "__main__":
             print("python3 main.py contaverbi file.tsv|cartella [ignora persona (y/n)] [ripristino (y/n)]\n")
             print("python3 main.py contapersone file.tsv|cartella [ignora persona (y/n)] [ripristino (y/n)]\n")
             print("python3 main.py densitalessicale file.tsv|cartella [livellodettaglio 0/1/2] [ripristino (y/n)]\n")
-            print("python3 main.py ricostruisci file.tsv|cartella [colonna] [ignorapunteggiatura (y/n)] [filtro] [ripristino (y/n)]\n")
+            print("python3 main.py ricostruisci file.tsv|cartella [colonna] [ignorapunteggiatura (y/n)] [filtro] [html|txt] [ripristino (y/n)]\n")
             print("\nOperazioni su tabelle o file di testo:\n")
             print("python3 main.py estraicolonna file.tsv|cartella colonna\n")
             print("python3 main.py mergetables file1,file2|cartella colonnaChiave [sum|mean|diff,sum|mean|diff] [1] [ripristino (y/n)]\n")
@@ -608,15 +608,24 @@ if __name__ == "__main__":
                 myfilter = sys.argv[5]
             except:
                 myfilter = ""
-            #try:
-            #    rch = sys.argv[6]
-            #except:
+            usehtml = False
+            try:
+                tmphtml = sys.argv[6]
+                if tmphtml == "html":
+                    usehtml = True
+            except:
+                usehtml = False
+            print(usehtml)
+            try:
+                rch = sys.argv[7]
+            except:
+                rch = "n"
             #    print("Vuoi usare un file di ripristino? [Y/N]")
             #    rch = input()
-            #if rch == "Y" or rch == "y":
-            #    myrecovery = True
-            #else:
-            #    myrecovery = False
+            if rch == "Y" or rch == "y":
+                myrecovery = True
+            else:
+                myrecovery = False
             #Corpus.separator = '\t'
             ignpos = []
             if myignore:
@@ -631,7 +640,7 @@ if __name__ == "__main__":
             for fileName in fileNames:
                 Corpus.CSVloader([fileName])
                 Corpus.sessionFile = fileName
-                Corpus.core_ricostruisci(Corpus.corpus, mycol, ignpos, 0, 0, myfilter)
+                Corpus.core_ricostruisci(Corpus.corpus, mycol, ignpos, 0, 0, myfilter, myrecovery, usehtml)
                 Corpus.chiudiProgetto()
             print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
         if sys.argv[1] == "contaverbi":
