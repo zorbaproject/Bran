@@ -170,7 +170,7 @@ class TextViewer(QMainWindow):
                 self.w.actionPreview_mode.setChecked(True)
                 totallines = self.previewlimit
         self.nuovo()
-        lines = self.openwithencoding(fileName, 'utf-8')
+        lines = self.openwithencoding(fileName, 'utf-8', totallines, showhtml)
         if lines == "ERRORE BRAN: Codifica errata":
             predefEncode = "ISO-8859-15"
             #https://pypi.org/project/chardet/
@@ -201,6 +201,7 @@ class TextViewer(QMainWindow):
                             return
                     if showhtml:
                         self.w.textEdit.insertHtml(line.replace('\n',''))
+                        lines = lines + line
                     else:
                         self.w.textEdit.insertPlainText(line.replace('\n',''))
                     #if row%2==0:

@@ -1293,9 +1293,9 @@ class BranCorpus(QObject):
         if ret == QMessageBox.Yes:
             usehtml = True
         outfile = self.core_ricostruisci(self.corpus, col, [], 0, 0, myfilter, False, usehtml)
-        te = textviewer.TextViewer(self.corpuswidget, self.mycfg)
-        te.loadfile(outfile, usehtml)
-        te.show()
+        tv = textviewer.TextViewer(self.corpuswidget, self.mycfg)
+        tv.loadfile(outfile, usehtml)
+        tv.show()
 
     def rebuildText(self, table, Progrdialog, col = "", ipunct = [], startrow = 0, endrow = 0, filtercol = None):
         mycorpus = ""
