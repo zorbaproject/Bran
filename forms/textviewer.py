@@ -48,7 +48,8 @@ class TextViewer(QMainWindow):
         self.w.actionSalva.triggered.connect(self.salva)
         self.w.actionSalva_come.triggered.connect(self.salvacome)
         self.w.actionCopia.triggered.connect(self.copia)
-        self.w.actionIncolla.triggered.connect(self.incolla)
+        #self.w.actionIncolla.triggered.connect(self.incolla)
+        self.w.gotoButton.clicked.connect(self.goto)
         #self.w.findprev.clicked.connect(self.findprev)
         #self.w.findnext.clicked.connect(self.findnext)
         #self.w.textEdit.cursorPositionChanged.connect(self.showcurpos)
@@ -59,6 +60,7 @@ class TextViewer(QMainWindow):
         self.showpreview = False
         self.sessionDir = "."
         self.setWindowTitle("Bran Text Viewer")
+        self.orightml = ""
 
 
     def nuovo(self):
@@ -84,6 +86,51 @@ class TextViewer(QMainWindow):
 
     def taglia(self):
         self.w.textEdit.cut()
+
+    def goto(self):
+        try:
+            phID = str(self.w.gotophrase.text())
+        except:
+            phID = ""
+        try:
+            tkID = start(self.w.gototoken.text())
+        except:
+            tkID = ""
+        if not phID.startswith("P"):
+            phID = "P"+str(phID)
+        if not tkID.startswith("T"):
+            tkID = "T"+str(tkID)
+        tkID = phID+tkID
+        if phID == "":
+            return
+        self.highlight([phID],[tkID])
+
+    def highlight(self, phraseIDs = [], tokenIDs = []):
+        gotoName = ""
+        gotocss = ""
+        try:
+            phraseID = phraseIDs[0]
+        except:
+            phraseID = "-1"
+        try:
+            tokenID = tokenIDs[0]
+        except:
+            tokenID = "-1"
+        phID = str(phraseID)
+        tkID = str(tokenID)
+        gotoName = phID
+        #gotocss = gotocss +"body {\nbackground: yellow;\n}\n"
+        for frase in phraseIDs:
+            gotocss = gotocss +"." + str(frase) + " {\nbackground: yellow;\n}\n"
+        for token in tokenIDs:
+            gotocss = gotocss + "." + str(token) + " {color: blue;}\n"
+        document = self.w.textEdit.document()
+        document.setDefaultStyleSheet(gotocss)
+        document.setHtml(self.orightml)
+        self.w.textEdit.setDocument(document)
+        if gotoName != "":
+            print("scrolling to "+gotoName)
+            self.w.textEdit.scrollToAnchor(gotoName);
 
     def showcurpos(self):
         row = self.w.textEdit.textCursor().blockNumber()
@@ -180,6 +227,7 @@ class TextViewer(QMainWindow):
             if lines == "ERRORE BRAN: Codifica errata":
                 self.loadfile(fileName)
                 return
+        self.orightml = lines
         self.setWindowTitle("Bran Text Viewer - "+fileName)
         self.currentFilename = fileName
 
@@ -199,9 +247,9 @@ class TextViewer(QMainWindow):
                         QApplication.processEvents()
                         if self.Progrdialog.w.annulla.isChecked():
                             return
+                    lines = lines + line
                     if showhtml:
                         self.w.textEdit.insertHtml(line.replace('\n',''))
-                        lines = lines + line
                     else:
                         self.w.textEdit.insertPlainText(line.replace('\n',''))
                     #if row%2==0:

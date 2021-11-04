@@ -2414,8 +2414,8 @@ class BranCorpus(QObject):
                 thispos = self.legendaPos[table[row][self.corpuscols['pos'][0]]][0]
                 if not thispos in ipunct:
                     if usehtml:
-                        wordid = table[row][self.corpuscols['IDphrase'][0]]+"-"+table[row][self.corpuscols['IDword'][0]]
-                        mycorpus = mycorpus + '<span id="'+wordid+'" name="'+wordid+'" >' + table[row][col] +'</span> '
+                        wordid = "P"+table[row][self.corpuscols['IDphrase'][0]]+"T"+table[row][self.corpuscols['IDword'][0]]
+                        mycorpus = mycorpus + '<span id="'+wordid+'" name="'+wordid+'" class="'+wordid+'" >' + table[row][col] +'</span> '
                     else:
                         mycorpus = mycorpus + table[row][col] + " "
         return mycorpus
@@ -2487,7 +2487,7 @@ class BranCorpus(QObject):
             tmptext = self.remUselessSpaces(tmptext, usehtml)
             if usehtml:
                 phraseid = frasi[nFrase][0]
-                fulltext = fulltext + '<span id="'+phraseid+'" name="'+phraseid+'" >' + tmptext +'</span> '
+                fulltext = fulltext + '<span id="P'+phraseid+'" name="P'+phraseid+'" class="P'+phraseid+'" >' + tmptext +'</span> '
             else:
                 fulltext = fulltext + tmptext
             if nFrase % 10 == 0:
