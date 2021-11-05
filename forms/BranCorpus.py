@@ -2414,7 +2414,8 @@ class BranCorpus(QObject):
                 thispos = self.legendaPos[table[row][self.corpuscols['pos'][0]]][0]
                 if not thispos in ipunct:
                     if usehtml:
-                        wordid = "P"+table[row][self.corpuscols['IDphrase'][0]]+"T"+table[row][self.corpuscols['IDword'][0]]
+                        #wordid = "P"+table[row][self.corpuscols['IDphrase'][0]]+"T"+table[row][self.corpuscols['IDword'][0]]
+                        wordid = "T"+str(row)
                         mycorpus = mycorpus + '<span id="'+wordid+'" name="'+wordid+'" class="'+wordid+'" >' + table[row][col] +'</span> '
                     else:
                         mycorpus = mycorpus + table[row][col] + " "

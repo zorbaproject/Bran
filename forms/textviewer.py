@@ -50,6 +50,8 @@ class TextViewer(QMainWindow):
         self.w.actionCopia.triggered.connect(self.copia)
         #self.w.actionIncolla.triggered.connect(self.incolla)
         self.w.gotoButton.clicked.connect(self.goto)
+        self.w.gotoLoadFromFile.clicked.connect(self.gotoLoadFile)
+        self.w.gotoList.itemDoubleClicked.connect(self.gotoFromList)
         #self.w.findprev.clicked.connect(self.findprev)
         #self.w.findnext.clicked.connect(self.findnext)
         #self.w.textEdit.cursorPositionChanged.connect(self.showcurpos)
@@ -59,14 +61,16 @@ class TextViewer(QMainWindow):
         self.previewlimit = 500000
         self.showpreview = False
         self.sessionDir = "."
-        self.setWindowTitle("Bran Text Viewer")
+        self.separator = "\t"
+        self.setWindowTitle("Bran RichText Viewer")
         self.orightml = ""
+        self.gotofile = []
 
 
     def nuovo(self):
         self.currentFilename = ""
         self.w.textEdit.setPlainText("")
-        self.setWindowTitle("Bran Text Viewer")
+        self.setWindowTitle("Bran RichText Viewer")
         self.modified = -1
         self.w.textEdit.document().clearUndoRedoStacks()
 
@@ -93,17 +97,27 @@ class TextViewer(QMainWindow):
         except:
             phID = ""
         try:
-            tkID = start(self.w.gototoken.text())
+            tkID = str(self.w.gototoken.text())
         except:
             tkID = ""
         if not phID.startswith("P"):
             phID = "P"+str(phID)
         if not tkID.startswith("T"):
             tkID = "T"+str(tkID)
-        tkID = phID+tkID
-        if phID == "":
-            return
         self.highlight([phID],[tkID])
+
+
+    def gotoFromList(self, myitem):
+        phIDs = []
+        #TODO: find out how to get phrase id
+        tkIDs = []
+        try:
+            i = self.w.gotoList.row(myitem)
+            for t in range(int(self.gotofile[i][1]), int(self.gotofile[i][2])+1):
+                tkIDs.append("T"+str(t))
+        except:
+            pass
+        self.highlight(phIDs,tkIDs)
 
     def highlight(self, phraseIDs = [], tokenIDs = []):
         gotoName = ""
@@ -116,21 +130,56 @@ class TextViewer(QMainWindow):
             tokenID = tokenIDs[0]
         except:
             tokenID = "-1"
-        phID = str(phraseID)
-        tkID = str(tokenID)
-        gotoName = phID
+        gotoName = phraseID
+        if tokenID != "":
+            gotoName = tokenID
         #gotocss = gotocss +"body {\nbackground: yellow;\n}\n"
         for frase in phraseIDs:
+            if frase == "":
+                continue
             gotocss = gotocss +"." + str(frase) + " {\nbackground: yellow;\n}\n"
         for token in tokenIDs:
-            gotocss = gotocss + "." + str(token) + " {color: blue;}\n"
+            if token == "":
+                continue
+            gotocss = gotocss + "." + str(token) + " {\ncolor: blue;\n}\n"
         document = self.w.textEdit.document()
         document.setDefaultStyleSheet(gotocss)
+        #print(gotocss)
         document.setHtml(self.orightml)
         self.w.textEdit.setDocument(document)
         if gotoName != "":
-            print("scrolling to "+gotoName)
+            #print("scrolling to "+gotoName)
             self.w.textEdit.scrollToAnchor(gotoName);
+
+    def gotoLoadFile(self):
+        self.gotofile = []
+        fileNames = QFileDialog.getOpenFileNames(self.w, "Apri file CSV", self.sessionDir, "CSV files (*.tsv *.csv)")[0]
+        for fileName in fileNames:
+            if not fileName == "":
+                if os.path.isfile(fileName):
+                    print(fileName)
+                    if not os.path.getsize(fileName) > 0:
+                        continue
+                    try:
+                        totallines = self.linescount(fileName)
+                    except Exception as ex:
+                        print(ex)
+                        continue
+                    text_file = open(fileName, "r", encoding='utf-8')
+                    lines = text_file.read()
+                    text_file.close()
+                    linesA = lines.split('\n')
+                    row = 0
+                    firstrow = True
+                    for line in linesA:
+                        if line == "":
+                            continue
+                        if firstrow:
+                            firstrow = False
+                            continue
+                        newtoken = line.split(self.separator)
+                        self.gotofile.append(newtoken)
+                        self.w.gotoList.addItem(str(newtoken[0]))
 
     def showcurpos(self):
         row = self.w.textEdit.textCursor().blockNumber()
@@ -228,7 +277,7 @@ class TextViewer(QMainWindow):
                 self.loadfile(fileName)
                 return
         self.orightml = lines
-        self.setWindowTitle("Bran Text Viewer - "+fileName)
+        self.setWindowTitle("Bran RichText Viewer - "+fileName)
         self.currentFilename = fileName
 
     def openwithencoding(self, fileName, myencoding = 'utf-8', totallines = -1, showhtml = False):
