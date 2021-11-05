@@ -266,6 +266,7 @@ class TextViewer(QMainWindow):
                 self.w.actionPreview_mode.setChecked(True)
                 totallines = self.previewlimit
         self.nuovo()
+        self.sessionDir = os.path.dirname(fileName)
         lines = self.openwithencoding(fileName, 'utf-8', totallines, showhtml)
         if lines == "ERRORE BRAN: Codifica errata":
             predefEncode = "ISO-8859-15"

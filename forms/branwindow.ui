@@ -490,6 +490,7 @@
     <addaction name="actionConcordanze"/>
     <addaction name="separator"/>
     <addaction name="actionRicostruisci_testo"/>
+    <addaction name="actionCerca_con_filtro"/>
    </widget>
    <widget class="QMenu" name="menuFiltri">
     <property name="title">
@@ -788,6 +789,11 @@
   <action name="actionAltre_lingue">
    <property name="text">
     <string>&amp;Altre lingue</string>
+   </property>
+  </action>
+  <action name="actionCerca_con_filtro">
+   <property name="text">
+    <string>Cerca con filtro</string>
    </property>
   </action>
  </widget>

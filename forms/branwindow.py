@@ -55,6 +55,7 @@ from forms import BranCorpus
 from forms import regex_replace
 from forms import url2corpus
 from forms import texteditor
+from forms import textviewer
 from forms import tableeditor
 from forms import confronto
 from forms import tint
@@ -107,6 +108,7 @@ class MainWindow(QMainWindow):
         self.w.actionConta_persone.triggered.connect(self.contapersone)
         self.w.actionConta_occorrenze_normalizzate.triggered.connect(self.occorrenzenormalizzate)
         self.w.actionConta_occorrenze_filtrate.triggered.connect(self.contaoccorrenzefiltrate)
+        self.w.actionCerca_con_filtro.triggered.connect(self.cercaconfiltro)
         self.w.actionEsporta_corpus_in_CSV_unico.triggered.connect(self.salvaCSV)
         self.w.actionEsporta_vista_attuale_in_CSV.triggered.connect(self.esportavistaCSV)
         self.w.actionEsporta_subcorpus_in_base_a_filtro.triggered.connect(self.esportafiltroCSV)
@@ -169,6 +171,7 @@ class MainWindow(QMainWindow):
         self.TintAddr = ""
         self.Corpus.txtloadingstopped()
         self.setcss()
+        self.w.actionFile_del_progetto.setChecked(True)
         self.showProjectFiles()
         self.w.corpusandproject.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
         self.w.groupBox_progetto.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
@@ -287,6 +290,10 @@ class MainWindow(QMainWindow):
         filepath = myitem.text(1)
         if filepath[-4:]==".tsv" or filepath[-4:]==".csv":
             self.Corpus.showResults(filepath, True)
+        elif filepath[-4:]==".htm" or filepath[-5:]==".html":
+            tv = textviewer.TextViewer(self.Corpus.corpuswidget, self.Corpus.mycfg)
+            tv.loadfile(filepath, True)
+            tv.show()
         else:
             te = texteditor.TextEditor(self.Corpus.corpuswidget, self.Corpus.mycfg)
             te.aprilista([filepath])
@@ -300,6 +307,8 @@ class MainWindow(QMainWindow):
         origitem.setText(0,"Corpus")
         resitem = QTreeWidgetItem(self.w.progetto)
         resitem.setText(0,"Risultati di Bran")
+        finditem = QTreeWidgetItem(self.w.progetto)
+        finditem.setText(0,"Ricerche di Bran")
         otheritem = QTreeWidgetItem(self.w.progetto)
         otheritem.setText(0,"Altri file")
         fileNames = []
@@ -342,6 +351,11 @@ class MainWindow(QMainWindow):
                     rootelem = resitem
                     myregex = re.escape(fingerprint) + "(.*?)\-" + "(.*?)" + re.escape(".tsv")
                     fileTitle = "Occorrenze "+ re.sub(myregex, "\g<1> filtro \g<2>", fileTitle)
+                fingerprint = sessionname+"-cerca-"
+                if fileTitle.startswith(fingerprint):
+                    rootelem = finditem
+                    myregex = re.escape(fingerprint) + "(.*?)\-filtro-" + "(.*?)" + re.escape(".tsv")
+                    fileTitle = "Ricerca "+ re.sub(myregex, "\g<1> con filtro \g<2>", fileTitle)
                 fingerprint = sessionname+"-coOccorrenze-"
                 if fileTitle.startswith(fingerprint):
                     rootelem = resitem
@@ -387,6 +401,7 @@ class MainWindow(QMainWindow):
             tritem.setText(1,fileName)
             tritem.setExpanded(True)
         resitem.setExpanded(True)
+        finditem.setExpanded(True)
         origitem.setExpanded(True)
         otheritem.setExpanded(True)
         for i in range(self.w.progetto.columnCount()):
@@ -503,6 +518,10 @@ class MainWindow(QMainWindow):
     def contaoccorrenzefiltrate(self):
         self.tableeditor("init")
         self.Corpus.contaoccorrenzefiltrate()
+
+    def cercaconfiltro(self):
+        self.tableeditor("init")
+        self.Corpus.cercaconfiltro()
 
     def contaverbi(self):
         self.tableeditor("init")

@@ -1321,17 +1321,58 @@ class BranCorpus(QObject):
         return mycorpus
 
     def remUselessSpaces(self, tempstring, usehtml = False):
-        if usehtml:
-            punt = " (<.*>["+re.escape(".,;!?)")+ "]<.*>)"
-            tmpstring = re.sub(punt, "\g<1>", tempstring, flags=re.IGNORECASE)
-            punt = "(<.*>["+re.escape("'’(")+ "]<.*>) "
+        if usehtml:            
+            tmpstring = tempstring.replace("</span> </span>", "</span></span>")
+            punt = " (<span[^>]*>[" +re.escape(".,;:!?)")+ "]<\/span>)"
+            tmpstring = re.sub(punt, "\g<1>", tmpstring, flags=re.IGNORECASE)
+            punt = "(["+re.escape("'’(")+ "]<\/span>) "
             tmpstring = re.sub(punt, "\g<1>", tmpstring, flags=re.IGNORECASE|re.DOTALL)
         else:
-            punt = " (["+re.escape(".,;!?)")+ "])"
+            punt = " (["+re.escape(".,;:!?)")+ "])"
             tmpstring = re.sub(punt, "\g<1>", tempstring, flags=re.IGNORECASE)
             punt = "(["+re.escape("'’(")+ "]) "
             tmpstring = re.sub(punt, "\g<1>", tmpstring, flags=re.IGNORECASE|re.DOTALL)
         return tmpstring
+
+    def cercaconfiltro(self):
+        thisname = []
+        for col in self.corpuscols:
+            thisname.append(self.corpuscols[col][1])
+        column = QInputDialog.getItem(self.corpuswidget, "Scegli la colonna", "Su quale colonna devo estrarre i risultati?",thisname,current=1,editable=False)
+        col = thisname.index(column[0])
+        QMessageBox.information(self.corpuswidget, "Filtro", "Ora devi impostare il filtro con cui eseguire la ricerca.")
+        fcol = self.filtrimultiplienabled
+        Fildialog = creafiltro.Form(self.corpus, self.corpuscols, self.corpuswidget)
+        Fildialog.sessionDir = self.sessionDir
+        Fildialog.w.filter.setText("pos=AD.*||pos=NOUN")
+        Fildialog.updateTable()
+        Fildialog.exec()
+        if Fildialog.w.filter.text() == "":
+            return
+        filtertext = Fildialog.w.filter.text()
+        #allfilters = filtertext.split("||")
+        mycol = thisname.index(column[0])
+        myrecovery = False
+        hname = str(mycol)
+        hkey = str(mycol)
+        for key in self.corpuscols:
+            if col == self.corpuscols[key][0]:
+                hname = self.corpuscols[key][1]
+                hkey = key
+        cleanedfilter = re.sub("[^a-zA-Z0-9]", "", filtertext)
+        fcol = self.filtrimultiplienabled
+        output = self.sessionFile + "-cerca-" + hkey + "-filtro-" + cleanedfilter + ".tsv"
+        recovery = output + ".tmp"
+        totallines = self.core_linescount(self.sessionFile)
+        self.core_killswitch = False
+        self.Progrdialog = progress.ProgressDialog(self, recovery, totallines)
+        self.Progrdialog.start()
+        self.core_cercaConFiltro(mycol, filtertext, myrecovery)
+        self.Progrdialog.cancelled = True
+        self.core_killswitch = False
+        if not self.stupidwindows:
+            self.showResults(output)
+        return output
 
     def findngrams(self, tokens, minoccur, TBdialog, Progrdialog, ignorecase, remspaces, ipunct, col, vuoteI, vuoteF, charNotWord= False):
         mycorpus = self.rebuildText(self.corpus, Progrdialog, col, ipunct)
