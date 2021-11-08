@@ -51,6 +51,7 @@ class Form(QDialog):
         self.usefulregexs = dict()
         self.usefulregexs["Numero"] = "[0-9]*[\.\,]*[0-9]"
         self.usefulregexs["Iniziale maiuscola"] = "[A-Z][a-z]*"
+        self.operators = [">=", "<=", "=", ">", "<"] #l'ordine è importante
         #Create an empty row initially
         if self.w.tableWidget.rowCount() == 0:
             self.andbtn()
@@ -89,6 +90,15 @@ class Form(QDialog):
             editor.editingFinished.connect(lambda: self.setcelltocorpus(str(editor.value()),row, col))
         elif col == 2:
             editor = QComboBox()
+            for key in self.operators:
+                editor.addItem(key)
+            if mytxt == "":
+                mytxt = "="
+            editor.setCurrentText(mytxt)
+            editor.setEditable(False)
+            editor.activated.connect(lambda index: self.setcelltocorpus(editor.itemText(index),row, col) )
+        elif col == 3:
+            editor = QComboBox()
             for key in self.usefulregexs:
                 editor.addItem(key)
             if editor.findText(mytxt) < 0:
@@ -104,6 +114,7 @@ class Form(QDialog):
         myfilter = ""
         iand = 0
         oldfilter = self.w.filter.text()
+        self.w.filter.editingFinished.disconnect()
         for tbrow in range(self.w.tableWidget.rowCount()):
             if iand >0:
                 if self.w.tableWidget.item(tbrow,0).text() == "OR":
@@ -123,6 +134,7 @@ class Form(QDialog):
             myfilter = myfilter + operator + myregex
             iand = iand+1
         self.w.filter.setText(myfilter)
+        self.w.filter.editingFinished.connect(self.updateTable)
 
     def updateTable(self):
         for row in range(self.w.tableWidget.rowCount()):
@@ -136,8 +148,7 @@ class Form(QDialog):
                     tmpcol = ""
                     tmprows = ""
                     tmpregex = ""
-                    operators = [">=", "<=", "=", ">", "<"] #l'ordine è importante
-                    for operator in operators:
+                    for operator in self.operators:
                         if operator in andcond:
                             break
                     #cellname = andcond.split("=", 1)[0]
@@ -188,8 +199,9 @@ class Form(QDialog):
                 return
             self.orbtn()
             tbrow = self.addlinetotable(mycol, 0)
-            self.setcelltocorpus("0", tbrow, 2)
-            self.setcelltocorpus("^"+re.escape(myvalues[row])+"$", tbrow, 2)
+            self.setcelltocorpus("0", tbrow, 1)
+            self.setcelltocorpus("=", tbrow, 2)
+            self.setcelltocorpus("^"+re.escape(myvalues[row])+"$", tbrow, 3)
         self.Progrdialog.accept()
 
     def filterDizionario(self, col, fileName, dizcol = 0):
@@ -247,8 +259,9 @@ class Form(QDialog):
                 return
             self.orbtn()
             tbrow = self.addlinetotable(mycol, 0)
-            self.setcelltocorpus("0", tbrow, 2)
-            self.setcelltocorpus("^"+re.escape(myvalues[row])+"$", tbrow, 2)
+            self.setcelltocorpus("0", tbrow, 1)
+            self.setcelltocorpus("=", tbrow, 2)
+            self.setcelltocorpus("^"+re.escape(myvalues[row])+"$", tbrow, 3)
         self.Progrdialog.accept()
 
     def filtroautomatico(self):
@@ -274,8 +287,8 @@ class Form(QDialog):
             if istable:
                 dizcol = int(QInputDialog.getInt(self.w, "Indica la colonna del dizionario", "Sembra che il dizionario che hai scelto sia una tabella. Indica la colonna da cui estrarre le parole:")[0])
             thisname = []
-            for col in range(self.mycorpus.columnCount()):
-                thisname.append(self.mycorpus.horizontalHeaderItem(col).text())
+            for col in self.corpuscols:
+                thisname.append(self.corpuscols[col][1])
             column = QInputDialog.getItem(self, "Scegli la colonna", "In quale colonna del corpus devo cercare i valori del dizionario?",thisname,current=self.corpuscols['lemma'][0],editable=False)
             col = thisname.index(column[0])
             self.filterDizionario(col, fileName, dizcol)
@@ -295,7 +308,7 @@ class Form(QDialog):
         titem.setText(text)
         if column == 1:
             titem.setToolTip("La parola che vuoi cercare è la numero 0. Ma puoi porre condizioni per quella che la precede con -1 o per quella che segue con 1.")
-        if column == 2:
+        if column == 3:
             titem.setToolTip("Puoi digitare una espressione regolare, oppure scegliere una opzione dall'elenco.")
         self.w.tableWidget.removeCellWidget(row, column)
         self.w.tableWidget.setItem(row, column, titem)
@@ -322,6 +335,14 @@ class Form(QDialog):
     def sanitizeTable(self):
         for row in range(self.w.tableWidget.rowCount()):
             for col in range(self.w.tableWidget.columnCount()):
+                try:
+                    if col == 0:
+                        ctxt = str(self.w.tableWidget.cellWidget(row,col).value())
+                    else:
+                        ctxt = self.w.tableWidget.cellWidget(row,col).currentText()
+                    self.setcelltocorpus(ctxt,row,col)
+                except:
+                    pass
                 if not self.w.tableWidget.item(row,col):
                     self.setcelltocorpus("", row, col)
         if self.w.tableWidget.rowCount() > 1:
