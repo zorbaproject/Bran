@@ -509,16 +509,28 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionApri">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/icons/document-open.png</normaloff>:/icons/icons/document-open.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Apri progetto</string>
    </property>
   </action>
   <action name="actionSalva">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/icons/document-save.png</normaloff>:/icons/icons/document-save.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Salva progetto</string>
    </property>
   </action>
   <action name="actionDa_file_di_testo_con_Tint">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/icons/document-import-tint.png</normaloff>:/icons/icons/document-import-tint.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Da file di testo con Tint</string>
    </property>
@@ -555,10 +567,14 @@
   </action>
   <action name="actionEsporta_corpus_in_un_CSV_per_ogni_ID">
    <property name="text">
-    <string>Esporta &amp;corpus in un CSV per ogni ID</string>
+    <string>Esporta &amp;corpus in un CSV per ogni tag</string>
    </property>
   </action>
   <action name="actionChiudi">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/icons/document-close.png</normaloff>:/icons/icons/document-close.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Chiudi progetto</string>
    </property>
@@ -731,6 +747,10 @@
    </property>
   </action>
   <action name="actionDa_file_di_testo_con_UDpipe">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/icons/document-import-ud.png</normaloff>:/icons/icons/document-import-ud.png</iconset>
+   </property>
    <property name="text">
     <string>Da file di testo &amp;con UDpipe</string>
    </property>
@@ -793,10 +813,12 @@
   </action>
   <action name="actionCerca_con_filtro">
    <property name="text">
-    <string>Cerca con filtro</string>
+    <string>Cerca con &amp;filtro</string>
    </property>
   </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="../resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

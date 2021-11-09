@@ -1,0 +1,21 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>icons/bran_logo_256x256.ico</file>
+        <file>icons/document-close.png</file>
+        <file>icons/document-edit.png</file>
+        <file>icons/document-export.png</file>
+        <file>icons/document-import.png</file>
+        <file>icons/document-new.png</file>
+        <file>icons/document-open-remote.png</file>
+        <file>icons/document-open.png</file>
+        <file>icons/document-preview.png</file>
+        <file>icons/document-save.png</file>
+        <file>icons/stylesheet-branch-closed.png</file>
+        <file>icons/stylesheet-branch-end.png</file>
+        <file>icons/stylesheet-branch-more.png</file>
+        <file>icons/stylesheet-branch-open.png</file>
+        <file>icons/stylesheet-vline.png</file>
+        <file>icons/document-import-ud.png</file>
+        <file>icons/document-import-tint.png</file>
+    </qresource>
+</RCC>

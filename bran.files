@@ -9,6 +9,7 @@ forms/creafiltro.py
 forms/creafiltro.ui
 forms/settings.py
 forms/settings.ui
+resources.qrc
 testfb.py
 forms/about.py
 forms/about.ui

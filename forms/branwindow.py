@@ -24,6 +24,7 @@ import math
 
 arch = platform.architecture()[0]
 
+from forms import rc_resources
 
 from PySide2.QtWidgets import QApplication
 

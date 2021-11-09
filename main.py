@@ -24,6 +24,9 @@ import math
 
 arch = platform.architecture()[0]
 
+#TODO: Run this on linux when needed
+#os.system("pyside2-rcc resources.qrc -o forms/rc_resources.py")
+
 try:
     from PySide2.QtWidgets import QApplication
 except:
