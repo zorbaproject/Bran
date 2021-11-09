@@ -541,21 +541,37 @@
    </property>
   </action>
   <action name="actionScarica_corpus_da_sito_web">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/icons/download.png</normaloff>:/icons/icons/download.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Scarica corpus da sito web</string>
    </property>
   </action>
   <action name="actionEditor_di_testo">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/icons/text-field.png</normaloff>:/icons/icons/text-field.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Editor di testo</string>
    </property>
   </action>
   <action name="actionAbout_Bran">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/icons/bran_logo_256x256.ico</normaloff>:/icons/icons/bran_logo_256x256.ico</iconset>
+   </property>
    <property name="text">
     <string>&amp;About Bran</string>
    </property>
   </action>
   <action name="actionConta_occorrenze">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/icons/format-list-ordered.png</normaloff>:/icons/icons/format-list-ordered.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Conta occorrenze</string>
    </property>
@@ -580,11 +596,19 @@
    </property>
   </action>
   <action name="actionEsci">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/icons/application-exit.png</normaloff>:/icons/icons/application-exit.png</iconset>
+   </property>
    <property name="text">
     <string>Esci</string>
    </property>
   </action>
   <action name="actionEsporta_vista_attuale_in_CSV">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/icons/view-process-all.png</normaloff>:/icons/icons/view-process-all.png</iconset>
+   </property>
    <property name="text">
     <string>Esporta &amp;vista attuale in CSV</string>
    </property>
@@ -595,6 +619,10 @@
    </property>
   </action>
   <action name="actionEstrai_dizionario">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/icons/accessories-calculator.png</normaloff>:/icons/icons/accessories-calculator.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Misure lessicometriche</string>
    </property>
@@ -605,6 +633,10 @@
    </property>
   </action>
   <action name="actionDa_file_CSV">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/icons/document-import.png</normaloff>:/icons/icons/document-import.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Aggiungi corpus creato con Bran</string>
    </property>
@@ -620,16 +652,28 @@
    </property>
   </action>
   <action name="actionCalcola_densit_lessicale">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/icons/format-line-spacing-triple.png</normaloff>:/icons/icons/format-line-spacing-triple.png</iconset>
+   </property>
    <property name="text">
     <string>Calcola &amp;densità lessicale</string>
    </property>
   </action>
   <action name="actionTrova_ripetizioni">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/icons/view-time-schedule.png</normaloff>:/icons/icons/view-time-schedule.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Trova nGrams (segmenti ripetuti)</string>
    </property>
   </action>
   <action name="actionConta_verbi">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/icons/irc-voice.png</normaloff>:/icons/icons/irc-voice.png</iconset>
+   </property>
    <property name="text">
     <string>Conta &amp;verbi</string>
    </property>
@@ -640,11 +684,19 @@
    </property>
   </action>
   <action name="actionRimuovi_righe_selezionate">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/icons/edit-table-delete-row.png</normaloff>:/icons/icons/edit-table-delete-row.png</iconset>
+   </property>
    <property name="text">
     <string>R&amp;imuovi righe selezionate</string>
    </property>
   </action>
   <action name="actionConfronta_corpora">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/icons/view-file-columns.png</normaloff>:/icons/icons/view-file-columns.png</iconset>
+   </property>
    <property name="text">
     <string>C&amp;onfronta corpora</string>
    </property>
@@ -687,31 +739,55 @@
    </property>
   </action>
   <action name="actionRicostruisci_testo">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/icons/draw-text.png</normaloff>:/icons/icons/draw-text.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Ricostruisci testo</string>
    </property>
   </action>
   <action name="actionConcordanze">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/icons/insert-link.png</normaloff>:/icons/icons/insert-link.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Concordanze</string>
    </property>
   </action>
   <action name="actionFiltri_multipli">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/icons/view-filter.png</normaloff>:/icons/icons/view-filter.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Crea filtro multiplo</string>
    </property>
   </action>
   <action name="actionConta_occorrenze_filtrate">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/icons/format-list-ordered-filter.png</normaloff>:/icons/icons/format-list-ordered-filter.png</iconset>
+   </property>
    <property name="text">
     <string>Conta &amp;occorrenze filtrate</string>
    </property>
   </action>
   <action name="actionCo_occorrenze">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/icons/format-list-ordered-link.png</normaloff>:/icons/icons/format-list-ordered-link.png</iconset>
+   </property>
    <property name="text">
     <string>Co&amp;nta co-occorrenze</string>
    </property>
   </action>
   <action name="actionAggiornamenti">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/icons/run-build-install.png</normaloff>:/icons/icons/run-build-install.png</iconset>
+   </property>
    <property name="text">
     <string>A&amp;ggiornamenti</string>
    </property>
@@ -722,6 +798,10 @@
    </property>
   </action>
   <action name="actionVisualizza_frasi">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/icons/code-class.png</normaloff>:/icons/icons/code-class.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Visualizza frasi</string>
    </property>
@@ -737,11 +817,19 @@
    </property>
   </action>
   <action name="actionDa_file_di_TreeTagger">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/icons/document-import-treetagger.png</normaloff>:/icons/icons/document-import-treetagger.png</iconset>
+   </property>
    <property name="text">
     <string>Da &amp;file di TreeTagger</string>
    </property>
   </action>
   <action name="actionEsporta_in_formato_CoNNL_U">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/icons/document-export.png</normaloff>:/icons/icons/document-export.png</iconset>
+   </property>
    <property name="text">
     <string>Esporta &amp;in formato CoNNL-U</string>
    </property>
@@ -756,11 +844,19 @@
    </property>
   </action>
   <action name="actionEditor_tabelle">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/icons/view-form-table.png</normaloff>:/icons/icons/view-form-table.png</iconset>
+   </property>
    <property name="text">
     <string>E&amp;ditor tabelle</string>
    </property>
   </action>
   <action name="actionConfigurazione_di_Bran">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/icons/configure.png</normaloff>:/icons/icons/configure.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Configurazione di Bran</string>
    </property>
@@ -781,6 +877,10 @@
    </property>
   </action>
   <action name="actionConta_persone">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/icons/edit-image-face-show.png</normaloff>:/icons/icons/edit-image-face-show.png</iconset>
+   </property>
    <property name="text">
     <string>Conta &amp;persone</string>
    </property>
@@ -802,6 +902,10 @@
    </property>
   </action>
   <action name="actionGulpEASE">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/icons/tools-check-spelling.png</normaloff>:/icons/icons/tools-check-spelling.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;GulpEASE</string>
    </property>
@@ -812,6 +916,10 @@
    </property>
   </action>
   <action name="actionCerca_con_filtro">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/icons/edit-find.png</normaloff>:/icons/icons/edit-find.png</iconset>
+   </property>
    <property name="text">
     <string>Cerca con &amp;filtro</string>
    </property>

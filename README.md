@@ -40,6 +40,7 @@ Per quanto riguarda la produzione di grafici, è necessario l'interprete R: http
 - Palmero Aprosio A. e Moretti G. hanno sviluppato Tint, un fork italiano di StanfordCoreNLP
 - Floriana Sciumbata ha progettato le varie funzioni di Bran
 - Luca Tringali ha scritto il codice di Bran
+- Il Team Oxygen di KDE ha disegnato le icone utilizzate come base per quelle di Bran
 
 Se utilizzi Bran per una pubblicazione accademica, ti chiediamo di citarlo così:
 ```
