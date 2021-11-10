@@ -139,7 +139,7 @@ class MainWindow(QMainWindow):
         self.w.actionConfigurazione_di_Bran.triggered.connect(self.showbranconfig)
         self.w.actionConfronta_corpora.triggered.connect(self.confronto)
         self.w.actionAbout_Bran.triggered.connect(self.aboutbran)
-        self.w.actionEstrai_dizionario.triggered.connect(self.misure_lessicometriche)
+        self.w.actionMisure_lessicometriche.triggered.connect(self.misure_lessicometriche)
         self.w.actionGulpEASE.triggered.connect(self.gulpease)
         self.w.actionTrova_ripetizioni.triggered.connect(self.trovaripetizioni)
         self.w.actionConta_verbi.triggered.connect(self.contaverbi)
@@ -290,7 +290,26 @@ class MainWindow(QMainWindow):
     def openprjfile(self, myitem, col):
         filepath = myitem.text(1)
         if filepath[-4:]==".tsv" or filepath[-4:]==".csv":
-            self.Corpus.showResults(filepath, True)
+            if "-cerca-" in filepath:
+                try:
+                    hkey = re.sub(".*\-cerca\-([^\-]*)\-.*","\g<1>",filepath)
+                    col = int(self.Corpus.corpuscols[hkey][0])
+                except:
+                    hkey = "token"
+                    col = 1
+                rebuiltfile = self.Corpus.sessionFile + "-ricostruito-" + hkey + "-.html"
+                if not os.path.isfile(rebuiltfile):
+                    print(rebuiltfile+" does not exists, creating it now.")
+                    rebuiltfile = self.core_ricostruisci(self.Corpus.corpus, col, [], 0, 0, "", False, True)
+                if os.path.isfile(rebuiltfile):
+                    tv = textviewer.TextViewer(self.Corpus.corpuswidget, self.Corpus.mycfg)
+                    tv.loadfile(rebuiltfile, True)
+                    tv.do_gotoloadfile([filepath])
+                    tv.show()
+                else:
+                    self.showResults(output)
+            else:
+                self.Corpus.showResults(filepath, True)
         elif filepath[-4:]==".htm" or filepath[-5:]==".html":
             tv = textviewer.TextViewer(self.Corpus.corpuswidget, self.Corpus.mycfg)
             tv.loadfile(filepath, True)

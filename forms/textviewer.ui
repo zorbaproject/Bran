@@ -60,25 +60,51 @@
         <item>
          <widget class="QPushButton" name="findprev">
           <property name="text">
-           <string>&lt;</string>
+           <string> </string>
+          </property>
+          <property name="icon">
+           <iconset resource="../resources.qrc">
+            <normaloff>:/icons/icons/arrow-left.png</normaloff>:/icons/icons/arrow-left.png</iconset>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QPushButton" name="findnext">
           <property name="text">
-           <string>&gt;</string>
+           <string> </string>
+          </property>
+          <property name="icon">
+           <iconset resource="../resources.qrc">
+            <normaloff>:/icons/icons/arrow-right.png</normaloff>:/icons/icons/arrow-right.png</iconset>
           </property>
          </widget>
         </item>
        </layout>
       </item>
       <item>
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QPushButton" name="gotoLoadFromFile">
+          <property name="text">
+           <string>Carica risultati da file</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../resources.qrc">
+            <normaloff>:/icons/icons/document-open.png</normaloff>:/icons/icons/document-open.png</iconset>
+          </property>
+         </widget>
+        </item>
         <item>
          <widget class="QLabel" name="label_2">
           <property name="text">
-           <string>Frase</string>
+           <string>Frase:</string>
           </property>
          </widget>
         </item>
@@ -102,13 +128,6 @@
           </property>
          </widget>
         </item>
-        <item>
-         <widget class="QPushButton" name="gotoLoadFromFile">
-          <property name="text">
-           <string>Carica da file</string>
-          </property>
-         </widget>
-        </item>
        </layout>
       </item>
      </layout>
@@ -122,17 +141,15 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>30</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
      <string>Fi&amp;le</string>
     </property>
-    <addaction name="actionNuovo"/>
     <addaction name="actionApri"/>
     <addaction name="actionPreview_mode"/>
-    <addaction name="actionSalva"/>
     <addaction name="actionSalva_come"/>
     <addaction name="separator"/>
     <addaction name="actionChiudi"/>
@@ -142,18 +159,9 @@
      <string>&amp;Modifica</string>
     </property>
     <addaction name="actionCopia"/>
-    <addaction name="actionIncolla"/>
-    <addaction name="actionCerca"/>
-   </widget>
-   <widget class="QMenu" name="menuAbout">
-    <property name="title">
-     <string>&amp;About</string>
-    </property>
-    <addaction name="actionAbout_this_text_editor"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuModifica"/>
-   <addaction name="menuAbout"/>
   </widget>
   <action name="actionAbout_this_text_editor">
    <property name="text">
@@ -161,6 +169,10 @@
    </property>
   </action>
   <action name="actionNuovo">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/icons/document-new.png</normaloff>:/icons/icons/document-new.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Nuovo</string>
    </property>
@@ -169,6 +181,10 @@
    </property>
   </action>
   <action name="actionApri">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/icons/document-open.png</normaloff>:/icons/icons/document-open.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Apri</string>
    </property>
@@ -185,11 +201,19 @@
    </property>
   </action>
   <action name="actionSalva_come">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/icons/document-save.png</normaloff>:/icons/icons/document-save.png</iconset>
+   </property>
    <property name="text">
     <string>Sa&amp;lva come</string>
    </property>
   </action>
   <action name="actionChiudi">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/icons/document-close.png</normaloff>:/icons/icons/document-close.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Chiudi</string>
    </property>
@@ -213,6 +237,10 @@
    </property>
   </action>
   <action name="actionCopia">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/icons/edit-copy.png</normaloff>:/icons/icons/edit-copy.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Copia</string>
    </property>
@@ -289,6 +317,8 @@
    </property>
   </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="../resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

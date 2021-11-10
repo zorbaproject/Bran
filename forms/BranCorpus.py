@@ -1368,10 +1368,20 @@ class BranCorpus(QObject):
         self.Progrdialog = progress.ProgressDialog(self, recovery, totallines)
         self.Progrdialog.start()
         self.core_cercaConFiltro(mycol, filtertext, myrecovery)
+        rebuiltfile = self.sessionFile + "-ricostruito-" + hkey + "-.html"
+        if not os.path.isfile(rebuiltfile):
+            print(rebuiltfile+" does not exists, creating it now.")
+            rebuiltfile = self.core_ricostruisci(self.corpus, col, [], 0, 0, "", False, True)
         self.Progrdialog.cancelled = True
         self.core_killswitch = False
         if not self.stupidwindows:
-            self.showResults(output)
+            if os.path.isfile(rebuiltfile):
+                tv = textviewer.TextViewer(self.corpuswidget, self.mycfg)
+                tv.loadfile(rebuiltfile, True)
+                tv.do_gotoloadfile([output])
+                tv.show()
+            else:
+                self.showResults(output)
         return output
 
     def findngrams(self, tokens, minoccur, TBdialog, Progrdialog, ignorecase, remspaces, ipunct, col, vuoteI, vuoteF, charNotWord= False):

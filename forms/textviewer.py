@@ -52,8 +52,9 @@ class TextViewer(QMainWindow):
         self.w.gotoButton.clicked.connect(self.goto)
         self.w.gotoLoadFromFile.clicked.connect(self.gotoLoadFile)
         self.w.gotoList.itemDoubleClicked.connect(self.gotoFromList)
-        #self.w.findprev.clicked.connect(self.findprev)
-        #self.w.findnext.clicked.connect(self.findnext)
+        self.w.findprev.clicked.connect(self.findprev)
+        self.w.findnext.clicked.connect(self.findnext)
+        self.w.textEdit.selectionChanged.connect(self.textselected)
         #self.w.textEdit.cursorPositionChanged.connect(self.showcurpos)
         #self.w.textEdit.textChanged.connect(self.textchanged)
         self.currentFilename = ""
@@ -131,7 +132,7 @@ class TextViewer(QMainWindow):
         except:
             tokenID = "-1"
         gotoName = phraseID
-        if tokenID != "":
+        if tokenID != "" and tokenID != "T":
             gotoName = tokenID
         #gotocss = gotocss +"body {\nbackground: yellow;\n}\n"
         for frase in phraseIDs:
@@ -148,12 +149,15 @@ class TextViewer(QMainWindow):
         document.setHtml(self.orightml)
         self.w.textEdit.setDocument(document)
         if gotoName != "":
-            #print("scrolling to "+gotoName)
+            print("scrolling to "+gotoName)
             self.w.textEdit.scrollToAnchor(gotoName);
 
     def gotoLoadFile(self):
         self.gotofile = []
         fileNames = QFileDialog.getOpenFileNames(self.w, "Apri file CSV", self.sessionDir, "CSV files (*.tsv *.csv)")[0]
+        self.do_gotoloadfile(fileNames)
+
+    def do_gotoloadfile(self, fileNames):
         for fileName in fileNames:
             if not fileName == "":
                 if os.path.isfile(fileName):
@@ -289,6 +293,7 @@ class TextViewer(QMainWindow):
         row = 0
         lines = ""
         try:
+            self.w.textEdit.setText("")
             with open(fileName, "r", encoding=myencoding) as ins:
                 for line in ins:
                     if row%500 == 0:
@@ -354,13 +359,26 @@ class TextViewer(QMainWindow):
                 cursor.setPosition(start, QTextCursor.MoveAnchor)
                 cursor.setPosition(end, QTextCursor.KeepAnchor)
                 self.w.textEdit.setTextCursor(cursor)
+                self.textselected()
                 break
             if dir > 0:
                 n = n + 1
             else:
                 n = n - 1
 
-
+    def textselected(self):
+        selhtml = self.w.textEdit.textCursor().selection().toHtml()
+        #print(selhtml)
+        tokenname = re.sub('.*'+re.escape('<a name="T')+'([0-9]*)".*','\g<1>',selhtml.replace("\n",""))
+        try:
+            self.w.gototoken.setText(str(int(tokenname)))
+        except:
+            self.w.gototoken.setText("")
+        phrasename = re.sub('.*'+re.escape('<a name="P')+'([0-9]*)".*','\g<1>',selhtml.replace("\n",""))
+        try:
+            self.w.gotophrase.setText(str(int(phrasename)))
+        except:
+            self.w.gotophrase.setText("")
 
     def findIndexinCol(arr, string, col):
         for i in range(len(arr)):

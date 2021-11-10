@@ -68,7 +68,11 @@
        <item>
         <widget class="QPushButton" name="filtriMultipli">
          <property name="text">
-          <string>Filtri multipli</string>
+          <string> </string>
+         </property>
+         <property name="icon">
+          <iconset resource="../resources.qrc">
+           <normaloff>:/icons/icons/view-filter.png</normaloff>:/icons/icons/view-filter.png</iconset>
          </property>
         </widget>
        </item>
@@ -77,19 +81,31 @@
          <property name="text">
           <string>Filtra</string>
          </property>
+         <property name="icon">
+          <iconset resource="../resources.qrc">
+           <normaloff>:/icons/icons/dialog-ok-apply.png</normaloff>:/icons/icons/dialog-ok-apply.png</iconset>
+         </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="cancelfiltro">
          <property name="text">
-          <string>Annulla filtro</string>
+          <string>Annulla</string>
+         </property>
+         <property name="icon">
+          <iconset resource="../resources.qrc">
+           <normaloff>:/icons/icons/dialog-close.png</normaloff>:/icons/icons/dialog-close.png</iconset>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="findNext">
          <property name="text">
-          <string>Trova prossimo</string>
+          <string>Prossimo</string>
+         </property>
+         <property name="icon">
+          <iconset resource="../resources.qrc">
+           <normaloff>:/icons/icons/arrow-right.png</normaloff>:/icons/icons/arrow-right.png</iconset>
          </property>
         </widget>
        </item>
@@ -222,7 +238,7 @@
              </column>
              <column>
               <property name="text">
-               <string>Forma grafica</string>
+               <string>Token</string>
               </property>
              </column>
              <column>
@@ -368,7 +384,7 @@
       <item>
        <widget class="QPushButton" name="delselected">
         <property name="text">
-         <string>Elimina righe selezionate</string>
+         <string>Elimina token selezionati</string>
         </property>
        </widget>
       </item>
@@ -481,7 +497,7 @@
     <addaction name="actionEsegui_calcoli_solo_su_righe_visibili"/>
     <addaction name="menuOccorrenze"/>
     <addaction name="menuDipendenze"/>
-    <addaction name="actionEstrai_dizionario"/>
+    <addaction name="actionMisure_lessicometriche"/>
     <addaction name="actionGulpEASE"/>
     <addaction name="actionCalcola_densit_lessicale"/>
     <addaction name="actionTrova_ripetizioni"/>
@@ -527,10 +543,11 @@
    <addaction name="separator"/>
    <addaction name="actionRicostruisci_testo"/>
    <addaction name="actionVisualizza_frasi"/>
+   <addaction name="actionCerca_con_filtro"/>
    <addaction name="separator"/>
    <addaction name="actionConta_occorrenze"/>
    <addaction name="actionConta_occorrenze_filtrate"/>
-   <addaction name="actionEstrai_dizionario"/>
+   <addaction name="actionMisure_lessicometriche"/>
    <addaction name="actionConta_verbi"/>
    <addaction name="actionConta_persone"/>
    <addaction name="actionConcordanze"/>
@@ -648,7 +665,7 @@
     <string>&amp;Rimuovi vista attuale dal corpus</string>
    </property>
   </action>
-  <action name="actionEstrai_dizionario">
+  <action name="actionMisure_lessicometriche">
    <property name="icon">
     <iconset resource="../resources.qrc">
      <normaloff>:/icons/icons/accessories-calculator.png</normaloff>:/icons/icons/accessories-calculator.png</iconset>

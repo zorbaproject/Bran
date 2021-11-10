@@ -55,14 +55,22 @@
           <item>
            <widget class="QPushButton" name="findprev">
             <property name="text">
-             <string>&lt;</string>
+             <string> </string>
+            </property>
+            <property name="icon">
+             <iconset resource="../resources.qrc">
+              <normaloff>:/icons/icons/arrow-left.png</normaloff>:/icons/icons/arrow-left.png</iconset>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QPushButton" name="findnext">
             <property name="text">
-             <string>&gt;</string>
+             <string> </string>
+            </property>
+            <property name="icon">
+             <iconset resource="../resources.qrc">
+              <normaloff>:/icons/icons/arrow-right.png</normaloff>:/icons/icons/arrow-right.png</iconset>
             </property>
            </widget>
           </item>
@@ -80,7 +88,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>30</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -275,10 +283,12 @@
   </action>
   <action name="actionNormalizza_parole_note">
    <property name="text">
-    <string>Normalizza parole note</string>
+    <string>&amp;Normalizza parole note</string>
    </property>
   </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="../resources.qrc"/>
+ </resources>
  <connections/>
 </ui>
