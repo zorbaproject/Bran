@@ -921,7 +921,7 @@ class BranCorpus(QObject):
         thisname = []
         for col in self.corpuscols:
             thisname.append(self.corpuscols[col][1])
-        column = QInputDialog.getItem(self.corpuswidget, "Scegli la colonna", "Su quale colonna devo contare le occorrenze?",thisname,current=0,editable=False)
+        column = QInputDialog.getItem(self.corpuswidget, "Scegli la colonna", "Su quale colonna devo contare le occorrenze?",thisname,current=1,editable=False)
         col = thisname.index(column[0])
         QMessageBox.information(self.corpuswidget, "Filtro", "Ora devi impostare i filtri con cui dividere i risultati. I vari filtri devono essere separati da condizioni OR, per ciascuno di essi verrà creata una colonna a parte nella tabella dei risultati.")
         fcol = self.filtrimultiplienabled
@@ -950,7 +950,47 @@ class BranCorpus(QObject):
         self.core_killswitch = False
         self.Progrdialog = progress.ProgressDialog(self, recovery, totallines)
         self.Progrdialog.start()
-        self.core_occorrenzeFiltrate(mycol, filtertext, myrecovery)
+        self.core_occorrenzeFiltrate(mycol, filtertext, False, myrecovery)
+        self.Progrdialog.cancelled = True
+        self.core_killswitch = False
+        if not self.stupidwindows:
+            self.showResults(output)
+        return output
+
+    def contaoccorrenzecontingenza(self):
+        thisname = []
+        for col in self.corpuscols:
+            thisname.append(self.corpuscols[col][1])
+        column = QInputDialog.getItem(self.corpuswidget, "Scegli la colonna", "Su quale colonna devo contare le occorrenze?",thisname,current=1,editable=False)
+        col = thisname.index(column[0])
+        QMessageBox.information(self.corpuswidget, "Filtro", "Ora devi impostare i filtri con cui dividere i risultati. I vari filtri devono essere separati da condizioni OR, per ciascuno di essi verrà creata una colonna a parte nella tabella dei risultati. Per esempio, puoi ottenere una colonna per ogni subcorpus creando il filtro sulla base dei tag.")
+        fcol = self.filtrimultiplienabled
+        Fildialog = creafiltro.Form(self.corpus, self.corpuscols, self.corpuswidget)
+        Fildialog.sessionDir = self.sessionDir
+        #Fildialog.w.filter.setText("pos=AD.*||pos=NOUN")
+        Fildialog.updateTable()
+        Fildialog.exec()
+        if Fildialog.w.filter.text() == "":
+            return
+        filtertext = Fildialog.w.filter.text()
+        #allfilters = filtertext.split("||")
+        mycol = thisname.index(column[0])
+        myrecovery = False
+        hname = str(mycol)
+        hkey = str(mycol)
+        for key in self.corpuscols:
+            if col == self.corpuscols[key][0]:
+                hname = self.corpuscols[key][1]
+                hkey = key
+        cleanedfilter = re.sub("[^a-zA-Z0-9]", "", filtertext)
+        fcol = self.filtrimultiplienabled
+        output = self.sessionFile + "-occorrenze_filtrate-" + hkey + "-contingenza-" + cleanedfilter + ".tsv"
+        recovery = output + ".tmp"
+        totallines = self.core_linescount(self.sessionFile)
+        self.core_killswitch = False
+        self.Progrdialog = progress.ProgressDialog(self, recovery, totallines)
+        self.Progrdialog.start()
+        self.core_occorrenzeFiltrate(mycol, filtertext, True, myrecovery)
         self.Progrdialog.cancelled = True
         self.core_killswitch = False
         if not self.stupidwindows:
@@ -2260,11 +2300,12 @@ class BranCorpus(QObject):
         self.core_fileappend(str(row)+"\n", recovery)
         return output
 
-    def core_occorrenzeFiltrate(self, mycol, filtertext = "", myrecovery = False):
+    def core_occorrenzeFiltrate(self, mycol, filtertext = "", contingenza = True, myrecovery = False):
         if filtertext=="":
             self.core_calcola_occorrenze(mycol, myrecovery)
             return
-        allfilters = filtertext.split("||")
+        if contingenza:
+            allfilters = filtertext.split("||")
         fileName = self.sessionFile
         table = []
         try:
@@ -2277,9 +2318,13 @@ class BranCorpus(QObject):
             if col == self.corpuscols[key][0]:
                 hname = self.corpuscols[key][1]
                 hkey = key
-        cleanedfilter = re.sub("[^a-zA-Z0-9\[\]]", "", filtertext)
+        #cleanedfilter = re.sub("[^a-zA-Z0-9\[\]]", "", filtertext)
+        cleanedfilter = re.sub("[^a-zA-Z0-9]", "", filtertext)
         fcol = self.filtrimultiplienabled
-        output = fileName + "-occorrenze_filtrate-" + hkey + "-" + cleanedfilter + ".tsv"
+        if contingenza:
+            output = fileName + "-occorrenze_filtrate-" + hkey + "-contingenza-" + cleanedfilter + ".tsv"
+        else:
+            output = fileName + "-occorrenze_filtrate-" + hkey + "-" + cleanedfilter + ".tsv"
         recovery = output + ".tmp"
         totallines = len(self.corpus)
         startatrow = -1
@@ -2299,8 +2344,11 @@ class BranCorpus(QObject):
         except:
             startatrow = -1
             headerlist = [hname]
-            for myfilter in allfilters:
-                headerlist.append(myfilter)
+            if contingenza:
+                for myfilter in allfilters:
+                    headerlist.append(myfilter)
+            else:
+                headerlist.append("Occorrenze")
             table.append(headerlist)
         if self.OnlyVisibleRows:
             totallines = self.aToken
@@ -2319,20 +2367,33 @@ class BranCorpus(QObject):
                         thistext = self.corpus[row][col]
                 except:
                     thistext = ""
-                for ifilter in range(len(allfilters)):
-                    if self.applicaFiltro(row, fcol, allfilters[ifilter]):
+                if contingenza:
+                    for ifilter in range(len(allfilters)):
+                        if self.applicaFiltro(row, fcol, allfilters[ifilter]):
+                            tbrow = self.core_finditemincolumn(table, thistext, col=0, matchexactly = True, escape = True)
+                            if tbrow>=0:
+                                try:
+                                    tbval = int(table[tbrow][ifilter+1])+1
+                                except:
+                                    tbval = 1
+                                table[tbrow][ifilter+1] = tbval
+                            else:
+                                newrow = [thistext]
+                                for emptyI in range(0,len(allfilters)):
+                                    newrow.append("")
+                                newrow[ifilter+1] = "1"
+                                table.append(newrow)
+                else:
+                    if self.applicaFiltro(row, fcol, filtertext):
                         tbrow = self.core_finditemincolumn(table, thistext, col=0, matchexactly = True, escape = True)
                         if tbrow>=0:
                             try:
-                                tbval = int(table[tbrow][ifilter+1])+1
+                                tbval = int(table[tbrow][1])+1
                             except:
                                 tbval = 1
-                            table[tbrow][ifilter+1] = tbval
+                            table[tbrow][1] = tbval
                         else:
-                            newrow = [thistext]
-                            for emptyI in range(0,len(allfilters)):
-                                newrow.append("")
-                            newrow[ifilter+1] = "1"
+                            newrow = [thistext, "1"]
                             table.append(newrow)
                 if row % 500 == 0:
                     self.core_savetable(table, output)

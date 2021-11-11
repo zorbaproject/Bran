@@ -68,7 +68,7 @@
        <item>
         <widget class="QPushButton" name="filtriMultipli">
          <property name="text">
-          <string> </string>
+          <string/>
          </property>
          <property name="icon">
           <iconset resource="../resources.qrc">
@@ -485,6 +485,7 @@
      <addaction name="actionConta_occorrenze"/>
      <addaction name="actionConta_occorrenze_normalizzate"/>
      <addaction name="actionConta_occorrenze_filtrate"/>
+     <addaction name="actionConta_occorrenze_contingenza"/>
      <addaction name="actionCo_occorrenze"/>
     </widget>
     <widget class="QMenu" name="menuDipendenze">
@@ -969,6 +970,15 @@
    </property>
    <property name="text">
     <string>Cerca con &amp;filtro</string>
+   </property>
+  </action>
+  <action name="actionConta_occorrenze_contingenza">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/icons/format-list-ordered-90deg.png</normaloff>:/icons/icons/format-list-ordered-90deg.png</iconset>
+   </property>
+   <property name="text">
+    <string>Conta occorrenze contingenza</string>
    </property>
   </action>
  </widget>

@@ -109,6 +109,7 @@ class MainWindow(QMainWindow):
         self.w.actionConta_persone.triggered.connect(self.contapersone)
         self.w.actionConta_occorrenze_normalizzate.triggered.connect(self.occorrenzenormalizzate)
         self.w.actionConta_occorrenze_filtrate.triggered.connect(self.contaoccorrenzefiltrate)
+        self.w.actionConta_occorrenze_contingenza.triggered.connect(self.contaoccorrenzecontingenza)
         self.w.actionCerca_con_filtro.triggered.connect(self.cercaconfiltro)
         self.w.actionEsporta_corpus_in_CSV_unico.triggered.connect(self.salvaCSV)
         self.w.actionEsporta_vista_attuale_in_CSV.triggered.connect(self.esportavistaCSV)
@@ -538,6 +539,10 @@ class MainWindow(QMainWindow):
     def contaoccorrenzefiltrate(self):
         self.tableeditor("init")
         self.Corpus.contaoccorrenzefiltrate()
+
+    def contaoccorrenzecontingenza(self):
+        self.tableeditor("init")
+        self.Corpus.contaoccorrenzecontingenza()
 
     def cercaconfiltro(self):
         self.tableeditor("init")

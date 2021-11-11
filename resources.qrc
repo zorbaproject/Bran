@@ -104,5 +104,6 @@
         <file>icons/okteta.png</file>
         <file>icons/format-list-ordered-filter.png</file>
         <file>icons/format-list-ordered-link.png</file>
+        <file>icons/format-list-ordered-90deg.png</file>
     </qresource>
 </RCC>
