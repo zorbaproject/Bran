@@ -923,7 +923,7 @@ class BranCorpus(QObject):
             thisname.append(self.corpuscols[col][1])
         column = QInputDialog.getItem(self.corpuswidget, "Scegli la colonna", "Su quale colonna devo contare le occorrenze?",thisname,current=1,editable=False)
         col = thisname.index(column[0])
-        QMessageBox.information(self.corpuswidget, "Filtro", "Ora devi impostare i filtri con cui dividere i risultati. I vari filtri devono essere separati da condizioni OR, per ciascuno di essi verrà creata una colonna a parte nella tabella dei risultati.")
+        QMessageBox.information(self.corpuswidget, "Filtro", "Ora devi impostare un filtro: solo i token che rispettano questo filtro saranno conteggiati.")
         fcol = self.filtrimultiplienabled
         Fildialog = creafiltro.Form(self.corpus, self.corpuscols, self.corpuswidget)
         Fildialog.sessionDir = self.sessionDir
@@ -942,7 +942,7 @@ class BranCorpus(QObject):
             if col == self.corpuscols[key][0]:
                 hname = self.corpuscols[key][1]
                 hkey = key
-        cleanedfilter = re.sub("[^a-zA-Z0-9]", "", filtertext)
+        cleanedfilter = re.sub("[^a-zA-Z0-9]", "", filtertext)[:50]
         fcol = self.filtrimultiplienabled
         output = self.sessionFile + "-occorrenze_filtrate-" + hkey + "-" + cleanedfilter + ".tsv"
         recovery = output + ".tmp"
@@ -982,7 +982,7 @@ class BranCorpus(QObject):
             if col == self.corpuscols[key][0]:
                 hname = self.corpuscols[key][1]
                 hkey = key
-        cleanedfilter = re.sub("[^a-zA-Z0-9]", "", filtertext)
+        cleanedfilter = re.sub("[^a-zA-Z0-9]", "", filtertext)[:50]
         fcol = self.filtrimultiplienabled
         output = self.sessionFile + "-occorrenze_filtrate-" + hkey + "-contingenza-" + cleanedfilter + ".tsv"
         recovery = output + ".tmp"
@@ -2319,7 +2319,7 @@ class BranCorpus(QObject):
                 hname = self.corpuscols[key][1]
                 hkey = key
         #cleanedfilter = re.sub("[^a-zA-Z0-9\[\]]", "", filtertext)
-        cleanedfilter = re.sub("[^a-zA-Z0-9]", "", filtertext)
+        cleanedfilter = re.sub("[^a-zA-Z0-9]", "", filtertext)[:50]
         fcol = self.filtrimultiplienabled
         if contingenza:
             output = fileName + "-occorrenze_filtrate-" + hkey + "-contingenza-" + cleanedfilter + ".tsv"
