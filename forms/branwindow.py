@@ -709,7 +709,7 @@ class MainWindow(QMainWindow):
                 QApplication.processEvents()
             if self.Progrdialog.w.annulla.isChecked():
                 return
-            col = self.w.ccolumn.currentIndex()
+            fcol = self.w.ccolumn.currentIndex()
             #ctext = self.w.corpus.item(row,col).text()
             ftext = self.w.cfilter.text()
             if self.Corpus.applicaFiltro(row, fcol, ftext): #if bool(re.match(ftext, ctext)):

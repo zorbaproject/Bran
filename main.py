@@ -255,6 +255,7 @@ if __name__ == "__main__":
             print("python3 main.py esporta file.tsv|cartella [filtro] [ripristino (y/n)]\n")
             print("\nOperazioni su tabelle o file di testo:\n")
             print("python3 main.py estraicolonna file.tsv|cartella colonna\n")
+            print("python3 main.py filtroDaColonna vocabolario.txt|file.tsv|cartella colonnaDelFileDaEstrarre colonnaDiBranPerCuiGenerareIlFiltro [ripristino (y/n)]\n")
             print("python3 main.py mergetables file1,file2|cartella colonnaChiave [sum|mean|diff,sum|mean|diff] [1] [ripristino (y/n)]\n")
             print("python3 main.py splitbigfile file.txt [maxnumberoflines] [.]\n")
             print("python3 main.py samplebigfile file.txt [maxnumberoflines] [.]\n")
@@ -842,6 +843,41 @@ if __name__ == "__main__":
                     if tfile[-4:] == ".csv" or tfile[-4:] == ".tsv":
                         fileNames.append(os.path.join(myfiles,tfile))
             Corpus.core_estrai_colonna(fileNames, mycol, myrecovery)
+            print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
+        if sys.argv[1] == "filtroDaColonna":
+            try:
+                myfiles = sys.argv[2]
+            except:
+                sys.exit()
+            try:
+                mycol = sys.argv[3]
+            except:
+                mycol = 0
+            try:
+                fcol = sys.argv[4]
+            except:
+                fcol = 2
+            try:
+                rch = sys.argv[5]
+            except:
+                print("Vuoi usare un file di ripristino? [Y/N]")
+                rch = input()
+            if rch == "Y" or rch == "y":
+                myrecovery = True
+            else:
+                myrecovery = False
+            #Corpus.separator = '\t'
+            fileNames = []
+            if os.path.isfile(myfiles):
+                fileNames = [myfiles]
+            if os.path.isdir(myfiles):
+                for tfile in os.listdir(myfiles):
+                    if tfile[-4:] == ".csv" or tfile[-4:] == ".tsv" or tfile[-4:] == ".txt":
+                        fileNames.append(os.path.join(myfiles,tfile))
+            myfilter = Corpus.core_filtro_da_colonna(fileNames, mycol, fcol, myrecovery, '\t')
+            print("---INIZIO FILTRO DI BRAN---")
+            print(myfilter)
+            print("---FINE FILTRO DI BRAN---")
             print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
         if sys.argv[1] == "splitbigfile":
             try:

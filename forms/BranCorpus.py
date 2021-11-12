@@ -3625,6 +3625,42 @@ class BranCorpus(QObject):
                     row = row + 1
         return output
 
+    def core_filtro_da_colonna(self, fileNames, mycol, myfcol, myrecovery, separator = '\t'):
+        try:
+            col = int(mycol)
+        except:
+            col = 0
+        try:
+            fcol = int(myfcol)
+        except:
+            fcol = 0
+        myfilter = ""
+        hname = str(fcol)
+        hkey = str(fcol)
+        for key in self.corpuscols:
+            if fcol == self.corpuscols[key][0]:
+                hname = self.corpuscols[key][1]
+                hkey = key
+        filterCol = hkey
+        unique = []
+        for fileName in fileNames:
+            row = 0
+            startatrow = -1
+            with open(fileName, "r", encoding='utf-8') as ins:
+                for line in ins:
+                    if row > startatrow:
+                        try:
+                            thistext = line.replace("\n","").replace("\r","").split(separator)[col]
+                        except:
+                            thistext = ""
+                        if thistext not in unique:
+                            unique.append(thistext)
+                            if myfilter != "":
+                                myfilter = myfilter + "||"
+                            myfilter = myfilter + filterCol + "[0]=^"+thistext+"$"
+                    row = row + 1
+        return myfilter
+
     def core_appendcorpus(self, fileNames):
         for fileName in fileNames:
             try:
