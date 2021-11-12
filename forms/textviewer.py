@@ -370,11 +370,19 @@ class TextViewer(QMainWindow):
         selhtml = self.w.textEdit.textCursor().selection().toHtml()
         #print(selhtml)
         tokenname = re.sub('.*'+re.escape('<a name="T')+'([0-9]*)".*','\g<1>',selhtml.replace("\n",""))
+        phrasename = re.sub('.*'+re.escape('<a name="P')+'([0-9]*)".*','\g<1>',selhtml.replace("\n",""))
+        if phrasename.isnumeric() and tokenname.isnumeric() == False:
+            s = self.orightml.find('name="T', self.orightml.find('name="P'+phrasename+'"'))
+            e = self.orightml.find('"', s+7)
+            tokenname = self.orightml[s+7:e]
+        if tokenname.isnumeric() and phrasename.isnumeric() == False:
+            s = self.orightml.rfind('name="P', 0, self.orightml.find('name="T'+tokenname+'"'))
+            e = self.orightml.find('"', s+7)
+            phrasename = self.orightml[s+7:e]
         try:
             self.w.gototoken.setText(str(int(tokenname)))
         except:
             self.w.gototoken.setText("")
-        phrasename = re.sub('.*'+re.escape('<a name="P')+'([0-9]*)".*','\g<1>',selhtml.replace("\n",""))
         try:
             self.w.gotophrase.setText(str(int(phrasename)))
         except:
