@@ -250,7 +250,9 @@ if __name__ == "__main__":
             print("python3 main.py contaverbi file.tsv|cartella [ignora persona (y/n)] [ripristino (y/n)]\n")
             print("python3 main.py contapersone file.tsv|cartella [ignora persona (y/n)] [ripristino (y/n)]\n")
             print("python3 main.py densitalessicale file.tsv|cartella [livellodettaglio 0/1/2] [ripristino (y/n)]\n")
+            print("\nEsportazione corpus:\n")
             print("python3 main.py ricostruisci file.tsv|cartella [colonna] [ignorapunteggiatura (y/n)] [filtro] [html|txt] [ripristino (y/n)]\n")
+            print("python3 main.py esporta file.tsv|cartella [filtro] [ripristino (y/n)]\n")
             print("\nOperazioni su tabelle o file di testo:\n")
             print("python3 main.py estraicolonna file.tsv|cartella colonna\n")
             print("python3 main.py mergetables file1,file2|cartella colonnaChiave [sum|mean|diff,sum|mean|diff] [1] [ripristino (y/n)]\n")
@@ -510,6 +512,38 @@ if __name__ == "__main__":
                 Corpus.CSVloader([fileName])
                 Corpus.sessionFile = fileName
                 Corpus.core_occorrenzeFiltrate(mycol, myfilter, True, myrecovery)
+                Corpus.chiudiProgetto()
+            print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
+        if sys.argv[1] == "esporta":
+            try:
+                myfiles = sys.argv[2]
+            except:
+                sys.exit()
+            try:
+                myfilter = sys.argv[3]
+            except:
+                myfilter = ""
+            try:
+                rch = sys.argv[4]
+            except:
+                print("Vuoi usare un file di ripristino? [Y/N]")
+                rch = input()
+            if rch == "Y" or rch == "y":
+                myrecovery = True
+            else:
+                myrecovery = False
+            #Corpus.separator = '\t'
+            fileNames = []
+            if os.path.isfile(myfiles):
+                fileNames = [myfiles]
+            if os.path.isdir(myfiles):
+                for tfile in os.listdir(myfiles):
+                    if tfile[-4:] == ".csv" or tfile[-4:] == ".tsv":
+                        fileNames.append(os.path.join(myfiles,tfile))
+            for fileName in fileNames:
+                Corpus.CSVloader([fileName])
+                Corpus.sessionFile = fileName
+                Corpus.core_esportaCorpusPerFiltro(myfilter, myrecovery)
                 Corpus.chiudiProgetto()
             print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
         if sys.argv[1] == "cerca" or sys.argv[1] == "cercaConFiltro":

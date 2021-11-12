@@ -2407,6 +2407,58 @@ class BranCorpus(QObject):
         self.core_fileappend(str(row)+"\n", recovery)
         return output
 
+    def core_esportaCorpusPerFiltro(self, filtertext = "", myrecovery = False):
+        if filtertext=="":
+            self.core_calcola_occorrenze(mycol, myrecovery)
+            return
+        allfilters = filtertext.split("||")
+        fileName = self.sessionFile
+        #cleanedfilter = re.sub("[^a-zA-Z0-9\[\]]", "", filtertext)
+        cleanedfilter = re.sub("[^a-zA-Z0-9]", "", filtertext)[:50]
+        fcol = self.filtrimultiplienabled
+        #output = fileName + "-esportato-filtro-" + cleanedfilter + ".tsv"
+        recovery = fileName + "-esportato-filtro-" + cleanedfilter + ".tsv.tmp"
+        totallines = len(self.corpus)
+        startatrow = -1
+        outs = []
+        try:
+            if os.path.isfile(recovery) and myrecovery:
+                with open(recovery, "r", encoding='utf-8') as tempfile:
+                   lastline = (list(tempfile)[-1])
+                startatrow = int(lastline)
+                print("Comincio dalla riga " + str(startatrow))
+            else:
+                exception = 0/0
+        except:
+            startatrow = -1
+        if self.OnlyVisibleRows:
+            totallines = self.aToken
+            if myrecovery and self.daToken > startatrow:
+                startatrow = self.daToken
+        for row in range(startatrow, totallines):
+            if self.core_killswitch:
+                break
+            if row > startatrow:
+                newrow = ""
+                for c in range(len(self.corpus[row])):
+                    if c > 0:
+                        newrow = newrow + "\t"
+                    newrow = newrow + str(self.corpus[row][c])
+                for ifilter in range(len(allfilters)):
+                    if self.applicaFiltro(row, fcol, allfilters[ifilter]):
+                        cleanedfilter = re.sub("[^a-zA-Z0-9]", "", allfilters[ifilter])[:50]
+                        output = fileName + "-esportato-filtro-" + cleanedfilter + ".tsv"
+                        if output not in outs:
+                            print(fileName + " -> " + output)
+                            outs.append(output)
+                        self.core_fileappend(str(newrow)+"\n", output)
+                if row % 500 == 0:
+                    self.core_fileappend(str(row)+"\n", recovery)
+            row = row + 1
+        self.core_fileappend(str(row)+"\n", recovery)
+        print("Exported outputs: "+str(outs))
+        return output
+
     def core_cercaConFiltro(self, mycol, filtertext, myrecovery = False):
         allfilters = filtertext.split("||")
         fileName = self.sessionFile
