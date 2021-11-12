@@ -44,6 +44,7 @@ class Form(QMainWindow):
         self.w.tableWidget.itemSelectionChanged.connect(self.selOps)
         self.w.dofiltra.clicked.connect(self.dofiltra)
         self.w.cancelfiltro.clicked.connect(self.cancelfiltro)
+        self.w.readregexfile.clicked.connect(self.readregexfile)
         self.w.filterGroup.clicked.connect(self.filtersh)
         self.w.tableWidget.horizontalHeader().sectionDoubleClicked.connect(self.sortbycolumn)
         self.w.apricsv.hide()
@@ -54,6 +55,7 @@ class Form(QMainWindow):
         self.w.filterWidget.hide()
         self.accepted = False
         self.Rpath = self.mycfg["rscript"] #"/usr/bin/Rscript"
+        self.regexlist = []
 
     def isaccepted(self):
         #self.accept()
@@ -140,6 +142,25 @@ class Form(QMainWindow):
             text_file = open(fileName, "w", encoding='utf-8')
             text_file.write(csv)
             text_file.close()
+
+    def readregexfile(self):
+        fileNames = QFileDialog.getOpenFileNames(self.w.tableWidget, "Apri lista di regex", self.sessionDir, "Text files (*.tsv *.csv *.txt)")[0]
+        self.setregexfile(fileNames)
+
+    def setregexfile(self, fileNames):
+        self.regexlist = []
+        for fileName in fileNames:
+            if not fileName == "":
+                if os.path.isfile(fileName):
+                    text_file = open(fileName, "r", encoding='utf-8')
+                    lines = text_file.read()
+                    text_file.close()
+                    linesA = lines.split('\n')
+                    for myregex in linesA:
+                        if myregex != "":
+                            self.regexlist.append(myregex)
+        retext = "LIST:"+str(self.regexlist)
+        self.w.cfilter.setText(retext)
 
     def apriCSV(self):
         fileNames = QFileDialog.getOpenFileNames(self.w.tableWidget, "Apri file CSV", self.sessionDir, "CSV files (*.tsv *.csv)")[0]
@@ -240,33 +261,47 @@ class Form(QMainWindow):
             try:
                 if self.w.filtronumerico.isChecked():
                     filterit = False
-                    if ftext.startswith(">"):
-                        filterit = bool(float(ctext) > float(eval(ftext[ftext.find(">")+1:])))
-                    elif ftext.startswith("<"):
-                        filterit = bool(float(ctext) < float(eval(ftext[ftext.find("<")+1:])))
-                    elif ftext.startswith("="):
-                        filterit = bool(float(ctext) == float(eval(ftext[ftext.find("=")+1:])))
-                    elif ftext.startswith(">="):
-                        filterit = bool(float(ctext) >= float(eval(ftext[ftext.find(">=")+2:])))
-                    elif ftext.startswith("<="):
-                        filterit = bool(float(ctext) <= float(eval(ftext[ftext.find("<=")+2:])))
-                    elif ftext.startswith("=="):
-                        filterit = bool(float(ctext) == float(eval(ftext[ftext.find("==")+2:])))
-                    elif ftext.startswith("!="):
-                        filterit = bool(float(ctext) != float(eval(ftext[ftext.find("!=")+2:])))
-                    elif ftext.startswith("~"):
-                        filterit = math.isclose(float(ctext), float(eval(ftext[ftext.find("~")+1:])), rel_tol=0.1)
+                    try:
+                        if ctext == "":
+                            ctext = "0"
+                        if ftext.startswith(">"):
+                            filterit = bool(float(ctext) > float(eval(ftext[ftext.find(">")+1:])))
+                        elif ftext.startswith("<"):
+                            filterit = bool(float(ctext) < float(eval(ftext[ftext.find("<")+1:])))
+                        elif ftext.startswith("="):
+                            filterit = bool(float(ctext) == float(eval(ftext[ftext.find("=")+1:])))
+                        elif ftext.startswith(">="):
+                            filterit = bool(float(ctext) >= float(eval(ftext[ftext.find(">=")+2:])))
+                        elif ftext.startswith("<="):
+                            filterit = bool(float(ctext) <= float(eval(ftext[ftext.find("<=")+2:])))
+                        elif ftext.startswith("=="):
+                            filterit = bool(float(ctext) == float(eval(ftext[ftext.find("==")+2:])))
+                        elif ftext.startswith("!="):
+                            filterit = bool(float(ctext) != float(eval(ftext[ftext.find("!=")+2:])))
+                        elif ftext.startswith("~"):
+                            filterit = math.isclose(float(ctext), float(eval(ftext[ftext.find("~")+1:])), rel_tol=0.1)
+                    except:
+                        print("Not a Number")
                     if filterit:
                         self.w.tableWidget.setRowHidden(row, False)
                         tcount = tcount +1
                     else:
                         self.w.tableWidget.setRowHidden(row, True)
                 else:
-                    if bool(re.match(ftext, ctext)):
-                        self.w.tableWidget.setRowHidden(row, False)
-                        tcount = tcount +1
+                    if ftext.startswith('LIST:[') and len(self.regexlist)>0:
+                        for retext in self.regexlist:
+                            if bool(re.match("^"+retext+"$", ctext)):
+                                self.w.tableWidget.setRowHidden(row, False)
+                                tcount = tcount +1
+                                break
+                            else:
+                                self.w.tableWidget.setRowHidden(row, True)
                     else:
-                        self.w.tableWidget.setRowHidden(row, True)
+                        if bool(re.match(ftext, ctext)):
+                            self.w.tableWidget.setRowHidden(row, False)
+                            tcount = tcount +1
+                        else:
+                            self.w.tableWidget.setRowHidden(row, True)
             except:
                 print("Error filtering row " + str(row) + " in TableEditor")
                 continue

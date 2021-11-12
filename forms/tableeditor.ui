@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>473</width>
+    <width>531</width>
     <height>389</height>
    </rect>
   </property>
@@ -17,7 +17,7 @@
    <item>
     <widget class="QGroupBox" name="filterGroup">
      <property name="title">
-      <string>Filtra con RegE&amp;x</string>
+      <string>Filtra</string>
      </property>
      <property name="checkable">
       <bool>true</bool>
@@ -30,7 +30,22 @@
        <widget class="QWidget" name="filterWidget" native="true">
         <layout class="QVBoxLayout" name="verticalLayout_3">
          <item>
-          <widget class="QLineEdit" name="cfilter"/>
+          <layout class="QHBoxLayout" name="horizontalLayout_2">
+           <item>
+            <widget class="QLineEdit" name="cfilter">
+             <property name="placeholderText">
+              <string>Regex o formula</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="readregexfile">
+             <property name="text">
+              <string>Leggi lista da file</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </item>
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -80,6 +95,10 @@
        <property name="text">
         <string>Apri file CSV</string>
        </property>
+       <property name="icon">
+        <iconset resource="../resources.qrc">
+         <normaloff>:/icons/icons/document-open.png</normaloff>:/icons/icons/document-open.png</iconset>
+       </property>
       </widget>
      </item>
      <item>
@@ -87,12 +106,20 @@
        <property name="text">
         <string>Crea grafico</string>
        </property>
+       <property name="icon">
+        <iconset resource="../resources.qrc">
+         <normaloff>:/icons/icons/office-chart-area.png</normaloff>:/icons/icons/office-chart-area.png</iconset>
+       </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="salvacsv">
        <property name="text">
         <string>Salva come CSV</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources.qrc">
+         <normaloff>:/icons/icons/document-save.png</normaloff>:/icons/icons/document-save.png</iconset>
        </property>
       </widget>
      </item>
@@ -136,7 +163,9 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../resources.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>
