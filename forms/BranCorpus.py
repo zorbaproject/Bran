@@ -3661,6 +3661,48 @@ class BranCorpus(QObject):
                     row = row + 1
         return myfilter
 
+    def core_filtraTabellaDaFile(self, fileNames, mycol, regexfile, myrcol, exact, myrecovery, separator = '\t'):
+        try:
+            col = int(mycol)
+        except:
+            col = 0
+        try:
+            rcol = int(myrcol)
+        except:
+            rcol = 0
+        myregex = []
+        with open(regexfile, "r", encoding='utf-8') as ins:
+            for line in ins:
+                try:
+                    thistext = line.replace("\n","").replace("\r","").split(separator)[rcol]
+                except:
+                    thistext = ""
+                if exact:
+                    thistext = "^"+thistext+"$"
+                myregex.append(thistext)
+        #print(myregex)
+        for fileName in fileNames:
+            row = 0
+            startatrow = -1
+            output = fileName + "-tabellafiltrata-" + str(col) + "-" + os.path.basename(regexfile) + "-" + str(rcol) + ".tsv"
+            text_file = open(output, "w", encoding='utf-8')
+            text_file.write("")
+            text_file.close()
+            print(fileName + " -> " + output)
+            with open(fileName, "r", encoding='utf-8') as ins:
+                for line in ins:
+                    if row > startatrow:
+                        try:
+                            thistext = line.replace("\n","").replace("\r","").split(separator)[col]
+                        except:
+                            thistext = ""
+                        for myr in myregex:
+                            if bool(re.match(myr, thistext, flags=0)):
+                                self.core_fileappend(line.replace("\n","").replace("\r","")+"\n", output)
+                                break
+                    row = row + 1
+        return output
+
     def core_appendcorpus(self, fileNames):
         for fileName in fileNames:
             try:

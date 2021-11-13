@@ -241,7 +241,6 @@ if __name__ == "__main__":
             print("python3 main.py occorrenze file.tsv|cartella colonna [ripristino (y/n)]\n")
             print("python3 main.py occorrenzeFiltrate file.tsv|cartella colonna [filtro] [ripristino (y/n)]\n")
             print("python3 main.py occorrenzeContingenza file.tsv|cartella colonna [filtro] [ripristino (y/n)]\n")
-            print("python3 main.py occorrenzeNonBran file.tsv|cartella [colonna] [separatore] [ripristino (y/n)]\n")
             print("python3 main.py occorrenzeNormalizzate file.tsv|cartella [colonna] [ripristino (y/n)]\n")
             print("python3 main.py coOccorrenze file.tsv|cartella parola colonna range [ripristino (y/n)]\n")
             print("python3 main.py concordanze file.tsv|cartella parola colonna range [ripristino (y/n)]\n")
@@ -255,7 +254,9 @@ if __name__ == "__main__":
             print("python3 main.py esporta file.tsv|cartella [filtro] [ripristino (y/n)]\n")
             print("\nOperazioni su tabelle o file di testo:\n")
             print("python3 main.py estraicolonna file.tsv|cartella colonna\n")
+            print("python3 main.py occorrenzeNonBran file.tsv|cartella [colonna] [separatore] [ripristino (y/n)]\n")
             print("python3 main.py filtroDaColonna vocabolario.txt|file.tsv|cartella colonnaDelFileDaEstrarre colonnaDiBranPerCuiGenerareIlFiltro [ripristino (y/n)]\n")
+            print("python3 main.py filtraTabella file.tsv|cartella colonnaDaConfrontare vocabolario.txt [colonnaDelVocabolario] [MatchEsatto (y/n)] [ripristino (y/n)]\n")
             print("python3 main.py mergetables file1,file2|cartella colonnaChiave [sum|mean|diff,sum|mean|diff] [1] [ripristino (y/n)]\n")
             print("python3 main.py splitbigfile file.txt [maxnumberoflines] [.]\n")
             print("python3 main.py samplebigfile file.txt [maxnumberoflines] [.]\n")
@@ -878,6 +879,50 @@ if __name__ == "__main__":
             print("---INIZIO FILTRO DI BRAN---")
             print(myfilter)
             print("---FINE FILTRO DI BRAN---")
+            print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
+        if sys.argv[1] == "filtraTabella":
+            try:
+                myfiles = sys.argv[2]
+            except:
+                sys.exit()
+            try:
+                mycol = sys.argv[3]
+            except:
+                mycol = 0
+            try:
+                regexfile = sys.argv[4]
+            except:
+                sys.exit()
+            try:
+                myrcol = sys.argv[5]
+            except:
+                myrcol = 2
+            try:
+                myexact = sys.argv[6]
+            except:
+                myexact = "n"
+            if myexact.lower() == "y":
+                exact = True
+            else:
+                exact = False
+            try:
+                rch = sys.argv[7]
+            except:
+                print("Vuoi usare un file di ripristino? [Y/N]")
+                rch = input()
+            if rch == "Y" or rch == "y":
+                myrecovery = True
+            else:
+                myrecovery = False
+            #Corpus.separator = '\t'
+            fileNames = []
+            if os.path.isfile(myfiles):
+                fileNames = [myfiles]
+            if os.path.isdir(myfiles):
+                for tfile in os.listdir(myfiles):
+                    if tfile[-4:] == ".csv" or tfile[-4:] == ".tsv" or tfile[-4:] == ".txt":
+                        fileNames.append(os.path.join(myfiles,tfile))
+            Corpus.core_filtraTabellaDaFile(fileNames, mycol, regexfile, myrcol, exact, myrecovery, '\t')
             print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
         if sys.argv[1] == "splitbigfile":
             try:
