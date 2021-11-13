@@ -28,11 +28,12 @@ from forms import regex_replace
 from forms import progress
 from forms import about
 from forms import tableeditor
+from forms import alberofrasi
 
 class TextViewer(QMainWindow):
 
     def __init__(self, parent=None, mycfg=None):
-        super(TextViewer, self).__init__(parent)
+        super(TextViewer, self).__init__(parent.corpuswidget)
         file = QFile(os.path.abspath(os.path.dirname(sys.argv[0]))+"/forms/textviewer.ui")
         file.open(QFile.ReadOnly)
         loader = QUiLoader()
@@ -54,6 +55,7 @@ class TextViewer(QMainWindow):
         self.w.gotoList.itemDoubleClicked.connect(self.gotoFromList)
         self.w.findprev.clicked.connect(self.findprev)
         self.w.findnext.clicked.connect(self.findnext)
+        self.w.visualizzaalbero.clicked.connect(self.alberofrase)
         self.w.textEdit.selectionChanged.connect(self.textselected)
         #self.w.textEdit.cursorPositionChanged.connect(self.showcurpos)
         #self.w.textEdit.textChanged.connect(self.textchanged)
@@ -66,6 +68,8 @@ class TextViewer(QMainWindow):
         self.setWindowTitle("Bran RichText Viewer")
         self.orightml = ""
         self.gotofile = []
+        self.corpuswidget = parent.corpuswidget
+        self.Corpus = parent
 
 
     def nuovo(self):
@@ -151,6 +155,8 @@ class TextViewer(QMainWindow):
         if gotoName != "":
             print("scrolling to "+gotoName)
             self.w.textEdit.scrollToAnchor(gotoName);
+            #Select text
+            #self.textselected()
 
     def gotoLoadFile(self):
         self.gotofile = []
@@ -201,6 +207,11 @@ class TextViewer(QMainWindow):
         except:
             lines = 0
         return lines
+
+    def alberofrase(self):
+        alberofrasidialog = alberofrasi.Form(self.Corpus)
+        alberofrasidialog.openphrase(self.w.gotophrase.text())
+        alberofrasidialog.exec()
 
     def salva(self, onlycurrent = ""):
         if self.currentFilename == "":

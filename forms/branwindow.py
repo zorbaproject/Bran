@@ -303,7 +303,7 @@ class MainWindow(QMainWindow):
                     print(rebuiltfile+" does not exists, creating it now.")
                     rebuiltfile = self.core_ricostruisci(self.Corpus.corpus, col, [], 0, 0, "", False, True)
                 if os.path.isfile(rebuiltfile):
-                    tv = textviewer.TextViewer(self.Corpus.corpuswidget, self.Corpus.mycfg)
+                    tv = textviewer.TextViewer(self.Corpus, self.Corpus.mycfg)
                     tv.loadfile(rebuiltfile, True)
                     tv.do_gotoloadfile([filepath])
                     tv.show()
@@ -312,7 +312,7 @@ class MainWindow(QMainWindow):
             else:
                 self.Corpus.showResults(filepath, True)
         elif filepath[-4:]==".htm" or filepath[-5:]==".html":
-            tv = textviewer.TextViewer(self.Corpus.corpuswidget, self.Corpus.mycfg)
+            tv = textviewer.TextViewer(self.Corpus, self.Corpus.mycfg)
             tv.loadfile(filepath, True)
             tv.show()
         else:

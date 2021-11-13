@@ -60,7 +60,7 @@
         <item>
          <widget class="QPushButton" name="findprev">
           <property name="text">
-           <string> </string>
+           <string/>
           </property>
           <property name="icon">
            <iconset resource="../resources.qrc">
@@ -71,7 +71,7 @@
         <item>
          <widget class="QPushButton" name="findnext">
           <property name="text">
-           <string> </string>
+           <string/>
           </property>
           <property name="icon">
            <iconset resource="../resources.qrc">
@@ -128,6 +128,17 @@
           </property>
          </widget>
         </item>
+        <item>
+         <widget class="QPushButton" name="visualizzaalbero">
+          <property name="text">
+           <string>Dipendenze della frase</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../resources.qrc">
+            <normaloff>:/icons/icons/code-class.png</normaloff>:/icons/icons/code-class.png</iconset>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
      </layout>
@@ -141,7 +152,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>24</height>
+     <height>30</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

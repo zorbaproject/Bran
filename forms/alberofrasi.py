@@ -165,3 +165,8 @@ class Form(QDialog):
                     ampiezza = len(gov[governor])
             self.w.ampiezza.setText(str(ampiezza))
             self.w.livelli.setText(str(livelli))
+        try:
+            if int(self.w.frase.value()) != int(arg1):
+                self.w.frase.setValue(int(arg1))
+        except:
+            pass
