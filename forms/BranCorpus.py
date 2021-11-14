@@ -2575,7 +2575,10 @@ class BranCorpus(QObject):
                 if self.OnlyVisibleRows and not self.applicaFiltro(row, filtercol, ftext, table):
                     continue
             if row >= 0 and row < len(table):
-                thispos = self.legendaPos[table[row][self.corpuscols['pos'][0]]][0]
+                try:
+                    thispos = self.legendaPos[table[row][self.corpuscols['pos'][0]]][0]
+                except:
+                    thispos = None
                 if not thispos in ipunct:
                     if usehtml:
                         #wordid = "P"+table[row][self.corpuscols['IDphrase'][0]]+"T"+table[row][self.corpuscols['IDword'][0]]
