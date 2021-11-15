@@ -2655,7 +2655,7 @@ class BranCorpus(QObject):
             tmptext = self.remUselessSpaces(tmptext, usehtml)
             if usehtml:
                 phraseid = frasi[nFrase][0]
-                fulltext = fulltext + '<span id="P'+phraseid+'" name="P'+phraseid+'" class="P'+phraseid+'" >' + tmptext +'</span> '
+                fulltext = fulltext + '<span id="P'+phraseid+'" name="P'+phraseid+'" class="P'+phraseid+'" >' + tmptext +'</span>\n'
             else:
                 fulltext = fulltext + tmptext
             if nFrase % 10 == 0:

@@ -57,6 +57,9 @@ class TextViewer(QMainWindow):
         self.w.findnext.clicked.connect(self.findnext)
         self.w.visualizzaalbero.clicked.connect(self.alberofrase)
         self.w.textEdit.selectionChanged.connect(self.textselected)
+        self.w.pagNumber.valueChanged.connect(self.refreshTextEdit)
+        self.w.pagPrev.clicked.connect(lambda: self.w.pagNumber.setValue(self.w.pagNumber.value()-1))
+        self.w.pagPrev.clicked.connect(lambda: self.w.pagNumber.setValue(self.w.pagNumber.value()+1))
         #self.w.textEdit.cursorPositionChanged.connect(self.showcurpos)
         #self.w.textEdit.textChanged.connect(self.textchanged)
         self.currentFilename = ""
@@ -66,8 +69,11 @@ class TextViewer(QMainWindow):
         self.sessionDir = "."
         self.separator = "\t"
         self.setWindowTitle("Bran RichText Viewer")
-        self.orightml = ""
+        self.orightml = []
+        self.partialhtml = ""
+        self.htmlcss = ""
         self.gotofile = []
+        self.ishtml = False
         self.corpuswidget = parent.corpuswidget
         self.Corpus = parent
 
@@ -122,6 +128,19 @@ class TextViewer(QMainWindow):
                 tkIDs.append("T"+str(t))
         except:
             pass
+        if len(tkIDs) > 0:
+            anchor = '<span id="'+str(tkIDs[0])+'"'
+            print(anchor)
+            for p in range(len(self.orightml)):
+                if anchor in self.orightml[p]:
+                    print("Found "+anchor+" in line "+str(p))
+                    for ps in range(0, len(self.orightml), self.w.phPerPag.value()):
+                        if p>ps and p < int(ps+self.w.phPerPag.value()):
+                            pg = int(ps/self.w.phPerPag.value())
+                            print("Setting page: "+str(pg))
+                            self.w.pagNumber.setValue(pg)
+                            break
+                    break
         self.highlight(phIDs,tkIDs)
 
     def highlight(self, phraseIDs = [], tokenIDs = []):
@@ -147,11 +166,8 @@ class TextViewer(QMainWindow):
             if token == "":
                 continue
             gotocss = gotocss + "." + str(token) + " {\ncolor: blue;\n}\n"
-        document = self.w.textEdit.document()
-        document.setDefaultStyleSheet(gotocss)
-        #print(gotocss)
-        document.setHtml(self.orightml)
-        self.w.textEdit.setDocument(document)
+        self.htmlcss = gotocss
+        self.refreshTextEdit()
         if gotoName != "":
             print("scrolling to "+gotoName)
             self.w.textEdit.scrollToAnchor(gotoName);
@@ -271,6 +287,7 @@ class TextViewer(QMainWindow):
         self.loadfile(fileName)
 
     def loadfile(self, fileName = "", showhtml = False):
+        self.ishtml = showhtml
         if fileName == "":
             fileName = self.currentFilename
         totallines = self.linescount(fileName)
@@ -292,11 +309,11 @@ class TextViewer(QMainWindow):
             if lines == "ERRORE BRAN: Codifica errata":
                 self.loadfile(fileName)
                 return
-        self.orightml = lines
         self.setWindowTitle("Bran RichText Viewer - "+fileName)
         self.currentFilename = fileName
 
     def openwithencoding(self, fileName, myencoding = 'utf-8', totallines = -1, showhtml = False):
+        self.ishtml = showhtml
         if totallines < 0:
             totallines = self.linescount(fileName)
         self.Progrdialog = progress.Form(self)
@@ -314,14 +331,7 @@ class TextViewer(QMainWindow):
                         if self.Progrdialog.w.annulla.isChecked():
                             return
                     lines = lines + line
-                    if showhtml:
-                        self.w.textEdit.insertHtml(line.replace('\n',''))
-                    else:
-                        self.w.textEdit.insertPlainText(line.replace('\n',''))
-                    #if row%2==0:
-                    #    fmt= QTextBlockFormat()
-                    #    fmt.setBackground(self.errorColor)
-                    #    self.w.textEdit.textCursor().setBlockFormat(fmt)
+                    self.orightml.append(line)
                     row = row + 1
                     if row > self.previewlimit and self.showpreview:
                         break
@@ -329,8 +339,29 @@ class TextViewer(QMainWindow):
             lines = "ERRORE BRAN: Codifica errata"
         self.Progrdialog.accept()
         self.modified = 0
+        self.refreshTextEdit()
         self.w.textEdit.document().clearUndoRedoStacks()
         return lines
+
+    def refreshTextEdit(self):
+        self.w.textEdit.setText("")
+        document = self.w.textEdit.document()
+        document.setDefaultStyleSheet(self.htmlcss)
+        phStart = self.w.pagNumber.value() * self.w.phPerPag.value()
+        phEnd = phStart + self.w.phPerPag.value() + 1
+        try:
+            htmllines = self.orightml[phStart:phEnd]
+        except:
+            print("Error in slicing html lines")
+            return
+        self.partialhtml = ""
+        for l in range(len(htmllines)):
+            self.partialhtml += htmllines[l]
+        if self.ishtml:
+            document.setHtml(self.partialhtml)
+        else:
+            document.setPlainText(self.partialhtml)
+        self.w.textEdit.setDocument(document)
 
     def previewmodeshift(self):
         if showpreview:
@@ -383,13 +414,9 @@ class TextViewer(QMainWindow):
         tokenname = re.sub('.*'+re.escape('<a name="T')+'([0-9]*)".*','\g<1>',selhtml.replace("\n",""))
         phrasename = re.sub('.*'+re.escape('<a name="P')+'([0-9]*)".*','\g<1>',selhtml.replace("\n",""))
         if phrasename.isnumeric() and tokenname.isnumeric() == False:
-            s = self.orightml.find('name="T', self.orightml.find('name="P'+phrasename+'"'))
-            e = self.orightml.find('"', s+7)
-            tokenname = self.orightml[s+7:e]
+            self.getTokenFromPhrase(phrasename)
         if tokenname.isnumeric() and phrasename.isnumeric() == False:
-            s = self.orightml.rfind('name="P', 0, self.orightml.find('name="T'+tokenname+'"'))
-            e = self.orightml.find('"', s+7)
-            phrasename = self.orightml[s+7:e]
+            self.getPhraseFromToken(tokenname)
         try:
             self.w.gototoken.setText(str(int(tokenname)))
         except:
@@ -398,6 +425,18 @@ class TextViewer(QMainWindow):
             self.w.gotophrase.setText(str(int(phrasename)))
         except:
             self.w.gotophrase.setText("")
+
+    def getTokenFromPhrase(phrasename):
+        s = self.partialhtml.find('name="T', self.partialhtml.find('name="P'+phrasename+'"'))
+        e = self.partialhtml.find('"', s+7)
+        tokenname = self.partialhtml[s+7:e]
+        return tokenname
+
+    def getPhraseFromToken(tokenname):
+        s = self.partialhtml.rfind('name="P', 0, self.partialhtml.find('name="T'+tokenname+'"'))
+        e = self.partialhtml.find('"', s+7)
+        phrasename = self.partialhtml[s+7:e]
+        return phrasename
 
     def findIndexinCol(arr, string, col):
         for i in range(len(arr)):
