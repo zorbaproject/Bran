@@ -58,8 +58,8 @@ class TextViewer(QMainWindow):
         self.w.visualizzaalbero.clicked.connect(self.alberofrase)
         self.w.textEdit.selectionChanged.connect(self.textselected)
         self.w.pagNumber.valueChanged.connect(self.refreshTextEdit)
-        self.w.pagPrev.clicked.connect(lambda: self.w.pagNumber.setValue(self.w.pagNumber.value()-1))
-        self.w.pagPrev.clicked.connect(lambda: self.w.pagNumber.setValue(self.w.pagNumber.value()+1))
+        self.w.pagPrev.clicked.connect(self.pagPrev)
+        self.w.pagNext.clicked.connect(self.pagNext)
         #self.w.textEdit.cursorPositionChanged.connect(self.showcurpos)
         #self.w.textEdit.textChanged.connect(self.textchanged)
         self.currentFilename = ""
@@ -77,6 +77,14 @@ class TextViewer(QMainWindow):
         self.corpuswidget = parent.corpuswidget
         self.Corpus = parent
 
+
+    def pagPrev(self):
+        pg = self.w.pagNumber.value()
+        self.w.pagNumber.setValue(pg-1)
+
+    def pagNext(self):
+        pg = self.w.pagNumber.value()
+        self.w.pagNumber.setValue(pg+1)
 
     def nuovo(self):
         self.currentFilename = ""
@@ -128,12 +136,24 @@ class TextViewer(QMainWindow):
                 tkIDs.append("T"+str(t))
         except:
             pass
+        #try:
+        #    if len(phIDs)==0:
+        #        phIDs.append(self.getPhraseFromToken(tkIDs[0]))
+        #    self.w.gotophrase.setText(phIDs[0])
+        #except:
+        #    pass
+        #try:
+        #    if len(tkIDs)==0:
+        #        tkIDs.append(self.getTokenFromPhrase(phIDs[0]))
+        #    self.w.gototoken.setText(tkIDs[0])
+        #except:
+        #    pass
         if len(tkIDs) > 0:
             anchor = '<span id="'+str(tkIDs[0])+'"'
-            print(anchor)
+            #print(anchor)
             for p in range(len(self.orightml)):
                 if anchor in self.orightml[p]:
-                    print("Found "+anchor+" in line "+str(p))
+                    #print("Found "+anchor+" in line "+str(p))
                     for ps in range(0, len(self.orightml), self.w.phPerPag.value()):
                         if p>ps and p < int(ps+self.w.phPerPag.value()):
                             pg = int(ps/self.w.phPerPag.value())
@@ -152,6 +172,7 @@ class TextViewer(QMainWindow):
             phraseID = "-1"
         try:
             tokenID = tokenIDs[0]
+            #phraseIDs =[self.getPhraseFromToken(tokenID[0])]
         except:
             tokenID = "-1"
         gotoName = phraseID
@@ -344,6 +365,7 @@ class TextViewer(QMainWindow):
         return lines
 
     def refreshTextEdit(self):
+        self.w.statusbar.showMessage("Sto caricando la pagina...")
         self.w.textEdit.setText("")
         document = self.w.textEdit.document()
         document.setDefaultStyleSheet(self.htmlcss)
@@ -362,6 +384,7 @@ class TextViewer(QMainWindow):
         else:
             document.setPlainText(self.partialhtml)
         self.w.textEdit.setDocument(document)
+        self.w.statusbar.clearMessage()
 
     def previewmodeshift(self):
         if showpreview:
@@ -414,9 +437,9 @@ class TextViewer(QMainWindow):
         tokenname = re.sub('.*'+re.escape('<a name="T')+'([0-9]*)".*','\g<1>',selhtml.replace("\n",""))
         phrasename = re.sub('.*'+re.escape('<a name="P')+'([0-9]*)".*','\g<1>',selhtml.replace("\n",""))
         if phrasename.isnumeric() and tokenname.isnumeric() == False:
-            self.getTokenFromPhrase(phrasename)
+            tokenname = self.getTokenFromPhrase(phrasename)
         if tokenname.isnumeric() and phrasename.isnumeric() == False:
-            self.getPhraseFromToken(tokenname)
+            phrasename = self.getPhraseFromToken(tokenname)
         try:
             self.w.gototoken.setText(str(int(tokenname)))
         except:
@@ -426,13 +449,13 @@ class TextViewer(QMainWindow):
         except:
             self.w.gotophrase.setText("")
 
-    def getTokenFromPhrase(phrasename):
+    def getTokenFromPhrase(self, phrasename):
         s = self.partialhtml.find('name="T', self.partialhtml.find('name="P'+phrasename+'"'))
         e = self.partialhtml.find('"', s+7)
         tokenname = self.partialhtml[s+7:e]
         return tokenname
 
-    def getPhraseFromToken(tokenname):
+    def getPhraseFromToken(self, tokenname):
         s = self.partialhtml.rfind('name="P', 0, self.partialhtml.find('name="T'+tokenname+'"'))
         e = self.partialhtml.find('"', s+7)
         phrasename = self.partialhtml[s+7:e]

@@ -170,3 +170,9 @@ class Form(QDialog):
                 self.w.frase.setValue(int(arg1))
         except:
             pass
+
+    def drawSVG(self):
+        #https://github.com/rawlins/svgling/
+        #http://etetoolkit.org/download/
+        pass
+
