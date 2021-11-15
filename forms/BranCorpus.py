@@ -1399,7 +1399,7 @@ class BranCorpus(QObject):
             if col == self.corpuscols[key][0]:
                 hname = self.corpuscols[key][1]
                 hkey = key
-        cleanedfilter = re.sub("[^a-zA-Z0-9]", "", filtertext)
+        cleanedfilter = re.sub("[^a-zA-Z0-9]", "", filtertext)[:50]
         fcol = self.filtrimultiplienabled
         output = self.sessionFile + "-cerca-" + hkey + "-filtro-" + cleanedfilter + ".tsv"
         recovery = output + ".tmp"
@@ -2492,7 +2492,7 @@ class BranCorpus(QObject):
             if tmp_la > max_lookahead:
                 max_lookahead = tmp_la
 
-        cleanedfilter = re.sub("[^a-zA-Z0-9\[\]]", "", filtertext)
+        cleanedfilter = re.sub("[^a-zA-Z0-9\[\]]", "", filtertext)[:50]
         fcol = self.filtrimultiplienabled
         output = fileName + "-cerca-" + hkey + "-filtro-" + cleanedfilter + ".tsv"
         recovery = output + ".tmp"
