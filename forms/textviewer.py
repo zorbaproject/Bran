@@ -60,6 +60,8 @@ class TextViewer(QMainWindow):
         self.w.pagNumber.valueChanged.connect(self.refreshTextEdit)
         self.w.pagPrev.clicked.connect(self.pagPrev)
         self.w.pagNext.clicked.connect(self.pagNext)
+        self.w.fontname.currentFontChanged.connect(self.setfont)
+        self.w.fontsize.valueChanged.connect(self.setfont)
         #self.w.textEdit.cursorPositionChanged.connect(self.showcurpos)
         #self.w.textEdit.textChanged.connect(self.textchanged)
         self.currentFilename = ""
@@ -77,6 +79,9 @@ class TextViewer(QMainWindow):
         self.corpuswidget = parent.corpuswidget
         self.Corpus = parent
 
+
+    def setfont(self, tmpfont = None):
+        self.refreshTextEdit()
 
     def pagPrev(self):
         pg = self.w.pagNumber.value()
@@ -369,6 +374,9 @@ class TextViewer(QMainWindow):
         self.w.textEdit.setText("")
         document = self.w.textEdit.document()
         document.setDefaultStyleSheet(self.htmlcss)
+        defFont = self.w.fontname.currentFont()
+        defFont.setPointSize(self.w.fontsize.value())
+        document.setDefaultFont(defFont)
         phStart = self.w.pagNumber.value() * self.w.phPerPag.value()
         phEnd = phStart + self.w.phPerPag.value() + 1
         try:
