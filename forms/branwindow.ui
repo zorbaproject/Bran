@@ -553,6 +553,9 @@
    <addaction name="actionConta_persone"/>
    <addaction name="actionConcordanze"/>
    <addaction name="separator"/>
+   <addaction name="actionEditor_di_testo"/>
+   <addaction name="actionEditor_tabelle"/>
+   <addaction name="separator"/>
    <addaction name="actionConfronta_corpora"/>
    <addaction name="actionConfigurazione_di_Bran"/>
   </widget>
@@ -978,7 +981,7 @@
      <normaloff>:/icons/icons/format-list-ordered-90deg.png</normaloff>:/icons/icons/format-list-ordered-90deg.png</iconset>
    </property>
    <property name="text">
-    <string>Conta occorrenze contingenza</string>
+    <string>Conta occorr&amp;enze contingenza</string>
    </property>
   </action>
  </widget>

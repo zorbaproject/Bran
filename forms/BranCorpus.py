@@ -875,20 +875,8 @@ class BranCorpus(QObject):
             return
         TBdialog = tableeditor.Form(self.corpuswidget, self.mycfg)
         TBdialog.sessionDir = self.sessionDir
-        lineI = 0
-        with open(output, "r", encoding='utf-8') as ins:
-            for line in ins:
-                colI = 0
-                for col in line.replace("\n","").replace("\r","").split(self.separator):
-                    if lineI == 0:
-                        TBdialog.addcolumn(col, colI)
-                    else:
-                        if colI == 0:
-                            TBdialog.addlinetotable(col, 0)
-                        else:
-                            TBdialog.setcelltotable(col, lineI-1, colI)
-                    colI = colI +1
-                lineI = lineI +1
+        TBdialog.opentables([output])
+        TBdialog.mostraTabella()
         TBdialog.show()
 
     def contaoccorrenze(self):

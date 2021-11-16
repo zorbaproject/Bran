@@ -308,7 +308,8 @@ class MainWindow(QMainWindow):
                     tv.do_gotoloadfile([filepath])
                     tv.show()
                 else:
-                    self.showResults(output)
+                    #self.showResults(output)
+                    self.Corpus.showResults(output, True)
             else:
                 self.Corpus.showResults(filepath, True)
         elif filepath[-4:]==".htm" or filepath[-5:]==".html":

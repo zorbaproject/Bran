@@ -46,6 +46,7 @@ class Form(QMainWindow):
         self.w.cancelfiltro.clicked.connect(self.cancelfiltro)
         self.w.readregexfile.clicked.connect(self.readregexfile)
         self.w.filterGroup.clicked.connect(self.filtersh)
+        self.w.ribaltatabella.clicked.connect(self.ribaltatabella)
         self.w.tableWidget.horizontalHeader().sectionDoubleClicked.connect(self.sortbycolumn)
         self.w.apricsv.hide()
         self.setWindowTitle("Visualizzazione tabella")
@@ -56,6 +57,7 @@ class Form(QMainWindow):
         self.accepted = False
         self.Rpath = self.mycfg["rscript"] #"/usr/bin/Rscript"
         self.regexlist = []
+        self.tabella = []
 
     def isaccepted(self):
         #self.accept()
@@ -164,8 +166,16 @@ class Form(QMainWindow):
 
     def apriCSV(self):
         fileNames = QFileDialog.getOpenFileNames(self.w.tableWidget, "Apri file CSV", self.sessionDir, "CSV files (*.tsv *.csv)")[0]
+        self.opentables(fileNames)
+        self.mostraTabella()
+
+    def opentables(self, fileNames):
+        if len(fileNames) == 0:
+            return
         self.Progrdialog = progress.Form(self.w.tableWidget)
         self.Progrdialog.show()
+        self.tabella = []
+        self.tabella.append([]) #table header
         for fileName in fileNames:
             if not fileName == "":
                 if os.path.isfile(fileName):
@@ -193,17 +203,58 @@ class Form(QMainWindow):
                         if self.Progrdialog.w.annulla.isChecked():
                             return
                         newtoken = line.split(self.separator)
-                        while len(newtoken) > self.w.tableWidget.columnCount():
-                            ci = self.w.tableWidget.columnCount()
+                        while len(newtoken) > len(self.tabella[0]):
+                            ci = len(self.tabella[0])
                             #self.addcolumn("Colonna"+str(ci), ci)
-                            self.addcolumn(newtoken[ci], ci)
+                            tmph = self.tabella[0]
+                            tmph.append(newtoken[ci])
+                            self.tabella[0] = tmph
                         if firstrow:
                             firstrow = False
                             continue
-                        row = self.addlinetotable(newtoken[0],0)
-                        for c in range(1,len(newtoken)):
-                            self.setcelltotable(newtoken[c],row, c)
+                        #row = self.addlinetotable(newtoken[0],0)
+                        newrow = []
+                        for c in range(0,len(newtoken)):
+                            newrow.append(newtoken[c])
+                        self.tabella.append(newrow)
         self.Progrdialog.accept()
+
+    def mostraTabella(self):
+        self.Progrdialog = progress.Form(self.w.tableWidget)
+        self.Progrdialog.show()
+        row = 0
+        firstrow = True
+        totallines = len(self.tabella)
+        self.w.tableWidget.setRowCount(0)
+        self.w.tableWidget.setColumnCount(0)
+        for line in self.tabella:
+            if len(line)==0:
+                continue
+            if row<100 or row%100==0:
+                self.Progrdialog.w.testo.setText("Sto caricando la riga numero "+str(row))
+                self.Progrdialog.w.progressBar.setValue(int((row/totallines)*100))
+                QApplication.processEvents()
+            if self.Progrdialog.w.annulla.isChecked():
+                return
+            newtoken = line
+            while len(newtoken) > self.w.tableWidget.columnCount():
+                ci = self.w.tableWidget.columnCount()
+                self.addcolumn(newtoken[ci], ci)
+            if firstrow:
+                firstrow = False
+                continue
+            row = self.addlinetotable(newtoken[0],0)
+            for c in range(1,len(newtoken)):
+                self.setcelltotable(newtoken[c],row, c)
+        self.Progrdialog.accept()
+
+    def ribaltatabella(self):
+        #print(self.tabella)
+        r = list(map(list, zip(*self.tabella)))
+        self.tabella = r
+        #print(self.tabella)
+        self.mostraTabella()
+        return
 
     def linescount(self, filename):
         f = open(filename, "r+", encoding='utf-8')
