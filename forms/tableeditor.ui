@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>531</width>
+    <width>676</width>
     <height>389</height>
    </rect>
   </property>
@@ -15,126 +15,304 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QGroupBox" name="filterGroup">
-     <property name="title">
-      <string>Filtra</string>
-     </property>
-     <property name="checkable">
-      <bool>true</bool>
-     </property>
-     <property name="checked">
-      <bool>false</bool>
-     </property>
-     <layout class="QVBoxLayout" name="verticalLayout_2">
-      <item>
-       <widget class="QWidget" name="filterWidget" native="true">
-        <layout class="QVBoxLayout" name="verticalLayout_3">
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_2">
-           <item>
-            <widget class="QLineEdit" name="cfilter">
-             <property name="placeholderText">
-              <string>Regex o formula</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="readregexfile">
-             <property name="text">
-              <string>Leggi lista da file</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_3">
-           <item>
-            <widget class="QLabel" name="label">
-             <property name="text">
-              <string>Colonna:</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QComboBox" name="ccolumn"/>
-           </item>
-           <item>
-            <widget class="QCheckBox" name="filtronumerico">
-             <property name="text">
-              <string>Numero</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="dofiltra">
-             <property name="text">
-              <string>Filtra</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="cancelfiltro">
-             <property name="text">
-              <string>Annulla filtro</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-        </layout>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QPushButton" name="apricsv">
+      <widget class="QToolButton" name="apricsv">
+       <property name="toolTip">
+        <string>Apri file TSV</string>
+       </property>
        <property name="text">
-        <string>Apri file CSV</string>
+        <string/>
        </property>
        <property name="icon">
         <iconset resource="../resources.qrc">
          <normaloff>:/icons/icons/document-open.png</normaloff>:/icons/icons/document-open.png</iconset>
        </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="creagrafico">
-       <property name="text">
-        <string>Crea grafico</string>
-       </property>
-       <property name="icon">
-        <iconset resource="../resources.qrc">
-         <normaloff>:/icons/icons/office-chart-area.png</normaloff>:/icons/icons/office-chart-area.png</iconset>
+       <property name="iconSize">
+        <size>
+         <width>32</width>
+         <height>32</height>
+        </size>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="ribaltatabella">
-       <property name="text">
-        <string>Scambia righe e colonne</string>
+      <widget class="QToolButton" name="salvacsv">
+       <property name="toolTip">
+        <string>Salva con nome</string>
        </property>
-       <property name="icon">
-        <iconset resource="../resources.qrc">
-         <normaloff>:/icons/icons/object-rotate-left.png</normaloff>:/icons/icons/object-rotate-left.png</iconset>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="salvacsv">
        <property name="text">
-        <string>Salva come CSV</string>
+        <string/>
        </property>
        <property name="icon">
         <iconset resource="../resources.qrc">
          <normaloff>:/icons/icons/document-save.png</normaloff>:/icons/icons/document-save.png</iconset>
        </property>
+       <property name="iconSize">
+        <size>
+         <width>32</width>
+         <height>32</height>
+        </size>
+       </property>
       </widget>
      </item>
+     <item>
+      <widget class="Line" name="line">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="showFilter">
+       <property name="toolTip">
+        <string>Filtra tabella</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources.qrc">
+         <normaloff>:/icons/icons/view-filter.png</normaloff>:/icons/icons/view-filter.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>32</width>
+         <height>32</height>
+        </size>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="Line" name="line_3">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="ribaltatabella">
+       <property name="toolTip">
+        <string>Scambia righe e colonne</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources.qrc">
+         <normaloff>:/icons/icons/object-rotate-left.png</normaloff>:/icons/icons/object-rotate-left.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>32</width>
+         <height>32</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="changeHeader">
+       <property name="toolTip">
+        <string>Modifica intestazione colonna</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources.qrc">
+         <normaloff>:/icons/icons/edit-rename.png</normaloff>:/icons/icons/edit-rename.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>32</width>
+         <height>32</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="rmRow">
+       <property name="toolTip">
+        <string>Rimuovi riga</string>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources.qrc">
+         <normaloff>:/icons/icons/edit-table-delete-row.png</normaloff>:/icons/icons/edit-table-delete-row.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>32</width>
+         <height>32</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="addRow">
+       <property name="toolTip">
+        <string>Aggiungi riga</string>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources.qrc">
+         <normaloff>:/icons/icons/edit-table-insert-row-below.png</normaloff>:/icons/icons/edit-table-insert-row-below.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>32</width>
+         <height>32</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="rmCol">
+       <property name="toolTip">
+        <string>Rimuovi colonna</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources.qrc">
+         <normaloff>:/icons/icons/edit-table-delete-column.png</normaloff>:/icons/icons/edit-table-delete-column.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>32</width>
+         <height>32</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="addCol">
+       <property name="toolTip">
+        <string>Aggiungi colonna</string>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources.qrc">
+         <normaloff>:/icons/icons/edit-table-insert-column-right.png</normaloff>:/icons/icons/edit-table-insert-column-right.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>32</width>
+         <height>32</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="Line" name="line_2">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="creagrafico">
+       <property name="toolTip">
+        <string>Crea grafico</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources.qrc">
+         <normaloff>:/icons/icons/office-chart-area.png</normaloff>:/icons/icons/office-chart-area.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>32</width>
+         <height>32</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
     </layout>
+   </item>
+   <item>
+    <widget class="QWidget" name="filterWidget" native="true">
+     <layout class="QVBoxLayout" name="verticalLayout_3">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QLineEdit" name="cfilter">
+          <property name="placeholderText">
+           <string>Regex o formula</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="readregexfile">
+          <property name="text">
+           <string>Leggi lista da file</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>Colonna:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="ccolumn"/>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="filtronumerico">
+          <property name="text">
+           <string>Numero</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="dofiltra">
+          <property name="text">
+           <string>Filtra</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="cancelfiltro">
+          <property name="text">
+           <string>Annulla filtro</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
    </item>
    <item>
     <widget class="QLabel" name="label_2">

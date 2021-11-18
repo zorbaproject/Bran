@@ -45,8 +45,13 @@ class Form(QMainWindow):
         self.w.dofiltra.clicked.connect(self.dofiltra)
         self.w.cancelfiltro.clicked.connect(self.cancelfiltro)
         self.w.readregexfile.clicked.connect(self.readregexfile)
-        self.w.filterGroup.clicked.connect(self.filtersh)
+        self.w.showFilter.clicked.connect(self.filtersh)
         self.w.ribaltatabella.clicked.connect(self.ribaltatabella)
+        self.w.changeHeader.clicked.connect(self.changeHeader)
+        self.w.addCol.clicked.connect(self.addCol)
+        self.w.addRow.clicked.connect(self.addRow)
+        self.w.rmCol.clicked.connect(self.rmCol)
+        self.w.rmRow.clicked.connect(self.rmRow)
         self.w.tableWidget.horizontalHeader().sectionDoubleClicked.connect(self.sortbycolumn)
         self.w.apricsv.hide()
         self.setWindowTitle("Visualizzazione tabella")
@@ -88,6 +93,107 @@ class Form(QMainWindow):
         titem = QTableWidgetItem()
         titem.setText(text)
         self.w.tableWidget.setItem(row, column, titem)
+
+    def addCol(self):
+        colheader = QInputDialog.getText(self.w, "Indica l'intestazione", "Scrivi l'intestazione della nuova colonna:", QLineEdit.Normal, "")[0]
+        self.addColH(colheader)
+
+    def addColH(self, colheader = ""):
+        alreadydone = []
+        cols = []
+        for i in range(len(self.w.tableWidget.selectedItems())-1,-1,-1):
+            col = self.w.tableWidget.selectedItems()[i].column()
+            cols.append(col)
+        cols.reverse()
+        for col in range(len(cols)-1,-1,-1):
+            c = cols[col]
+            if c in alreadydone:
+                continue
+            alreadydone.append(c)
+            val = colheader
+            for r in range(len(self.tabella)):
+                tmplist = self.tabella[r][:c+1]
+                tmplist.append(val)
+                tmplist.extend(self.tabella[r][c+1:])
+                self.tabella[r] = tmplist
+                val = "" #default
+        self.mostraTabella()
+
+    def addRow(self):
+        alreadydone = []
+        for i in range(len(self.w.tableWidget.selectedItems())-1,-1,-1):
+            row = self.w.tableWidget.selectedItems()[i].row()+1
+            if row in alreadydone:
+                continue
+            alreadydone.append(row)
+            tmprow = []
+            for c in range(self.w.tableWidget.columnCount()):
+                tmprow.append("")
+            if len(self.tabella)>row+1:
+                tmptable = self.tabella[:row+1]
+                tmptable.append(tmprow)
+                tmptable.extend(self.tabella[row+1:])
+                self.tabella = tmptable
+            else:
+                self.tabella.append(tmprow)
+        self.mostraTabella()
+
+    def rmCol(self):
+        alreadydone = []
+        cols = []
+        for i in range(len(self.w.tableWidget.selectedItems())-1,-1,-1):
+            col = self.w.tableWidget.selectedItems()[i].column()
+            cols.append(col)
+        cols.reverse()
+        for col in range(len(cols)-1,-1,-1):
+            c = cols[col]
+            if c in alreadydone:
+                continue
+            alreadydone.append(c)
+            for r in range(len(self.tabella)):
+                tmplist = self.tabella[r][:c]
+                tmplist.extend(self.tabella[r][c+1:])
+                self.tabella[r] = tmplist
+        self.mostraTabella()
+
+    def rmRow(self):
+        alreadydone = []
+        for i in range(len(self.w.tableWidget.selectedItems())-1,-1,-1):
+            row = self.w.tableWidget.selectedItems()[i].row()+1
+            if row in alreadydone:
+                continue
+            alreadydone.append(row)
+            if len(self.tabella)>row+1:
+                tmptable = self.tabella[:row]
+                tmptable.extend(self.tabella[row+1:])
+                self.tabella = tmptable
+            else:
+                self.tabella = self.tabella[:row]
+        self.mostraTabella()
+
+    def changeHeader(self):
+        try:
+            col = self.w.tableWidget.selectedItems()[-1].column()
+            colheader = self.tabella[0][col]
+        except:
+            colheader = ""
+        colheader = QInputDialog.getText(self.w, "Indica l'intestazione", "Scrivi l'intestazione della colonna selezionata:", QLineEdit.Normal, colheader)[0]
+        self.changeHeaderH(colheader)
+
+    def changeHeaderH(self, colheader):
+        alreadydone = []
+        cols = []
+        for i in range(len(self.w.tableWidget.selectedItems())-1,-1,-1):
+            col = self.w.tableWidget.selectedItems()[i].column()
+            cols.append(col)
+        cols.reverse()
+        for col in range(len(cols)-1,-1,-1):
+            c = cols[col]
+            if c in alreadydone:
+                continue
+            alreadydone.append(c)
+            self.tabella[0][c] = colheader
+        self.mostraTabella()
 
     def salvaCSV(self):
         checkfilter = False
@@ -363,10 +469,10 @@ class Form(QMainWindow):
             self.w.tableWidget.setRowHidden(row, False)
 
     def filtersh(self):
-        if self.w.filterWidget.isVisible() == True:
-            self.w.filterWidget.hide()
-        else:
+        if self.w.showFilter.isChecked():
             self.w.filterWidget.show()
+        else:
+            self.w.filterWidget.hide()
 
     def sortbycolumn(self, col):
         self.w.tableWidget.setSortingEnabled(False)
