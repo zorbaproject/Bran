@@ -213,6 +213,8 @@ class MainWindow(QMainWindow):
                 break
         for lang in self.Corpus.mycfg["udpipemodels"]:
             newlangName = re.sub("\-.*","",os.path.basename(self.Corpus.mycfg["udpipemodels"][lang]))
+            if len(newlangName)<2:
+                continue
             newlangName = newlangName[0].upper() + newlangName[1:]
             newlangAct = QAction(newlangName, parent=self.w)
             newlangAct.setToolTip(lang)
