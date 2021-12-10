@@ -325,6 +325,20 @@ if __name__ == "__main__":
                 sys.exit(0)
             Corpus.language = language
             #print(Corpus.mycfg)
+            if Corpus.mycfg["udpipe"] == "" or Corpus.mycfg["udpipemodels"][Corpus.language] == "":
+                print("WARNING: udpipe path or model not set, using default values")
+                if platform.system() == "Windows":
+                    Corpus.mycfg["udpipe"] = os.path.abspath(os.path.dirname(sys.argv[0]))+"\\udpipe\\bin-win64\\udpipe.exe"
+                    if Corpus.mycfg["udpipemodels"]["ita"] == "":
+                        Corpus.mycfg["udpipemodels"]["ita"] = os.path.abspath(os.path.dirname(sys.argv[0]))+"\\udpipe\\modelli\\italian-isdt-ud-2.4-190531.udpipe"
+                else:
+                    if Corpus.mycfg["udpipemodels"]["ita"] == "":
+                        Corpus.mycfg["udpipemodels"]["ita"] = os.path.abspath(os.path.dirname(sys.argv[0]))+"/udpipe/modelli/italian-isdt-ud-2.4-190531.udpipe"
+                    if platform.architecture()[0] == '32bit':
+                        Corpus.mycfg["udpipe"] = os.path.abspath(os.path.dirname(sys.argv[0]))+"/udpipe/bin-linux32/udpipe"
+                    else:
+                        Corpus.mycfg["udpipe"] = os.path.abspath(os.path.dirname(sys.argv[0]))+"/udpipe/bin-linux64/udpipe"
+                Corpus.savePersonalCFG()
             udpipe = Corpus.mycfg["udpipe"]
             model = Corpus.mycfg["udpipemodels"][Corpus.language]
             UDThread = BranCorpus.UDCorpus(w, fileNames, corpuscols, udpipe, model, language)

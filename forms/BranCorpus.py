@@ -220,7 +220,7 @@ class BranCorpus(QObject):
         udpipe = self.mycfg["udpipe"]
         model = self.mycfg["udpipemodels"][self.language]
 
-        corpusID = "[ID]_[FILENAME],lang:ita,tagger:udpipe"
+        corpusID = "[ID]_[FILENAME],lang:"+self.language+",tagger:udpipe"
         corpusID = QInputDialog.getText(self.corpuswidget, "Scegli il tag", "Indica il tag di questo file nel corpus:", QLineEdit.Normal, corpusID)[0]
         self.copyOrigFiles(fileNames)
 
@@ -3984,7 +3984,7 @@ class UDCorpus(QThread):
         self.udpipemodel = udpipemodel
         self.language = lang
         self.outputcsv = ""
-        self.corpusIDpattern = "[ID]_[FILENAME],lang:ita,tagger:udpipe"
+        self.corpusIDpattern = "[ID]_[FILENAME],lang:"+self.language+",tagger:udpipe"
         self.csvIDcolumn = -1
         self.csvTextcolumn = -1
         self.csvSep = '\t'
@@ -4009,6 +4009,9 @@ class UDCorpus(QThread):
         print("Shutting down thread")
 
     def run(self):
+        if self.udpipe == "" or self.udpipemodel == "":
+            print("ERROR: udpipe path or udpipe models path is empty")
+            return
         self.loadtxt()
         return
 
@@ -4180,8 +4183,8 @@ class UDCorpus(QThread):
                         ch = "y"
                     else:
                         ch = "n"
-                        print("Ho trovato un file di ripristino, lo devo usare? [Y/N]")
-                        ch = input()
+                        #print("Ho trovato un file di ripristino, lo devo usare? [Y/N]")
+                        #ch = input()
                     if ch == "Y" or ch == "y":
                         with open(self.rowfilename, "r", encoding='utf-8') as tempfile:
                            lastline = (list(tempfile)[-1])
