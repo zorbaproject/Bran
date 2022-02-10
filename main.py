@@ -234,7 +234,7 @@ if __name__ == "__main__":
             print("python3 main.py tintStart [brancfg]\n")
             print("python3 main.py estraiTesto file.txt|cartella [ita]\n")
             print("python3 main.py tintImport file.txt|cartella [indirizzoServerTint] [ripristino (y/n)]\n")
-            print("python3 main.py udpipeImport file.txt|cartella [ita] [ripristino (y/n)]\n")
+            print("python3 main.py udpipeImport file.txt|cartella [ita:modello] [ripristino (y/n)]\n")
             print("python3 main.py appendBran corpus-bran.tsv corpus-da-accodare.tsv|cartella\n")
             print("\nAnalisi su corpus di Bran:\n")
             print("python3 main.py cerca file.tsv|cartella colonna filtro [ripristino (y/n)]\n")
@@ -314,19 +314,25 @@ if __name__ == "__main__":
                 for tfile in os.listdir(sys.argv[2]):
                     if tfile[-4:] == ".txt":
                         fileNames.append(os.path.join(sys.argv[2],tfile))
+            modello = ""
+            modello = "ita"
             try:
                 language = sys.argv[3]
+                if ":" in language:
+                    modello = language.split(":", 1)[1]
+                    language = language.split(":", 1)[0]
             except:
+                modello = ""
                 language = "ita"
             if len(fileNames)<1:
                 sys.exit(0)
             if language != "ita" and language != "eng":
-                print("Language "+ language +" not supported")
-                sys.exit(0)
+                print("WARNING: Language "+ language +" not supported, results might be unreliable.")
+                #sys.exit(0)
             Corpus.language = language
             #print(Corpus.mycfg)
             if Corpus.mycfg["udpipe"] == "" or Corpus.mycfg["udpipemodels"][Corpus.language] == "":
-                print("WARNING: udpipe path or model not set, using default values")
+                print("WARNING: udpipe path or model not set in brancfg, using default values")
                 if platform.system() == "Windows":
                     Corpus.mycfg["udpipe"] = os.path.abspath(os.path.dirname(sys.argv[0]))+"\\udpipe\\bin-win64\\udpipe.exe"
                     if Corpus.mycfg["udpipemodels"]["ita"] == "":
@@ -340,7 +346,10 @@ if __name__ == "__main__":
                         Corpus.mycfg["udpipe"] = os.path.abspath(os.path.dirname(sys.argv[0]))+"/udpipe/bin-linux64/udpipe"
                 Corpus.savePersonalCFG()
             udpipe = Corpus.mycfg["udpipe"]
-            model = Corpus.mycfg["udpipemodels"][Corpus.language]
+            if modello != "" and os.path.isfile(modello):
+                model = modello
+            else:
+                model = Corpus.mycfg["udpipemodels"][Corpus.language]
             UDThread = BranCorpus.UDCorpus(w, fileNames, corpuscols, udpipe, model, language)
             UDThread.outputcsv = re.sub("\..*?$","", fileNames[0]) + "-bran.tsv"
             try:
