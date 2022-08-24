@@ -1587,6 +1587,20 @@ class BranCorpus(QObject):
             except:
                 continue
         return -1
+    
+    def finditemintablecolumn(self, tb, mytext, col=0, matchexactly = True, escape = True, myflags=0):
+        myregex = mytext
+        if escape:
+            myregex = re.escape(myregex)
+        if matchexactly:
+            myregex = "^" + myregex + "$"
+        for row in range(len(tb)):
+            try:
+                if bool(re.match(myregex, tb[row][col], flags=myflags)):
+                    return row
+            except:
+                continue
+        return -1
 
     def findItemsInColumn(self, table, value, col):
         mylist = [row[col] for row in table if row[col]==value]
@@ -2394,6 +2408,100 @@ class BranCorpus(QObject):
         #    rowfile.write(str(row)+"\n")
         self.core_fileappend(str(row)+"\n", recovery)
         return output
+    
+    def core_vocabolario(self, myvoc, mycol = 2, voccol = 0, doignorepunct = False, myrecovery = False):
+        fileName = self.sessionFile
+        table = []
+        try:
+            col = int(mycol)
+        except:
+            col = 0
+        hname = str(col)
+        hkey = str(col)
+        for key in self.corpuscols:
+            if col == self.corpuscols[key][0]:
+                hname = self.corpuscols[key][1]
+                hkey = key
+        myvocName = os.path.basename(myvoc).split(".")[0]
+        output = fileName + "-vocabolario-" + hkey + "-"+ myvocName + ".tsv"
+        recovery = output + ".tmp"
+        totallines = len(self.corpus)
+        startatrow = -1
+        print(fileName + " -> " + output)
+        
+        vocTable = self.core_readcsv(myvoc)
+        voc = []
+        for line in vocTable:
+            try:
+                voc.append(line[voccol])
+            except Exception as e:
+                #print(e)
+                pass
+        print("Lemmi nel vocabolario:"+str(len(voc)))
+        
+        try:
+            if os.path.isfile(recovery) and myrecovery:
+                with open(recovery, "r", encoding='utf-8') as tempfile:
+                   lastline = (list(tempfile)[-1])
+                startatrow = int(lastline)
+                print("Carico la tabella")
+                with open(output, "r", encoding='utf-8') as ins:
+                    for line in ins:
+                        table.append(line.replace("\n","").replace("\r","").split(separator))
+                print("Comincio dalla riga " + str(startatrow))
+            else:
+                exception = 0/0
+        except:
+            startatrow = -1
+            table.append([hname,myvocName, "NON "+myvocName])
+        if self.OnlyVisibleRows:
+            totallines = self.aToken
+            if myrecovery and self.daToken > startatrow:
+                startatrow = self.daToken
+        for row in range(startatrow, totallines):
+            if self.core_killswitch:
+                break
+            if row > startatrow:
+                try:
+                    thistext = self.corpus[row][col]
+                except:
+                    thistext = ""
+                if self.ignoretext != "" and doignorepunct:
+                    thistext = re.sub(self.ignoretext, "", thistext)
+                if thistext == "":
+                    continue
+                resCol = 2
+                if thistext in voc:
+                    resCol = 1
+                tbrow = self.core_findintable(table, thistext, 0)
+                if tbrow>=0:
+                    tbval = int(table[tbrow][resCol])+1
+                    table[tbrow][resCol] = tbval
+                else:
+                    newrow = [thistext, 0, 0]
+                    newrow[resCol] = 1
+                    table.append(newrow)
+                if row % 500 == 0:
+                    self.core_savetable(table, output)
+                    self.core_fileappend(str(row)+"\n", recovery)
+                    #with open(recovery, "a", encoding='utf-8') as rowfile:
+                    #    rowfile.write(str(row)+"\n")
+            row = row + 1
+        vocWords = 0
+        nonVocWords = 0
+        for line in table:
+            try:
+                vocWords = vocWords + line[1]
+                nonVocWords = nonVocWords + line[2]
+            except:
+                pass
+        table.append(["Totale:",str(vocWords),str(nonVocWords)])
+        table.append(["Totale(%):",str(float(vocWords*100)/(vocWords+nonVocWords)),str(float(nonVocWords*100)/(vocWords+nonVocWords))])
+        self.core_savetable(table, output)
+        #with open(recovery, "a", encoding='utf-8') as rowfile:
+        #    rowfile.write(str(row)+"\n")
+        self.core_fileappend(str(row)+"\n", recovery)
+        return output
 
     def core_esportaCorpusPerFiltro(self, filtertext = "", myrecovery = False):
         if filtertext=="":
@@ -2812,6 +2920,273 @@ class BranCorpus(QObject):
         self.core_savetable(table, output)
         self.core_fileappend(str(row)+"\n", recovery)
         return output
+
+    def core_readcsv(self, fileName, separator = "\t"):
+        lines = self.opentextfile(fileName)
+        mylist = lines.split("\n")
+        for i in range(len(mylist)):
+            mylist[i] = mylist[i].split(separator)
+        return mylist
+    
+    def core_table_addcolumn(self, tb, val = "", pos = -1, label = None):
+        nt = -1
+        for i in range(len(tb)):
+            if pos < 0:
+                tb[i] = tb[i].append(val)
+            else:
+                tmp = tb[i][:pos]
+                #if not isinstance(tmp, list):
+                #    tmp = [tmp]
+                tmp.append(val)
+                tmp.extend(tb[i][pos:])
+                tb[i] = tmp
+                nt = pos
+        if label != None:
+            tb[0][nt] = label
+        return tb
+    
+    def core_table_addlinetotable(self, tb, val = "", pos = -1):
+        if len(tb) > 0:
+            tmp = ["" for row in range(len(tb[0]))]
+            if pos >= 0 and pos < len(tmp):
+                tmp[pos] = val
+            tb.append(tmp)
+        else:
+            tb.append([val])
+        return tb
+    
+    #TODO: ottimizzare
+    def core_confronta(self, fileNames, context, riferimentoName, ignoreTxt = "", corpusSize = 0, dopercent = False, ignorefirstrow = False, corporaKey = 0, riferimentoKey = 0, corporaValue = 1, riferimentoValue = 1, doDiff = False, doDS = False, doRMS = False, doTFIDF = False, multicolCorpora = "", outputFile = "", overwrite = True):
+        ignorethis = ignoreTxt
+        normalizzazionecorpus = corpusSize
+        thisname = []
+        
+        output = outputFile
+        if os.path.isfile(output) and not overwrite:
+            output = output+"-1" #TODO: sostituire con timestamp
+        
+        if doDiff == False and doDS == False and doRMS == False and doTFIDF == False:
+            doDiff = True
+        multicorpusName = riferimentoName  #TODO: verificare
+        multicolRiferimento = riferimentoValue
+        riferimento = ""
+        try:
+            riferimento = self.core_readcsv(riferimentoName)
+        except:
+            print("Impossibile leggere la tabella di riferimento")
+            if context == "multicolonna":
+                try:
+                    riferimento = self.core_readcsv(riferimentoName)
+                    multicorpus = self.core_readcsv(multicorpusName)
+                except:
+                  return
+            else:
+                return
+        table = []
+        table.append([context])  #first row is header
+        thistext = ""
+        thisvalue = ""
+        indexes = 1 + len(fileNames)
+        multivalcols = []
+        if context == "multicolonna":
+            if multicolCorpora == "":  #get all other columns
+                multivalcols = list(range(len(multicorpus[0])))
+                if riferimentoName == multicorpusName:
+                    multivalcols.remove(multicolRiferimento)
+                multivalcols.remove(corporaKey)  #nel caso di multicol corporaKey e riferimentoKey dovrebbero essere uguali
+            else:  #get only specified columns
+                multivalcols = multicolCorpora.split(",")
+            indexes = 1+ len(multivalcols)
+        outputcol = 1
+        for i in range(indexes):
+            corpKeyCol = 0
+            corpValueCol = 1
+            if context == "generico":
+                corpKeyCol = corporaKey
+                corpValueCol = corporaValue
+                if i == 0:
+                    corpKeyCol = riferimentoKey
+                    corpValueCol = riferimentoValue
+            startrow = 0
+            if ignorefirstrow:
+                startrow = 1
+            if i == 0:
+                corpus = riferimento
+                colname = os.path.basename(riferimentoName)
+            elif context != "multicolonna":
+                corpus = self.core_readcsv(fileNames[i-1])
+                colname = os.path.basename(fileNames[i-1])
+            if context == "multicolonna":
+                corpKeyCol = corporaKey
+                if i == 0:
+                    corpus = riferimento
+                    corpValueCol = multicolRiferimento
+                else:
+                    multicorpus = self.core_readcsv(multicorpusName)
+                    corpus = multicorpus
+                    corpValueCol = int(multivalcols[i-1])
+                tempcrp = []
+                for row in range(len(corpus)):
+                    try:
+                        tempcrp.append([corpus[row][corpKeyCol], corpus[row][corpValueCol]])
+                    except:
+                        if row == 0 and ignorefirstrow:
+                            tempcrp.append([corpus[row][corpKeyCol], corpus[row][corpKeyCol]])
+                        else:
+                            tempcrp.append([corpus[row][corpKeyCol], 1])
+                        continue
+                corpus = tempcrp
+                corpKeyCol = 0
+                corpValueCol = 1
+                colname = str(i-1)
+                if ignorefirstrow:
+                    colname = corpus[0][corpValueCol]
+            corpKeyCol = int(corpKeyCol)
+            corpValueCol = int(corpValueCol)
+            table = self.core_table_addcolumn(table,"",i+1,colname)
+            if doDS:
+                table = self.core_table_addcolumn(table,"",outputcol+1,colname+" SCARTO")
+            if doRMS:
+                table = self.core_table_addcolumn(table,"",outputcol+1,colname+" RMS")
+            if doTFIDF:
+                table = self.core_table_addcolumn(table,"",outputcol+1,colname+" TF-IDF")
+            totallines = len(corpus)
+            for row in range(startrow, len(corpus)):
+                try:
+                    thistext = corpus[row][corpKeyCol]
+                    if ignorethis != "":
+                        thistext = re.sub(ignorethis, "", thistext)
+                    if thistext == "":
+                        continue
+                    thisvalue = 0
+                    if context.replace(" ","_") == "Occorrenze_PoS":   #traduco lo spazio per retrocompatibilità
+                        try:
+                            thistext = self.legendaPos[corpus[row][corpKeyCol]][0]
+                        except:
+                            thistext = corpus[row][corpKeyCol]
+                    try:
+                        thisvalue = int(corpus[row][corpValueCol])#verifico che sia un numero
+                    except:
+                        thisvalue = "1"
+                    tbrow = self.finditemintablecolumn(table[1:], thistext, col=0, matchexactly = True, escape = True)
+                    tbrow=tbrow+1 #la prima riga è header
+                    if tbrow>0:
+                        if doDS or doRMS or doTFIDF:
+                            tbcol = outputcol
+                        else:
+                            tbcol = i+1
+                        try:
+                            tbval = int(table[tbrow][tbcol]) + int(thisvalue) #dovrebbero essere int, non str
+                        except:
+                            tbval = thisvalue
+                        table[tbrow][tbcol] = str(tbval)
+                    else:
+                        table = self.core_table_addlinetotable(table, thistext, 0)
+                        tbrow = len(table)-1
+                        if bool(doDS or doRMS or doTFIDF) and i>0:
+                            table[tbrow][outputcol] = str(thisvalue)
+                            table[tbrow][outputcol+1] = "0"
+                        else:
+                            table[tbrow][i+1] = str(thisvalue)
+                        for itemp in range(1,i+1):  #ho già inizializzato alla creazione della nuova riga
+                            table[tbrow][itemp] = "0"
+                except Exception as e:
+                    thistext = ""
+                    print(e)
+            if doDS or doRMS or doTFIDF:
+                outputcol = outputcol + 2
+            else:
+                outputcol = outputcol + 1
+        totallines = len(table)
+        coltotal = []
+        dimcorp = []
+        if dopercent or doDS or doTFIDF:
+            for col in range(1,len(table[0])):
+                thistotal = 0.0
+                for row in range(totallines):
+                    try:
+                        teststring = table[row][col]
+                        thistotal = thistotal + float(teststring)
+                    except:
+                        teststring = ""
+                coltotal.append(thistotal)
+                if normalizzazionecorpus == 0:
+                    dimCorpus = self.getCorpusDim(thistotal)
+                    normalizzazionecorpus = dimCorpus
+                else:
+                    dimCorpus = normalizzazionecorpus
+                dimcorp.append(dimCorpus)
+        col = 0
+        while col < len(table[0]):
+            for row in range(1,totallines):
+                try:
+                    if col > 0:
+                        try:
+                            if float(table[row][col]) == 0:
+                                table[row][col] = "0"
+                        except:
+                            table[row][col] = "0"
+                        teststring = table[row][col]
+                        if dopercent:
+                            thisvalue = str(float((float(teststring)/coltotal[col-1])*100.0))
+                            table[row][col] = thisvalue
+                            teststring = thisvalue
+                        if doDS and i>0:
+                            try:
+                                rifval = float(table[row][1])
+                                if not dopercent:
+                                    teststring = str(float((float(teststring)/coltotal[col-1])*100.0))
+                                    rifval = str(float((float(rifval)/coltotal[0])*100.0))
+                                rifval = float(rifval)/100.0
+                                myval = float(teststring)/100.0
+                                tbval = float((float(myval*dimcorp[col-1])-(rifval*dimcorp[col-1]))/math.sqrt(rifval*dimcorp[col-1]))
+                            except:
+                                rifval = 0.0
+                                tbval = 0.0
+                            table[row][col+1] = str(tbval)
+                            if row == 0:
+                                tmpstr = table[0][col+1]
+                                table[0][col+1] = tmpstr + " per " + str(dimcorp[col-1]) + " token"
+                        if doRMS and i>0:
+                            N = 2
+                            try:
+                                rifval = float(table[row][1])
+                            except:
+                                rifval = 0.0
+                            tbval = math.sqrt((math.pow(rifval,2)+ math.pow(float(teststring),2))/N)
+                            table[row][col+1] = str(tbval)
+                        if doTFIDF and i>0:
+                            N = float(len(table[0])-1)/2
+                            if not dopercent:
+                                teststring = str(float((float(teststring)/coltotal[col-1])*100.0))
+                            tfval = float(float(teststring)/100.0)
+                            wINd = 0
+                            wdcol = 1
+                            while wdcol < len(table[0]):
+                                try:
+                                    tmptest = 1/float(table[row][wdcol]) #should fail if content of the cell is zero
+                                    wINd = wINd +1
+                                    wdcol = wdcol +2
+                                except:
+                                    wdcol = wdcol +2
+                            try:
+                                idfval = math.log10(N/float(wINd))
+                            except:
+                                idfval = 0.0
+                            tfidfval = tfval * idfval
+                            table[row][col+1] = str(tfidfval)
+                except Exception as e:
+                    print(str(e))
+            if bool(doDS or doRMS or doTFIDF) and col >0:
+                col = col + 2
+            else:
+                col = col + 1
+        #self.Progrdialog.accept()
+        #TBdialog.show()
+        print("Writing table to disk")
+        self.core_savetable(table, output)
+        print("TSV done")
+
 
     def core_orderVerbMorf(self, text, ignoreperson = False):
         if not "VerbForm" in text:

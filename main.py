@@ -244,6 +244,7 @@ if __name__ == "__main__":
             print("python3 main.py occorrenzeNormalizzate file.tsv|cartella [colonna] [ripristino (y/n)]\n")
             print("python3 main.py coOccorrenze file.tsv|cartella parola colonna range [ripristino (y/n)]\n")
             print("python3 main.py concordanze file.tsv|cartella parola colonna range [ripristino (y/n)]\n")
+            print("python3 main.py vocabolario file.tsv|cartella fileVocabolario [colonna lemma corpus] [colonna lemma vocabolario] [ignorapunteggiatura (y/n)] [ripristino (y/n)]\n")
             print("python3 main.py misurelessico file.tsv|cartella [colonna] [ripristino (y/n)]\n")
             print("python3 main.py gulpease file.tsv|cartella [ignorapunteggiatura (y/n)] [filtro] [ripristino (y/n)]\n")
             print("python3 main.py contaverbi file.tsv|cartella [ignora persona (y/n)] [ripristino (y/n)]\n")
@@ -257,6 +258,7 @@ if __name__ == "__main__":
             print("python3 main.py occorrenzeNonBran file.tsv|cartella [colonna] [separatore] [ripristino (y/n)]\n")
             print("python3 main.py filtroDaColonna vocabolario.txt|file.tsv|cartella colonnaDelFileDaEstrarre colonnaDiBranPerCuiGenerareIlFiltro [ripristino (y/n)]\n")
             print("python3 main.py filtraTabella file.tsv|cartella colonnaDaConfrontare vocabolario.txt [colonnaDelVocabolario] [MatchEsatto (y/n)] [ripristino (y/n)]\n")
+            print("python3 main.py confronta file1,file2,file3 generico|multicolonna file-riferimento.tsv [calcola percentuali (Y/N)] [ignora prima riga (Y/N)] [chiavecorpora,valorecorpora,chiaveriferimento,valoreriferimento] [diff|DS|RMS|TF-IDF] [Corpora per multicol (2,3,4)] [sovrascrivi risultato (Y/N)]\n")
             print("python3 main.py mergetables file1,file2|cartella colonnaChiave [sum|mean|diff,sum|mean|diff] [1] [ripristino (y/n)]\n")
             print("python3 main.py splitbigfile file.txt [maxnumberoflines] [.]\n")
             print("python3 main.py samplebigfile file.txt [maxnumberoflines] [.]\n")
@@ -465,6 +467,55 @@ if __name__ == "__main__":
                 Corpus.CSVloader([fileName])
                 Corpus.sessionFile = fileName
                 Corpus.core_calcola_occorrenze(mycol, myrecovery)
+                Corpus.chiudiProgetto()
+            print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
+        if sys.argv[1] == "vocabolario":
+            #main.py vocabolario corpora/barone-rampante/barone-rampante-bran.tsv dizionario/vdb2016.txt 2 0 Y N
+            try:
+                myfiles = sys.argv[2]
+            except:
+                sys.exit()
+            try:
+                myvoc = sys.argv[3]
+            except:
+                sys.exit()
+            try:
+                mycol = int(sys.argv[4])
+            except:
+                mycol = 2
+            try:
+                voccol = int(sys.argv[5])
+            except:
+                voccol = 0
+            try:
+                rch = sys.argv[6]
+            except:
+                rch = "n"
+            if rch == "Y" or rch == "y":
+                ignpunct = True
+            else:
+                ignpunct = False
+            try:
+                rch = sys.argv[7]
+            except:
+                print("Vuoi usare un file di ripristino? [Y/N]")
+                rch = input()
+            if rch == "Y" or rch == "y":
+                myrecovery = True
+            else:
+                myrecovery = False
+            #Corpus.separator = '\t'
+            fileNames = []
+            if os.path.isfile(myfiles):
+                fileNames = [myfiles]
+            if os.path.isdir(myfiles):
+                for tfile in os.listdir(myfiles):
+                    if tfile[-4:] == ".csv" or tfile[-4:] == ".tsv":
+                        fileNames.append(os.path.join(myfiles,tfile))
+            for fileName in fileNames:
+                Corpus.CSVloader([fileName])
+                Corpus.sessionFile = fileName
+                Corpus.core_vocabolario(myvoc, mycol, voccol, ignpunct, myrecovery)
                 Corpus.chiudiProgetto()
             print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
         if sys.argv[1] == "occorrenzeFiltrate":
@@ -946,6 +997,95 @@ if __name__ == "__main__":
                     if tfile[-4:] == ".csv" or tfile[-4:] == ".tsv" or tfile[-4:] == ".txt":
                         fileNames.append(os.path.join(myfiles,tfile))
             Corpus.core_filtraTabellaDaFile(fileNames, mycol, regexfile, myrcol, exact, myrecovery, '\t')
+            print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
+        if sys.argv[1] == "confronta":
+            #main.py confronta corpora/barone-rampante/barone-rampante-occorrenze-lemma.tsv generico dizionario/vdb2016.txt N Y 0,1,0,0 diff 0 Y
+            try:
+                myfiles = sys.argv[2]
+            except:
+                sys.exit()
+            try:
+                context = sys.argv[3]
+            except:
+                context = "generico"
+            try:
+                riferimentoName = sys.argv[4]
+            except:
+                sys.exit()
+            try:
+                myexact = sys.argv[5]
+            except:
+                myexact = "n"
+            if myexact.lower() == "y":
+                dopercent = True
+            else:
+                dopercent = False
+            try:
+                myexact = sys.argv[6]
+            except:
+                myexact = "n"
+            if myexact.lower() == "y":
+                ignorefirstrow = True
+            else:
+                ignorefirstrow = False
+            try:
+                keyvalues = sys.argv[7]
+                corporaKey = keyvalues.split(",")[0]
+                riferimentoKey = keyvalues.split(",")[2]
+                corporaValue = keyvalues.split(",")[1]
+                riferimentoValue = keyvalues.split(",")[3]
+            except:
+                keyvalues = "0,1,0,1"
+                corporaKey = keyvalues.split(",")[0]
+                riferimentoKey = keyvalues.split(",")[2]
+                corporaValue = keyvalues.split(",")[1]
+                riferimentoValue = keyvalues.split(",")[3]
+            doDiff = False
+            doDS = False
+            doRMS = False
+            doTFIDF = False
+            try:
+                op = sys.argv[8]
+                if op == "diff":
+                    doDiff = True
+                if op == "DS":
+                    doDS = True
+                if op == "RMS":
+                    doRMS = True
+                if op == "TF-IDF":
+                    doTFIDF = True
+            except:
+                print("Unable to determine operation to perform.")
+                doDiff = True
+            try:
+                multicolCorpora = str(sys.argv[9])
+            except:
+                multicolCorpora = ""
+            try:
+                rch = sys.argv[10]
+            except:
+                rch = "n"
+            if rch.lower() == "y":
+                overwrite = True
+            else:
+                overwrite = False
+            #Corpus.separator = '\t'
+            fileNames = []
+            if os.path.isfile(myfiles):
+                fileNames = [myfiles]
+            elif os.path.isdir(myfiles):
+                for tfile in os.listdir(myfiles):
+                    if tfile[-4:] == ".csv" or tfile[-4:] == ".tsv" or tfile[-4:] == ".txt":
+                        fileNames.append(os.path.join(myfiles,tfile))
+            elif "," in myfiles:
+                for f in myfiles.split(","):
+                    if os.path.isfile(f):
+                        fileNames = [f]
+            ignoreTxt = ""
+            corpusSize = 0
+            outputFile = fileNames[0]+"-confronto-"+os.path.basename(riferimentoName).split(".")[0]+".tsv"
+            #confronta file1,file2,file3 generico|multicolonna file-riferimento.tsv [calcola percentuali (Y/N)] [ignora prima riga (Y/N)] [chiavecorpora,valorecorpora,chiaveriferimento,valoreriferimento] [diff|DS|RMS|TF-IDF] [Corpora per multicol (2,3,4)] [sovrascrivi risultato (Y/N)]
+            Corpus.core_confronta(fileNames, context, riferimentoName, ignoreTxt, corpusSize, dopercent, ignorefirstrow, corporaKey, riferimentoKey, corporaValue, riferimentoValue, doDiff, doDS, doRMS, doTFIDF, multicolCorpora, outputFile, overwrite)
             print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
         if sys.argv[1] == "splitbigfile":
             try:
