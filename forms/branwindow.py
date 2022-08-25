@@ -227,6 +227,7 @@ class MainWindow(QMainWindow):
 
     def changeLang(self, lang):
         self.language = lang
+        self.Corpus.language = lang
         #https://lindat.mff.cuni.cz/repository/xmlui/handle/11234/1-3131
         print("Set language "+self.language)
 

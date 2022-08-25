@@ -213,12 +213,14 @@ class BranCorpus(QObject):
         fileNames = QFileDialog.getOpenFileNames(self.corpuswidget, "Apri file TXT", self.sessionDir, "Text files (*.txt *.md)")[0]
         if len(fileNames)<1:
             return
-        if self.language != "ita" and self.language != "eng":
-            print("Language "+ self.language +" not supported")
-            return
+        #if self.language != "ita" and self.language != "eng":
+        #    print("Language "+ self.language +" not supported")
+        #    return
 
         udpipe = self.mycfg["udpipe"]
         model = self.mycfg["udpipemodels"][self.language]
+        if not os.path.isfile(model):
+            print("Model for this language not found")
 
         corpusID = "[ID]_[FILENAME],lang:"+self.language+",tagger:udpipe"
         corpusID = QInputDialog.getText(self.corpuswidget, "Scegli il tag", "Indica il tag di questo file nel corpus:", QLineEdit.Normal, corpusID)[0]
@@ -4678,6 +4680,7 @@ class UDCorpus(QThread):
 
     def getUDTable(self, text):
         print("Running "+self.udpipe)
+        print("Using model "+ str(self.udpipemodel))
         process = subprocess.Popen([self.udpipe, "--tokenize", "--tag", "--parse", self.udpipemodel], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         testobyte = text.encode(encoding='utf-8')
         outputbyte = process.communicate(testobyte)[0]

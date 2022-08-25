@@ -323,8 +323,10 @@ class Form(QDialog):
         #thisname.append("ita")
         #thisname.append("en-US")
         for key in self.langLegenda:
-            thisname.append(key)
+            thisname.append(str(self.langLegenda[key]+" ("+key+")"))
         lang = QInputDialog.getItem(self.w, "Scegli la lingua", "Per quale lingua (ISO639-3) stai scegliendo il modello di UDpipe?",thisname,current=0,editable=False)[0]
+        tmplang = lang.split("(")[1]
+        lang = tmplang.replace(")", "")
         filter = ""
         if platform.system() == "Windows":
             filter = "UDpipe Models (*.udpipe)"
