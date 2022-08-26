@@ -336,6 +336,7 @@ class Form(QDialog):
             temp[lang] = fileName
             #self.w.udpipemodels.setText(json.dumps(temp))
             self.setUDmodels(temp)
+            QMessageBox.information(self, "Chiudi e riapri Bran", "Per vedere le nuove lingue che hai aggiunto, ricorda di chiudere Bran e aprirlo di nuovo.")
 
     def clearsessions(self):
         self.w.sessions.setText("[]")
