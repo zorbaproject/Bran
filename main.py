@@ -244,10 +244,10 @@ if __name__ == "__main__":
             print("python3 main.py occorrenzeNormalizzate file.tsv|cartella [colonna] [ripristino (y/n)]\n")
             print("python3 main.py coOccorrenze file.tsv|cartella parola colonna range [ripristino (y/n)]\n")
             print("python3 main.py concordanze file.tsv|cartella parola colonna range [ripristino (y/n)]\n")
-            print("python3 main.py vocabolario file.tsv|cartella fileVocabolario [colonna lemma corpus] [colonna lemma vocabolario] [ignorapunteggiatura (y/n)] [ripristino (y/n)]\n")
+            print("python3 main.py vocabolario file.tsv|cartella fileVocabolario [colonna lemma corpus] [colonna lemma vocabolario] [ignorapunteggiatura (y/n)] [caseinsensitive (y/n)] [ripristino (y/n)]\n")
             print("python3 main.py misurelessico file.tsv|cartella [colonna] [ripristino (y/n)]\n")
             print("python3 main.py gulpease file.tsv|cartella [ignorapunteggiatura (y/n)] [filtro] [ripristino (y/n)]\n")
-            print("python3 main.py contaverbi file.tsv|cartella [ignora persona (y/n)] [ripristino (y/n)]\n")
+            print("python3 main.py contaverbi file.tsv|cartella [ignora persona (y/n)] [verbi composti contigui (y/n)] [ripristino (y/n)]\n")
             print("python3 main.py contapersone file.tsv|cartella [ignora persona (y/n)] [ripristino (y/n)]\n")
             print("python3 main.py densitalessicale file.tsv|cartella [livellodettaglio 0/1/2] [ripristino (y/n)]\n")
             print("\nEsportazione corpus:\n")
@@ -470,7 +470,7 @@ if __name__ == "__main__":
                 Corpus.chiudiProgetto()
             print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
         if sys.argv[1] == "vocabolario":
-            #main.py vocabolario corpora/barone-rampante/barone-rampante-bran.tsv dizionario/vdb2016.txt 2 0 Y N
+            #main.py vocabolario corpora/barone-rampante/barone-rampante-bran.tsv dizionario/vdb2016.txt 2 0 Y Y N
             try:
                 myfiles = sys.argv[2]
             except:
@@ -498,6 +498,14 @@ if __name__ == "__main__":
             try:
                 rch = sys.argv[7]
             except:
+                rch = "n"
+            if rch == "Y" or rch == "y":
+                caseins = True
+            else:
+                caseins = False
+            try:
+                rch = sys.argv[8]
+            except:
                 print("Vuoi usare un file di ripristino? [Y/N]")
                 rch = input()
             if rch == "Y" or rch == "y":
@@ -515,7 +523,7 @@ if __name__ == "__main__":
             for fileName in fileNames:
                 Corpus.CSVloader([fileName])
                 Corpus.sessionFile = fileName
-                Corpus.core_vocabolario(myvoc, mycol, voccol, ignpunct, myrecovery)
+                Corpus.core_vocabolario(myvoc, mycol, voccol, ignpunct, caseins, myrecovery)
                 Corpus.chiudiProgetto()
             print("ELABORAZIONE TERMINATA: se il prompt rimane in stallo, premi Ctrl+C.")
         if sys.argv[1] == "occorrenzeFiltrate":
@@ -808,11 +816,14 @@ if __name__ == "__main__":
                 if ch == "Y" or ch == "y":
                     ignoreperson = True
             try:
+                contigui = False
                 if sys.argv[4] == "y" or sys.argv[4] == "Y":
-                    contigui = "Y"
+                    contigui = True
             except:
                 print("Vuoi che i verbi composti siano contigui? [Y/N]")
                 contigui = input()
+                if contigui == "y" or contigui == "Y":
+                    contigui = True
             try:
                 rch = sys.argv[5]
             except:

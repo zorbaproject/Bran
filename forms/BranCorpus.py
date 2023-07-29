@@ -2305,6 +2305,12 @@ class BranCorpus(QObject):
         return output
 
     def core_occorrenzeFiltrate(self, mycol, filtertext = "", contingenza = True, myrecovery = False):
+        #Se è stato specificato un file, leggo dal file
+        if os.path.file(filtertext):
+            filtertext = ""
+            with open(filtertext, "r", encoding='utf-8') as ins:
+                for line in ins:
+                    filtertext += line.replace("\n","").replace("\r","")
         if filtertext=="":
             self.core_calcola_occorrenze(mycol, myrecovery)
             return
@@ -2411,7 +2417,7 @@ class BranCorpus(QObject):
         self.core_fileappend(str(row)+"\n", recovery)
         return output
     
-    def core_vocabolario(self, myvoc, mycol = 2, voccol = 0, doignorepunct = False, myrecovery = False):
+    def core_vocabolario(self, myvoc, mycol = 2, voccol = 0, doignorepunct = False, caseinsensitive = False, myrecovery = False):
         fileName = self.sessionFile
         table = []
         try:
@@ -2466,6 +2472,8 @@ class BranCorpus(QObject):
             if row > startatrow:
                 try:
                     thistext = self.corpus[row][col]
+                    if caseinsensitive:
+                        thistext = thistext.lower()
                 except:
                     thistext = ""
                 if self.ignoretext != "" and doignorepunct:
@@ -3301,7 +3309,7 @@ class BranCorpus(QObject):
                             except:
                                 pass
                             startline = row+ind+1
-                        elif contigui=="y" or contigui=="Y":
+                        elif contigui:
                             break
                     if len(thistext2.split("+"))>1:
                         thistext3 = thistext2.split("+")[1]
