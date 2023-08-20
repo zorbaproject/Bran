@@ -235,6 +235,7 @@ if __name__ == "__main__":
             print("python3 main.py estraiTesto file.txt|cartella [ita]\n")
             print("python3 main.py tintImport file.txt|cartella [indirizzoServerTint] [ripristino (y/n)]\n")
             print("python3 main.py udpipeImport file.txt|cartella [ita:modello] [ripristino (y/n)]\n")
+            print("python3 main.py spacyImport file.txt|cartella [ita] \n")
             print("python3 main.py appendBran corpus-bran.tsv corpus-da-accodare.tsv|cartella\n")
             print("\nAnalisi su corpus di Bran:\n")
             print("python3 main.py cerca file.tsv|cartella colonna filtro [ripristino (y/n)]\n")
@@ -364,6 +365,31 @@ if __name__ == "__main__":
             UDThread.start()
             while True:
                 time.sleep(10)
+        if sys.argv[1] == "spacyImport":
+            fileNames = []
+            if os.path.isfile(sys.argv[2]):
+                fileNames = [sys.argv[2]]
+            if os.path.isdir(sys.argv[2]):
+                for tfile in os.listdir(sys.argv[2]):
+                    if tfile.endswith(".spacy"):
+                        fileNames.append(os.path.join(sys.argv[2],tfile))
+            language = "ita"
+            try:
+                language = sys.argv[3]
+                if ":" in language:
+                    language = language.split(":", 1)[0]
+            except:
+                language = "ita"
+            if len(fileNames)<1:
+                sys.exit(0)
+            if language != "ita" and language != "eng":
+                print("WARNING: Language "+ language +" not supported, results might be unreliable.")
+                #sys.exit(0)
+            Corpus.language = language
+            #print(Corpus.mycfg)
+            Corpus.sessionFile = re.sub("\..*?$","", fileNames[0]) + "-bran.tsv"
+            Corpus.spacyImport(fileNames, language)
+            print("NOTA: Se il prompt rimane in stallo, premi Ctrl+C quando appare la scritta Done.")
         if sys.argv[1] == "appendBran":
             if os.path.isfile(sys.argv[3]):
                 fileName = sys.argv[2]

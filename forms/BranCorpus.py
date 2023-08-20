@@ -4079,6 +4079,123 @@ class BranCorpus(QObject):
                     row = row + 1
         return output
 
+    def spacyImport(self, fileNames, language):
+        for fileName in fileNames:
+            try:
+                IDphrase = -1
+                with open(self.sessionFile, "r", encoding='utf-8') as ins:
+                    for line in ins:
+                        try:
+                            tmpphrase = int(line.split("\t")[self.corpuscols["IDphrase"][0]])
+                        except:
+                            continue
+                        if tmpphrase > IDphrase:
+                            IDphrase = tmpphrase
+            except:
+                IDphrase = -1
+            IDphrase = IDphrase +1
+            print("Appending " + fileName + " to " + self.sessionFile + " IDphrase: " + str(IDphrase))
+            separator = '\t'
+
+            #with open(fileName, "r", encoding='utf-8') as ins:
+            #    for line in ins:
+            #        myline = line.replace("\n","").replace("\r","")
+            TAGcorpus = str(os.path.basename(fileName))+",language:"+language+",tagger:spacy"
+            self.udpipe2corpus(fileName, TAGcorpus, IDphrase)
+
+
+    def udpipe2corpus(self, fileName, TAGcorpus, IDphrase = 0):
+        row = 0
+        startatrow = -1
+        sentence = []
+        dct = {"ID" : 0, "FORM" : 1, "LEMMA" : 2, "UPOS" : 3, "XPOS" : 4, "FEATS" : 4 , "HEAD": 6, "DEPREL": 5, "DEPS": 7, "MISC": 9}
+        with open(fileName, "r", encoding='utf-8') as ins:
+            for line in ins:
+                myline = line.replace("\n","").replace("\r","")
+                if "<p>" in myline or "</p>" in myline:
+                    continue
+                if "<s>" in myline:
+                    sentence = []
+                    continue
+                if "</s>" not in myline:
+                    sentence.append(myline.split("\t"))
+                    #print(myline.split("\t"))
+                row = row + 1
+                #for sentence in myres:
+                if "</s>" in myline:
+                    IDphrase += 1
+                    skipT = -1
+                    for t in range(len(sentence)):
+                        token = sentence[t]
+                        fullline = ""
+                        if "-" in str(token[dct["ID"]]):
+                            fullline = str(TAGcorpus) + "\t"
+                            fullline = fullline + str(sentence[t][dct["FORM"]]) + "\t"
+                            lemma = ""
+                            for el in range(len(str(token[dct["ID"]]).split("-"))):
+                                templemma = str(sentence[t+el+1][dct["LEMMA"]])
+                                if len(templemma)>len(lemma):
+                                    lemma = templemma
+                            fullline = fullline + lemma + "\t"
+                            pos = ""
+                            for el in range(len(str(token[dct["ID"]]).split("-"))):
+                                if el > 0:
+                                    pos = pos + "+"
+                                pos = pos + str(sentence[t+el+1][dct["UPOS"]])
+                            fullline = fullline + pos + "\t"
+                            ner = "_"
+                            fullline = fullline + str(ner) + "\t"
+                            morf = ""
+                            for el in range(len(str(token[dct["ID"]]).split("-"))):
+                                if el > 0:
+                                    morf = morf + "/"
+                                morf = morf + str(sentence[t+el+1][dct["FEATS"]])
+                                if "__" in morf:
+                                    morf = morf.split("__")[1]
+                            fullline = fullline + str(morf) + "\t"
+                            fullline = fullline + str(str(sentence[t][dct["ID"]]).split("-")[0]) + "\t"
+                            fullline = fullline + str(IDphrase)
+                            #for el in range(len(str(token[dct["ID"]]).split("-"))):
+                            fullline = fullline + "\t" + str(sentence[t+1][dct["DEPREL"]]) + "\t"
+                            governor = str(sentence[t+1][dct["HEAD"]])
+                            for el in range(len(str(token[dct["ID"]]).split("-"))):
+                                tmpgov = str(sentence[t+el+1][dct["HEAD"]])
+                                if not tmpgov in str(token[dct["ID"]]).split("-"):
+                                    governor = tmpgov
+                            fullline = fullline + governor
+                            skipT = t + len(str(token[dct["ID"]]).split("-"))
+                        elif t > skipT:
+                            fullline = str(TAGcorpus) + "\t"
+                            fullline = fullline + str(token[dct["FORM"]]) + "\t"
+                            fullline = fullline + str(token[dct["LEMMA"]]) + "\t"
+                            fullline = fullline + str(token[dct["UPOS"]]) + "\t"
+                            ner = "O"
+                            fullline = fullline + str(ner) + "\t"
+                            morf = str(token[dct["FEATS"]])
+                            fullline = fullline + str(morf) + "\t"
+                            fullline = fullline + str(token[dct["ID"]]) + "\t"
+                            fullline = fullline + str(IDphrase)
+                            fullline = fullline + "\t" + str(token[dct["DEPREL"]]) + "\t"
+                            fullline = fullline + str(token[dct["HEAD"]])
+                        if fullline != "":
+                            fdatefile = self.sessionFile
+                            with open(fdatefile, "a", encoding='utf-8') as myfile:
+                                myfile.write(fullline+"\n")
+                        else:
+                            if self.logfile != "" and t > skipT:
+                                logline = "ERROR,"+self.sessionFile+",Frase:"+ str(IDphrase) +",Token:" + str(t) + "," +"Errore: riga vuota per il token "+str(token).replace("\n","")+" nella frase "+str(sentence).replace("\n","")
+                                with open(self.logfile, "a", encoding='utf-8') as mylogfile:
+                                    mylogfile.write(str(logline)+"\n")
+                #if self.iscli:
+                #    with open(self.rowfilename, "a", encoding='utf-8') as rowfile:
+                #        rowfile.write(str(row)+"\n")
+                #else:
+                #    with open(self.sessionFile+"-UD-importlog.tmp", "a", encoding='utf-8') as rowfile:
+                #        rowfile.write(str(row)+","+str(totallines)+"\n")
+        #if self.iscli:
+        #    print("Done")
+        print("Done")
+
     def core_appendcorpus(self, fileNames):
         for fileName in fileNames:
             try:
