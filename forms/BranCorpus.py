@@ -2306,7 +2306,7 @@ class BranCorpus(QObject):
 
     def core_occorrenzeFiltrate(self, mycol, filtertext = "", contingenza = True, myrecovery = False):
         #Se è stato specificato un file, leggo dal file
-        if os.path.file(filtertext):
+        if os.path.isfile(filtertext):
             filtertext = ""
             with open(filtertext, "r", encoding='utf-8') as ins:
                 for line in ins:
